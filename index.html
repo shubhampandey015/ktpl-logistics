@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTPL Logistics Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        /* GEMINI RADIANT STYLING */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: linear-gradient(180deg, #ffffff 0%, #e6f0fa 100%); min-height: 100vh; margin: 0; padding: 15px; color: #1f1f1f; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 600px; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 25px 20px; border-radius: 32px; box-shadow: 0 12px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.8); margin-top: 10px; margin-bottom: 40px; display: none; }
+        
+        /* PIN SCREEN STYLING */
+        #pin-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #ffffff 0%, #e6f0fa 100%); z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
+        .pin-box { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 35px 25px; border-radius: 32px; text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.8); width: 100%; max-width: 320px; }
+        .pin-box h2 { margin: 0 0 10px 0; color: #202124; font-size: 22px; }
+        .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: bold; margin-bottom: 20px; padding: 10px; width: 80%; border: 2px solid #dadce0; border-radius: 12px; }
+        .pin-input:focus { border-color: #0b57d0; outline: none; box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.2); }
+        .sync-text { font-size: 13px; font-weight: 500; margin-top: 15px; color: #5f6368; }
+        
+        /* UI ELEMENTS */
+        .greeting { text-align: center; margin-bottom: 20px; }
+        .greeting h1 { font-size: 26px; font-weight: 400; margin: 0; color: #202124; }
+        .main-tabs { display: flex; background: #fff; border-radius: 20px; padding: 5px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .main-tab { flex: 1; text-align: center; padding: 10px 5px; cursor: pointer; font-size: 13px; font-weight: 600; color: #5f6368; border-radius: 15px; transition: 0.3s; }
+        .main-tab.active { background: #e8f0fe; color: #0b57d0; }
+        .app-section { display: none; animation: fadeIn 0.4s ease; }
+        .app-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* FORM ELEMENTS */
+        .form-group { margin-top: 12px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #5f6368; padding-left: 5px; margin-bottom: 4px; }
+        .required-star { color: #d93025; } 
+        input, select { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 12px; box-sizing: border-box; font-size: 14px; background-color: #ffffff; transition: 0.3s; }
+        input:focus, select:focus { outline: none; border-color: #a8c7fa; box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.2); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; padding-left: 5px; font-weight: 500; }
+        .section-divider { height: 1px; background: rgba(0,0,0,0.1); margin: 20px 0; }
+
+        /* BUTTONS */
+        .btn-primary { width: 100%; padding: 14px; border: none; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; background: linear-gradient(135deg, #0b57d0 0%, #0842a0 100%); box-shadow: 0 4px 15px rgba(11, 87, 208, 0.3); margin-top: 15px;}
+        .btn-whatsapp { width: 100%; padding: 14px; border: none; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); margin-top: 15px;}
+        .btn-secondary { background: #f1f3f4; color: #3c4043; box-shadow: none; border: 1px solid #dadce0; }
+        .btn-primary:active, .btn-whatsapp:active { transform: scale(0.98); }
+
+        /* AUTOCOMPLETE */
+        .autocomplete { position: relative; display: block; }
+        .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border: 1px solid #dadce0; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); max-height: 200px; overflow-y: auto; display: none; margin-top: 4px; }
+        .autocomplete-items div { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 14px; }
+        .autocomplete-items div:hover { background-color: #e8f0fe; }
+
+        /* CARDS & COMPONENTS */
+        .sub-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .sub-tab { flex: 1; text-align: center; padding: 8px; cursor: pointer; font-size: 13px; font-weight: 600; border-radius: 10px; background: #f1f3f4; color: #5f6368; }
+        .sub-tab.active { background: #0b57d0; color: #fff; }
+        .trip-card { background: #fff; border-radius: 16px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; font-size: 13px;}
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; }
+        .status-transit { background: #fff3e0; color: #e65100; }
+        .status-delivered { background: #e6f4ea; color: #137333; }
+        
+        #unified-filter-bar { background: #fff; padding: 15px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; display: none; animation: fadeIn 0.4s; }
+        .filter-header { font-size: 12px; font-weight: bold; color: #5f6368; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; margin-top: 10px; width: 100%; text-align: left; }
+        .history-panel { display: none; background: #f8f9fa; border-radius: 12px; padding: 10px; margin-top: 5px; font-size: 12px; color: #3c4043; border-left: 3px solid #0b57d0; max-height: 150px; overflow-y: auto;}
+        .history-item { margin-bottom: 8px; border-bottom: 1px solid #e8eaed; padding-bottom: 4px; }
+        .pod-badge { background: #e8f0fe; color: #0b57d0; padding: 8px 12px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; display: block; font-size: 13px;}
+        .compact-input { padding: 8px; font-size: 13px; border-radius: 8px; }
+
+        /* MODAL */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 24px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+
+        /* REPORTS TABLE */
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .report-table th, .report-table td { padding: 10px; border-bottom: 1px solid #e8eaed; text-align: left; }
+        .report-table th { background: #f8f9fa; font-weight: 600; color: #5f6368; }
+
+        /* STRICT PDF PRINT STYLES */
+        @media print { 
+            body * { visibility: hidden; }
+            #printable-report, #printable-report * { visibility: visible; }
+            #printable-report { position: absolute; left: 0; top: 0; width: 100%; }
+            .report-table { border: 1px solid #000; box-shadow: none; border-radius: 0; }
+            .report-table th, .report-table td { border: 1px solid #000; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- APP LOCK SCREEN -->
+<div id="pin-overlay" style="display: flex;">
+    <div class="pin-box">
+        <h2>KTPL Secure Login</h2>
+        <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric">
+        <button class="btn-primary" onclick="checkPin()" style="margin-top: 0;">Unlock App</button>
+        <p id="pin-error" style="display:none; color: #d93025; font-size: 13px; margin-top: 15px;">Invalid PIN.</p>
+        <p id="sync-status" class="sync-text">Syncing databank in background...</p>
+    </div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div class="container" id="main-app">
+    <button id="btn-logout" onclick="logoutApp()" style="position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.8); border: 1px solid #dadce0; color: #5f6368; padding: 6px 12px; border-radius: 12px; font-size: 12px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">Lock App</button>
+    
+    <div class="greeting" style="margin-top: 10px;">
+        <h2 id="user-name-text" style="font-size: 20px; font-weight: 500; color: #5f6368; margin: 0 0 5px 0; display: none;"></h2>
+        <h1 id="greeting-text">Good Morning,</h1>
+    </div>
+
+    <!-- MAIN NAVIGATION -->
+    <div class="main-tabs" id="main-navigation">
+        <div class="main-tab active" id="nav-placement" onclick="switchMainTab('tab-placement')">Placement</div>
+        <div class="main-tab" id="nav-deployed" onclick="switchMainTab('tab-deployed')">Deployed</div>
+        <div class="main-tab" id="nav-pod" onclick="switchMainTab('tab-pod')">POD</div>
+        <div class="main-tab" id="nav-reports" onclick="switchMainTab('tab-reports')">Reports</div>
+    </div>
+
+    <!-- UNIFIED FILTER BAR -->
+    <div id="unified-filter-bar">
+        <div class="filter-header">Universal Search Filters</div>
+        <div class="grid-2">
+            <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
+            <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
+        </div>
+        <div class="grid-2" style="margin-top: 8px;">
+            <div class="autocomplete">
+                <input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()">
+                <div id="uf-vnum-list" class="autocomplete-items"></div>
+            </div>
+            <div class="autocomplete">
+                <input type="text" id="uf-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()">
+                <div id="uf-party-list" class="autocomplete-items"></div>
+            </div>
+        </div>
+        <div class="autocomplete" style="margin-top: 8px;">
+            <input type="text" id="uf-origin" class="compact-input" placeholder="Route Origin" oninput="triggerCurrentRender()">
+            <div id="uf-origin-list" class="autocomplete-items"></div>
+        </div>
+    </div>
+
+    <!-- TAB 1: PLACEMENT -->
+    <div id="tab-placement" class="app-section active">
+        <div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="b-date"><span class="error-msg" id="err-b-date">Required</span></div>
+        <div class="form-group autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="p-name" placeholder="Type or Select..." onchange="formatCase(this, 'title')"><div id="p-name-list" class="autocomplete-items"></div><span class="error-msg" id="err-p-name">Required</span></div>
+        
+        <div class="grid-2 form-group">
+            <div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="route-from" placeholder="Origin" onchange="formatCase(this, 'title')"><div id="route-from-list" class="autocomplete-items"></div><span class="error-msg" id="err-route-from">Required</span></div>
+            <div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="route-to" placeholder="Destination" onchange="formatCase(this, 'title')"><div id="route-to-list" class="autocomplete-items"></div><span class="error-msg" id="err-route-to">Required</span></div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="v-num" placeholder="Search..." onchange="formatVehicleNumber(this)"><div id="v-num-list" class="autocomplete-items"></div><span class="error-msg" id="err-v-num">Required</span></div>
+        <div class="grid-2 form-group">
+            <div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="v-type" placeholder="32FT" onchange="formatCase(this, 'upper')"><span class="error-msg" id="err-v-type">Required</span></div>
+            <div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="v-weight" placeholder="18MT" onchange="formatCase(this, 'upper')"><span class="error-msg" id="err-v-weight">Required</span></div>
+        </div>
+        
+        <!-- RESTORED FREIGHT OPTIONS FOR INTERNAL REFERENCE -->
+        <div class="grid-2 form-group">
+            <div><label>Vehicle Freight</label><input type="text" id="v-freight" placeholder="Team"></div>
+            <div><label>Charged Freight</label><input type="text" id="c-freight" placeholder="Client"></div>
+        </div>
+
+        <div class="grid-2 form-group">
+            <div><label>Driver Name</label><input type="text" id="d-name" placeholder="Name" onchange="formatCase(this, 'title')"></div>
+            <div class="autocomplete"><label>Driver Contact <span class="required-star">*</span></label><input type="text" id="d-contact" placeholder="9876543210"><div id="d-contact-list" class="autocomplete-items"></div><span class="error-msg" id="err-d-contact">Required</span></div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="form-group autocomplete"><label>Transporter <span class="required-star">*</span></label><input type="text" id="t-name" placeholder="KTPL" onchange="formatCase(this, 'title')"><div id="t-name-list" class="autocomplete-items"></div><span class="error-msg" id="err-t-name">Required</span></div>
+        <div class="grid-2 form-group">
+            <div class="autocomplete"><label>Person Name</label><input type="text" id="t-person" placeholder="Name" onchange="formatCase(this, 'title')"><div id="t-person-list" class="autocomplete-items"></div></div>
+            <div><label>Contact Number <span class="required-star">*</span></label><input type="text" id="t-contact" placeholder="9876543210"><span class="error-msg" id="err-t-contact">Required</span></div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="form-group"><label>Remarks</label><input type="text" id="remarks" placeholder="..."></div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-primary" onclick="generateMessage('team')">Share Team</button>
+            <button class="btn-whatsapp" onclick="generateMessage('client')">Share Client</button>
+        </div>
+    </div>
+
+    <!-- TAB 2: DEPLOYED -->
+    <div id="tab-deployed" class="app-section">
+        <div class="sub-tabs">
+            <div class="sub-tab active" id="btn-ongoing" onclick="renderDeployed('In-Transit')">On-Going</div>
+            <div class="sub-tab" id="btn-completed" onclick="renderDeployed('Delivered')">Completed</div>
+        </div>
+        <div id="deployed-container"></div>
+    </div>
+
+    <!-- TAB 3: POD WORKFLOW -->
+    <div id="tab-pod" class="app-section">
+        <div class="sub-tabs">
+            <div class="sub-tab active" id="btn-pod-pending" onclick="renderPOD('Pending')">Pending</div>
+            <div class="sub-tab" id="btn-pod-received" onclick="renderPOD('Received')">Received</div>
+        </div>
+        <div id="pod-summary" class="pod-badge"></div>
+        <div id="pod-container"></div>
+    </div>
+
+    <!-- TAB 4: REPORTS -->
+    <div id="tab-reports" class="app-section">
+        <div style="display:flex; gap:10px;">
+            <button class="btn-primary btn-secondary" onclick="renderReport('Trips')">Fetch Trips</button>
+            <button class="btn-primary btn-secondary" onclick="renderReport('POD')">Fetch POD Details</button>
+        </div>
+        
+        <!-- PRINTABLE DIV FOR PDF EXPORT -->
+        <div id="printable-report" style="margin-top: 15px;"></div>
+        
+        <div style="display:flex; gap:10px; margin-top: 15px;" id="report-actions" style="display:none;">
+            <button class="btn-primary" onclick="window.print()" style="margin-top:0;">Save PDF</button>
+            <button class="btn-whatsapp" onclick="shareReportWhatsApp()" style="margin-top:0;">WhatsApp</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delivery Modal Popup -->
+<div id="deliveryModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0;">Confirm Delivery</h3>
+        <label style="text-align:left;">Delivery Date:</label>
+        <input type="date" id="delivery-date-input" style="margin-bottom:15px;">
+        <input type="hidden" id="delivery-trip-id">
+        <div style="display:flex; gap:10px;">
+            <button class="btn-primary btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn-whatsapp" onclick="confirmDelivery()" style="margin-top:15px;">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- APP CORE CONFIGURATION ---
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxJsu4llXFpjbeMX53mDmIpQ2z1YNR8garBDkBKxVF9AR3dSmfX0Zvm-XB02ZQplus/exec"; 
+    
+    let vehicles = {}; let clients = []; let transporters = {}; 
+    let allTrips = []; let users = []; let statusLogs = [];
+    let currentUser = null; let currentActiveMainTab = 'tab-placement';
+    let activeSubTab = 'In-Transit'; 
+    let lastSavedPlacementStr = "";
+    let dataLoaded = false;
+
+    // --- INITIALIZATION & BACKGROUND SYNC ---
+    function setGreeting() {
+        const hour = new Date().getHours();
+        document.getElementById('greeting-text').innerText = `${hour < 12 ? "Good Morning," : hour < 17 ? "Good Afternoon," : "Good Evening,"}`;
+    }
+    setGreeting();
+
+    window.onload = async () => {
+        try {
+            const response = await fetch(GOOGLE_SCRIPT_URL);
+            if (!response.ok) throw new Error("Connection failed.");
+            const data = await response.json();
+            
+            vehicles = data.vehicles || {}; clients = data.clients || []; transporters = data.transporters || {}; 
+            allTrips = data.trips || []; users = data.users || []; statusLogs = data.statusLogs || [];
+
+            setupMemoryDropdowns();
+            
+            setupCustomDropdown('uf-party', 'uf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort(), triggerCurrentRender);
+            setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), triggerCurrentRender);
+            setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t.from))].sort(), triggerCurrentRender);
+
+            dataLoaded = true;
+            document.getElementById('sync-status').innerText = "✓ Databank Synced";
+            document.getElementById('sync-status').style.color = "#137333";
+            
+            const savedUser = sessionStorage.getItem('ktpl_user');
+            if (sessionStorage.getItem('ktpl_unlocked') === 'true' && savedUser) {
+                currentUser = JSON.parse(savedUser);
+                applyUserPermissions();
+            }
+        } catch (error) {
+            console.error(error);
+            document.getElementById('sync-status').innerText = "Offline Mode: Connection Failed.";
+            document.getElementById('sync-status').style.color = "#d93025";
+            dataLoaded = true; 
+        }
+    };
+
+    function setupCustomDropdown(inputId, listId, dataFetchFn, onSelectFn = null) {
+        const inputElement = document.getElementById(inputId);
+        const listContainer = document.getElementById(listId);
+        if (!inputElement || !listContainer) return;
+
+        function showList(filterText = "") {
+            const dataArray = dataFetchFn();
+            listContainer.innerHTML = ""; let hasMatches = false;
+            dataArray.forEach(item => {
+                if (!item) return; 
+                if (!filterText || String(item).toLowerCase().includes(filterText.toLowerCase())) {
+                    hasMatches = true;
+                    let optionDiv = document.createElement("div"); optionDiv.innerHTML = item; 
+                    optionDiv.addEventListener("click", function() {
+                        inputElement.value = item; listContainer.style.display = "none";
+                        if (onSelectFn) onSelectFn(item); 
+                    });
+                    listContainer.appendChild(optionDiv);
+                }
+            });
+            listContainer.style.display = hasMatches ? "block" : "none";
+        }
+        inputElement.addEventListener("input", function() { showList(this.value); });
+        inputElement.addEventListener("click", function() { showList(this.value); });
+        document.addEventListener("click", function (e) { if (e.target !== inputElement) listContainer.style.display = "none"; });
+    }
+
+    function setupMemoryDropdowns() {
+        setupCustomDropdown('p-name', 'p-name-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+        setupCustomDropdown('v-num', 'v-num-list', () => Object.keys(vehicles).sort(), autoFillVehicle);
+        setupCustomDropdown('t-name', 't-name-list', () => Object.keys(transporters).sort());
+        setupCustomDropdown('t-person', 't-person-list', () => transporters[document.getElementById('t-name').value]?.map(p => p.name).sort() || [], autoFillContact);
+        setupCustomDropdown('route-from', 'route-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
+        setupCustomDropdown('route-to', 'route-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
+        
+        const driverNums = [...new Set(allTrips.map(t => t.dContact).filter(Boolean))];
+        const dcInput = document.getElementById('d-contact');
+        const dcList = document.getElementById('d-contact-list');
+        if(dcInput && dcList) {
+            dcInput.addEventListener("input", function() {
+                dcList.innerHTML = "";
+                if (this.value.length > 2) {
+                    const matches = driverNums.filter(n => n.includes(this.value));
+                    matches.forEach(m => {
+                        let div = document.createElement("div"); div.innerHTML = m;
+                        div.onclick = () => { dcInput.value = m; dcList.style.display = "none"; };
+                        dcList.appendChild(div);
+                    });
+                    dcList.style.display = matches.length ? "block" : "none";
+                } else { dcList.style.display = "none"; }
+            });
+        }
+    }
+
+    // --- SECURITY & PERMISSIONS ---
+    function checkPin() {
+        if (!dataLoaded) return alert("Please wait for databank to sync before logging in.");
+        const pin = document.getElementById('app-pin').value;
+        const user = users.find(u => String(u.PIN) === String(pin)) || (pin === "1234" ? {Name: "Master Admin", Role: "Admin"} : null);
+        if (user) {
+            currentUser = user;
+            sessionStorage.setItem('ktpl_unlocked', 'true');
+            sessionStorage.setItem('ktpl_user', JSON.stringify(user));
+            applyUserPermissions();
+        } else {
+            document.getElementById('pin-error').style.display = 'block'; document.getElementById('app-pin').value = '';
+        }
+    }
+    
+    function logoutApp() { sessionStorage.clear(); location.reload(); }
+
+    function applyUserPermissions() {
+        document.getElementById('pin-overlay').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        
+        document.getElementById('user-name-text').innerText = `Hi ${currentUser.Name}!`;
+        document.getElementById('user-name-text').style.display = 'block';
+
+        if (currentUser.Role === 'ReadOnly') {
+            document.getElementById('nav-placement').style.display = 'none';
+            switchMainTab('tab-deployed');
+        } else {
+            switchMainTab('tab-placement');
+        }
+    }
+
+    // --- TAB SWITCHING & GLOBAL FILTER ENGINE ---
+    function switchMainTab(tabId) {
+        currentActiveMainTab = tabId;
+        document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.main-tab').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        
+        const navId = tabId.replace('tab-', 'nav-');
+        if(document.getElementById(navId)) document.getElementById(navId).classList.add('active');
+
+        document.getElementById('unified-filter-bar').style.display = (tabId === 'tab-placement') ? 'none' : 'block';
+        triggerCurrentRender();
+    }
+
+    function triggerCurrentRender() {
+        if (currentActiveMainTab === 'tab-deployed') renderDeployed(activeSubTab);
+        if (currentActiveMainTab === 'tab-pod') renderPOD(activeSubTab);
+    }
+
+    function getFilteredTrips(baseTrips) {
+        let result = [...baseTrips];
+
+        if (currentUser && currentUser.Role === 'SelfOnly') {
+            result = result.filter(t => t.createdBy === currentUser.Name);
+        }
+
+        const startDateStr = document.getElementById('uf-start').value;
+        const endDateStr = document.getElementById('uf-end').value;
+        const vNumMatch = document.getElementById('uf-vnum').value.trim().toLowerCase();
+        const partyMatch = document.getElementById('uf-party').value.trim().toLowerCase();
+        const originMatch = document.getElementById('uf-origin').value.trim().toLowerCase();
+
+        result = result.filter(t => {
+            let passDate = true;
+            if (startDateStr || endDateStr) {
+                const parts = t.date.split(',')[0].split('/'); 
+                if (parts.length === 3) {
+                    const tDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                    if (startDateStr && tDate < new Date(startDateStr)) passDate = false;
+                    if (endDateStr && tDate > new Date(endDateStr)) passDate = false;
+                }
+            }
+            const passV = !vNumMatch || t.vNum.toLowerCase().includes(vNumMatch);
+            const passP = !partyMatch || t.party.toLowerCase().includes(partyMatch);
+            const passO = !originMatch || t.from.toLowerCase().includes(originMatch);
+
+            return passDate && passV && passP && passO;
+        });
+
+        result.sort((a, b) => new Date(a.date.split(',')[0].split('/').reverse().join('-')) - new Date(b.date.split(',')[0].split('/').reverse().join('-')));
+        return result;
+    }
+
+    // --- CARD RENDERING ENGINE ---
+    function buildTripCard(trip, index, viewMode) {
+        let isReadOnly = (currentUser && currentUser.Role === 'ReadOnly');
+        let cardHtml = `
+            <div class="trip-card">
+                <div class="trip-row-flex" style="border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px;">
+                    <span><strong>#${index + 1}</strong> | ${trip.date.split(',')[0]}</span>
+                    <span class="status-badge ${trip.status.trim() === 'In-Transit' ? 'status-transit' : 'status-delivered'}">${trip.status.trim() === 'In-Transit' ? 'In-Transit' : `Delivered: ${trip.deliveryDate}`}</span>
+                </div>
+                <div style="margin-bottom: 5px;"><strong>Party:</strong> ${trip.party}</div>
+                <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
+                <div style="margin-bottom: 5px;"><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</div>
+        `;
+
+        if (viewMode === 'deployed' && !isReadOnly) {
+            cardHtml += `
+                <div style="margin-bottom: 5px;">
+                    <input type="text" class="compact-input" style="border: 1px solid #dadce0; width:100%; box-sizing:border-box;" 
+                           placeholder="Enter C-Note" value="${trip.cNote || ''}" 
+                           onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
+                </div>
+            `;
+            if (trip.status.trim() === 'In-Transit') {
+                cardHtml += `
+                    <div style="display:flex; margin-top:5px;">
+                        <select class="select-status" onchange="triggerDeliveryModal('${trip.id}')">
+                            <option value="In-Transit" selected>In-Transit</option>
+                            <option value="Delivered">Delivered</option>
+                        </select>
+                        <input type="text" class="compact-input custom-note-input" placeholder="Current location..." value="${trip.statusNote || ""}" 
+                               onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)">
+                    </div>
+                `;
+            } else {
+                cardHtml += `
+                    <div style="display:flex; margin-top:5px;">
+                        <select class="select-status" onchange="revertStatus('${trip.id}', 'In-Transit')" style="background: #fff3e0; color: #e65100;">
+                            <option value="Delivered" selected>Status: Delivered</option>
+                            <option value="In-Transit">Undo: Back to In-Transit</option>
+                        </select>
+                    </div>
+                `;
+            }
+            cardHtml += `
+                <button class="history-btn" onclick="toggleHistory('${trip.id}')">▶ View Status History</button>
+                <div id="hist-${trip.id}" class="history-panel"></div>
+            `;
+        }
+
+        if (viewMode === 'pod-pending' && !isReadOnly) {
+            cardHtml += `
+                <div style="margin-bottom: 5px; font-size:12px; color:#5f6368;"><strong>C-Note:</strong> ${trip.cNote || "Not Entered"}</div>
+                <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
+                    <label style="margin:0;">POD Date:</label>
+                    <input type="date" class="compact-input" id="pod-date-${trip.id}" style="border:1px solid #dadce0;">
+                    <button class="btn-primary" style="padding: 6px 12px; margin:0; width:auto; border-radius:8px;" onclick="savePOD('${trip.id}')">Save</button>
+                </div>
+            `;
+        }
+
+        if (viewMode === 'pod-received') {
+            cardHtml += `
+                <div style="margin-bottom: 5px; font-size:12px; color:#5f6368;"><strong>C-Note:</strong> ${trip.cNote || "Not Entered"}</div>
+                <div style="margin-top:10px; color:#137333; font-weight:bold;">POD Received: ${trip.podDate}</div>
+            `;
+            if (!isReadOnly) {
+                cardHtml += `<button class="btn-secondary" style="font-size:11px; padding:4px 8px; margin-top:5px; border-radius:6px; cursor:pointer;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove POD Date</button>`;
+            }
+        }
+
+        if (isReadOnly) {
+            cardHtml += `<div style="margin-top: 10px; font-size: 12px; color: #5f6368;"><strong>C-Note:</strong> ${trip.cNote || "N/A"}<br><strong>Latest Update:</strong> ${trip.statusNote || "None"}</div>`;
+        }
+
+        cardHtml += `</div>`;
+        return cardHtml;
+    }
+
+    function renderDeployed(statusFilter) {
+        activeSubTab = statusFilter;
+        document.getElementById('btn-ongoing').classList.toggle('active', statusFilter === 'In-Transit');
+        document.getElementById('btn-completed').classList.toggle('active', statusFilter === 'Delivered');
+
+        let base = allTrips.filter(t => t.status.trim() === statusFilter);
+        let finalTrips = getFilteredTrips(base);
+
+        const container = document.getElementById('deployed-container');
+        if (finalTrips.length === 0) { container.innerHTML = `<div style="text-align:center; color:#5f6368;">No trips found.</div>`; return; }
+        container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, 'deployed')).join('');
+    }
+
+    function renderPOD(subTab) {
+        activeSubTab = subTab;
+        document.getElementById('btn-pod-pending').classList.toggle('active', subTab === 'Pending');
+        document.getElementById('btn-pod-received').classList.toggle('active', subTab === 'Received');
+
+        let base = allTrips.filter(t => t.status.trim() === 'Delivered');
+        if (subTab === 'Pending') base = base.filter(t => !t.podDate || t.podDate.trim() === '');
+        if (subTab === 'Received') base = base.filter(t => t.podDate && t.podDate.trim() !== '');
+
+        let finalTrips = getFilteredTrips(base);
+
+        document.getElementById('pod-summary').innerText = `No. of ${subTab} POD: ${finalTrips.length}`;
+        const container = document.getElementById('pod-container');
+        const viewMode = subTab === 'Pending' ? 'pod-pending' : 'pod-received';
+        container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, viewMode)).join('');
+    }
+
+    function renderReport(type) {
+        let finalTrips = getFilteredTrips(allTrips);
+        const container = document.getElementById('printable-report');
+        document.getElementById('report-actions').style.display = 'flex';
+
+        let html = `<table class="report-table"><thead><tr><th>Sr</th><th>Party</th><th>Date</th><th>Route</th><th>Vehicle</th>`;
+        if (type === 'POD') html += `<th>POD Date</th>`;
+        html += `</tr></thead><tbody>`;
+
+        finalTrips.forEach((t, i) => {
+            html += `<tr><td>${i+1}</td><td><strong>${t.party}</strong></td><td>${t.date.split(',')[0]}</td><td>${t.from} ➔ ${t.to}</td><td>${t.vNum}</td>`;
+            if (type === 'POD') html += `<td>${t.podDate || 'Pending'}</td>`;
+            html += `</tr>`;
+        });
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+        currentReportTrips = finalTrips; 
+    }
+
+    // --- INTERACTIVE ACTIONS ---
+    function toggleHistory(tripId) {
+        const p = document.getElementById(`hist-${tripId}`);
+        const logs = statusLogs.filter(l => String(l.tripId) === String(tripId));
+        if (logs.length === 0) { p.innerHTML = "<div class='history-item'>No history found.</div>"; }
+        else {
+            p.innerHTML = logs.map(l => {
+                const d = new Date(l.time);
+                return `<div class="history-item"><strong>${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes() < 10 ? '0':''}${d.getMinutes()}</strong> - ${l.note}</div>`;
+            }).join('');
+        }
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function triggerDeliveryModal(tripId) {
+        document.getElementById('delivery-trip-id').value = tripId;
+        document.getElementById('deliveryModal').style.display = "flex";
+    }
+    function closeModal() { 
+        document.getElementById('deliveryModal').style.display = "none"; 
+        triggerCurrentRender(); 
+    }
+    
+    function confirmDelivery() {
+        const dInput = document.getElementById('delivery-date-input').value;
+        if (!dInput) return alert("Select a date.");
+        const tripId = document.getElementById('delivery-trip-id').value;
+        const dObj = new Date(dInput);
+        const fmtDate = `${String(dObj.getDate()).padStart(2, '0')}/${String(dObj.getMonth() + 1).padStart(2, '0')}/${dObj.getFullYear()}`;
+        
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTripStatus', id: tripId, status: 'Delivered', deliveryDate: fmtDate }) });
+        const t = allTrips.find(x => x.id === tripId); if(t){ t.status = 'Delivered'; t.deliveryDate = fmtDate; }
+        closeModal();
+    }
+
+    function revertStatus(tripId, newStatus) {
+        if(!confirm(`Revert vehicle to ${newStatus}?`)) return triggerCurrentRender();
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTripStatus', id: tripId, status: newStatus, deliveryDate: '' }) });
+        const t = allTrips.find(x => x.id === tripId); if(t){ t.status = newStatus; t.deliveryDate = ''; t.podDate = '';}
+        triggerCurrentRender();
+    }
+
+    function savePOD(tripId) {
+        const dInput = document.getElementById(`pod-date-${tripId}`).value;
+        if (!dInput) return alert("Select a POD date.");
+        const dObj = new Date(dInput);
+        const fmtDate = `${String(dObj.getDate()).padStart(2, '0')}/${String(dObj.getMonth() + 1).padStart(2, '0')}/${dObj.getFullYear()}`;
+        updateBackendData(tripId, 'updatePOD', fmtDate);
+    }
+
+    function updateBackendData(tripId, action, value) {
+        const payload = { action: action, id: tripId };
+        if (action === 'updateCNote') payload.value = value;
+        if (action === 'updatePOD') payload.date = value;
+        
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        
+        const t = allTrips.find(x => x.id === tripId);
+        if (t) {
+            if (action === 'updateCNote') t.cNote = value;
+            if (action === 'updatePOD') t.podDate = value;
+        }
+        if (action === 'updatePOD') triggerCurrentRender(); 
+    }
+
+    function updateStatusLog(tripId, noteValue) {
+        const timeNow = new Date().toISOString();
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addStatusLog', id: tripId, note: noteValue, timestamp: timeNow }) });
+        const t = allTrips.find(x => x.id === tripId); if (t) t.statusNote = noteValue;
+        statusLogs.push({tripId: tripId, note: noteValue, time: timeNow});
+    }
+
+    // --- FORM HELPERS & SAVING ---
+    function formatCase(el, style) { if(!el.value) return; el.value = style==='upper' ? el.value.trim().toUpperCase() : el.value.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()); }
+    function formatSentence(el) { if(el.value) el.value = el.value.trim().charAt(0).toUpperCase() + el.value.trim().slice(1); }
+    
+    function formatVehicleNumber(el) {
+        if(!el.value) return;
+        el.value = el.value.toUpperCase().replace(/[\s-]/g, '');
+    }
+
+    function autoFillVehicle(vNum) { const u = vNum.toUpperCase(); if (vehicles[u]) { document.getElementById('v-type').value = vehicles[u].type || ""; document.getElementById('v-weight').value = vehicles[u].capacity || ""; } }
+    function autoFillContact(pName) { const t = document.getElementById('t-name').value; if (transporters[t]) { const person = transporters[t].find(x => x.name === pName); if (person) document.getElementById('t-contact').value = person.phone; } }
+
+    function getFormattedDate() {
+        const dInput = document.getElementById('b-date').value;
+        if (!dInput) return "";
+        const dObj = new Date(dInput);
+        const dd = String(dObj.getDate()).padStart(2, '0');
+        const mm = String(dObj.getMonth() + 1).padStart(2, '0');
+        const yyyy = dObj.getFullYear();
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        return `${dd}/${mm}/${yyyy}, ${days[dObj.getDay()]}`;
+    }
+
+    function validateForm() {
+        let isValid = true;
+        const requiredFields = ['b-date', 'p-name', 'route-from', 'route-to', 'v-num', 'v-type', 'v-weight', 'd-contact', 't-name', 't-contact'];
+        document.querySelectorAll('.error-msg').forEach(msg => msg.style.display = 'none');
+        document.querySelectorAll('input').forEach(input => input.style.borderColor = '#dadce0');
+        requiredFields.forEach(id => {
+            const inputField = document.getElementById(id);
+            if (!inputField.value.trim()) { document.getElementById('err-' + id).style.display = 'block'; inputField.style.borderColor = '#d93025'; isValid = false; }
+        });
+        if (!isValid) alert("Please fill in all mandatory fields marked with an asterisk (*).");
+        return isValid;
+    }
+
+    function generateMessage(type) {
+        if (!validateForm()) return; 
+        const date = getFormattedDate();
+        const party = document.getElementById('p-name').value;
+        const rFrom = document.getElementById('route-from').value;
+        const rTo = document.getElementById('route-to').value;
+        const vNum = document.getElementById('v-num').value.toUpperCase();
+        
+        const currentPlacementStr = `${date}-${party}-${rFrom}-${rTo}-${vNum}`;
+        if (lastSavedPlacementStr !== currentPlacementStr) {
+            const tripId = "TRP-" + Date.now();
+            
+            const newTrip = {
+                action: 'saveTrip', id: tripId, date: date, party: party, 
+                from: rFrom, to: rTo, vNum: vNum, vType: document.getElementById('v-type').value, weight: document.getElementById('v-weight').value,
+                createdBy: currentUser ? currentUser.Name : "Unknown",
+                vFreight: document.getElementById('v-freight').value || "",
+                cFreight: document.getElementById('c-freight').value || ""
+            };
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(newTrip) });
+            
+            allTrips.push({
+                id: tripId, date: date, party: party, from: rFrom, to: rTo,
+                vNum: vNum, type: newTrip.vType, weight: newTrip.weight,
+                status: "In-Transit", deliveryDate: "", statusNote: "", createdBy: newTrip.createdBy,
+                cNote: "", podDate: ""
+            });
+            lastSavedPlacementStr = currentPlacementStr; 
+        }
+
+        const vType = document.getElementById('v-type').value; const vWeight = document.getElementById('v-weight').value;
+        const dName = document.getElementById('d-name').value; const dContact = formatPhoneNumber(document.getElementById('d-contact').value);
+        
+        const header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${rFrom}\n*To:* ${rTo}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n\n*Driver Name:* ${dName}\n*Driver Contact No:* ${dContact}\n\n`;
+        let finalMessage = type === 'team' ? header + `*Transporter:* ${document.getElementById('t-name').value}\n*Person Name:* ${document.getElementById('t-person').value}\n*Contact Number:* ${formatPhoneNumber(document.getElementById('t-contact').value)}\n\n*Remarks:* ${document.getElementById('remarks').value}` : header;
+        
+        // Use location.href as a robust fallback for mobile browsers that block window.open
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(finalMessage)}`;
+        window.open(whatsappUrl, '_blank') || (window.location.href = whatsappUrl);
+    }
+
+    function shareReportWhatsApp() {
+        if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
+        
+        const today = new Date();
+        const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayStr = days[today.getDay()];
+        
+        let message = `*Vehicle Status Update - ${dateStr}, ${dayStr}*\n\n`;
+        
+        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party))];
+        uniqueParties.forEach(p => {
+            message += `*Client:* ${p}\n`; let counter = 1;
+            currentReportTrips.forEach(t => {
+                if (t.party === p) {
+                    let stat = t.status.trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
+                    if (t.statusNote) stat += ` (${t.statusNote})`;
+                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight} | ${stat}\n`; counter++;
+                }
+            }); message += `\n`;
+        });
+        
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank') || (window.location.href = whatsappUrl);
+    }
+
+</script>
+</body>
+</html>
