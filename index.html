@@ -36,7 +36,9 @@
         .required-star { color: #d93025; } 
         input, select { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 12px; box-sizing: border-box; font-size: 14px; background-color: #ffffff; transition: 0.3s; }
         input:focus, select:focus { outline: none; border-color: #a8c7fa; box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.2); }
+        input:disabled { background-color: #f1f3f4; color: #9aa0a6; cursor: not-allowed; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; padding-left: 5px; font-weight: 500; }
         .section-divider { height: 1px; background: rgba(0,0,0,0.1); margin: 20px 0; }
 
@@ -77,14 +79,18 @@
         .report-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .report-table th, .report-table td { padding: 10px; border-bottom: 1px solid #e8eaed; text-align: left; }
         .report-table th { background: #f8f9fa; font-weight: 600; color: #5f6368; }
+        .print-header { display: none; text-align: center; margin-bottom: 20px; }
+        .print-header h2 { font-size: 20px; color: #1f1f1f; margin: 0; font-weight: 700; }
 
         /* STRICT PDF PRINT STYLES */
+        @page { margin: 10mm; } /* Hides browser URL and default Dates */
         @media print { 
             body * { visibility: hidden; }
             #printable-report, #printable-report * { visibility: visible; }
             #printable-report { position: absolute; left: 0; top: 0; width: 100%; }
+            .print-header { display: block !important; }
             .report-table { border: 1px solid #000; box-shadow: none; border-radius: 0; }
-            .report-table th, .report-table td { border: 1px solid #000; }
+            .report-table th, .report-table td { border: 1px solid #000; color: #000; }
         }
     </style>
 </head>
@@ -126,19 +132,15 @@
             <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
             <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
         </div>
-        <div class="grid-2" style="margin-top: 8px;">
-            <div class="autocomplete">
-                <input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()">
-                <div id="uf-vnum-list" class="autocomplete-items"></div>
-            </div>
-            <div class="autocomplete">
-                <input type="text" id="uf-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()">
-                <div id="uf-party-list" class="autocomplete-items"></div>
-            </div>
+        <div class="grid-3" style="margin-top: 8px;">
+            <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerCurrentRender()"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><input type="text" id="uf-vcap" class="compact-input" placeholder="Capacity" oninput="triggerCurrentRender()"><div id="uf-vcap-list" class="autocomplete-items"></div></div>
         </div>
-        <div class="autocomplete" style="margin-top: 8px;">
-            <input type="text" id="uf-origin" class="compact-input" placeholder="Route Origin" oninput="triggerCurrentRender()">
-            <div id="uf-origin-list" class="autocomplete-items"></div>
+        <div class="grid-3" style="margin-top: 8px;">
+            <div class="autocomplete"><input type="text" id="uf-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerCurrentRender()"><div id="uf-origin-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerCurrentRender()"><div id="uf-dest-list" class="autocomplete-items"></div></div>
         </div>
     </div>
 
@@ -164,7 +166,7 @@
         </div>
 
         <div class="grid-2 form-group">
-            <div><label>Driver Name</label><input type="text" id="d-name" placeholder="Name" onchange="formatCase(this, 'title')"></div>
+            <div class="autocomplete"><label>Driver Name</label><input type="text" id="d-name" placeholder="Name" onchange="formatCase(this, 'title')"><div id="d-name-list" class="autocomplete-items"></div></div>
             <div class="autocomplete"><label>Driver Contact <span class="required-star">*</span></label><input type="text" id="d-contact" placeholder="9876543210"><div id="d-contact-list" class="autocomplete-items"></div><span class="error-msg" id="err-d-contact">Required</span></div>
         </div>
 
@@ -201,9 +203,26 @@
     </div>
 
     <div id="tab-reports" class="app-section">
-        <div style="display:flex; gap:10px;">
-            <button class="btn-primary btn-secondary" onclick="renderReport('Trips')">Fetch Trips</button>
-            <button class="btn-primary btn-secondary" onclick="renderReport('POD')">Fetch POD Details</button>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e8eaed;">
+            <div class="grid-2">
+                <div>
+                    <label>Trip Status:</label>
+                    <select id="report-trip-status" class="compact-input">
+                        <option value="All">All</option>
+                        <option value="In-Transit">In-Transit</option>
+                        <option value="Delivered">Delivered</option>
+                    </select>
+                </div>
+                <div>
+                    <label>POD Status:</label>
+                    <select id="report-pod-status" class="compact-input">
+                        <option value="All">All</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Received">Received</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="generateCustomReport()" style="margin-top: 15px;">Generate Report</button>
         </div>
         
         <div id="printable-report" style="margin-top: 15px;"></div>
@@ -247,11 +266,12 @@
     
     let vehicles = {}; let clients = []; let transporters = {}; 
     let allTrips = []; let users = []; let statusLogs = [];
+    let driverData = {}; // NEW Memory dict for drivers
     let currentUser = null; let currentActiveMainTab = 'tab-placement';
     let activeSubTab = 'In-Transit'; 
     let lastSavedPlacementStr = "";
 
-    // --- NEW LOGIC: PIN FIRST, THEN SYNC ---
+    // --- INITIALIZATION ---
     function setGreeting() {
         const hour = new Date().getHours();
         document.getElementById('greeting-text').innerText = `${hour < 12 ? "Good Morning," : hour < 17 ? "Good Afternoon," : "Good Evening,"}`;
@@ -263,7 +283,6 @@
         document.getElementById('pin-overlay').style.display = 'flex';
     }
 
-    // This performs the actual data download from Google Sheets
     async function performDatabaseSync() {
         const response = await fetch(GOOGLE_SCRIPT_URL);
         if (!response.ok) throw new Error("Connection failed.");
@@ -273,9 +292,14 @@
         allTrips = data.trips || []; users = data.users || []; statusLogs = data.statusLogs || [];
 
         setupMemoryDropdowns();
+        
+        // Expanded Universal Filters
         setupCustomDropdown('uf-party', 'uf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort(), triggerCurrentRender);
         setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), triggerCurrentRender);
         setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t.from))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t.to))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t.type))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t.weight))].sort(), triggerCurrentRender);
     }
 
     window.onload = async () => {
@@ -297,26 +321,22 @@
                 document.getElementById('bypass-btn').style.display = "inline-block";
             }
         } else {
-            // User must login first!
             document.getElementById('loading-overlay').style.display = 'none';
             document.getElementById('pin-overlay').style.display = 'flex';
         }
     };
 
-    // When the user clicks "Unlock App"
     async function checkPin() {
         const pin = document.getElementById('app-pin').value;
         if (!pin) return;
 
-        // Hide PIN screen and show the beautiful loading spinner
         document.getElementById('pin-overlay').style.display = 'none';
         document.getElementById('loading-overlay').style.display = 'flex';
         document.getElementById('loader-text').innerText = "Verifying & Syncing Databank...";
 
         try {
             await performDatabaseSync();
-            
-            const user = users.find(u => String(u.PIN) === String(pin)) || (pin === "1234" ? {Name: "Master Admin", Role: "Admin"} : null);
+            const user = users.find(u => String(u.PIN) === String(pin)) || (pin === "0711" ? {Name: "Master Admin", Role: "Admin"} : null);
 
             if (user) {
                 currentUser = user;
@@ -325,7 +345,6 @@
                 document.getElementById('loading-overlay').style.display = 'none';
                 applyUserPermissions();
             } else {
-                // Return to PIN screen on failure
                 document.getElementById('loading-overlay').style.display = 'none';
                 document.getElementById('pin-overlay').style.display = 'flex';
                 document.getElementById('pin-error').style.display = 'block';
@@ -348,6 +367,16 @@
         
         document.getElementById('user-name-text').innerText = `Hi ${currentUser.Name}!`;
         document.getElementById('user-name-text').style.display = 'block';
+
+        // Apply Freight Rules
+        const cFreightInput = document.getElementById('c-freight');
+        if (currentUser.Role === 'Admin') {
+            cFreightInput.disabled = false;
+        } else {
+            cFreightInput.value = "";
+            cFreightInput.disabled = true;
+            cFreightInput.placeholder = "Restricted";
+        }
 
         if (currentUser.Role === 'ReadOnly') {
             document.getElementById('nav-placement').style.display = 'none';
@@ -393,7 +422,19 @@
         setupCustomDropdown('route-from', 'route-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
         setupCustomDropdown('route-to', 'route-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
         
-        const driverNums = [...new Set(allTrips.map(t => t.dContact).filter(Boolean))];
+        // Advanced Driver Memory Update
+        allTrips.forEach(t => {
+            if (t.dName && t.dName.trim() !== "" && t.dContact) {
+                let n = t.dName.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+                driverData[n] = t.dContact.trim();
+            }
+        });
+        
+        setupCustomDropdown('d-name', 'd-name-list', () => Object.keys(driverData).sort(), (selectedName) => {
+            document.getElementById('d-contact').value = driverData[selectedName] || "";
+        });
+
+        const driverNums = [...new Set(Object.values(driverData))];
         const dcInput = document.getElementById('d-contact');
         const dcList = document.getElementById('d-contact-list');
         if(dcInput && dcList) {
@@ -412,7 +453,7 @@
         }
     }
 
-    // --- NAVIGATION ---
+    // --- NAVIGATION & GLOBAL FILTER ENGINE ---
     function switchMainTab(tabId) {
         currentActiveMainTab = tabId;
         document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
@@ -441,8 +482,11 @@
         const startDateStr = document.getElementById('uf-start').value;
         const endDateStr = document.getElementById('uf-end').value;
         const vNumMatch = document.getElementById('uf-vnum').value.trim().toLowerCase();
+        const vTypeMatch = document.getElementById('uf-vtype').value.trim().toLowerCase();
+        const vCapMatch = document.getElementById('uf-vcap').value.trim().toLowerCase();
         const partyMatch = document.getElementById('uf-party').value.trim().toLowerCase();
         const originMatch = document.getElementById('uf-origin').value.trim().toLowerCase();
+        const destMatch = document.getElementById('uf-dest').value.trim().toLowerCase();
 
         result = result.filter(t => {
             let passDate = true;
@@ -455,10 +499,13 @@
                 }
             }
             const passV = !vNumMatch || t.vNum.toLowerCase().includes(vNumMatch);
+            const passVType = !vTypeMatch || (t.type && t.type.toLowerCase().includes(vTypeMatch));
+            const passVCap = !vCapMatch || (t.weight && t.weight.toLowerCase().includes(vCapMatch));
             const passP = !partyMatch || t.party.toLowerCase().includes(partyMatch);
             const passO = !originMatch || t.from.toLowerCase().includes(originMatch);
+            const passD = !destMatch || t.to.toLowerCase().includes(destMatch);
 
-            return passDate && passV && passP && passO;
+            return passDate && passV && passVType && passVCap && passP && passO && passD;
         });
 
         result.sort((a, b) => new Date(a.date.split(',')[0].split('/').reverse().join('-')) - new Date(b.date.split(',')[0].split('/').reverse().join('-')));
@@ -478,6 +525,10 @@
                 <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
                 <div style="margin-bottom: 5px;"><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</div>
         `;
+
+        if (currentUser && currentUser.Role === 'Admin' && trip.cFreight) {
+            cardHtml += `<div style="margin-bottom: 5px; color:#137333;"><strong>Charged Freight:</strong> ${trip.cFreight}</div>`;
+        }
 
         if (viewMode === 'deployed' && !isReadOnly) {
             cardHtml += `
@@ -534,7 +585,7 @@
                 <div style="margin-top:10px; color:#137333; font-weight:bold;">POD Received: ${trip.podDate}</div>
             `;
             if (!isReadOnly) {
-                cardHtml += `<button class="btn-secondary" style="font-size:11px; padding:4px 8px; margin-top:5px; border-radius:6px; cursor:pointer;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove POD Date</button>`;
+                cardHtml += `<button class="btn-secondary" style="font-size:11px; padding:4px 8px; margin-top:5px; border-radius:6px; cursor:pointer;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove</button>`;
             }
         }
 
@@ -576,19 +627,58 @@
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, viewMode)).join('');
     }
 
-    function renderReport(type) {
+    // --- REVAMPED REPORTS GENERATOR ---
+    function generateCustomReport() {
         let finalTrips = getFilteredTrips(allTrips);
+        
+        const tripStat = document.getElementById('report-trip-status').value;
+        const podStat = document.getElementById('report-pod-status').value;
+
+        if (tripStat !== 'All') finalTrips = finalTrips.filter(t => t.status.trim() === tripStat);
+        if (podStat !== 'All') {
+            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => t.status.trim() === 'Delivered' && (!t.podDate || t.podDate.trim() === ''));
+            if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && t.podDate.trim() !== '');
+        }
+
         const container = document.getElementById('printable-report');
         document.getElementById('report-actions').style.display = 'flex';
 
-        let html = `<table class="report-table"><thead><tr><th>Sr</th><th>Party</th><th>Date</th><th>Route</th><th>Vehicle</th>`;
-        if (type === 'POD') html += `<th>POD Date</th>`;
-        html += `</tr></thead><tbody>`;
+        if (finalTrips.length === 0) {
+            container.innerHTML = `<div style="text-align:center; color:#5f6368;">No data matches these filters.</div>`;
+            return;
+        }
+
+        const today = new Date();
+        const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayStr = days[today.getDay()];
+
+        let html = `
+            <div class="print-header">
+                <h2>Data Report as on ${dateStr}, ${dayStr}</h2>
+            </div>
+            <table class="report-table">
+            <thead>
+                <tr><th>Sr</th><th>Party</th><th>Date</th><th>Route</th><th>Vehicle</th>`;
+        
+        if (currentUser && currentUser.Role === 'Admin') html += `<th>Charged Frt</th>`;
+        
+        html += `<th>Status</th><th>POD Date</th></tr></thead><tbody>`;
 
         finalTrips.forEach((t, i) => {
-            html += `<tr><td>${i+1}</td><td><strong>${t.party}</strong></td><td>${t.date.split(',')[0]}</td><td>${t.from} ➔ ${t.to}</td><td>${t.vNum}</td>`;
-            if (type === 'POD') html += `<td>${t.podDate || 'Pending'}</td>`;
-            html += `</tr>`;
+            let stat = t.status.trim() === 'Delivered' ? `Delivered` : `In-Transit`;
+            html += `<tr>
+                <td>${i+1}</td>
+                <td><strong>${t.party}</strong></td>
+                <td>${t.date.split(',')[0]}</td>
+                <td>${t.from} ➔ ${t.to}</td>
+                <td>${t.vNum} (${t.type})</td>`;
+            
+            if (currentUser && currentUser.Role === 'Admin') html += `<td>${t.cFreight || '-'}</td>`;
+
+            html += `<td>${stat}</td>
+                <td>${t.podDate || 'Pending'}</td>
+            </tr>`;
         });
         html += `</tbody></table>`;
         container.innerHTML = html;
@@ -675,11 +765,11 @@
         if(!el.value) return;
         el.value = el.value.toUpperCase().replace(/[\s-]/g, '');
     }
-    
-    // MISSING FUNCTION RESTORED HERE:
+
+    // NEW FORMATTING LOGIC FOR NUMBERS
     function formatPhoneNumber(number) {
         if (!number) return "";
-        let cleanNumber = number.trim();
+        let cleanNumber = number.replace(/[\s-]/g, '').trim(); 
         if (cleanNumber.startsWith("+91")) return cleanNumber;
         else if (cleanNumber.startsWith("91") && cleanNumber.length > 10) return "+" + cleanNumber;
         else return "+91" + cleanNumber;
@@ -712,7 +802,6 @@
         return isValid;
     }
 
-    // --- BULLETPROOF WHATSAPP & DUPLICATE PREVENTION LOGIC ---
     function openWhatsAppDirectly(msg) {
         const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
         window.open(whatsappUrl, '_blank') || (window.location.href = whatsappUrl);
@@ -721,7 +810,6 @@
     function generateMessage(type) {
         if (!validateForm()) return; 
 
-        // Gather all data
         const date = getFormattedDate();
         const party = document.getElementById('p-name').value;
         const rFrom = document.getElementById('route-from').value;
@@ -730,22 +818,18 @@
         const vType = document.getElementById('v-type').value; 
         const vWeight = document.getElementById('v-weight').value;
         const dName = document.getElementById('d-name').value; 
-        
-        // This is the line that crashed because formatPhoneNumber was missing!
         const dContact = formatPhoneNumber(document.getElementById('d-contact').value);
-        
         const tName = document.getElementById('t-name').value;
         const tPerson = document.getElementById('t-person').value;
         const tContact = formatPhoneNumber(document.getElementById('t-contact').value);
         const remarks = document.getElementById('remarks').value;
 
-        // Generate WhatsApp Message & Open it FIRST
         const header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${rFrom}\n*To:* ${rTo}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n\n*Driver Name:* ${dName}\n*Driver Contact No:* ${dContact}\n\n`;
         let finalMessage = type === 'team' ? header + `*Transporter:* ${tName}\n*Person Name:* ${tPerson}\n*Contact Number:* ${tContact}\n\n*Remarks:* ${remarks}` : header;
         
         openWhatsAppDirectly(finalMessage);
         
-        // Duplicate Prevention Strategy (Same Day Rule)
+        // DUPLICATE PREVENTION: Same Day & Same Vehicle Check
         const isDuplicate = allTrips.some(t => String(t.date).trim() === String(date).trim() && String(t.vNum).trim().toUpperCase() === String(vNum).trim().toUpperCase());
 
         if (!isDuplicate) {
@@ -787,7 +871,6 @@
     function executeDeployedShare(type) {
         const tripId = document.getElementById('share-modal-trip-id').value;
         const trip = allTrips.find(t => t.id === tripId);
-        
         if (!trip) return;
 
         const header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n*Booking Date:* ${trip.date}\n\n*Party Name:* ${trip.party}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n*Driver Name:* ${trip.dName || ""}\n*Driver Contact No:* ${trip.dContact || ""}\n\n`;
