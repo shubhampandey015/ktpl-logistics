@@ -42,7 +42,7 @@
         .btn-primary { width: 100%; padding: 14px; border: none; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; background: linear-gradient(135deg, #0b57d0 0%, #0842a0 100%); box-shadow: 0 4px 15px rgba(11, 87, 208, 0.3); margin-top: 15px;}
         .btn-whatsapp { width: 100%; padding: 14px; border: none; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); margin-top: 15px;}
         .btn-secondary { background: #f1f3f4; color: #3c4043; box-shadow: none; border: 1px solid #dadce0; }
-        .btn-primary:active, .btn-whatsapp:active { transform: scale(0.98); }
+        .btn-primary:active, .btn-whatsapp:active, .btn-secondary:active { transform: scale(0.98); }
 
         /* AUTOCOMPLETE */
         .autocomplete { position: relative; display: block; }
@@ -61,15 +61,15 @@
         
         #unified-filter-bar { background: #fff; padding: 15px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; display: none; animation: fadeIn 0.4s; }
         .filter-header { font-size: 12px; font-weight: bold; color: #5f6368; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;}
-        .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; margin-top: 10px; width: 100%; text-align: left; }
+        .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; margin-top: 10px; text-align: left; }
         .history-panel { display: none; background: #f8f9fa; border-radius: 12px; padding: 10px; margin-top: 5px; font-size: 12px; color: #3c4043; border-left: 3px solid #0b57d0; max-height: 150px; overflow-y: auto;}
         .history-item { margin-bottom: 8px; border-bottom: 1px solid #e8eaed; padding-bottom: 4px; }
         .pod-badge { background: #e8f0fe; color: #0b57d0; padding: 8px 12px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; display: block; font-size: 13px;}
         .compact-input { padding: 8px; font-size: 13px; border-radius: 8px; }
 
-        /* MODAL */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; }
-        .modal-content { background: #fff; padding: 25px; border-radius: 24px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        /* MODALS */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; padding: 20px;}
+        .modal-content { background: #fff; padding: 25px; border-radius: 24px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
 
         /* REPORTS TABLE */
         .report-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
@@ -156,7 +156,6 @@
             <div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="v-weight" placeholder="18MT" onchange="formatCase(this, 'upper')"><span class="error-msg" id="err-v-weight">Required</span></div>
         </div>
         
-        <!-- RESTORED FREIGHT OPTIONS FOR INTERNAL REFERENCE -->
         <div class="grid-2 form-group">
             <div><label>Vehicle Freight</label><input type="text" id="v-freight" placeholder="Team"></div>
             <div><label>Charged Freight</label><input type="text" id="c-freight" placeholder="Client"></div>
@@ -208,7 +207,6 @@
             <button class="btn-primary btn-secondary" onclick="renderReport('POD')">Fetch POD Details</button>
         </div>
         
-        <!-- PRINTABLE DIV FOR PDF EXPORT -->
         <div id="printable-report" style="margin-top: 15px;"></div>
         
         <div style="display:flex; gap:10px; margin-top: 15px;" id="report-actions" style="display:none;">
@@ -227,7 +225,21 @@
         <input type="hidden" id="delivery-trip-id">
         <div style="display:flex; gap:10px;">
             <button class="btn-primary btn-secondary" onclick="closeModal()">Cancel</button>
-            <button class="btn-whatsapp" onclick="confirmDelivery()" style="margin-top:15px;">Save</button>
+            <button class="btn-whatsapp" onclick="confirmDelivery()" style="margin-top:0;">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Share from Deployed Modal -->
+<div id="shareModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:#202124;">Share Trip Update</h3>
+        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Choose who you want to share these details with via WhatsApp.</p>
+        <input type="hidden" id="share-modal-trip-id">
+        <div style="display:flex; flex-direction: column; gap:10px;">
+            <button class="btn-primary" onclick="executeDeployedShare('team')" style="margin-top:0;">Share to Team</button>
+            <button class="btn-whatsapp" onclick="executeDeployedShare('client')" style="margin-top:0;">Share to Client</button>
+            <button class="btn-secondary" onclick="closeShareModal()" style="padding: 12px; border-radius: 20px; cursor: pointer; margin-top: 5px;">Cancel</button>
         </div>
     </div>
 </div>
@@ -240,10 +252,9 @@
     let allTrips = []; let users = []; let statusLogs = [];
     let currentUser = null; let currentActiveMainTab = 'tab-placement';
     let activeSubTab = 'In-Transit'; 
-    let lastSavedPlacementStr = "";
     let dataLoaded = false;
 
-    // --- INITIALIZATION & BACKGROUND SYNC ---
+    // --- INITIALIZATION ---
     function setGreeting() {
         const hour = new Date().getHours();
         document.getElementById('greeting-text').innerText = `${hour < 12 ? "Good Morning," : hour < 17 ? "Good Afternoon," : "Good Evening,"}`;
@@ -260,7 +271,6 @@
             allTrips = data.trips || []; users = data.users || []; statusLogs = data.statusLogs || [];
 
             setupMemoryDropdowns();
-            
             setupCustomDropdown('uf-party', 'uf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort(), triggerCurrentRender);
             setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), triggerCurrentRender);
             setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t.from))].sort(), triggerCurrentRender);
@@ -368,7 +378,7 @@
         }
     }
 
-    // --- TAB SWITCHING & GLOBAL FILTER ENGINE ---
+    // --- NAVIGATION ---
     function switchMainTab(tabId) {
         currentActiveMainTab = tabId;
         document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
@@ -465,7 +475,10 @@
                 `;
             }
             cardHtml += `
-                <button class="history-btn" onclick="toggleHistory('${trip.id}')">▶ View Status History</button>
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}')">▶ View History</button>
+                    <button class="btn-secondary" style="font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer;" onclick="openShareModal('${trip.id}')">Share</button>
+                </div>
                 <div id="hist-${trip.id}" class="history-panel"></div>
             `;
         }
@@ -656,45 +669,88 @@
         return isValid;
     }
 
+    // --- BULLETPROOF WHATSAPP & DUPLICATE PREVENTION LOGIC ---
+    function openWhatsAppDirectly(msg) {
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+        
+        // Native fallback method to guarantee opening on mobile
+        window.open(whatsappUrl, '_blank') || (window.location.href = whatsappUrl);
+    }
+
     function generateMessage(type) {
         if (!validateForm()) return; 
+
+        // Gather all data
         const date = getFormattedDate();
         const party = document.getElementById('p-name').value;
         const rFrom = document.getElementById('route-from').value;
         const rTo = document.getElementById('route-to').value;
         const vNum = document.getElementById('v-num').value.toUpperCase();
+        const vType = document.getElementById('v-type').value; 
+        const vWeight = document.getElementById('v-weight').value;
+        const dName = document.getElementById('d-name').value; 
+        const dContact = formatPhoneNumber(document.getElementById('d-contact').value);
+        const tName = document.getElementById('t-name').value;
+        const tPerson = document.getElementById('t-person').value;
+        const tContact = formatPhoneNumber(document.getElementById('t-contact').value);
+        const remarks = document.getElementById('remarks').value;
+
+        // Generate WhatsApp Message & Open it FIRST
+        const header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${rFrom}\n*To:* ${rTo}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n\n*Driver Name:* ${dName}\n*Driver Contact No:* ${dContact}\n\n`;
+        let finalMessage = type === 'team' ? header + `*Transporter:* ${tName}\n*Person Name:* ${tPerson}\n*Contact Number:* ${tContact}\n\n*Remarks:* ${remarks}` : header;
         
-        const currentPlacementStr = `${date}-${party}-${rFrom}-${rTo}-${vNum}`;
-        if (lastSavedPlacementStr !== currentPlacementStr) {
+        openWhatsAppDirectly(finalMessage);
+        
+        // Duplicate Prevention Strategy (Same Day Rule)
+        const isDuplicate = allTrips.some(t => String(t.date).trim() === String(date).trim() && String(t.vNum).trim().toUpperCase() === String(vNum).trim().toUpperCase());
+
+        if (!isDuplicate) {
             const tripId = "TRP-" + Date.now();
+            const vFreight = document.getElementById('v-freight').value || "";
+            const cFreight = document.getElementById('c-freight').value || "";
             
             const newTrip = {
                 action: 'saveTrip', id: tripId, date: date, party: party, 
-                from: rFrom, to: rTo, vNum: vNum, vType: document.getElementById('v-type').value, weight: document.getElementById('v-weight').value,
+                from: rFrom, to: rTo, vNum: vNum, vType: vType, weight: vWeight,
                 createdBy: currentUser ? currentUser.Name : "Unknown",
-                vFreight: document.getElementById('v-freight').value || "",
-                cFreight: document.getElementById('c-freight').value || ""
+                vFreight: vFreight, cFreight: cFreight,
+                dName: dName, dContact: dContact, tName: tName, tPerson: tPerson, tContact: tContact, remarks: remarks
             };
+            
             fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(newTrip) });
             
             allTrips.push({
                 id: tripId, date: date, party: party, from: rFrom, to: rTo,
-                vNum: vNum, type: newTrip.vType, weight: newTrip.weight,
+                vNum: vNum, type: vType, weight: vWeight,
                 status: "In-Transit", deliveryDate: "", statusNote: "", createdBy: newTrip.createdBy,
-                cNote: "", podDate: ""
+                cNote: "", podDate: "", vFreight: vFreight, cFreight: cFreight,
+                dName: dName, dContact: dContact, tName: tName, tPerson: tPerson, tContact: tContact, remarks: remarks
             });
-            lastSavedPlacementStr = currentPlacementStr; 
+            triggerCurrentRender(); 
         }
+    }
 
-        const vType = document.getElementById('v-type').value; const vWeight = document.getElementById('v-weight').value;
-        const dName = document.getElementById('d-name').value; const dContact = formatPhoneNumber(document.getElementById('d-contact').value);
+    // --- SHARE FROM DEPLOYED TAB LOGIC ---
+    function openShareModal(tripId) {
+        document.getElementById('share-modal-trip-id').value = tripId;
+        document.getElementById('shareModal').style.display = "flex";
+    }
+    
+    function closeShareModal() {
+        document.getElementById('shareModal').style.display = "none";
+    }
+
+    function executeDeployedShare(type) {
+        const tripId = document.getElementById('share-modal-trip-id').value;
+        const trip = allTrips.find(t => t.id === tripId);
         
-        const header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${rFrom}\n*To:* ${rTo}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n\n*Driver Name:* ${dName}\n*Driver Contact No:* ${dContact}\n\n`;
-        let finalMessage = type === 'team' ? header + `*Transporter:* ${document.getElementById('t-name').value}\n*Person Name:* ${document.getElementById('t-person').value}\n*Contact Number:* ${formatPhoneNumber(document.getElementById('t-contact').value)}\n\n*Remarks:* ${document.getElementById('remarks').value}` : header;
+        if (!trip) return;
+
+        const header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n*Booking Date:* ${trip.date}\n\n*Party Name:* ${trip.party}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n*Driver Name:* ${trip.dName || ""}\n*Driver Contact No:* ${trip.dContact || ""}\n\n`;
+        let finalMessage = type === 'team' ? header + `*Transporter:* ${trip.tName || ""}\n*Person Name:* ${trip.tPerson || ""}\n*Contact Number:* ${trip.tContact || ""}\n\n*Remarks:* ${trip.remarks || ""}` : header;
         
-        // Use location.href as a robust fallback for mobile browsers that block window.open
-        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(finalMessage)}`;
-        window.open(whatsappUrl, '_blank') || (window.location.href = whatsappUrl);
+        openWhatsAppDirectly(finalMessage);
+        closeShareModal();
     }
 
     function shareReportWhatsApp() {
@@ -719,8 +775,7 @@
             }); message += `\n`;
         });
         
-        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank') || (window.location.href = whatsappUrl);
+        openWhatsAppDirectly(message);
     }
 
 </script>
