@@ -42,10 +42,11 @@
         .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; padding-left: 5px; font-weight: 500; }
         .section-divider { height: 1px; background: rgba(0,0,0,0.1); margin: 20px 0; }
 
-        /* BUTTONS */
-        .btn-primary { width: 100%; padding: 14px; border: none; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; background: linear-gradient(135deg, #0b57d0 0%, #0842a0 100%); box-shadow: 0 4px 15px rgba(11, 87, 208, 0.3); }
-        .btn-whatsapp { width: 100%; padding: 14px; border: none; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); }
-        .btn-secondary { width: 100%; padding: 14px; border: 1px solid #dadce0; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 600; background: #f1f3f4; color: #3c4043; box-shadow: none; }
+        /* BUTTONS (SLEEKER & SLIMMER) */
+        .btn-primary, .btn-whatsapp, .btn-secondary { width: 100%; padding: 12px 14px; border: none; border-radius: 16px; cursor: pointer; font-size: 14px; font-weight: 600; box-sizing: border-box; transition: 0.2s;}
+        .btn-primary { color: white; background: linear-gradient(135deg, #0b57d0 0%, #0842a0 100%); box-shadow: 0 4px 10px rgba(11, 87, 208, 0.2); }
+        .btn-whatsapp { color: white; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2); }
+        .btn-secondary { border: 1px solid #dadce0; background: #f1f3f4; color: #3c4043; box-shadow: none; }
         .btn-primary:active, .btn-whatsapp:active, .btn-secondary:active { transform: scale(0.98); }
 
         /* AUTOCOMPLETE */
@@ -101,7 +102,7 @@
 
 <div id="pin-overlay" style="display: none;">
     <div class="pin-box">
-        <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 180px; margin-bottom: 15px;" onerror="this.style.display='none'">
+        <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 180px; margin-bottom: 15px;">
         <h2>KTPL Secure Login</h2>
         <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric">
         <button class="btn-primary" onclick="checkPin()" style="margin-top: 0;">Unlock App</button>
@@ -217,7 +218,7 @@
             <div class="grid-2">
                 <div>
                     <label>Trip Status:</label>
-                    <select id="report-trip-status" class="compact-input">
+                    <select id="report-trip-status" class="compact-input" style="background:#fff;">
                         <option value="All">All</option>
                         <option value="In-Transit">In-Transit</option>
                         <option value="Delivered">Delivered</option>
@@ -225,7 +226,7 @@
                 </div>
                 <div>
                     <label>POD Status:</label>
-                    <select id="report-pod-status" class="compact-input">
+                    <select id="report-pod-status" class="compact-input" style="background:#fff;">
                         <option value="All">All</option>
                         <option value="Pending">Pending</option>
                         <option value="Received">Received</option>
@@ -238,7 +239,7 @@
         <div id="printable-report" style="margin-top: 15px;"></div>
         
         <div style="display:flex; gap:10px; margin-top: 15px;" id="report-actions" style="display:none;">
-            <button class="btn-primary" onclick="window.print()" style="margin-top:0;">Save PDF</button>
+            <button class="btn-secondary" onclick="window.print()" style="margin-top:0;">Save PDF</button>
             <button class="btn-whatsapp" onclick="shareReportWhatsApp()" style="margin-top:0;">WhatsApp</button>
         </div>
     </div>
@@ -248,7 +249,7 @@
     <div class="modal-content">
         <h3 style="margin-top:0;">Confirm Delivery</h3>
         <label style="text-align:left;">Delivery Date:</label>
-        <input type="date" id="delivery-date-input" style="margin-bottom:15px;">
+        <input type="date" id="delivery-date-input" style="margin-bottom:15px; border: 1px solid #dadce0;" class="compact-input">
         <input type="hidden" id="delivery-trip-id">
         <div style="display:flex; gap:10px;">
             <button class="btn-secondary" onclick="closeModal()" style="margin-top:0;">Cancel</button>
@@ -274,9 +275,13 @@
     <div class="modal-content">
         <h3 style="margin-top:0;">Edit Trip (Admin)</h3>
         <input type="hidden" id="edit-trip-id">
-        <div class="form-group"><label>Vehicle No.</label><input type="text" id="edit-vnum" onchange="formatVehicleNumber(this)"></div>
-        <div class="form-group"><label>Route Origin</label><input type="text" id="edit-from" onchange="formatCase(this, 'title')"></div>
-        <div class="form-group"><label>Route Destination</label><input type="text" id="edit-to" onchange="formatCase(this, 'title')"></div>
+        <div class="form-group"><label style="text-align:left;">Vehicle No.</label><input type="text" id="edit-vnum" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatVehicleNumber(this)"></div>
+        <div class="grid-2">
+            <div class="form-group"><label style="text-align:left;">Veh Type</label><input type="text" id="edit-vtype" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'upper')"></div>
+            <div class="form-group"><label style="text-align:left;">Capacity</label><input type="text" id="edit-vcap" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'upper')"></div>
+        </div>
+        <div class="form-group"><label style="text-align:left;">Route Origin</label><input type="text" id="edit-from" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'title')"></div>
+        <div class="form-group"><label style="text-align:left;">Route Destination</label><input type="text" id="edit-to" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'title')"></div>
         <div style="display:flex; gap:10px; margin-top:15px;">
             <button class="btn-secondary" onclick="closeAdminEditModal()" style="margin-top:0;">Cancel</button>
             <button class="btn-primary" onclick="saveAdminEdit()" style="margin-top:0;">Update</button>
@@ -294,6 +299,7 @@
     let currentUser = null; let currentActiveMainTab = 'tab-placement';
     let activeSubTab = 'In-Transit'; 
     let lastSavedPlacementStr = "";
+    let dataLoaded = false;
 
     // --- INITIALIZATION ---
     function setGreeting() {
@@ -454,7 +460,6 @@
         setupCustomDropdown('route-from', 'route-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
         setupCustomDropdown('route-to', 'route-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
         
-        // Advanced Driver Memory Update
         allTrips.forEach(t => {
             if (t.dName && t.dName.trim() !== "" && t.dContact) {
                 let n = t.dName.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
@@ -504,8 +509,7 @@
 
         document.getElementById('unified-filter-bar').style.display = (tabId === 'tab-placement') ? 'none' : 'block';
         
-        // Reset filters on tab switch to avoid crossover confusion
-        clearFilters();
+        clearFilters(); // Clear cross-over confusion
     }
 
     function triggerCurrentRender() {
@@ -574,13 +578,11 @@
                     <span><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</span>
         `;
         
-        // Admin Edit Button
         if (currentUser && currentUser.Role === 'Admin' && trip.status.trim() === 'In-Transit') {
             cardHtml += `<span style="cursor:pointer; color:#0b57d0; font-size:11px; text-decoration:underline;" onclick="openAdminEdit('${trip.id}')">Edit Trip</span>`;
         }
         cardHtml += `</div>`;
 
-        // Freight visibility logic
         if (trip.vFreight && trip.vFreight.trim() !== '') {
             cardHtml += `<div style="margin-bottom: 5px; color:#5f6368;"><strong>Vehicle Freight:</strong> ${trip.vFreight}</div>`;
         }
@@ -626,10 +628,11 @@
             `;
         }
 
+        // NEW POD LOGIC APPLIED HERE
         if (viewMode === 'pod-pending' && !isReadOnly) {
             cardHtml += `
                 <div style="margin-bottom: 5px; font-size:12px; color:#5f6368;"><strong>C-Note:</strong> ${trip.cNote || "Not Entered"}</div>
-                <div style="margin-bottom: 5px;"><input type="text" class="compact-input" style="width:100%; border:1px solid #dadce0;" placeholder="Add Remarks..." value="${trip.podRemark || ''}" onchange="updateBackendData('${trip.id}', 'updatePODRemark', this.value)"></div>
+                <div style="margin-bottom: 5px;"><input type="text" class="compact-input" style="width:100%; border:1px solid #dadce0; box-sizing:border-box;" placeholder="Add Remarks..." value="${trip.podRemark || ''}" onchange="updateBackendData('${trip.id}', 'updatePODRemark', this.value)"></div>
                 <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
                     <label style="margin:0;">POD Date:</label>
                     <input type="date" class="compact-input" id="pod-date-${trip.id}" style="border:1px solid #dadce0;">
@@ -645,7 +648,7 @@
                 <div style="margin-top:10px; color:#137333; font-weight:bold;">POD Received: ${trip.podDate}</div>
             `;
             if (!isReadOnly) {
-                cardHtml += `<button class="btn-secondary" style="font-size:11px; padding:4px 8px; margin-top:5px; border-radius:6px; cursor:pointer; width:auto;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove POD Date</button>`;
+                cardHtml += `<button class="btn-secondary" style="font-size:11px; padding:4px 8px; margin-top:5px; border-radius:6px; cursor:pointer; width:auto;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove</button>`;
             }
         }
 
@@ -670,12 +673,14 @@
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, 'deployed')).join('');
     }
 
+    // NEW POD LOGIC
     function renderPOD(subTab) {
         activeSubTab = subTab;
         document.getElementById('btn-pod-pending').classList.toggle('active', subTab === 'Pending');
         document.getElementById('btn-pod-received').classList.toggle('active', subTab === 'Received');
 
-        let base = allTrips.filter(t => t.status.trim() === 'Delivered');
+        // Only trips with a C-Note show up in the POD tab
+        let base = allTrips.filter(t => t.cNote && t.cNote.trim() !== '');
         if (subTab === 'Pending') base = base.filter(t => !t.podDate || t.podDate.trim() === '');
         if (subTab === 'Received') base = base.filter(t => t.podDate && t.podDate.trim() !== '');
 
@@ -687,7 +692,6 @@
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, viewMode)).join('');
     }
 
-    // --- REVAMPED REPORTS GENERATOR & PDF FORMATTING ---
     function generateCustomReport() {
         let finalTrips = getFilteredTrips(allTrips);
         
@@ -696,7 +700,7 @@
 
         if (tripStat !== 'All') finalTrips = finalTrips.filter(t => t.status.trim() === tripStat);
         if (podStat !== 'All') {
-            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => t.status.trim() === 'Delivered' && (!t.podDate || t.podDate.trim() === ''));
+            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => t.cNote && t.cNote.trim() !== '' && (!t.podDate || t.podDate.trim() === ''));
             if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && t.podDate.trim() !== '');
         }
 
@@ -713,7 +717,6 @@
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayStr = days[today.getDay()];
 
-        // PDF Mode expects grouping by Party
         const uniqueParties = [...new Set(finalTrips.map(t => t.party))];
         
         let html = `
@@ -754,7 +757,6 @@
 
     // --- INTERACTIVE ACTIONS ---
     function toggleHistory(tripId) {
-        // Close others
         document.querySelectorAll('.history-panel').forEach(p => {
             if (p.id !== `hist-${tripId}`) p.style.display = 'none';
         });
@@ -771,12 +773,14 @@
         p.style.display = p.style.display === 'block' ? 'none' : 'block';
     }
 
-    // ADMIN EDIT MODAL
+    // NEW ADMIN EDIT MODAL LOGIC
     function openAdminEdit(tripId) {
         const trip = allTrips.find(t => t.id === tripId);
         if(!trip) return;
         document.getElementById('edit-trip-id').value = tripId;
         document.getElementById('edit-vnum').value = trip.vNum;
+        document.getElementById('edit-vtype').value = trip.type || "";
+        document.getElementById('edit-vcap').value = trip.weight || "";
         document.getElementById('edit-from').value = trip.from;
         document.getElementById('edit-to').value = trip.to;
         document.getElementById('adminEditModal').style.display = "flex";
@@ -785,13 +789,15 @@
     function saveAdminEdit() {
         const tripId = document.getElementById('edit-trip-id').value;
         const vNum = document.getElementById('edit-vnum').value.toUpperCase();
+        const vType = document.getElementById('edit-vtype').value.toUpperCase();
+        const vCap = document.getElementById('edit-vcap').value.toUpperCase();
         const from = document.getElementById('edit-from').value;
         const to = document.getElementById('edit-to').value;
         
-        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'adminEditTrip', id: tripId, vNum: vNum, from: from, to: to }) });
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'adminEditTrip', id: tripId, vNum: vNum, vType: vType, weight: vCap, from: from, to: to }) });
         
         const t = allTrips.find(x => x.id === tripId); 
-        if(t){ t.vNum = vNum; t.from = from; t.to = to; }
+        if(t){ t.vNum = vNum; t.type = vType; t.weight = vCap; t.from = from; t.to = to; }
         
         closeAdminEditModal();
         triggerCurrentRender();
@@ -906,7 +912,6 @@
         window.open(whatsappUrl, '_blank') || (window.location.href = whatsappUrl);
     }
 
-    // INTERNAL SAVE LOGIC (Handles duplicate prevention)
     function executeDatabaseSave() {
         const date = getFormattedDate();
         const party = document.getElementById('p-name').value;
@@ -964,7 +969,7 @@
     function generateMessage(type) {
         if (!validateForm()) return; 
         
-        executeDatabaseSave(); // Will only save if not duplicate
+        executeDatabaseSave(); 
 
         const date = getFormattedDate();
         const party = document.getElementById('p-name').value;
@@ -980,7 +985,6 @@
         const tContact = formatPhoneNumber(document.getElementById('t-contact').value);
         const remarks = document.getElementById('remarks').value;
 
-        // Dynamic Header (Omits empty optionals)
         let header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n`;
         header += `*Booking Date:* ${date}\n*Party Name:* ${party}\n*From:* ${rFrom}\n*To:* ${rTo}\n*Vehicle No.:* ${vNum}\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n`;
         if (dName) header += `*Driver Name:* ${dName}\n`;
@@ -1047,7 +1051,7 @@
             currentReportTrips.forEach(t => {
                 if (t.party === p) {
                     let stat = t.status.trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
-                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight} | ${stat}\n`;
+                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight} | *${stat}*\n`;
                     if (t.statusNote) message += `*Current Status:* ${t.statusNote}\n`;
                     counter++;
                 }
