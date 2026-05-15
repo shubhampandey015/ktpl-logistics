@@ -43,9 +43,9 @@
         .section-divider { height: 1px; background: rgba(0,0,0,0.1); margin: 20px 0; }
 
         /* BUTTONS */
-        .btn-primary { width: 100%; padding: 14px; border: none; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; background: linear-gradient(135deg, #0b57d0 0%, #0842a0 100%); box-shadow: 0 4px 15px rgba(11, 87, 208, 0.3); margin-top: 15px;}
-        .btn-whatsapp { width: 100%; padding: 14px; border: none; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); margin-top: 15px;}
-        .btn-secondary { background: #f1f3f4; color: #3c4043; box-shadow: none; border: 1px solid #dadce0; }
+        .btn-primary { width: 100%; padding: 14px; border: none; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; background: linear-gradient(135deg, #0b57d0 0%, #0842a0 100%); box-shadow: 0 4px 15px rgba(11, 87, 208, 0.3); }
+        .btn-whatsapp { width: 100%; padding: 14px; border: none; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); }
+        .btn-secondary { width: 100%; padding: 14px; border: 1px solid #dadce0; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 600; background: #f1f3f4; color: #3c4043; box-shadow: none; }
         .btn-primary:active, .btn-whatsapp:active, .btn-secondary:active { transform: scale(0.98); }
 
         /* AUTOCOMPLETE */
@@ -64,11 +64,11 @@
         .status-delivered { background: #e6f4ea; color: #137333; }
         
         #unified-filter-bar { background: #fff; padding: 15px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; display: none; animation: fadeIn 0.4s; }
-        .filter-header { font-size: 12px; font-weight: bold; color: #5f6368; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;}
-        .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; margin-top: 10px; text-align: left; }
+        .filter-header { font-size: 12px; font-weight: bold; color: #5f6368; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;}
+        .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; margin-top: 10px; text-align: left; box-shadow: none; width: auto;}
         .history-panel { display: none; background: #f8f9fa; border-radius: 12px; padding: 10px; margin-top: 5px; font-size: 12px; color: #3c4043; border-left: 3px solid #0b57d0; max-height: 150px; overflow-y: auto;}
         .history-item { margin-bottom: 8px; border-bottom: 1px solid #e8eaed; padding-bottom: 4px; }
-        .pod-badge { background: #e8f0fe; color: #0b57d0; padding: 8px 12px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; display: block; font-size: 13px;}
+        .pod-badge { background: #e8f0fe; color: #0b57d0; padding: 6px 12px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; display: inline-block; font-size: 12px;}
         .compact-input { padding: 8px; font-size: 13px; border-radius: 8px; }
 
         /* MODALS */
@@ -76,21 +76,24 @@
         .modal-content { background: #fff; padding: 25px; border-radius: 24px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
 
         /* REPORTS TABLE */
-        .report-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .report-table th, .report-table td { padding: 10px; border-bottom: 1px solid #e8eaed; text-align: left; }
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .report-table th, .report-table td { padding: 8px; border-bottom: 1px solid #e8eaed; text-align: left; }
         .report-table th { background: #f8f9fa; font-weight: 600; color: #5f6368; }
-        .print-header { display: none; text-align: center; margin-bottom: 20px; }
-        .print-header h2 { font-size: 20px; color: #1f1f1f; margin: 0; font-weight: 700; }
+        .print-header { display: none; text-align: center; margin-bottom: 20px; padding-top: 20px; }
+        .print-header h2 { font-size: 22px; color: #000; margin: 0; font-weight: bold; }
+        .party-table-wrapper { page-break-inside: avoid; margin-bottom: 20px; }
+        .party-title { margin: 0 0 5px 0; font-size: 14px; color: #1f1f1f; }
 
         /* STRICT PDF PRINT STYLES */
-        @page { margin: 10mm; } /* Hides browser URL and default Dates */
+        @page { margin: 0mm; size: auto; }
         @media print { 
             body * { visibility: hidden; }
+            body { padding: 0; margin: 0; background: #fff; }
             #printable-report, #printable-report * { visibility: visible; }
-            #printable-report { position: absolute; left: 0; top: 0; width: 100%; }
+            #printable-report { position: absolute; left: 0; top: 0; width: 100%; padding: 15mm; box-sizing: border-box;}
             .print-header { display: block !important; }
             .report-table { border: 1px solid #000; box-shadow: none; border-radius: 0; }
-            .report-table th, .report-table td { border: 1px solid #000; color: #000; }
+            .report-table th, .report-table td { border: 1px solid #000; color: #000; padding: 6px; }
         }
     </style>
 </head>
@@ -98,6 +101,7 @@
 
 <div id="pin-overlay" style="display: none;">
     <div class="pin-box">
+        <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 180px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <h2>KTPL Secure Login</h2>
         <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric">
         <button class="btn-primary" onclick="checkPin()" style="margin-top: 0;">Unlock App</button>
@@ -112,7 +116,7 @@
 </div>
 
 <div class="container" id="main-app">
-    <button id="btn-logout" onclick="logoutApp()" style="position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.8); border: 1px solid #dadce0; color: #5f6368; padding: 6px 12px; border-radius: 12px; font-size: 12px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">Lock App</button>
+    <button id="btn-logout" onclick="logoutApp()" style="position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.8); border: 1px solid #dadce0; color: #5f6368; padding: 6px 12px; border-radius: 12px; font-size: 12px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">Logout</button>
     
     <div class="greeting" style="margin-top: 10px;">
         <h2 id="user-name-text" style="font-size: 20px; font-weight: 500; color: #5f6368; margin: 0 0 5px 0; display: none;"></h2>
@@ -127,7 +131,10 @@
     </div>
 
     <div id="unified-filter-bar">
-        <div class="filter-header">Universal Search Filters</div>
+        <div class="filter-header">
+            Universal Search Filters
+            <span style="color:#0b57d0; font-size:11px; cursor:pointer; padding: 4px;" onclick="clearFilters()">Reset</span>
+        </div>
         <div class="grid-2">
             <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
             <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
@@ -161,8 +168,8 @@
         </div>
         
         <div class="grid-2 form-group">
-            <div><label>Vehicle Freight</label><input type="text" id="v-freight" placeholder="Team"></div>
-            <div><label>Charged Freight</label><input type="text" id="c-freight" placeholder="Client"></div>
+            <div><label>Vehicle Freight</label><input type="text" id="v-freight" placeholder="Amount"></div>
+            <div><label>Charged Freight</label><input type="text" id="c-freight" placeholder="Amount"></div>
         </div>
 
         <div class="grid-2 form-group">
@@ -179,9 +186,12 @@
 
         <div class="section-divider"></div>
         <div class="form-group"><label>Remarks</label><input type="text" id="remarks" placeholder="..."></div>
-        <div style="display:flex; gap:10px;">
-            <button class="btn-primary" onclick="generateMessage('team')">Share Team</button>
-            <button class="btn-whatsapp" onclick="generateMessage('client')">Share Client</button>
+        
+        <div class="grid-2" style="margin-top:15px; gap:10px;">
+            <button class="btn-primary" onclick="saveDetailsOnly()" style="margin-top:0;">Save Details</button>
+            <button class="btn-secondary" onclick="clearPlacementForm()" style="margin-top:0;">Clear</button>
+            <button class="btn-primary" onclick="generateMessage('team')" style="margin-top:0;">For Team</button>
+            <button class="btn-whatsapp" onclick="generateMessage('client')" style="margin-top:0;">For Client</button>
         </div>
     </div>
 
@@ -241,7 +251,7 @@
         <input type="date" id="delivery-date-input" style="margin-bottom:15px;">
         <input type="hidden" id="delivery-trip-id">
         <div style="display:flex; gap:10px;">
-            <button class="btn-primary btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn-secondary" onclick="closeModal()" style="margin-top:0;">Cancel</button>
             <button class="btn-whatsapp" onclick="confirmDelivery()" style="margin-top:0;">Save</button>
         </div>
     </div>
@@ -253,9 +263,23 @@
         <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Choose who you want to share these details with via WhatsApp.</p>
         <input type="hidden" id="share-modal-trip-id">
         <div style="display:flex; flex-direction: column; gap:10px;">
-            <button class="btn-primary" onclick="executeDeployedShare('team')" style="margin-top:0;">Share to Team</button>
-            <button class="btn-whatsapp" onclick="executeDeployedShare('client')" style="margin-top:0;">Share to Client</button>
-            <button class="btn-secondary" onclick="closeShareModal()" style="padding: 12px; border-radius: 20px; cursor: pointer; margin-top: 5px;">Cancel</button>
+            <button class="btn-primary" onclick="executeDeployedShare('team')" style="margin-top:0;">For Team</button>
+            <button class="btn-whatsapp" onclick="executeDeployedShare('client')" style="margin-top:0;">For Client</button>
+            <button class="btn-secondary" onclick="closeShareModal()" style="margin-top: 5px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="adminEditModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0;">Edit Trip (Admin)</h3>
+        <input type="hidden" id="edit-trip-id">
+        <div class="form-group"><label>Vehicle No.</label><input type="text" id="edit-vnum" onchange="formatVehicleNumber(this)"></div>
+        <div class="form-group"><label>Route Origin</label><input type="text" id="edit-from" onchange="formatCase(this, 'title')"></div>
+        <div class="form-group"><label>Route Destination</label><input type="text" id="edit-to" onchange="formatCase(this, 'title')"></div>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn-secondary" onclick="closeAdminEditModal()" style="margin-top:0;">Cancel</button>
+            <button class="btn-primary" onclick="saveAdminEdit()" style="margin-top:0;">Update</button>
         </div>
     </div>
 </div>
@@ -266,7 +290,7 @@
     
     let vehicles = {}; let clients = []; let transporters = {}; 
     let allTrips = []; let users = []; let statusLogs = [];
-    let driverData = {}; // NEW Memory dict for drivers
+    let driverData = {}; 
     let currentUser = null; let currentActiveMainTab = 'tab-placement';
     let activeSubTab = 'In-Transit'; 
     let lastSavedPlacementStr = "";
@@ -293,7 +317,6 @@
 
         setupMemoryDropdowns();
         
-        // Expanded Universal Filters
         setupCustomDropdown('uf-party', 'uf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort(), triggerCurrentRender);
         setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), triggerCurrentRender);
         setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t.from))].sort(), triggerCurrentRender);
@@ -304,6 +327,8 @@
 
     window.onload = async () => {
         const savedUser = sessionStorage.getItem('ktpl_user');
+        document.getElementById('b-date').valueAsDate = new Date(); // Default Booking Date
+        
         if (sessionStorage.getItem('ktpl_unlocked') === 'true' && savedUser) {
             currentUser = JSON.parse(savedUser);
             document.getElementById('pin-overlay').style.display = 'none';
@@ -386,6 +411,13 @@
         }
     }
 
+    function clearPlacementForm() {
+        document.querySelectorAll('#tab-placement input').forEach(input => {
+            if (input.id !== 'b-date' && !input.disabled) input.value = '';
+        });
+        document.getElementById('b-date').valueAsDate = new Date();
+    }
+
     // --- DROPDOWN ENGINE ---
     function setupCustomDropdown(inputId, listId, dataFetchFn, onSelectFn = null) {
         const inputElement = document.getElementById(inputId);
@@ -441,7 +473,8 @@
             dcInput.addEventListener("input", function() {
                 dcList.innerHTML = "";
                 if (this.value.length > 2) {
-                    const matches = driverNums.filter(n => n.includes(this.value));
+                    let c = this.value.replace(/[\s-]/g, '').trim();
+                    const matches = driverNums.filter(n => n.includes(c));
                     matches.forEach(m => {
                         let div = document.createElement("div"); div.innerHTML = m;
                         div.onclick = () => { dcInput.value = m; dcList.style.display = "none"; };
@@ -454,6 +487,12 @@
     }
 
     // --- NAVIGATION & GLOBAL FILTER ENGINE ---
+    function clearFilters() {
+        const filterIds = ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-origin', 'uf-dest'];
+        filterIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
+        triggerCurrentRender();
+    }
+
     function switchMainTab(tabId) {
         currentActiveMainTab = tabId;
         document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
@@ -464,7 +503,9 @@
         if(document.getElementById(navId)) document.getElementById(navId).classList.add('active');
 
         document.getElementById('unified-filter-bar').style.display = (tabId === 'tab-placement') ? 'none' : 'block';
-        triggerCurrentRender();
+        
+        // Reset filters on tab switch to avoid crossover confusion
+        clearFilters();
     }
 
     function triggerCurrentRender() {
@@ -488,14 +529,20 @@
         const originMatch = document.getElementById('uf-origin').value.trim().toLowerCase();
         const destMatch = document.getElementById('uf-dest').value.trim().toLowerCase();
 
+        let sDate = startDateStr ? new Date(startDateStr) : null;
+        if(sDate) sDate.setHours(0,0,0,0);
+        let eDate = endDateStr ? new Date(endDateStr) : null;
+        if(eDate) eDate.setHours(23,59,59,999);
+
         result = result.filter(t => {
             let passDate = true;
-            if (startDateStr || endDateStr) {
+            if (sDate || eDate) {
                 const parts = t.date.split(',')[0].split('/'); 
                 if (parts.length === 3) {
                     const tDate = new Date(parts[2], parts[1] - 1, parts[0]);
-                    if (startDateStr && tDate < new Date(startDateStr)) passDate = false;
-                    if (endDateStr && tDate > new Date(endDateStr)) passDate = false;
+                    const tTime = tDate.getTime();
+                    if (sDate && tTime < sDate.getTime()) passDate = false;
+                    if (eDate && tTime > eDate.getTime()) passDate = false;
                 }
             }
             const passV = !vNumMatch || t.vNum.toLowerCase().includes(vNumMatch);
@@ -523,10 +570,21 @@
                 </div>
                 <div style="margin-bottom: 5px;"><strong>Party:</strong> ${trip.party}</div>
                 <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
-                <div style="margin-bottom: 5px;"><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</div>
+                <div style="margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
+                    <span><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</span>
         `;
+        
+        // Admin Edit Button
+        if (currentUser && currentUser.Role === 'Admin' && trip.status.trim() === 'In-Transit') {
+            cardHtml += `<span style="cursor:pointer; color:#0b57d0; font-size:11px; text-decoration:underline;" onclick="openAdminEdit('${trip.id}')">Edit Trip</span>`;
+        }
+        cardHtml += `</div>`;
 
-        if (currentUser && currentUser.Role === 'Admin' && trip.cFreight) {
+        // Freight visibility logic
+        if (trip.vFreight && trip.vFreight.trim() !== '') {
+            cardHtml += `<div style="margin-bottom: 5px; color:#5f6368;"><strong>Vehicle Freight:</strong> ${trip.vFreight}</div>`;
+        }
+        if (currentUser && currentUser.Role === 'Admin' && trip.cFreight && trip.cFreight.trim() !== '') {
             cardHtml += `<div style="margin-bottom: 5px; color:#137333;"><strong>Charged Freight:</strong> ${trip.cFreight}</div>`;
         }
 
@@ -562,7 +620,7 @@
             cardHtml += `
                 <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}')">▶ View History</button>
-                    <button class="btn-secondary" style="font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer;" onclick="openShareModal('${trip.id}')">Share</button>
+                    <button class="btn-secondary" style="font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer; width:auto;" onclick="openShareModal('${trip.id}')">Share</button>
                 </div>
                 <div id="hist-${trip.id}" class="history-panel"></div>
             `;
@@ -571,6 +629,7 @@
         if (viewMode === 'pod-pending' && !isReadOnly) {
             cardHtml += `
                 <div style="margin-bottom: 5px; font-size:12px; color:#5f6368;"><strong>C-Note:</strong> ${trip.cNote || "Not Entered"}</div>
+                <div style="margin-bottom: 5px;"><input type="text" class="compact-input" style="width:100%; border:1px solid #dadce0;" placeholder="Add Remarks..." value="${trip.podRemark || ''}" onchange="updateBackendData('${trip.id}', 'updatePODRemark', this.value)"></div>
                 <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
                     <label style="margin:0;">POD Date:</label>
                     <input type="date" class="compact-input" id="pod-date-${trip.id}" style="border:1px solid #dadce0;">
@@ -582,10 +641,11 @@
         if (viewMode === 'pod-received') {
             cardHtml += `
                 <div style="margin-bottom: 5px; font-size:12px; color:#5f6368;"><strong>C-Note:</strong> ${trip.cNote || "Not Entered"}</div>
+                ${trip.podRemark ? `<div style="margin-bottom: 5px; font-size:12px; color:#5f6368;"><strong>Remarks:</strong> ${trip.podRemark}</div>` : ''}
                 <div style="margin-top:10px; color:#137333; font-weight:bold;">POD Received: ${trip.podDate}</div>
             `;
             if (!isReadOnly) {
-                cardHtml += `<button class="btn-secondary" style="font-size:11px; padding:4px 8px; margin-top:5px; border-radius:6px; cursor:pointer;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove</button>`;
+                cardHtml += `<button class="btn-secondary" style="font-size:11px; padding:4px 8px; margin-top:5px; border-radius:6px; cursor:pointer; width:auto;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove POD Date</button>`;
             }
         }
 
@@ -627,7 +687,7 @@
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, viewMode)).join('');
     }
 
-    // --- REVAMPED REPORTS GENERATOR ---
+    // --- REVAMPED REPORTS GENERATOR & PDF FORMATTING ---
     function generateCustomReport() {
         let finalTrips = getFilteredTrips(allTrips);
         
@@ -653,40 +713,52 @@
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayStr = days[today.getDay()];
 
+        // PDF Mode expects grouping by Party
+        const uniqueParties = [...new Set(finalTrips.map(t => t.party))];
+        
         let html = `
             <div class="print-header">
                 <h2>Data Report as on ${dateStr}, ${dayStr}</h2>
             </div>
-            <table class="report-table">
-            <thead>
-                <tr><th>Sr</th><th>Party</th><th>Date</th><th>Route</th><th>Vehicle</th>`;
-        
-        if (currentUser && currentUser.Role === 'Admin') html += `<th>Charged Frt</th>`;
-        
-        html += `<th>Status</th><th>POD Date</th></tr></thead><tbody>`;
+        `;
 
-        finalTrips.forEach((t, i) => {
-            let stat = t.status.trim() === 'Delivered' ? `Delivered` : `In-Transit`;
-            html += `<tr>
-                <td>${i+1}</td>
-                <td><strong>${t.party}</strong></td>
-                <td>${t.date.split(',')[0]}</td>
-                <td>${t.from} ➔ ${t.to}</td>
-                <td>${t.vNum} (${t.type})</td>`;
+        uniqueParties.forEach(party => {
+            const pTrips = finalTrips.filter(t => t.party === party);
             
-            if (currentUser && currentUser.Role === 'Admin') html += `<td>${t.cFreight || '-'}</td>`;
-
-            html += `<td>${stat}</td>
-                <td>${t.podDate || 'Pending'}</td>
-            </tr>`;
+            html += `<div class="party-table-wrapper">
+                <h3 class="party-title">${party}</h3>
+                <table class="report-table">
+                <thead>
+                    <tr><th>Sr</th><th>Date</th><th>Route</th><th>Vehicle</th><th>Status</th><th>C-Note</th><th>POD Date</th></tr>
+                </thead>
+                <tbody>`;
+            
+            pTrips.forEach((t, i) => {
+                let stat = t.status.trim() === 'Delivered' ? `Delivered` : `In-Transit`;
+                html += `<tr>
+                    <td>${i+1}</td>
+                    <td>${t.date.split(',')[0]}</td>
+                    <td>${t.from} ➔ ${t.to}</td>
+                    <td>${t.vNum} (${t.weight})</td>
+                    <td>${stat}</td>
+                    <td>${t.cNote || '-'}</td>
+                    <td>${t.podDate || 'Pending'}</td>
+                </tr>`;
+            });
+            html += `</tbody></table></div>`;
         });
-        html += `</tbody></table>`;
+        
         container.innerHTML = html;
         currentReportTrips = finalTrips; 
     }
 
     // --- INTERACTIVE ACTIONS ---
     function toggleHistory(tripId) {
+        // Close others
+        document.querySelectorAll('.history-panel').forEach(p => {
+            if (p.id !== `hist-${tripId}`) p.style.display = 'none';
+        });
+
         const p = document.getElementById(`hist-${tripId}`);
         const logs = statusLogs.filter(l => String(l.tripId) === String(tripId));
         if (logs.length === 0) { p.innerHTML = "<div class='history-item'>No history found.</div>"; }
@@ -697,6 +769,32 @@
             }).join('');
         }
         p.style.display = p.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // ADMIN EDIT MODAL
+    function openAdminEdit(tripId) {
+        const trip = allTrips.find(t => t.id === tripId);
+        if(!trip) return;
+        document.getElementById('edit-trip-id').value = tripId;
+        document.getElementById('edit-vnum').value = trip.vNum;
+        document.getElementById('edit-from').value = trip.from;
+        document.getElementById('edit-to').value = trip.to;
+        document.getElementById('adminEditModal').style.display = "flex";
+    }
+    function closeAdminEditModal() { document.getElementById('adminEditModal').style.display = "none"; }
+    function saveAdminEdit() {
+        const tripId = document.getElementById('edit-trip-id').value;
+        const vNum = document.getElementById('edit-vnum').value.toUpperCase();
+        const from = document.getElementById('edit-from').value;
+        const to = document.getElementById('edit-to').value;
+        
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'adminEditTrip', id: tripId, vNum: vNum, from: from, to: to }) });
+        
+        const t = allTrips.find(x => x.id === tripId); 
+        if(t){ t.vNum = vNum; t.from = from; t.to = to; }
+        
+        closeAdminEditModal();
+        triggerCurrentRender();
     }
 
     function triggerDeliveryModal(tripId) {
@@ -739,6 +837,7 @@
         const payload = { action: action, id: tripId };
         if (action === 'updateCNote') payload.value = value;
         if (action === 'updatePOD') payload.date = value;
+        if (action === 'updatePODRemark') payload.value = value;
         
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
         
@@ -746,6 +845,7 @@
         if (t) {
             if (action === 'updateCNote') t.cNote = value;
             if (action === 'updatePOD') t.podDate = value;
+            if (action === 'updatePODRemark') t.podRemark = value;
         }
         if (action === 'updatePOD') triggerCurrentRender(); 
     }
@@ -766,7 +866,6 @@
         el.value = el.value.toUpperCase().replace(/[\s-]/g, '');
     }
 
-    // NEW FORMATTING LOGIC FOR NUMBERS
     function formatPhoneNumber(number) {
         if (!number) return "";
         let cleanNumber = number.replace(/[\s-]/g, '').trim(); 
@@ -807,33 +906,27 @@
         window.open(whatsappUrl, '_blank') || (window.location.href = whatsappUrl);
     }
 
-    function generateMessage(type) {
-        if (!validateForm()) return; 
-
+    // INTERNAL SAVE LOGIC (Handles duplicate prevention)
+    function executeDatabaseSave() {
         const date = getFormattedDate();
         const party = document.getElementById('p-name').value;
         const rFrom = document.getElementById('route-from').value;
         const rTo = document.getElementById('route-to').value;
         const vNum = document.getElementById('v-num').value.toUpperCase();
-        const vType = document.getElementById('v-type').value; 
-        const vWeight = document.getElementById('v-weight').value;
-        const dName = document.getElementById('d-name').value; 
-        const dContact = formatPhoneNumber(document.getElementById('d-contact').value);
-        const tName = document.getElementById('t-name').value;
-        const tPerson = document.getElementById('t-person').value;
-        const tContact = formatPhoneNumber(document.getElementById('t-contact').value);
-        const remarks = document.getElementById('remarks').value;
-
-        const header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${rFrom}\n*To:* ${rTo}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n\n*Driver Name:* ${dName}\n*Driver Contact No:* ${dContact}\n\n`;
-        let finalMessage = type === 'team' ? header + `*Transporter:* ${tName}\n*Person Name:* ${tPerson}\n*Contact Number:* ${tContact}\n\n*Remarks:* ${remarks}` : header;
         
-        openWhatsAppDirectly(finalMessage);
-        
-        // DUPLICATE PREVENTION: Same Day & Same Vehicle Check
+        const currentPlacementStr = `${date}-${party}-${rFrom}-${rTo}-${vNum}`;
         const isDuplicate = allTrips.some(t => String(t.date).trim() === String(date).trim() && String(t.vNum).trim().toUpperCase() === String(vNum).trim().toUpperCase());
 
-        if (!isDuplicate) {
+        if (!isDuplicate && lastSavedPlacementStr !== currentPlacementStr) {
             const tripId = "TRP-" + Date.now();
+            const vType = document.getElementById('v-type').value; 
+            const vWeight = document.getElementById('v-weight').value;
+            const dName = document.getElementById('d-name').value; 
+            const dContact = formatPhoneNumber(document.getElementById('d-contact').value);
+            const tName = document.getElementById('t-name').value;
+            const tPerson = document.getElementById('t-person').value;
+            const tContact = formatPhoneNumber(document.getElementById('t-contact').value);
+            const remarks = document.getElementById('remarks').value;
             const vFreight = document.getElementById('v-freight').value || "";
             const cFreight = document.getElementById('c-freight').value || "";
             
@@ -852,10 +945,57 @@
                 vNum: vNum, type: vType, weight: vWeight,
                 status: "In-Transit", deliveryDate: "", statusNote: "", createdBy: newTrip.createdBy,
                 cNote: "", podDate: "", vFreight: vFreight, cFreight: cFreight,
-                dName: dName, dContact: dContact, tName: tName, tPerson: tPerson, tContact: tContact, remarks: remarks
+                dName: dName, dContact: dContact, tName: tName, tPerson: tPerson, tContact: tContact, remarks: remarks, podRemark: ""
             });
-            triggerCurrentRender(); 
+            lastSavedPlacementStr = currentPlacementStr; 
+            triggerCurrentRender();
+            return true;
         }
+        return false;
+    }
+
+    function saveDetailsOnly() {
+        if (!validateForm()) return;
+        executeDatabaseSave();
+        alert("Details saved successfully!");
+        clearPlacementForm();
+    }
+
+    function generateMessage(type) {
+        if (!validateForm()) return; 
+        
+        executeDatabaseSave(); // Will only save if not duplicate
+
+        const date = getFormattedDate();
+        const party = document.getElementById('p-name').value;
+        const rFrom = document.getElementById('route-from').value;
+        const rTo = document.getElementById('route-to').value;
+        const vNum = document.getElementById('v-num').value.toUpperCase();
+        const vType = document.getElementById('v-type').value; 
+        const vWeight = document.getElementById('v-weight').value;
+        const dName = document.getElementById('d-name').value; 
+        const dContact = formatPhoneNumber(document.getElementById('d-contact').value);
+        const tName = document.getElementById('t-name').value;
+        const tPerson = document.getElementById('t-person').value;
+        const tContact = formatPhoneNumber(document.getElementById('t-contact').value);
+        const remarks = document.getElementById('remarks').value;
+
+        // Dynamic Header (Omits empty optionals)
+        let header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n`;
+        header += `*Booking Date:* ${date}\n*Party Name:* ${party}\n*From:* ${rFrom}\n*To:* ${rTo}\n*Vehicle No.:* ${vNum}\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n`;
+        if (dName) header += `*Driver Name:* ${dName}\n`;
+        if (dContact) header += `*Driver Contact No:* ${dContact}\n`;
+        header += `\n`;
+
+        let finalMessage = header;
+        if (type === 'team') {
+            finalMessage += `*Transporter:* ${tName}\n`;
+            if (tPerson) finalMessage += `*Person Name:* ${tPerson}\n`;
+            if (tContact) finalMessage += `*Contact Number:* ${tContact}\n`;
+            if (remarks) finalMessage += `\n*Remarks:* ${remarks}`;
+        }
+        
+        openWhatsAppDirectly(finalMessage);
     }
 
     // --- SHARE FROM DEPLOYED TAB LOGIC ---
@@ -873,8 +1013,19 @@
         const trip = allTrips.find(t => t.id === tripId);
         if (!trip) return;
 
-        const header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n*Booking Date:* ${trip.date}\n\n*Party Name:* ${trip.party}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n*Driver Name:* ${trip.dName || ""}\n*Driver Contact No:* ${trip.dContact || ""}\n\n`;
-        let finalMessage = type === 'team' ? header + `*Transporter:* ${trip.tName || ""}\n*Person Name:* ${trip.tPerson || ""}\n*Contact Number:* ${trip.tContact || ""}\n\n*Remarks:* ${trip.remarks || ""}` : header;
+        let header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n`;
+        header += `*Booking Date:* ${trip.date}\n*Party Name:* ${trip.party}\n*From:* ${trip.from}\n*To:* ${trip.to}\n*Vehicle No.:* ${trip.vNum}\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n`;
+        if (trip.dName) header += `*Driver Name:* ${trip.dName}\n`;
+        if (trip.dContact) header += `*Driver Contact No:* ${trip.dContact}\n`;
+        header += `\n`;
+
+        let finalMessage = header;
+        if (type === 'team') {
+            if(trip.tName) finalMessage += `*Transporter:* ${trip.tName}\n`;
+            if(trip.tPerson) finalMessage += `*Person Name:* ${trip.tPerson}\n`;
+            if(trip.tContact) finalMessage += `*Contact Number:* ${trip.tContact}\n`;
+            if(trip.remarks) finalMessage += `\n*Remarks:* ${trip.remarks}`;
+        }
         
         openWhatsAppDirectly(finalMessage);
         closeShareModal();
@@ -896,8 +1047,9 @@
             currentReportTrips.forEach(t => {
                 if (t.party === p) {
                     let stat = t.status.trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
-                    if (t.statusNote) stat += ` (${t.statusNote})`;
-                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight} | ${stat}\n`; counter++;
+                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight} | ${stat}\n`;
+                    if (t.statusNote) message += `*Current Status:* ${t.statusNote}\n`;
+                    counter++;
                 }
             }); message += `\n`;
         });
