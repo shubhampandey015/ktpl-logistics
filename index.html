@@ -24,8 +24,8 @@
         /* UI ELEMENTS */
         .greeting { text-align: center; margin-bottom: 20px; }
         .greeting h1 { font-size: 26px; font-weight: 400; margin: 0; color: #202124; }
-        .main-tabs { display: flex; background: #fff; border-radius: 20px; padding: 5px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .main-tab { flex: 1; text-align: center; padding: 10px 5px; cursor: pointer; font-size: 13px; font-weight: 600; color: #5f6368; border-radius: 15px; transition: 0.3s; }
+        .main-tabs { display: flex; background: #fff; border-radius: 20px; padding: 5px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto; white-space: nowrap; }
+        .main-tab { flex: 1; text-align: center; padding: 10px 15px; cursor: pointer; font-size: 13px; font-weight: 600; color: #5f6368; border-radius: 15px; transition: 0.3s; min-width: 70px; }
         .main-tab.active { background: #e8f0fe; color: #0b57d0; }
         .app-section { display: none; animation: fadeIn 0.4s ease; }
         .app-section.active { display: block; }
@@ -43,7 +43,7 @@
         .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; padding-left: 5px; font-weight: 500; }
         .section-divider { height: 1px; background: rgba(0,0,0,0.1); margin: 20px 0; }
 
-        /* BUTTONS */
+        /* BUTTONS (SLEEKER & SLIMMER) */
         .btn-primary, .btn-whatsapp, .btn-secondary { width: 100%; padding: 12px 14px; border: none; border-radius: 16px; cursor: pointer; font-size: 14px; font-weight: 600; box-sizing: border-box; transition: 0.2s;}
         .btn-primary { color: white; background: linear-gradient(135deg, #0b57d0 0%, #0842a0 100%); box-shadow: 0 4px 10px rgba(11, 87, 208, 0.2); }
         .btn-whatsapp { color: white; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2); }
@@ -103,6 +103,7 @@
 
 <div id="pin-overlay" style="display: none;">
     <div class="pin-box">
+        <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 180px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <h2>KTPL Secure Login</h2>
         <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric">
         <button class="btn-primary" onclick="checkPin()" style="margin-top: 0;">Unlock App</button>
@@ -129,6 +130,7 @@
         <div class="main-tab" id="nav-deployed" onclick="switchMainTab('tab-deployed')">Deployed</div>
         <div class="main-tab" id="nav-pod" onclick="switchMainTab('tab-pod')">POD</div>
         <div class="main-tab" id="nav-reports" onclick="switchMainTab('tab-reports')">Reports</div>
+        <div class="main-tab" id="nav-admin" onclick="switchMainTab('tab-admin')" style="display:none; color:#d93025;">Admin</div>
     </div>
 
     <div id="unified-filter-bar">
@@ -243,6 +245,26 @@
             <button class="btn-whatsapp" onclick="shareReportWhatsApp()" style="margin-top:0;">WhatsApp</button>
         </div>
     </div>
+
+    <div id="tab-admin" class="app-section">
+        <h3 style="color:#202124; margin-top:0;">Access Control Monitor</h3>
+        <p style="font-size:13px; color:#5f6368;">Below are the users currently registered in the database. To edit roles or PINs, please access the master Google Sheet.</p>
+        
+        <div style="background: #fff; border: 1px solid #e8eaed; border-radius: 12px; overflow: hidden; margin-top: 15px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <thead>
+                    <tr style="background: #f8f9fa; text-align: left;">
+                        <th style="padding: 10px; border-bottom: 1px solid #e8eaed;">Name</th>
+                        <th style="padding: 10px; border-bottom: 1px solid #e8eaed;">Role</th>
+                        <th style="padding: 10px; border-bottom: 1px solid #e8eaed;">PIN</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-user-list">
+                    </tbody>
+            </table>
+        </div>
+        <button class="btn-secondary" onclick="forceAdminSync()" style="margin-top: 20px;">Force Sync Databank</button>
+    </div>
 </div>
 
 <div id="deliveryModal" class="modal">
@@ -273,7 +295,7 @@
 
 <div id="adminEditModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0;">Edit Trip</h3>
+        <h3 style="margin-top:0;">Edit Trip (Admin)</h3>
         <input type="hidden" id="edit-trip-id">
         <div class="form-group"><label style="text-align:left;">Vehicle No.</label><input type="text" id="edit-vnum" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatVehicleNumber(this)"></div>
         <div class="grid-2">
@@ -329,11 +351,13 @@
         setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t.to))].sort(), triggerCurrentRender);
         setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t.type))].sort(), triggerCurrentRender);
         setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t.weight))].sort(), triggerCurrentRender);
+
+        renderAdminUsers();
     }
 
     window.onload = async () => {
         const savedUser = sessionStorage.getItem('ktpl_user');
-        document.getElementById('b-date').valueAsDate = new Date(); // Default Booking Date
+        document.getElementById('b-date').valueAsDate = new Date(); 
         
         if (sessionStorage.getItem('ktpl_unlocked') === 'true' && savedUser) {
             currentUser = JSON.parse(savedUser);
@@ -368,7 +392,6 @@
         try {
             await performDatabaseSync();
             
-            // Note: PIN '0711' creates a Master Admin
             const user = users.find(u => String(u.PIN) === String(pin)) || (pin === "0711" ? {Name: "Master Admin", Role: "Master Admin"} : null);
 
             if (user) {
@@ -401,7 +424,6 @@
         document.getElementById('user-name-text').innerText = `Hi ${currentUser.Name}!`;
         document.getElementById('user-name-text').style.display = 'block';
 
-        // Apply Freight Rules
         const cFreightInput = document.getElementById('c-freight');
         if (currentUser.Role === 'Admin' || currentUser.Role === 'Master Admin') {
             cFreightInput.disabled = false;
@@ -409,6 +431,13 @@
             cFreightInput.value = "";
             cFreightInput.disabled = true;
             cFreightInput.placeholder = "Restricted";
+        }
+
+        // Show/Hide Admin Tab
+        if (currentUser.Role === 'Master Admin') {
+            document.getElementById('nav-admin').style.display = 'block';
+        } else {
+            document.getElementById('nav-admin').style.display = 'none';
         }
 
         if (currentUser.Role === 'ReadOnly') {
@@ -509,7 +538,7 @@
         const navId = tabId.replace('tab-', 'nav-');
         if(document.getElementById(navId)) document.getElementById(navId).classList.add('active');
 
-        document.getElementById('unified-filter-bar').style.display = (tabId === 'tab-placement') ? 'none' : 'block';
+        document.getElementById('unified-filter-bar').style.display = (tabId === 'tab-placement' || tabId === 'tab-admin') ? 'none' : 'block';
         
         clearFilters(); 
     }
@@ -615,7 +644,6 @@
                     </div>
                 `;
             } else {
-                // IT IS DELIVERED. ONLY MASTER ADMIN CAN REVERT.
                 if (isMasterAdmin) {
                     cardHtml += `
                         <div style="display:flex; margin-top:5px;">
@@ -682,12 +710,13 @@
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, 'deployed')).join('');
     }
 
-    // ALL DELIVERED TRIPS GO TO PENDING (Even if C-Note is missing)
+    // --- FIX: ALL DELIVERED TRIPS SHOW IN POD TAB ---
     function renderPOD(subTab) {
         activeSubTab = subTab;
         document.getElementById('btn-pod-pending').classList.toggle('active', subTab === 'Pending');
         document.getElementById('btn-pod-received').classList.toggle('active', subTab === 'Received');
 
+        // Rule: If it is delivered, it goes to the POD tab. (C-Note is NOT required).
         let base = allTrips.filter(t => t.status.trim() === 'Delivered');
         if (subTab === 'Pending') base = base.filter(t => !t.podDate || t.podDate.trim() === '');
         if (subTab === 'Received') base = base.filter(t => t.podDate && t.podDate.trim() !== '');
@@ -1067,6 +1096,31 @@
         });
         
         openWhatsAppDirectly(message);
+    }
+
+    // ADMIN TAB LOGIC
+    function renderAdminUsers() {
+        const tbody = document.getElementById('admin-user-list');
+        if(!tbody) return;
+        tbody.innerHTML = users.map(u => `
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #e8eaed; font-weight: 500;">${u.Name || u.name || 'Unknown'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #e8eaed;">${u.Role || u.role || 'Unassigned'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #e8eaed; font-family: monospace;">${u.PIN || u.pin || 'None'}</td>
+            </tr>
+        `).join('');
+    }
+
+    async function forceAdminSync() {
+        document.getElementById('loading-overlay').style.display = 'flex';
+        document.getElementById('loader-text').innerText = "Forcing Databank Sync...";
+        try {
+            await performDatabaseSync();
+            alert("Databank successfully synchronized with Google Sheets!");
+        } catch(e) {
+            alert("Sync failed. Check connection.");
+        }
+        document.getElementById('loading-overlay').style.display = 'none';
     }
 
 </script>
