@@ -323,7 +323,7 @@
 <div id="shareModal" class="modal">
     <div class="modal-content">
         <h3 style="margin-top:0; color:#202124; font-weight:500;">Share Trip Update</h3>
-        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Choose who you want to share these details with via WhatsApp.</p>
+        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Share these details with your team or client.</p>
         <input type="hidden" id="share-modal-trip-id">
         <div style="display:flex; flex-direction: column; gap:10px;">
             <button class="btn-primary" onclick="executeDeployedShare('team')" style="margin-top:0;">For Team</button>
@@ -407,6 +407,13 @@
         if (c.startsWith('+')) return c;
         if (c.startsWith('91') && c.length > 10) return '+' + c;
         return '+91' + c;
+    }
+
+    // --- DIRECT WHATSAPP LAUNCHER (NO MODAL) ---
+    function openWhatsAppDirectly(msg) {
+        const encodedMsg = encodeURIComponent(msg);
+        const url = `https://api.whatsapp.com/send?text=${encodedMsg}`;
+        window.open(url, '_blank') || (window.location.href = url);
     }
 
     // --- INITIALIZATION ---
@@ -1242,11 +1249,6 @@
         return isValid;
     }
 
-    function openWhatsAppDirectly(msg) {
-        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
-        window.open(whatsappUrl, '_blank') || (window.location.href = whatsappUrl);
-    }
-
     function executeDatabaseSave() {
         const date = getFormattedDate();
         const party = document.getElementById('p-name').value;
@@ -1337,8 +1339,22 @@
         openWhatsAppDirectly(finalMessage);
     }
 
-    // --- SHARE FROM DEPLOYED TAB LOGIC ---
     function openShareModal(tripId) {
+        const trip = allTrips.find(t => t.id === tripId);
+        if (!trip) return;
+
+        let header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n`;
+        header += `*Booking Date:* ${trip.date}\n\n*Party Name:* ${trip.party}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n`;
+        if (trip.dName) header += `*Driver Name:* ${trip.dName}\n`;
+        if (trip.dContact) header += `*Driver Contact No:* ${trip.dContact}\n\n`;
+
+        let teamMessage = header;
+        if(trip.tName) teamMessage += `*Transporter:* ${trip.tName}\n`;
+        if(trip.tPerson) teamMessage += `*Person Name:* ${trip.tPerson}\n`;
+        if(trip.tContact) teamMessage += `*Contact Number:* ${trip.tContact}\n\n`;
+        if(trip.remarks) teamMessage += `*Remarks:* ${trip.remarks}`;
+
+        // Directly store team message globally for quick access, but open modal first to choose team/client
         document.getElementById('share-modal-trip-id').value = tripId;
         document.getElementById('shareModal').style.display = "flex";
     }
@@ -1365,8 +1381,8 @@
             if(trip.remarks) finalMessage += `*Remarks:* ${trip.remarks}`;
         }
         
-        openWhatsAppDirectly(finalMessage);
         closeShareModal();
+        openWhatsAppDirectly(finalMessage);
     }
 
     function shareReportWhatsApp() {
