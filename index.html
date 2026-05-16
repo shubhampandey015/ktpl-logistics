@@ -65,6 +65,7 @@
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; }
         .status-transit { background: #fff3e0; color: #e65100; }
         .status-delivered { background: #e6f4ea; color: #137333; }
+        .status-cancelled { background: #fce8e6; color: #d93025; }
         
         #unified-filter-bar { background: #fff; padding: 15px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; display: none; animation: fadeIn 0.4s; text-align: left; }
         .filter-header { font-size: 12px; font-weight: bold; color: #5f6368; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;}
@@ -76,14 +77,14 @@
 
         /* MODALS */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; padding: 20px;}
-        .modal-content { background: #fff; padding: 25px; border-radius: 24px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .modal-content { background: #fff; padding: 25px; border-radius: 24px; width: 100%; max-width: 320px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
 
         /* REPORTS TABLE */
         .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .report-table th, .report-table td { padding: 8px; border-bottom: 1px solid #e8eaed; text-align: left; }
         .report-table th { background: #f8f9fa; font-weight: 600; color: #5f6368; }
         .print-header { display: none; text-align: center; margin-bottom: 20px; padding-top: 20px; }
-        .print-header h2 { font-size: 22px; color: #000; margin: 0; font-weight: bold; }
+        
         .party-table-wrapper { page-break-inside: avoid; margin-bottom: 20px; }
         .party-title { margin: 0 0 5px 0; font-size: 14px; color: #1f1f1f; text-align: left; }
 
@@ -92,15 +93,21 @@
         .admin-action-btn:hover { background: #f1f3f4; }
 
         /* STRICT PDF PRINT STYLES */
-        @page { margin: 0mm; size: auto; }
+        @page { margin: 0; size: auto; }
         @media print { 
             body * { visibility: hidden; }
             body { padding: 0; margin: 0; background: #fff; }
             #printable-report, #printable-report * { visibility: visible; }
-            #printable-report { position: absolute; left: 0; top: 0; width: 100%; padding: 15mm; box-sizing: border-box;}
-            .print-header { display: block !important; }
-            .report-table { border: 1px solid #000; box-shadow: none; border-radius: 0; }
+            #printable-report { position: absolute; left: 0; top: 0; width: 100%; padding: 10mm; box-sizing: border-box;}
+            
+            .print-header { display: block !important; border: 2px solid #000; padding: 8px; margin-bottom: 15px; }
+            .print-header h2 { font-size: 18px; color: #000; margin: 0; font-weight: bold; }
+            
+            .report-table { border: 2px solid #000; box-shadow: none; border-radius: 0; border-collapse: collapse; width: 100%;}
             .report-table th, .report-table td { border: 1px solid #000; color: #000; padding: 6px; }
+            .report-table th { border-bottom: 2px solid #000; background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
+            .party-table-wrapper { margin-bottom: 0; } /* Grouped into one table now */
+            .party-title { display: none; }
         }
     </style>
 </head>
@@ -207,6 +214,7 @@
         <div class="sub-tabs">
             <div class="sub-tab active" id="btn-ongoing" onclick="renderDeployed('In-Transit')">On-Going</div>
             <div class="sub-tab" id="btn-completed" onclick="renderDeployed('Delivered')">Completed</div>
+            <div class="sub-tab" id="btn-cancelled" onclick="renderDeployed('Cancelled Trip')">Cancelled</div>
         </div>
         <div id="deployed-container"></div>
     </div>
@@ -229,6 +237,7 @@
                         <option value="All">All</option>
                         <option value="In-Transit">In-Transit</option>
                         <option value="Delivered">Delivered</option>
+                        <option value="Cancelled Trip">Cancelled Trip</option>
                     </select>
                 </div>
                 <div>
@@ -313,6 +322,16 @@
         </div>
         <div class="form-group"><label style="text-align:left;">Route Origin</label><input type="text" id="edit-from" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'title')"></div>
         <div class="form-group"><label style="text-align:left;">Route Destination</label><input type="text" id="edit-to" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'title')"></div>
+        
+        <div class="grid-2">
+            <div class="form-group"><label style="text-align:left;">Vehicle Freight</label><input type="text" id="edit-vfreight" class="compact-input" style="border: 1px solid #dadce0;"></div>
+            <div class="form-group"><label style="text-align:left;">Charged Freight</label><input type="text" id="edit-cfreight" class="compact-input" style="border: 1px solid #dadce0;"></div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group"><label style="text-align:left;">Driver Name</label><input type="text" id="edit-dname" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'title')"></div>
+            <div class="form-group"><label style="text-align:left;">Driver Contact</label><input type="text" id="edit-dcontact" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatPhoneNumber(this)"></div>
+        </div>
+        
         <div style="display:flex; gap:10px; margin-top:15px;">
             <button class="btn-secondary" onclick="closeAdminEditModal()" style="margin-top:0;">Cancel</button>
             <button class="btn-primary" onclick="saveAdminEdit()" style="margin-top:0;">Update</button>
@@ -353,12 +372,11 @@
     let currentUser = null; 
     let currentActiveMainTab = 'tab-placement';
     
-    // BUG FIX: Seperated memory for Deployed and POD tabs!
+    // SEPARATED MEMORY FOR TABS
     let activeDeployedTab = 'In-Transit'; 
     let activePodTab = 'Pending'; 
 
     let lastSavedPlacementStr = "";
-    let dataLoaded = false;
 
     // --- INITIALIZATION ---
     function setGreeting() {
@@ -466,6 +484,7 @@
         const cFreightInput = document.getElementById('c-freight');
         if (role === 'Admin' || role === 'Master Admin') {
             cFreightInput.disabled = false;
+            cFreightInput.placeholder = "Amount";
         } else {
             cFreightInput.value = "";
             cFreightInput.disabled = true;
@@ -587,7 +606,6 @@
     }
 
     function triggerCurrentRender() {
-        // Only trigger rendering for Tabs that are visible to prevent auto-generating the report tab!
         if (currentActiveMainTab === 'tab-deployed') renderDeployed(activeDeployedTab);
         if (currentActiveMainTab === 'tab-pod') renderPOD(activePodTab);
     }
@@ -646,11 +664,16 @@
         const isMasterAdmin = (role === 'Master Admin' || (currentUser.Name || currentUser.name) === 'Master Admin');
         const isAdminOrMaster = (role === 'Admin' || isMasterAdmin);
 
+        let statusClass = 'status-transit';
+        let statusText = trip.status.trim();
+        if (statusText === 'Delivered') { statusClass = 'status-delivered'; statusText = `Delivered: ${trip.deliveryDate}`; }
+        if (statusText === 'Cancelled Trip') { statusClass = 'status-cancelled'; statusText = `Cancelled`; }
+
         let cardHtml = `
             <div class="trip-card">
-                <div class="trip-row-flex" style="border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px;">
+                <div class="trip-row-flex" style="border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;">
                     <span><strong>#${index + 1}</strong> | ${trip.date.split(',')[0]}</span>
-                    <span class="status-badge ${trip.status.trim() === 'In-Transit' ? 'status-transit' : 'status-delivered'}">${trip.status.trim() === 'In-Transit' ? 'In-Transit' : `Delivered: ${trip.deliveryDate}`}</span>
+                    <span class="status-badge ${statusClass}">${statusText}</span>
                 </div>
                 <div style="margin-bottom: 5px;"><strong>Party:</strong> ${trip.party}</div>
                 <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
@@ -658,11 +681,13 @@
                     <span><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</span>
         `;
         
+        // Only allow edit if not delivered/cancelled
         if (isAdminOrMaster && trip.status.trim() === 'In-Transit') {
             cardHtml += `<span style="cursor:pointer; color:#0b57d0; font-size:11px; text-decoration:underline;" onclick="openAdminEdit('${trip.id}')">Edit Trip</span>`;
         }
         cardHtml += `</div>`;
 
+        // Freight
         if (trip.vFreight && trip.vFreight.trim() !== '') {
             cardHtml += `<div style="margin-bottom: 5px; color:#5f6368;"><strong>Vehicle Freight:</strong> ${trip.vFreight}</div>`;
         }
@@ -670,39 +695,62 @@
             cardHtml += `<div style="margin-bottom: 5px; color:#137333;"><strong>Charged Freight:</strong> ${trip.cFreight}</div>`;
         }
 
+        // Contact Toggle
+        cardHtml += `
+            <div style="font-size: 11px; margin-bottom: 10px;">
+                <span style="color:#0b57d0; cursor:pointer; text-decoration:underline;" onclick="document.getElementById('contact-${trip.id}').style.display = document.getElementById('contact-${trip.id}').style.display === 'block' ? 'none' : 'block';">View Contact Details ▼</span>
+                <div id="contact-${trip.id}" style="display:none; background:#f8f9fa; padding:8px; border-radius:8px; margin-top:5px; border:1px solid #e8eaed; color:#3c4043;">
+                    <div style="margin-bottom:4px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} - <a href="tel:${trip.dContact}" style="color:#0b57d0; text-decoration:none;">${trip.dContact || 'N/A'}</a></div>
+                    <div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} - <a href="tel:${trip.tContact}" style="color:#0b57d0; text-decoration:none;">${trip.tContact || 'N/A'}</a></div>
+                </div>
+            </div>
+        `;
+
         if (viewMode === 'deployed' && !isReadOnly) {
             cardHtml += `
-                <div style="margin-bottom: 5px;">
-                    <input type="text" class="compact-input" style="border: 1px solid #dadce0; width:100%; box-sizing:border-box;" 
-                           placeholder="Enter C-Note" value="${trip.cNote || ''}" 
-                           onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
+                <div class="grid-2" style="margin-bottom: 5px;">
+                    <input type="text" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
+                    <input type="text" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Remarks" value="${trip.remarks || ''}" onchange="updateBackendData('${trip.id}', 'updateTripRemark', this.value)">
                 </div>
             `;
             if (trip.status.trim() === 'In-Transit') {
                 cardHtml += `
                     <div style="display:flex; margin-top:5px;">
-                        <select class="select-status" onchange="triggerDeliveryModal('${trip.id}')">
+                        <select class="select-status compact-input" onchange="handleStatusChange('${trip.id}', this.value, this)" style="flex:1; border: 1px solid #dadce0;">
                             <option value="In-Transit" selected>In-Transit</option>
                             <option value="Delivered">Delivered</option>
+                            <option value="Cancelled Trip">Cancelled Trip</option>
                         </select>
                         <input type="text" class="compact-input custom-note-input" placeholder="Current location..." value="${trip.statusNote || ""}" 
-                               onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)">
+                               onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="border: 1px solid #dadce0; margin-left: 5px; flex:2;">
                     </div>
                 `;
-            } else {
+            } else if (trip.status.trim() === 'Delivered') {
                 if (isMasterAdmin) {
                     cardHtml += `
                         <div style="display:flex; margin-top:5px;">
-                            <select class="select-status" onchange="revertStatus('${trip.id}', 'In-Transit')" style="background: #fff3e0; color: #e65100;">
+                            <select class="select-status compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')" style="background: #fff3e0; color: #e65100; border: 1px solid #dadce0;">
                                 <option value="Delivered" selected>Status: Delivered</option>
                                 <option value="In-Transit">Undo: Back to In-Transit</option>
                             </select>
                         </div>
                     `;
                 } else {
-                    cardHtml += `<div style="margin-top: 5px; color:#137333; font-weight:bold; font-size: 12px;">Status: Delivered on ${trip.deliveryDate}</div>`;
+                    cardHtml += `<div style="margin-top: 5px; color:#137333; font-weight:bold; font-size: 12px;">Delivered on ${trip.deliveryDate}</div>`;
+                }
+            } else if (trip.status.trim() === 'Cancelled Trip') {
+                if (isMasterAdmin) {
+                    cardHtml += `
+                        <div style="display:flex; margin-top:5px;">
+                            <select class="select-status compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')" style="background: #fce8e6; color: #d93025; border: 1px solid #dadce0;">
+                                <option value="Cancelled Trip" selected>Status: Cancelled</option>
+                                <option value="In-Transit">Undo: Back to In-Transit</option>
+                            </select>
+                        </div>
+                    `;
                 }
             }
+            
             cardHtml += `
                 <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}')">▶ View History</button>
@@ -719,7 +767,7 @@
                            placeholder="Enter C-Note" value="${trip.cNote || ''}" 
                            onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
                 </div>
-                <div style="margin-bottom: 5px;"><input type="text" class="compact-input" style="width:100%; border:1px solid #dadce0; box-sizing:border-box;" placeholder="Add Remarks..." value="${trip.podRemark || ''}" onchange="updateBackendData('${trip.id}', 'updatePODRemark', this.value)"></div>
+                <div style="margin-bottom: 5px;"><input type="text" class="compact-input" style="width:100%; border:1px solid #dadce0; box-sizing:border-box;" placeholder="Add POD Remarks..." value="${trip.podRemark || ''}" onchange="updateBackendData('${trip.id}', 'updatePODRemark', this.value)"></div>
                 <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
                     <label style="margin:0;">POD Date:</label>
                     <input type="date" class="compact-input" id="pod-date-${trip.id}" style="border:1px solid #dadce0;">
@@ -751,6 +799,7 @@
         activeDeployedTab = statusFilter;
         document.getElementById('btn-ongoing').classList.toggle('active', statusFilter === 'In-Transit');
         document.getElementById('btn-completed').classList.toggle('active', statusFilter === 'Delivered');
+        document.getElementById('btn-cancelled').classList.toggle('active', statusFilter === 'Cancelled Trip');
 
         let base = allTrips.filter(t => (t.status || '').trim() === statusFilter);
         let finalTrips = getFilteredTrips(base);
@@ -760,19 +809,15 @@
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, 'deployed')).join('');
     }
 
-    // --- FIX: NO RESTRICTIONS ON PENDING ---
     function renderPOD(subTab) {
         activePodTab = subTab;
         document.getElementById('btn-pod-pending').classList.toggle('active', subTab === 'Pending');
         document.getElementById('btn-pod-received').classList.toggle('active', subTab === 'Received');
 
-        let base = [...allTrips]; 
-
-        if (subTab === 'Pending') {
-            base = base.filter(t => !t.podDate || String(t.podDate).trim() === '');
-        } else if (subTab === 'Received') {
-            base = base.filter(t => t.podDate && String(t.podDate).trim() !== '');
-        }
+        let base = allTrips.filter(t => (t.status || '').trim() === 'Delivered');
+        
+        if (subTab === 'Pending') base = base.filter(t => !t.podDate || String(t.podDate).trim() === '');
+        if (subTab === 'Received') base = base.filter(t => t.podDate && String(t.podDate).trim() !== '');
 
         let finalTrips = getFilteredTrips(base);
 
@@ -796,7 +841,7 @@
 
         if (tripStat !== 'All') finalTrips = finalTrips.filter(t => (t.status || '').trim() === tripStat);
         if (podStat !== 'All') {
-            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => !t.podDate || String(t.podDate).trim() === '');
+            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => (t.status || '').trim() === 'Delivered' && (!t.podDate || String(t.podDate).trim() === ''));
             if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && String(t.podDate).trim() !== '');
         }
 
@@ -819,40 +864,72 @@
             <div class="print-header">
                 <h2>Data Report as on ${dateStr}, ${dayStr}</h2>
             </div>
+            <div class="party-table-wrapper">
+                <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Party Name</th>
+                        <th>Sr No</th>
+                        <th>Date</th>
+                        <th>Route</th>
+                        <th>Vehicle</th>
+                        <th>Status</th>
+                        <th>C-Note</th>
+                        <th>POD Date</th>
+                        <th>Trip Remarks</th>
+                        <th>POD Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
         `;
 
         uniqueParties.forEach(party => {
             const pTrips = finalTrips.filter(t => t.party === party);
             if (pTrips.length === 0) return;
             
-            html += `<div class="party-table-wrapper">
-                <h3 class="party-title">${party}</h3>
-                <table class="report-table">
-                <thead>
-                    <tr><th>Sr</th><th>Date</th><th>Route</th><th>Vehicle</th><th>Status</th><th>C-Note</th><th>POD Date</th></tr>
-                </thead>
-                <tbody>`;
-            
             pTrips.forEach((t, i) => {
-                let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : `In-Transit`;
-                html += `<tr>
-                    <td>${i+1}</td>
-                    <td>${t.date.split(',')[0]}</td>
-                    <td>${t.from} ➔ ${t.to}</td>
-                    <td>${t.vNum} (${t.weight})</td>
-                    <td>${stat}</td>
-                    <td>${t.cNote || '-'}</td>
-                    <td>${t.podDate || 'Pending'}</td>
-                </tr>`;
+                let stat = (t.status || '').trim();
+                html += `<tr>`;
+                
+                // Group Party Name using rowspan for print aesthetics
+                if (i === 0) {
+                    html += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
+                }
+                
+                html += `
+                        <td style="text-align:center;">${i+1}</td>
+                        <td>${t.date.split(',')[0]}</td>
+                        <td>${t.from} to ${t.to}</td>
+                        <td>${t.vNum} (${t.weight})</td>
+                        <td>${stat}</td>
+                        <td>${t.cNote || '-'}</td>
+                        <td>${t.podDate || 'Pending'}</td>
+                        <td>${t.remarks || ''}</td>
+                        <td>${t.podRemark || ''}</td>
+                    </tr>
+                `;
             });
-            html += `</tbody></table></div>`;
         });
         
+        html += `</tbody></table></div>`;
         container.innerHTML = html;
         currentReportTrips = finalTrips; 
     }
 
     // --- INTERACTIVE ACTIONS ---
+    function handleStatusChange(tripId, value, selectElement) {
+        if (value === 'Delivered') {
+            triggerDeliveryModal(tripId);
+            selectElement.value = 'In-Transit'; 
+        } else if (value === 'Cancelled Trip') {
+            if (confirm("Are you sure you want to mark this trip as Cancelled?")) {
+                revertStatus(tripId, 'Cancelled Trip');
+            } else {
+                selectElement.value = 'In-Transit';
+            }
+        }
+    }
+
     function toggleHistory(tripId) {
         document.querySelectorAll('.history-panel').forEach(p => {
             if (p.id !== `hist-${tripId}`) p.style.display = 'none';
@@ -879,6 +956,10 @@
         document.getElementById('edit-vcap').value = trip.weight || "";
         document.getElementById('edit-from').value = trip.from;
         document.getElementById('edit-to').value = trip.to;
+        document.getElementById('edit-vfreight').value = trip.vFreight || "";
+        document.getElementById('edit-cfreight').value = trip.cFreight || "";
+        document.getElementById('edit-dname').value = trip.dName || "";
+        document.getElementById('edit-dcontact').value = trip.dContact || "";
         document.getElementById('adminEditModal').style.display = "flex";
     }
     function closeAdminEditModal() { document.getElementById('adminEditModal').style.display = "none"; }
@@ -890,11 +971,19 @@
         const vCap = document.getElementById('edit-vcap').value.toUpperCase();
         const from = document.getElementById('edit-from').value;
         const to = document.getElementById('edit-to').value;
+        const vFreight = document.getElementById('edit-vfreight').value;
+        const cFreight = document.getElementById('edit-cfreight').value;
+        const dName = document.getElementById('edit-dname').value;
+        const dContact = formatPhoneNumber(document.getElementById('edit-dcontact').value);
         
-        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'adminEditTrip', id: tripId, vNum: vNum, vType: vType, weight: vCap, from: from, to: to }) });
+        const payload = { action: 'adminEditTrip', id: tripId, vNum: vNum, vType: vType, weight: vCap, from: from, to: to, vFreight: vFreight, cFreight: cFreight, dName: dName, dContact: dContact };
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
         
         const t = allTrips.find(x => x.id === tripId); 
-        if(t){ t.vNum = vNum; t.type = vType; t.weight = vCap; t.from = from; t.to = to; }
+        if(t){ 
+            t.vNum = vNum; t.type = vType; t.weight = vCap; t.from = from; t.to = to; 
+            t.vFreight = vFreight; t.cFreight = cFreight; t.dName = dName; t.dContact = dContact;
+        }
         
         closeAdminEditModal();
         triggerCurrentRender();
@@ -929,9 +1018,23 @@
 
     function savePOD(tripId) {
         const dInput = document.getElementById(`pod-date-${tripId}`).value;
-        if (!dInput) return alert("Select a POD date.");
-        const dObj = new Date(dInput);
-        const fmtDate = `${String(dObj.getDate()).padStart(2, '0')}/${String(dObj.getMonth() + 1).padStart(2, '0')}/${dObj.getFullYear()}`;
+        const role = currentUser.Role || currentUser.role;
+        const isAdmin = (role === 'Admin' || role === 'Master Admin');
+
+        if (!dInput) {
+            if (isAdmin) {
+                if(!confirm("Are you sure you want to save this POD without a date?")) return;
+            } else {
+                return alert("Please select a POD date.");
+            }
+        }
+        
+        let fmtDate = "No Date";
+        if (dInput) {
+            const dObj = new Date(dInput);
+            fmtDate = `${String(dObj.getDate()).padStart(2, '0')}/${String(dObj.getMonth() + 1).padStart(2, '0')}/${dObj.getFullYear()}`;
+        }
+        
         updateBackendData(tripId, 'updatePOD', fmtDate);
     }
 
@@ -940,6 +1043,7 @@
         if (action === 'updateCNote') payload.value = value;
         if (action === 'updatePOD') payload.date = value;
         if (action === 'updatePODRemark') payload.value = value;
+        if (action === 'updateTripRemark') payload.value = value;
         
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
         
@@ -948,6 +1052,7 @@
             if (action === 'updateCNote') t.cNote = value;
             if (action === 'updatePOD') t.podDate = value;
             if (action === 'updatePODRemark') t.podRemark = value;
+            if (action === 'updateTripRemark') t.remarks = value;
         }
         if (action === 'updatePOD') triggerCurrentRender(); 
     }
@@ -968,12 +1073,12 @@
         el.value = el.value.toUpperCase().replace(/[\s-]/g, '');
     }
 
-    function formatPhoneNumber(number) {
-        if (!number) return "";
-        let cleanNumber = number.replace(/[\s-]/g, '').trim(); 
-        if (cleanNumber.startsWith("+91")) return cleanNumber;
-        else if (cleanNumber.startsWith("91") && cleanNumber.length > 10) return "+" + cleanNumber;
-        else return "+91" + cleanNumber;
+    function formatPhoneNumber(el) {
+        if (!el.value) return;
+        let cleanNumber = el.value.replace(/[\s-]/g, '').trim(); 
+        if (cleanNumber.startsWith("+91")) el.value = cleanNumber;
+        else if (cleanNumber.startsWith("91") && cleanNumber.length > 10) el.value = "+" + cleanNumber;
+        else el.value = "+91" + cleanNumber;
     }
 
     function autoFillVehicle(vNum) { const u = vNum.toUpperCase(); if (vehicles[u]) { document.getElementById('v-type').value = vehicles[u].type || ""; document.getElementById('v-weight').value = vehicles[u].capacity || ""; } }
@@ -1023,10 +1128,10 @@
             const vType = document.getElementById('v-type').value; 
             const vWeight = document.getElementById('v-weight').value;
             const dName = document.getElementById('d-name').value; 
-            const dContact = formatPhoneNumber(document.getElementById('d-contact').value);
+            const dContact = document.getElementById('d-contact').value;
             const tName = document.getElementById('t-name').value;
             const tPerson = document.getElementById('t-person').value;
-            const tContact = formatPhoneNumber(document.getElementById('t-contact').value);
+            const tContact = document.getElementById('t-contact').value;
             const remarks = document.getElementById('remarks').value;
             const vFreight = document.getElementById('v-freight').value || "";
             const cFreight = document.getElementById('c-freight').value || "";
@@ -1076,10 +1181,10 @@
         const vType = document.getElementById('v-type').value; 
         const vWeight = document.getElementById('v-weight').value;
         const dName = document.getElementById('d-name').value; 
-        const dContact = formatPhoneNumber(document.getElementById('d-contact').value);
+        const dContact = document.getElementById('d-contact').value;
         const tName = document.getElementById('t-name').value;
         const tPerson = document.getElementById('t-person').value;
-        const tContact = formatPhoneNumber(document.getElementById('t-contact').value);
+        const tContact = document.getElementById('t-contact').value;
         const remarks = document.getElementById('remarks').value;
 
         let header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n`;
@@ -1211,12 +1316,10 @@
         if (!newName || !pin) return alert("Name and PIN are required.");
 
         if (oldName) {
-            // Edit Existing
             fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateUser', oldName: oldName, newName: newName, pin: pin, role: role }) });
             let u = users.find(x => (x.Name || x.name) === oldName);
             if(u) { u.Name = newName; u.name = newName; u.PIN = pin; u.pin = pin; u.Role = role; u.role = role; }
         } else {
-            // Add New
             fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addUser', name: newName, pin: pin, role: role }) });
             users.push({ Name: newName, name: newName, PIN: pin, pin: pin, Role: role, role: role });
         }
