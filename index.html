@@ -19,7 +19,6 @@
         .pin-box h2 { margin: 0 0 10px 0; color: #202124; font-size: 22px; }
         .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: bold; margin-bottom: 20px; padding: 10px; width: 80%; border: 2px solid #dadce0; border-radius: 12px; }
         .pin-input:focus { border-color: #0b57d0; outline: none; box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.2); }
-        .sync-text { font-size: 13px; font-weight: 500; margin-top: 15px; color: #5f6368; }
         
         /* UI ELEMENTS */
         .greeting { text-align: center; margin-bottom: 20px; }
@@ -79,35 +78,35 @@
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; padding: 20px;}
         .modal-content { background: #fff; padding: 25px; border-radius: 24px; width: 100%; max-width: 320px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
 
-        /* REPORTS TABLE */
-        .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .report-table th, .report-table td { padding: 8px; border-bottom: 1px solid #e8eaed; text-align: left; }
+        /* REPORTS TABLE - SCREEN UI */
+        .screen-report-container { overflow-x: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; margin-top: 10px; }
+        .report-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+        .report-table th, .report-table td { padding: 10px 12px; border-bottom: 1px solid #e8eaed; text-align: left; }
         .report-table th { background: #f8f9fa; font-weight: 600; color: #5f6368; }
-        .print-header { display: none; text-align: center; margin-bottom: 20px; padding-top: 20px; }
         
-        .party-table-wrapper { page-break-inside: avoid; margin-bottom: 20px; }
-        .party-title { margin: 0 0 5px 0; font-size: 14px; color: #1f1f1f; text-align: left; }
-
-        /* ADMIN TABLE SPECIFIC */
+        .print-only { display: none; }
         .admin-action-btn { background: transparent; border: 1px solid #dadce0; border-radius: 8px; padding: 4px 8px; font-size: 11px; cursor: pointer; color: #5f6368; margin-right: 5px;}
         .admin-action-btn:hover { background: #f1f3f4; }
 
         /* STRICT PDF PRINT STYLES */
-        @page { margin: 0; size: auto; }
         @media print { 
+            @page { margin: 0; }
             body * { visibility: hidden; }
             body { padding: 0; margin: 0; background: #fff; }
-            #printable-report, #printable-report * { visibility: visible; }
-            #printable-report { position: absolute; left: 0; top: 0; width: 100%; padding: 10mm; box-sizing: border-box;}
             
-            .print-header { display: block !important; border: 2px solid #000; padding: 8px; margin-bottom: 15px; }
+            #print-report-container, #print-report-container * { visibility: visible; }
+            #print-report-container { position: absolute; left: 0; top: 0; width: 100%; padding: 10mm; box-sizing: border-box; display: block !important; }
+            
+            .screen-report-container { display: none !important; }
+            #report-actions, .main-tabs, .greeting, #unified-filter-bar, #btn-logout { display: none !important; }
+
+            .print-header { text-align: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; display: block; }
             .print-header h2 { font-size: 18px; color: #000; margin: 0; font-weight: bold; }
             
-            .report-table { border: 2px solid #000; box-shadow: none; border-radius: 0; border-collapse: collapse; width: 100%;}
-            .report-table th, .report-table td { border: 1px solid #000; color: #000; padding: 6px; }
-            .report-table th { border-bottom: 2px solid #000; background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
-            .party-table-wrapper { margin-bottom: 0; } /* Grouped into one table now */
-            .party-title { display: none; }
+            .print-table { border: 2px solid #000; box-shadow: none; border-radius: 0; border-collapse: collapse; width: 100%; font-size: 10px;}
+            .print-table th, .print-table td { border: 1px solid #000; color: #000; padding: 4px 6px; text-align: left;}
+            .print-table th { border-bottom: 2px solid #000; font-weight: bold; }
+            .party-group-table { margin-bottom: 20px; page-break-inside: avoid; }
         }
     </style>
 </head>
@@ -189,14 +188,14 @@
 
         <div class="grid-2 form-group">
             <div class="autocomplete"><label>Driver Name</label><input type="text" id="d-name" placeholder="Name" onchange="formatCase(this, 'title')"><div id="d-name-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><label>Driver Contact <span class="required-star">*</span></label><input type="text" id="d-contact" placeholder="9876543210"><div id="d-contact-list" class="autocomplete-items"></div><span class="error-msg" id="err-d-contact">Required</span></div>
+            <div class="autocomplete"><label>Driver Contact <span class="required-star">*</span></label><input type="text" id="d-contact" placeholder="9876543210" onchange="formatPhoneInput(this)"><div id="d-contact-list" class="autocomplete-items"></div><span class="error-msg" id="err-d-contact">Required</span></div>
         </div>
 
         <div class="section-divider"></div>
         <div class="form-group autocomplete"><label>Transporter <span class="required-star">*</span></label><input type="text" id="t-name" placeholder="KTPL" onchange="formatCase(this, 'title')"><div id="t-name-list" class="autocomplete-items"></div><span class="error-msg" id="err-t-name">Required</span></div>
         <div class="grid-2 form-group">
             <div class="autocomplete"><label>Person Name</label><input type="text" id="t-person" placeholder="Name" onchange="formatCase(this, 'title')"><div id="t-person-list" class="autocomplete-items"></div></div>
-            <div><label>Contact Number <span class="required-star">*</span></label><input type="text" id="t-contact" placeholder="9876543210"><span class="error-msg" id="err-t-contact">Required</span></div>
+            <div><label>Contact Number <span class="required-star">*</span></label><input type="text" id="t-contact" placeholder="9876543210" onchange="formatPhoneInput(this)"><span class="error-msg" id="err-t-contact">Required</span></div>
         </div>
 
         <div class="section-divider"></div>
@@ -252,7 +251,7 @@
             <button class="btn-primary" onclick="generateCustomReport()" style="margin-top: 15px;">Generate Report</button>
         </div>
         
-        <div id="printable-report" style="margin-top: 15px;"></div>
+        <div id="screen-report" class="screen-report-container"></div>
         
         <div style="display:flex; gap:10px; margin-top: 15px;" id="report-actions" style="display:none;">
             <button class="btn-secondary" onclick="window.print()" style="margin-top:0;">Save PDF</button>
@@ -284,6 +283,8 @@
         <button class="btn-secondary" onclick="forceAdminSync()" style="margin-top: 20px;">Force Sync Databank</button>
     </div>
 </div>
+
+<div id="print-report-container" class="print-only"></div>
 
 <div id="deliveryModal" class="modal">
     <div class="modal-content">
@@ -329,7 +330,7 @@
         </div>
         <div class="grid-2">
             <div class="form-group"><label style="text-align:left;">Driver Name</label><input type="text" id="edit-dname" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'title')"></div>
-            <div class="form-group"><label style="text-align:left;">Driver Contact</label><input type="text" id="edit-dcontact" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatPhoneNumber(this)"></div>
+            <div class="form-group"><label style="text-align:left;">Driver Contact</label><input type="text" id="edit-dcontact" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatPhoneInput(this)"></div>
         </div>
         
         <div style="display:flex; gap:10px; margin-top:15px;">
@@ -372,11 +373,11 @@
     let currentUser = null; 
     let currentActiveMainTab = 'tab-placement';
     
-    // SEPARATED MEMORY FOR TABS
     let activeDeployedTab = 'In-Transit'; 
     let activePodTab = 'Pending'; 
 
     let lastSavedPlacementStr = "";
+    let currentReportTrips = [];
 
     // --- INITIALIZATION ---
     function setGreeting() {
@@ -598,7 +599,8 @@
         document.getElementById('unified-filter-bar').style.display = (tabId === 'tab-placement' || tabId === 'tab-admin') ? 'none' : 'block';
         
         if (tabId === 'tab-reports') {
-            document.getElementById('printable-report').innerHTML = '';
+            document.getElementById('screen-report').innerHTML = '';
+            document.getElementById('print-report-container').innerHTML = '';
             document.getElementById('report-actions').style.display = 'none';
         }
         
@@ -635,7 +637,7 @@
         result = result.filter(t => {
             let passDate = true;
             if (sDate || eDate) {
-                const parts = t.date.split(',')[0].split('/'); 
+                const parts = t.date ? t.date.split(',')[0].split('/') : []; 
                 if (parts.length === 3) {
                     const tDate = new Date(parts[2], parts[1] - 1, parts[0]);
                     const tTime = tDate.getTime();
@@ -643,17 +645,17 @@
                     if (eDate && tTime > eDate.getTime()) passDate = false;
                 }
             }
-            const passV = !vNumMatch || t.vNum.toLowerCase().includes(vNumMatch);
+            const passV = !vNumMatch || (t.vNum && t.vNum.toLowerCase().includes(vNumMatch));
             const passVType = !vTypeMatch || (t.type && t.type.toLowerCase().includes(vTypeMatch));
             const passVCap = !vCapMatch || (t.weight && t.weight.toLowerCase().includes(vCapMatch));
-            const passP = !partyMatch || t.party.toLowerCase().includes(partyMatch);
-            const passO = !originMatch || t.from.toLowerCase().includes(originMatch);
-            const passD = !destMatch || t.to.toLowerCase().includes(destMatch);
+            const passP = !partyMatch || (t.party && t.party.toLowerCase().includes(partyMatch));
+            const passO = !originMatch || (t.from && t.from.toLowerCase().includes(originMatch));
+            const passD = !destMatch || (t.to && t.to.toLowerCase().includes(destMatch));
 
             return passDate && passV && passVType && passVCap && passP && passO && passD;
         });
 
-        result.sort((a, b) => new Date(a.date.split(',')[0].split('/').reverse().join('-')) - new Date(b.date.split(',')[0].split('/').reverse().join('-')));
+        result.sort((a, b) => new Date((a.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((b.date||'').split(',')[0].split('/').reverse().join('-')));
         return result;
     }
 
@@ -665,7 +667,7 @@
         const isAdminOrMaster = (role === 'Admin' || isMasterAdmin);
 
         let statusClass = 'status-transit';
-        let statusText = trip.status.trim();
+        let statusText = (trip.status || '').trim();
         if (statusText === 'Delivered') { statusClass = 'status-delivered'; statusText = `Delivered: ${trip.deliveryDate}`; }
         if (statusText === 'Cancelled Trip') { statusClass = 'status-cancelled'; statusText = `Cancelled`; }
 
@@ -681,13 +683,11 @@
                     <span><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</span>
         `;
         
-        // Only allow edit if not delivered/cancelled
         if (isAdminOrMaster && trip.status.trim() === 'In-Transit') {
             cardHtml += `<span style="cursor:pointer; color:#0b57d0; font-size:11px; text-decoration:underline;" onclick="openAdminEdit('${trip.id}')">Edit Trip</span>`;
         }
         cardHtml += `</div>`;
 
-        // Freight
         if (trip.vFreight && trip.vFreight.trim() !== '') {
             cardHtml += `<div style="margin-bottom: 5px; color:#5f6368;"><strong>Vehicle Freight:</strong> ${trip.vFreight}</div>`;
         }
@@ -695,13 +695,13 @@
             cardHtml += `<div style="margin-bottom: 5px; color:#137333;"><strong>Charged Freight:</strong> ${trip.cFreight}</div>`;
         }
 
-        // Contact Toggle
+        // Contact Toggle (Aesthetic Pill)
         cardHtml += `
             <div style="font-size: 11px; margin-bottom: 10px;">
-                <span style="color:#0b57d0; cursor:pointer; text-decoration:underline;" onclick="document.getElementById('contact-${trip.id}').style.display = document.getElementById('contact-${trip.id}').style.display === 'block' ? 'none' : 'block';">View Contact Details ▼</span>
-                <div id="contact-${trip.id}" style="display:none; background:#f8f9fa; padding:8px; border-radius:8px; margin-top:5px; border:1px solid #e8eaed; color:#3c4043;">
-                    <div style="margin-bottom:4px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} - <a href="tel:${trip.dContact}" style="color:#0b57d0; text-decoration:none;">${trip.dContact || 'N/A'}</a></div>
-                    <div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} - <a href="tel:${trip.tContact}" style="color:#0b57d0; text-decoration:none;">${trip.tContact || 'N/A'}</a></div>
+                <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#0b57d0; font-weight:600; cursor:pointer;" onclick="document.getElementById('contact-${trip.id}').style.display = document.getElementById('contact-${trip.id}').style.display === 'block' ? 'none' : 'block';">View Contact Details ▼</span>
+                <div id="contact-${trip.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:8px; margin-top:5px; border:1px solid #e8eaed; color:#3c4043;">
+                    <div style="margin-bottom:6px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} <br> <a href="tel:${trip.dContact}" style="color:#0b57d0; text-decoration:none; font-size:13px; font-weight:bold;">📞 ${trip.dContact || 'N/A'}</a></div>
+                    <div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} <br> <a href="tel:${trip.tContact}" style="color:#0b57d0; text-decoration:none; font-size:13px; font-weight:bold;">📞 ${trip.tContact || 'N/A'}</a></div>
                 </div>
             </div>
         `;
@@ -809,21 +809,24 @@
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, 'deployed')).join('');
     }
 
+    // --- FIX: SHOW ALL TRIPS IN PENDING UNCONDITIONALLY ---
     function renderPOD(subTab) {
         activePodTab = subTab;
         document.getElementById('btn-pod-pending').classList.toggle('active', subTab === 'Pending');
         document.getElementById('btn-pod-received').classList.toggle('active', subTab === 'Received');
 
-        let base = allTrips.filter(t => (t.status || '').trim() === 'Delivered');
-        
-        if (subTab === 'Pending') base = base.filter(t => !t.podDate || String(t.podDate).trim() === '');
-        if (subTab === 'Received') base = base.filter(t => t.podDate && String(t.podDate).trim() !== '');
+        let base = [...allTrips]; 
+
+        if (subTab === 'Pending') {
+            base = base.filter(t => !t.podDate || String(t.podDate).trim() === '');
+        } else if (subTab === 'Received') {
+            base = base.filter(t => t.podDate && String(t.podDate).trim() !== '');
+        }
 
         let finalTrips = getFilteredTrips(base);
-
         document.getElementById('pod-summary').innerText = `No. of ${subTab} POD: ${finalTrips.length}`;
-        const container = document.getElementById('pod-container');
         
+        const container = document.getElementById('pod-container');
         if (finalTrips.length === 0) { 
             container.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No trips found.</div>`; 
             return; 
@@ -833,6 +836,7 @@
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, viewMode)).join('');
     }
 
+    // --- DUAL REPORT GENERATOR (UI SCROLLABLE vs PDF BEAUTIFUL) ---
     function generateCustomReport() {
         let finalTrips = getFilteredTrips(allTrips);
         
@@ -841,15 +845,17 @@
 
         if (tripStat !== 'All') finalTrips = finalTrips.filter(t => (t.status || '').trim() === tripStat);
         if (podStat !== 'All') {
-            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => (t.status || '').trim() === 'Delivered' && (!t.podDate || String(t.podDate).trim() === ''));
+            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => !t.podDate || String(t.podDate).trim() === '');
             if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && String(t.podDate).trim() !== '');
         }
 
-        const container = document.getElementById('printable-report');
+        const screenContainer = document.getElementById('screen-report');
+        const printContainer = document.getElementById('print-report-container');
         document.getElementById('report-actions').style.display = 'flex';
 
         if (finalTrips.length === 0) {
-            container.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No data matches these filters.</div>`;
+            screenContainer.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No data matches these filters.</div>`;
+            printContainer.innerHTML = ``;
             return;
         }
 
@@ -858,26 +864,65 @@
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayStr = days[today.getDay()];
 
+        // 1. SCREEN UI GENERATION (Flat, Scrollable Table)
+        let screenHtml = `
+            <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Sr No</th>
+                    <th>Party Name</th>
+                    <th>Date</th>
+                    <th>Route</th>
+                    <th>Vehicle</th>
+                    <th>Status</th>
+                    <th>C-Note</th>
+                    <th>POD Date</th>
+                    <th>Trip Remarks</th>
+                    <th>POD Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+        finalTrips.forEach((t, i) => {
+            let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : `In-Transit`;
+            screenHtml += `
+                <tr>
+                    <td>${i+1}</td>
+                    <td><strong>${t.party}</strong></td>
+                    <td>${t.date.split(',')[0]}</td>
+                    <td>${t.from} to ${t.to}</td>
+                    <td>${t.vNum} (${t.weight})</td>
+                    <td>${stat}</td>
+                    <td>${t.cNote || '-'}</td>
+                    <td>${t.podDate || 'Pending'}</td>
+                    <td>${t.remarks || ''}</td>
+                    <td>${t.podRemark || ''}</td>
+                </tr>
+            `;
+        });
+        screenHtml += `</tbody></table>`;
+        screenContainer.innerHTML = screenHtml;
+
+        // 2. PRINT PDF GENERATION (Grouped by Party, Styled)
         const uniqueParties = [...new Set(finalTrips.map(t => t.party))];
-        
-        let html = `
+        let printHtml = `
             <div class="print-header">
                 <h2>Data Report as on ${dateStr}, ${dayStr}</h2>
             </div>
             <div class="party-table-wrapper">
-                <table class="report-table">
+                <table class="print-table">
                 <thead>
                     <tr>
-                        <th>Party Name</th>
-                        <th>Sr No</th>
-                        <th>Date</th>
-                        <th>Route</th>
-                        <th>Vehicle</th>
-                        <th>Status</th>
-                        <th>C-Note</th>
-                        <th>POD Date</th>
-                        <th>Trip Remarks</th>
-                        <th>POD Remarks</th>
+                        <th style="width:15%;">Party Name</th>
+                        <th style="width:5%; text-align:center;">Sr</th>
+                        <th style="width:10%;">Date</th>
+                        <th style="width:15%;">Route</th>
+                        <th style="width:15%;">Vehicle</th>
+                        <th style="width:10%;">Status</th>
+                        <th style="width:10%;">C-Note</th>
+                        <th style="width:10%;">POD Date</th>
+                        <th style="width:5%;">Trip Remarks</th>
+                        <th style="width:5%;">POD Remarks</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -888,15 +933,15 @@
             if (pTrips.length === 0) return;
             
             pTrips.forEach((t, i) => {
-                let stat = (t.status || '').trim();
-                html += `<tr>`;
+                let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : `In-Transit`;
+                printHtml += `<tr>`;
                 
                 // Group Party Name using rowspan for print aesthetics
                 if (i === 0) {
-                    html += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
+                    printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
                 }
                 
-                html += `
+                printHtml += `
                         <td style="text-align:center;">${i+1}</td>
                         <td>${t.date.split(',')[0]}</td>
                         <td>${t.from} to ${t.to}</td>
@@ -909,10 +954,12 @@
                     </tr>
                 `;
             });
+            // Add a thick border bottom for separation between parties
+            printHtml += `<tr><td colspan="10" style="border-left:none; border-right:none; padding:0; border-bottom:2px solid #000;"></td></tr>`;
         });
         
-        html += `</tbody></table></div>`;
-        container.innerHTML = html;
+        printHtml += `</tbody></table></div>`;
+        printContainer.innerHTML = printHtml;
         currentReportTrips = finalTrips; 
     }
 
@@ -951,17 +998,18 @@
         const trip = allTrips.find(t => t.id === tripId);
         if(!trip) return;
         document.getElementById('edit-trip-id').value = tripId;
-        document.getElementById('edit-vnum').value = trip.vNum;
+        document.getElementById('edit-vnum').value = trip.vNum || "";
         document.getElementById('edit-vtype').value = trip.type || "";
         document.getElementById('edit-vcap').value = trip.weight || "";
-        document.getElementById('edit-from').value = trip.from;
-        document.getElementById('edit-to').value = trip.to;
+        document.getElementById('edit-from').value = trip.from || "";
+        document.getElementById('edit-to').value = trip.to || "";
         document.getElementById('edit-vfreight').value = trip.vFreight || "";
         document.getElementById('edit-cfreight').value = trip.cFreight || "";
         document.getElementById('edit-dname').value = trip.dName || "";
         document.getElementById('edit-dcontact').value = trip.dContact || "";
         document.getElementById('adminEditModal').style.display = "flex";
     }
+    
     function closeAdminEditModal() { document.getElementById('adminEditModal').style.display = "none"; }
     
     function saveAdminEdit() {
@@ -974,7 +1022,9 @@
         const vFreight = document.getElementById('edit-vfreight').value;
         const cFreight = document.getElementById('edit-cfreight').value;
         const dName = document.getElementById('edit-dname').value;
-        const dContact = formatPhoneNumber(document.getElementById('edit-dcontact').value);
+        
+        // FIX: Using formatPhoneString safely without passing the HTML element
+        const dContact = formatPhoneString(document.getElementById('edit-dcontact').value);
         
         const payload = { action: 'adminEditTrip', id: tripId, vNum: vNum, vType: vType, weight: vCap, from: from, to: to, vFreight: vFreight, cFreight: cFreight, dName: dName, dContact: dContact };
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
@@ -1073,12 +1123,16 @@
         el.value = el.value.toUpperCase().replace(/[\s-]/g, '');
     }
 
-    function formatPhoneNumber(el) {
-        if (!el.value) return;
-        let cleanNumber = el.value.replace(/[\s-]/g, '').trim(); 
-        if (cleanNumber.startsWith("+91")) el.value = cleanNumber;
-        else if (cleanNumber.startsWith("91") && cleanNumber.length > 10) el.value = "+" + cleanNumber;
-        else el.value = "+91" + cleanNumber;
+    // FIX: Separated raw string logic from HTML element logic to prevent undefined saving
+    function formatPhoneString(numberStr) {
+        if (!numberStr) return "";
+        let cleanNumber = numberStr.replace(/[\s-]/g, '').trim(); 
+        if (cleanNumber.startsWith("+91")) return cleanNumber;
+        else if (cleanNumber.startsWith("91") && cleanNumber.length > 10) return "+" + cleanNumber;
+        else return "+91" + cleanNumber;
+    }
+    function formatPhoneInput(el) {
+        el.value = formatPhoneString(el.value);
     }
 
     function autoFillVehicle(vNum) { const u = vNum.toUpperCase(); if (vehicles[u]) { document.getElementById('v-type').value = vehicles[u].type || ""; document.getElementById('v-weight').value = vehicles[u].capacity || ""; } }
@@ -1128,10 +1182,10 @@
             const vType = document.getElementById('v-type').value; 
             const vWeight = document.getElementById('v-weight').value;
             const dName = document.getElementById('d-name').value; 
-            const dContact = document.getElementById('d-contact').value;
+            const dContact = formatPhoneString(document.getElementById('d-contact').value);
             const tName = document.getElementById('t-name').value;
             const tPerson = document.getElementById('t-person').value;
-            const tContact = document.getElementById('t-contact').value;
+            const tContact = formatPhoneString(document.getElementById('t-contact').value);
             const remarks = document.getElementById('remarks').value;
             const vFreight = document.getElementById('v-freight').value || "";
             const cFreight = document.getElementById('c-freight').value || "";
@@ -1181,24 +1235,23 @@
         const vType = document.getElementById('v-type').value; 
         const vWeight = document.getElementById('v-weight').value;
         const dName = document.getElementById('d-name').value; 
-        const dContact = document.getElementById('d-contact').value;
+        const dContact = formatPhoneString(document.getElementById('d-contact').value);
         const tName = document.getElementById('t-name').value;
         const tPerson = document.getElementById('t-person').value;
-        const tContact = document.getElementById('t-contact').value;
+        const tContact = formatPhoneString(document.getElementById('t-contact').value);
         const remarks = document.getElementById('remarks').value;
 
         let header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n`;
-        header += `*Booking Date:* ${date}\n*Party Name:* ${party}\n*From:* ${rFrom}\n*To:* ${rTo}\n*Vehicle No.:* ${vNum}\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n`;
+        header += `*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${rFrom}\n*To:* ${rTo}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n\n`;
         if (dName) header += `*Driver Name:* ${dName}\n`;
-        if (dContact) header += `*Driver Contact No:* ${dContact}\n`;
-        header += `\n`;
+        if (dContact) header += `*Driver Contact No:* ${dContact}\n\n`;
 
         let finalMessage = header;
         if (type === 'team') {
             finalMessage += `*Transporter:* ${tName}\n`;
             if (tPerson) finalMessage += `*Person Name:* ${tPerson}\n`;
-            if (tContact) finalMessage += `*Contact Number:* ${tContact}\n`;
-            if (remarks) finalMessage += `\n*Remarks:* ${remarks}`;
+            if (tContact) finalMessage += `*Contact Number:* ${tContact}\n\n`;
+            if (remarks) finalMessage += `*Remarks:* ${remarks}`;
         }
         
         openWhatsAppDirectly(finalMessage);
@@ -1220,23 +1273,23 @@
         if (!trip) return;
 
         let header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n`;
-        header += `*Booking Date:* ${trip.date}\n*Party Name:* ${trip.party}\n*From:* ${trip.from}\n*To:* ${trip.to}\n*Vehicle No.:* ${trip.vNum}\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n`;
+        header += `*Booking Date:* ${trip.date}\n\n*Party Name:* ${trip.party}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n`;
         if (trip.dName) header += `*Driver Name:* ${trip.dName}\n`;
-        if (trip.dContact) header += `*Driver Contact No:* ${trip.dContact}\n`;
-        header += `\n`;
+        if (trip.dContact) header += `*Driver Contact No:* ${trip.dContact}\n\n`;
 
         let finalMessage = header;
         if (type === 'team') {
             if(trip.tName) finalMessage += `*Transporter:* ${trip.tName}\n`;
             if(trip.tPerson) finalMessage += `*Person Name:* ${trip.tPerson}\n`;
-            if(trip.tContact) finalMessage += `*Contact Number:* ${trip.tContact}\n`;
-            if(trip.remarks) finalMessage += `\n*Remarks:* ${trip.remarks}`;
+            if(trip.tContact) finalMessage += `*Contact Number:* ${trip.tContact}\n\n`;
+            if(trip.remarks) finalMessage += `*Remarks:* ${trip.remarks}`;
         }
         
         openWhatsAppDirectly(finalMessage);
         closeShareModal();
     }
 
+    // FIX: Asterisk Bold Formatting for Status
     function shareReportWhatsApp() {
         if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
         
@@ -1253,11 +1306,12 @@
             currentReportTrips.forEach(t => {
                 if (t.party === p) {
                     let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
-                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight} | *${stat}*\n`;
-                    if (t.statusNote) message += `*Current Status:* ${t.statusNote}\n`;
+                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight}\n*Status:* *${stat}*\n`;
+                    if (t.statusNote) message += `*Current Location:* ${t.statusNote}\n`;
+                    message += `\n`;
                     counter++;
                 }
-            }); message += `\n`;
+            });
         });
         
         openWhatsAppDirectly(message);
