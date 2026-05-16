@@ -42,13 +42,14 @@
         .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; padding-left: 5px; font-weight: 500; text-align: left; }
         .section-divider { height: 1px; background: rgba(0,0,0,0.1); margin: 20px 0; }
 
-        /* BUTTONS (SLEEKER & SLIMMER) */
+        /* BUTTONS */
         .btn-primary, .btn-whatsapp, .btn-secondary, .btn-danger { width: 100%; padding: 12px 14px; border: none; border-radius: 16px; cursor: pointer; font-size: 14px; font-weight: 600; box-sizing: border-box; transition: 0.2s;}
         .btn-primary { color: white; background: linear-gradient(135deg, #0b57d0 0%, #0842a0 100%); box-shadow: 0 4px 10px rgba(11, 87, 208, 0.2); }
         .btn-whatsapp { color: white; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2); }
+        .btn-business { color: white; background: linear-gradient(135deg, #102d36 0%, #1e4d5c 100%); box-shadow: 0 4px 10px rgba(16, 45, 54, 0.2); }
         .btn-danger { color: white; background: #d93025; box-shadow: 0 4px 10px rgba(217, 48, 37, 0.2); }
         .btn-secondary { border: 1px solid #dadce0; background: #f1f3f4; color: #3c4043; box-shadow: none; }
-        .btn-primary:active, .btn-whatsapp:active, .btn-secondary:active, .btn-danger:active { transform: scale(0.98); }
+        .btn-primary:active, .btn-whatsapp:active, .btn-business:active, .btn-secondary:active, .btn-danger:active { transform: scale(0.98); }
 
         /* AUTOCOMPLETE */
         .autocomplete { position: relative; display: block; text-align: left; }
@@ -78,7 +79,7 @@
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; padding: 20px;}
         .modal-content { background: #fff; padding: 25px; border-radius: 24px; width: 100%; max-width: 320px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
 
-        /* REPORTS TABLE - SCREEN UI */
+        /* REPORTS TABLE */
         .screen-report-container { overflow-x: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; margin-top: 10px; }
         .report-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
         .report-table th, .report-table td { padding: 10px 12px; border-bottom: 1px solid #e8eaed; text-align: left; }
@@ -286,6 +287,40 @@
 
 <div id="print-report-container" class="print-only"></div>
 
+<div id="whatsappChoiceModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:#202124;">Choose WhatsApp App</h3>
+        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Which app would you like to use to send this message?</p>
+        <div style="display:flex; flex-direction: column; gap:10px;">
+            <button class="btn-whatsapp" onclick="executeWhatsAppShare('regular')" style="margin-top:0;">Regular WhatsApp</button>
+            <button class="btn-business" onclick="executeWhatsAppShare('business')" style="margin-top:0;">WhatsApp Business</button>
+            <button class="btn-secondary" onclick="closeWhatsAppChoiceModal()" style="margin-top: 5px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="expenseModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:#202124;">Additional Expenses</h3>
+        <input type="hidden" id="expense-trip-id">
+        <div class="grid-2">
+            <div class="form-group"><label style="text-align:left;">Loading</label><input type="number" id="exp-loading" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Amount"></div>
+            <div class="form-group"><label style="text-align:left;">Unloading</label><input type="number" id="exp-unloading" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Amount"></div>
+            <div class="form-group"><label style="text-align:left;">LR</label><input type="number" id="exp-lr" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Amount"></div>
+            <div class="form-group"><label style="text-align:left;">Others Amount</label><input type="number" id="exp-others" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Amount"></div>
+        </div>
+        <div class="form-group autocomplete" style="margin-top: 10px;">
+            <label style="text-align:left;">Other Expense Type</label>
+            <input type="text" id="exp-other-reason" class="compact-input" style="border: 1px solid #dadce0;" placeholder="e.g. Toll, Weighbridge...">
+            <div id="exp-other-reason-list" class="autocomplete-items"></div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-secondary" onclick="closeExpenseModal()" style="margin-top:0;">Cancel</button>
+            <button class="btn-primary" onclick="saveExpenses()" style="margin-top:0;">Save</button>
+        </div>
+    </div>
+</div>
+
 <div id="deliveryModal" class="modal">
     <div class="modal-content">
         <h3 style="margin-top:0;">Confirm Delivery</h3>
@@ -378,6 +413,7 @@
 
     let lastSavedPlacementStr = "";
     let currentReportTrips = [];
+    let pendingWhatsAppMsg = ""; // Holds the generated text while the user picks Business/Regular
 
     // --- FUNCTION TO SAFELY EXTRACT NUMBERS ---
     function getSafeTel(num) {
@@ -557,6 +593,7 @@
         setupCustomDropdown('t-person', 't-person-list', () => transporters[document.getElementById('t-name').value]?.map(p => p.name).sort() || [], autoFillContact);
         setupCustomDropdown('route-from', 'route-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
         setupCustomDropdown('route-to', 'route-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
+        setupCustomDropdown('exp-other-reason', 'exp-other-reason-list', () => [...new Set(allTrips.map(t => t.otherExpReason).filter(Boolean))].sort());
         
         allTrips.forEach(t => {
             if (t.dName && t.dName.trim() !== "" && t.dContact) {
@@ -668,6 +705,50 @@
         return result;
     }
 
+    // --- EXPENSES MODAL ---
+    function openExpenseModal(tripId) {
+        const trip = allTrips.find(t => t.id === tripId);
+        if(!trip) return;
+        document.getElementById('expense-trip-id').value = tripId;
+        document.getElementById('exp-loading').value = trip.loadingExp || "";
+        document.getElementById('exp-unloading').value = trip.unloadingExp || "";
+        document.getElementById('exp-lr').value = trip.lrExp || "";
+        document.getElementById('exp-others').value = trip.otherExp || "";
+        document.getElementById('exp-other-reason').value = trip.otherExpReason || "";
+        document.getElementById('expenseModal').style.display = "flex";
+    }
+    
+    function closeExpenseModal() { document.getElementById('expenseModal').style.display = "none"; }
+    
+    function saveExpenses() {
+        const tripId = document.getElementById('expense-trip-id').value;
+        const load = document.getElementById('exp-loading').value;
+        const unload = document.getElementById('exp-unloading').value;
+        const lr = document.getElementById('exp-lr').value;
+        const others = document.getElementById('exp-others').value;
+        const othersReason = document.getElementById('exp-other-reason').value;
+        
+        fetch(GOOGLE_SCRIPT_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: 'updateExpenses', id: tripId, loading: load, unloading: unload, lr: lr, others: others, otherReason: othersReason }) 
+        });
+        
+        const t = allTrips.find(x => x.id === tripId);
+        if(t) { 
+            t.loadingExp = load; 
+            t.unloadingExp = unload; 
+            t.lrExp = lr; 
+            t.otherExp = others; 
+            t.otherExpReason = othersReason;
+        }
+        
+        closeExpenseModal();
+        alert("Additional expenses saved.");
+        
+        // Refresh memory dropdown for reasons
+        setupCustomDropdown('exp-other-reason', 'exp-other-reason-list', () => [...new Set(allTrips.map(tr => tr.otherExpReason).filter(Boolean))].sort());
+    }
+
     // --- CARD RENDERING ENGINE ---
     function buildTripCard(trip, index, viewMode) {
         const role = currentUser.Role || currentUser.role;
@@ -704,7 +785,6 @@
             cardHtml += `<div style="margin-bottom: 5px; color:#137333;"><strong>Charged Freight:</strong> ${trip.cFreight}</div>`;
         }
 
-        // FIX: Added Safe Phone Formatter to Contact Links
         const dTel = getSafeTel(trip.dContact);
         const tTel = getSafeTel(trip.tContact);
 
@@ -766,7 +846,10 @@
             cardHtml += `
                 <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}', '${viewMode}')">▶ View History</button>
-                    <button class="btn-secondary" style="font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer; width:auto;" onclick="openShareModal('${trip.id}')">Share</button>
+                    <div>
+                        <button class="btn-secondary" style="font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer; width:auto; margin-right: 5px;" onclick="openExpenseModal('${trip.id}')">₹ Expenses</button>
+                        <button class="btn-secondary" style="font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer; width:auto;" onclick="openShareModal('${trip.id}')">Share</button>
+                    </div>
                 </div>
                 <div id="hist-${viewMode}-${trip.id}" class="history-panel"></div>
             `;
@@ -875,7 +958,7 @@
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayStr = days[today.getDay()];
 
-        // 1. SCREEN UI GENERATION (Flat, Scrollable Table)
+        // 1. SCREEN UI GENERATION
         let screenHtml = `
             <table class="report-table">
             <thead>
@@ -914,7 +997,7 @@
         screenHtml += `</tbody></table>`;
         screenContainer.innerHTML = screenHtml;
 
-        // 2. PRINT PDF GENERATION (Grouped by Party, Styled)
+        // 2. PRINT PDF GENERATION
         const uniqueParties = [...new Set(finalTrips.map(t => t.party))];
         let printHtml = `
             <div class="print-header">
@@ -946,11 +1029,9 @@
             pTrips.forEach((t, i) => {
                 let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : `In-Transit`;
                 printHtml += `<tr>`;
-                
                 if (i === 0) {
                     printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
                 }
-                
                 printHtml += `
                         <td style="text-align:center;">${i+1}</td>
                         <td>${t.date.split(',')[0]}</td>
@@ -1169,9 +1250,30 @@
         return isValid;
     }
 
+    // NEW SMART WHATSAPP HANDLER
     function openWhatsAppDirectly(msg) {
-        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
-        window.open(whatsappUrl, '_blank') || (window.location.href = whatsappUrl);
+        pendingWhatsAppMsg = msg;
+        document.getElementById('whatsappChoiceModal').style.display = 'flex';
+        closeShareModal(); // Closes Deployed share modal if open to prevent overlap
+    }
+
+    function closeWhatsAppChoiceModal() {
+        document.getElementById('whatsappChoiceModal').style.display = 'none';
+    }
+
+    function executeWhatsAppShare(appType) {
+        let url = "";
+        const encodedMsg = encodeURIComponent(pendingWhatsAppMsg);
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        if (appType === 'regular') {
+            url = isMobile ? `whatsapp://send?text=${encodedMsg}` : `https://api.whatsapp.com/send?text=${encodedMsg}`;
+        } else if (appType === 'business') {
+            url = isMobile ? `whatsapp-business://send?text=${encodedMsg}` : `https://api.whatsapp.com/send?text=${encodedMsg}`;
+        }
+        
+        window.open(url, '_blank') || (window.location.href = url);
+        closeWhatsAppChoiceModal();
     }
 
     function executeDatabaseSave() {
@@ -1293,7 +1395,6 @@
         }
         
         openWhatsAppDirectly(finalMessage);
-        closeShareModal();
     }
 
     function shareReportWhatsApp() {
