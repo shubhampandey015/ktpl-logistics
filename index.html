@@ -353,6 +353,7 @@
     let currentUser = null; 
     let currentActiveMainTab = 'tab-placement';
     
+    // BUG FIX: Seperated memory for Deployed and POD tabs!
     let activeDeployedTab = 'In-Transit'; 
     let activePodTab = 'Pending'; 
 
@@ -586,6 +587,7 @@
     }
 
     function triggerCurrentRender() {
+        // Only trigger rendering for Tabs that are visible to prevent auto-generating the report tab!
         if (currentActiveMainTab === 'tab-deployed') renderDeployed(activeDeployedTab);
         if (currentActiveMainTab === 'tab-pod') renderPOD(activePodTab);
     }
@@ -758,15 +760,19 @@
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, 'deployed')).join('');
     }
 
+    // --- FIX: NO RESTRICTIONS ON PENDING ---
     function renderPOD(subTab) {
         activePodTab = subTab;
         document.getElementById('btn-pod-pending').classList.toggle('active', subTab === 'Pending');
         document.getElementById('btn-pod-received').classList.toggle('active', subTab === 'Received');
 
-        let base = allTrips.filter(t => (t.status || '').trim() === 'Delivered');
-        
-        if (subTab === 'Pending') base = base.filter(t => !t.podDate || String(t.podDate).trim() === '');
-        if (subTab === 'Received') base = base.filter(t => t.podDate && String(t.podDate).trim() !== '');
+        let base = [...allTrips]; 
+
+        if (subTab === 'Pending') {
+            base = base.filter(t => !t.podDate || String(t.podDate).trim() === '');
+        } else if (subTab === 'Received') {
+            base = base.filter(t => t.podDate && String(t.podDate).trim() !== '');
+        }
 
         let finalTrips = getFilteredTrips(base);
 
@@ -790,7 +796,7 @@
 
         if (tripStat !== 'All') finalTrips = finalTrips.filter(t => (t.status || '').trim() === tripStat);
         if (podStat !== 'All') {
-            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => (t.status || '').trim() === 'Delivered' && (!t.podDate || String(t.podDate).trim() === ''));
+            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => !t.podDate || String(t.podDate).trim() === '');
             if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && String(t.podDate).trim() !== '');
         }
 
