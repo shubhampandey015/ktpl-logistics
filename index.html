@@ -33,25 +33,26 @@
 
         /* FORM ELEMENTS */
         .form-group { margin-top: 12px; }
-        label { display: block; font-size: 13px; font-weight: 600; color: #5f6368; padding-left: 5px; margin-bottom: 4px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #5f6368; padding-left: 5px; margin-bottom: 4px; text-align: left; }
         .required-star { color: #d93025; } 
         input, select { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 12px; box-sizing: border-box; font-size: 14px; background-color: #ffffff; transition: 0.3s; }
         input:focus, select:focus { outline: none; border-color: #a8c7fa; box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.2); }
         input:disabled { background-color: #f1f3f4; color: #9aa0a6; cursor: not-allowed; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; padding-left: 5px; font-weight: 500; }
+        .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; padding-left: 5px; font-weight: 500; text-align: left; }
         .section-divider { height: 1px; background: rgba(0,0,0,0.1); margin: 20px 0; }
 
         /* BUTTONS (SLEEKER & SLIMMER) */
-        .btn-primary, .btn-whatsapp, .btn-secondary { width: 100%; padding: 12px 14px; border: none; border-radius: 16px; cursor: pointer; font-size: 14px; font-weight: 600; box-sizing: border-box; transition: 0.2s;}
+        .btn-primary, .btn-whatsapp, .btn-secondary, .btn-danger { width: 100%; padding: 12px 14px; border: none; border-radius: 16px; cursor: pointer; font-size: 14px; font-weight: 600; box-sizing: border-box; transition: 0.2s;}
         .btn-primary { color: white; background: linear-gradient(135deg, #0b57d0 0%, #0842a0 100%); box-shadow: 0 4px 10px rgba(11, 87, 208, 0.2); }
         .btn-whatsapp { color: white; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2); }
+        .btn-danger { color: white; background: #d93025; box-shadow: 0 4px 10px rgba(217, 48, 37, 0.2); }
         .btn-secondary { border: 1px solid #dadce0; background: #f1f3f4; color: #3c4043; box-shadow: none; }
-        .btn-primary:active, .btn-whatsapp:active, .btn-secondary:active { transform: scale(0.98); }
+        .btn-primary:active, .btn-whatsapp:active, .btn-secondary:active, .btn-danger:active { transform: scale(0.98); }
 
         /* AUTOCOMPLETE */
-        .autocomplete { position: relative; display: block; }
+        .autocomplete { position: relative; display: block; text-align: left; }
         .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border: 1px solid #dadce0; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); max-height: 200px; overflow-y: auto; display: none; margin-top: 4px; }
         .autocomplete-items div { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 14px; }
         .autocomplete-items div:hover { background-color: #e8f0fe; }
@@ -60,12 +61,12 @@
         .sub-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
         .sub-tab { flex: 1; text-align: center; padding: 8px; cursor: pointer; font-size: 13px; font-weight: 600; border-radius: 10px; background: #f1f3f4; color: #5f6368; }
         .sub-tab.active { background: #0b57d0; color: #fff; }
-        .trip-card { background: #fff; border-radius: 16px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; font-size: 13px;}
+        .trip-card { background: #fff; border-radius: 16px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; font-size: 13px; text-align: left;}
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; }
         .status-transit { background: #fff3e0; color: #e65100; }
         .status-delivered { background: #e6f4ea; color: #137333; }
         
-        #unified-filter-bar { background: #fff; padding: 15px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; display: none; animation: fadeIn 0.4s; }
+        #unified-filter-bar { background: #fff; padding: 15px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; display: none; animation: fadeIn 0.4s; text-align: left; }
         .filter-header { font-size: 12px; font-weight: bold; color: #5f6368; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;}
         .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; margin-top: 10px; text-align: left; box-shadow: none; width: auto;}
         .history-panel { display: none; background: #f8f9fa; border-radius: 12px; padding: 10px; margin-top: 5px; font-size: 12px; color: #3c4043; border-left: 3px solid #0b57d0; max-height: 150px; overflow-y: auto;}
@@ -84,7 +85,11 @@
         .print-header { display: none; text-align: center; margin-bottom: 20px; padding-top: 20px; }
         .print-header h2 { font-size: 22px; color: #000; margin: 0; font-weight: bold; }
         .party-table-wrapper { page-break-inside: avoid; margin-bottom: 20px; }
-        .party-title { margin: 0 0 5px 0; font-size: 14px; color: #1f1f1f; }
+        .party-title { margin: 0 0 5px 0; font-size: 14px; color: #1f1f1f; text-align: left; }
+
+        /* ADMIN TABLE SPECIFIC */
+        .admin-action-btn { background: transparent; border: 1px solid #dadce0; border-radius: 8px; padding: 4px 8px; font-size: 11px; cursor: pointer; color: #5f6368; margin-right: 5px;}
+        .admin-action-btn:hover { background: #f1f3f4; }
 
         /* STRICT PDF PRINT STYLES */
         @page { margin: 0mm; size: auto; }
@@ -135,7 +140,7 @@
 
     <div id="unified-filter-bar">
         <div class="filter-header">
-            Universal Search Filters
+            Search Filter
             <span style="color:#0b57d0; font-size:11px; cursor:pointer; padding: 4px;" onclick="clearFilters()">Reset</span>
         </div>
         <div class="grid-2">
@@ -247,16 +252,20 @@
     </div>
 
     <div id="tab-admin" class="app-section">
-        <h3 style="color:#202124; margin-top:0;">Access Control Monitor</h3>
-        <p style="font-size:13px; color:#5f6368;">Below are the users currently registered in the database. To edit roles or PINs, please access the master Google Sheet.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="color:#202124; margin:0;">User Access Control</h3>
+            <button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0; border-radius: 8px;" onclick="openAddUserModal()">+ Add User</button>
+        </div>
+        <p style="font-size:13px; color:#5f6368; margin-top: 5px;">Manage roles and PINs for the application.</p>
         
-        <div style="background: #fff; border: 1px solid #e8eaed; border-radius: 12px; overflow: hidden; margin-top: 15px;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+        <div style="background: #fff; border: 1px solid #e8eaed; border-radius: 12px; overflow-x: auto; margin-top: 15px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
                 <thead>
-                    <tr style="background: #f8f9fa; text-align: left;">
+                    <tr style="background: #f8f9fa;">
                         <th style="padding: 10px; border-bottom: 1px solid #e8eaed;">Name</th>
                         <th style="padding: 10px; border-bottom: 1px solid #e8eaed;">Role</th>
                         <th style="padding: 10px; border-bottom: 1px solid #e8eaed;">PIN</th>
+                        <th style="padding: 10px; border-bottom: 1px solid #e8eaed;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="admin-user-list">
@@ -311,6 +320,29 @@
     </div>
 </div>
 
+<div id="userManageModal" class="modal">
+    <div class="modal-content">
+        <h3 id="user-modal-title" style="margin-top:0;">Add / Edit User</h3>
+        <input type="hidden" id="manage-user-old-name">
+        <div class="form-group"><label style="text-align:left;">User Name</label><input type="text" id="manage-user-name" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Name"></div>
+        <div class="form-group"><label style="text-align:left;">4-Digit PIN</label><input type="number" id="manage-user-pin" class="compact-input" style="border: 1px solid #dadce0;" placeholder="0711"></div>
+        <div class="form-group">
+            <label style="text-align:left;">Role Assignment</label>
+            <select id="manage-user-role" class="compact-input" style="border: 1px solid #dadce0;">
+                <option value="Admin">Admin</option>
+                <option value="Manager">Manager</option>
+                <option value="SelfOnly">SelfOnly</option>
+                <option value="ReadOnly">ReadOnly</option>
+                <option value="Master Admin">Master Admin</option>
+            </select>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-secondary" onclick="closeUserModal()" style="margin-top:0;">Cancel</button>
+            <button class="btn-primary" onclick="saveUserManage()" style="margin-top:0;">Save User</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // --- APP CORE CONFIGURATION ---
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxJsu4llXFpjbeMX53mDmIpQ2z1YNR8garBDkBKxVF9AR3dSmfX0Zvm-XB02ZQplus/exec"; 
@@ -318,8 +350,13 @@
     let vehicles = {}; let clients = []; let transporters = {}; 
     let allTrips = []; let users = []; let statusLogs = [];
     let driverData = {}; 
-    let currentUser = null; let currentActiveMainTab = 'tab-placement';
-    let activeSubTab = 'In-Transit'; 
+    let currentUser = null; 
+    let currentActiveMainTab = 'tab-placement';
+    
+    // BUG FIX: Seperated memory for Deployed and POD tabs!
+    let activeDeployedTab = 'In-Transit'; 
+    let activePodTab = 'Pending'; 
+
     let lastSavedPlacementStr = "";
     let dataLoaded = false;
 
@@ -392,7 +429,7 @@
         try {
             await performDatabaseSync();
             
-            const user = users.find(u => String(u.PIN) === String(pin)) || (pin === "0711" ? {Name: "Master Admin", Role: "Master Admin"} : null);
+            const user = users.find(u => String(u.PIN || u.pin) === String(pin)) || (pin === "0711" ? {Name: "Master Admin", Role: "Master Admin"} : null);
 
             if (user) {
                 currentUser = user;
@@ -421,11 +458,13 @@
         document.getElementById('pin-overlay').style.display = 'none';
         document.getElementById('main-app').style.display = 'block';
         
-        document.getElementById('user-name-text').innerText = `Hi ${currentUser.Name}!`;
+        document.getElementById('user-name-text').innerText = `Hi ${currentUser.Name || currentUser.name}!`;
         document.getElementById('user-name-text').style.display = 'block';
 
+        const role = currentUser.Role || currentUser.role;
+
         const cFreightInput = document.getElementById('c-freight');
-        if (currentUser.Role === 'Admin' || currentUser.Role === 'Master Admin') {
+        if (role === 'Admin' || role === 'Master Admin') {
             cFreightInput.disabled = false;
         } else {
             cFreightInput.value = "";
@@ -433,14 +472,13 @@
             cFreightInput.placeholder = "Restricted";
         }
 
-        // Show/Hide Admin Tab
-        if (currentUser.Role === 'Master Admin') {
+        if (role === 'Master Admin') {
             document.getElementById('nav-admin').style.display = 'block';
         } else {
             document.getElementById('nav-admin').style.display = 'none';
         }
 
-        if (currentUser.Role === 'ReadOnly') {
+        if (role === 'ReadOnly') {
             document.getElementById('nav-placement').style.display = 'none';
             switchMainTab('tab-deployed');
         } else {
@@ -544,15 +582,17 @@
     }
 
     function triggerCurrentRender() {
-        if (currentActiveMainTab === 'tab-deployed') renderDeployed(activeSubTab);
-        if (currentActiveMainTab === 'tab-pod') renderPOD(activeSubTab);
+        if (currentActiveMainTab === 'tab-deployed') renderDeployed(activeDeployedTab);
+        if (currentActiveMainTab === 'tab-pod') renderPOD(activePodTab);
+        if (currentActiveMainTab === 'tab-reports') generateCustomReport();
     }
 
     function getFilteredTrips(baseTrips) {
         let result = [...baseTrips];
+        const role = currentUser.Role || currentUser.role;
 
-        if (currentUser && currentUser.Role === 'SelfOnly') {
-            result = result.filter(t => t.createdBy === currentUser.Name);
+        if (role === 'SelfOnly') {
+            result = result.filter(t => t.createdBy === (currentUser.Name || currentUser.name));
         }
 
         const startDateStr = document.getElementById('uf-start').value;
@@ -596,9 +636,10 @@
 
     // --- CARD RENDERING ENGINE ---
     function buildTripCard(trip, index, viewMode) {
-        let isReadOnly = (currentUser && currentUser.Role === 'ReadOnly');
-        const isMasterAdmin = (currentUser && (currentUser.Role === 'Master Admin' || currentUser.Name === 'Master Admin'));
-        const isAdminOrMaster = (currentUser && (currentUser.Role === 'Admin' || isMasterAdmin));
+        const role = currentUser.Role || currentUser.role;
+        let isReadOnly = (role === 'ReadOnly');
+        const isMasterAdmin = (role === 'Master Admin' || (currentUser.Name || currentUser.name) === 'Master Admin');
+        const isAdminOrMaster = (role === 'Admin' || isMasterAdmin);
 
         let cardHtml = `
             <div class="trip-card">
@@ -698,11 +739,11 @@
     }
 
     function renderDeployed(statusFilter) {
-        activeSubTab = statusFilter;
+        activeDeployedTab = statusFilter;
         document.getElementById('btn-ongoing').classList.toggle('active', statusFilter === 'In-Transit');
         document.getElementById('btn-completed').classList.toggle('active', statusFilter === 'Delivered');
 
-        let base = allTrips.filter(t => t.status.trim() === statusFilter);
+        let base = allTrips.filter(t => (t.status || '').trim() === statusFilter);
         let finalTrips = getFilteredTrips(base);
 
         const container = document.getElementById('deployed-container');
@@ -710,14 +751,13 @@
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, 'deployed')).join('');
     }
 
-    // --- FIX: ALL DELIVERED TRIPS SHOW IN POD TAB ---
     function renderPOD(subTab) {
-        activeSubTab = subTab;
+        activePodTab = subTab;
         document.getElementById('btn-pod-pending').classList.toggle('active', subTab === 'Pending');
         document.getElementById('btn-pod-received').classList.toggle('active', subTab === 'Received');
 
-        // Rule: If it is delivered, it goes to the POD tab. (C-Note is NOT required).
-        let base = allTrips.filter(t => t.status.trim() === 'Delivered');
+        // ALL DELIVERED TRIPS SHOW HERE!
+        let base = allTrips.filter(t => (t.status || '').trim() === 'Delivered');
         if (subTab === 'Pending') base = base.filter(t => !t.podDate || t.podDate.trim() === '');
         if (subTab === 'Received') base = base.filter(t => t.podDate && t.podDate.trim() !== '');
 
@@ -735,9 +775,9 @@
         const tripStat = document.getElementById('report-trip-status').value;
         const podStat = document.getElementById('report-pod-status').value;
 
-        if (tripStat !== 'All') finalTrips = finalTrips.filter(t => t.status.trim() === tripStat);
+        if (tripStat !== 'All') finalTrips = finalTrips.filter(t => (t.status || '').trim() === tripStat);
         if (podStat !== 'All') {
-            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => t.status.trim() === 'Delivered' && (!t.podDate || t.podDate.trim() === ''));
+            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => (t.status || '').trim() === 'Delivered' && (!t.podDate || t.podDate.trim() === ''));
             if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && t.podDate.trim() !== '');
         }
 
@@ -775,7 +815,7 @@
                 <tbody>`;
             
             pTrips.forEach((t, i) => {
-                let stat = t.status.trim() === 'Delivered' ? `Delivered` : `In-Transit`;
+                let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : `In-Transit`;
                 html += `<tr>
                     <td>${i+1}</td>
                     <td>${t.date.split(',')[0]}</td>
@@ -971,11 +1011,12 @@
             const remarks = document.getElementById('remarks').value;
             const vFreight = document.getElementById('v-freight').value || "";
             const cFreight = document.getElementById('c-freight').value || "";
+            const createdByName = currentUser.Name || currentUser.name || "Unknown";
             
             const newTrip = {
                 action: 'saveTrip', id: tripId, date: date, party: party, 
                 from: rFrom, to: rTo, vNum: vNum, vType: vType, weight: vWeight,
-                createdBy: currentUser ? currentUser.Name : "Unknown",
+                createdBy: createdByName,
                 vFreight: vFreight, cFreight: cFreight,
                 dName: dName, dContact: dContact, tName: tName, tPerson: tPerson, tContact: tContact, remarks: remarks
             };
@@ -985,7 +1026,7 @@
             allTrips.push({
                 id: tripId, date: date, party: party, from: rFrom, to: rTo,
                 vNum: vNum, type: vType, weight: vWeight,
-                status: "In-Transit", deliveryDate: "", statusNote: "", createdBy: newTrip.createdBy,
+                status: "In-Transit", deliveryDate: "", statusNote: "", createdBy: createdByName,
                 cNote: "", podDate: "", vFreight: vFreight, cFreight: cFreight,
                 dName: dName, dContact: dContact, tName: tName, tPerson: tPerson, tContact: tContact, remarks: remarks, podRemark: ""
             });
@@ -1087,7 +1128,7 @@
             message += `*Client:* ${p}\n`; let counter = 1;
             currentReportTrips.forEach(t => {
                 if (t.party === p) {
-                    let stat = t.status.trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
+                    let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
                     message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight} | *${stat}*\n`;
                     if (t.statusNote) message += `*Current Status:* ${t.statusNote}\n`;
                     counter++;
@@ -1098,17 +1139,79 @@
         openWhatsAppDirectly(message);
     }
 
-    // ADMIN TAB LOGIC
+    // --- ADMIN USER MANAGEMENT LOGIC ---
     function renderAdminUsers() {
         const tbody = document.getElementById('admin-user-list');
         if(!tbody) return;
-        tbody.innerHTML = users.map(u => `
+        tbody.innerHTML = users.map(u => {
+            const name = u.Name || u.name;
+            const role = u.Role || u.role;
+            const pin = u.PIN || u.pin;
+            return `
             <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e8eaed; font-weight: 500;">${u.Name || u.name || 'Unknown'}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e8eaed;">${u.Role || u.role || 'Unassigned'}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e8eaed; font-family: monospace;">${u.PIN || u.pin || 'None'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #e8eaed; font-weight: 500;">${name || 'Unknown'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #e8eaed;">${role || 'Unassigned'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #e8eaed; font-family: monospace;">${pin || 'None'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #e8eaed;">
+                    <button class="admin-action-btn" onclick="openEditUserModal('${name}', '${pin}', '${role}')">Edit</button>
+                    <button class="admin-action-btn" style="color: #d93025;" onclick="deleteUser('${name}')">Delete</button>
+                </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
+    }
+
+    function openAddUserModal() {
+        document.getElementById('user-modal-title').innerText = "Add New User";
+        document.getElementById('manage-user-old-name').value = "";
+        document.getElementById('manage-user-name').value = "";
+        document.getElementById('manage-user-pin').value = "";
+        document.getElementById('manage-user-role').value = "ReadOnly";
+        document.getElementById('userManageModal').style.display = 'flex';
+    }
+
+    function openEditUserModal(name, pin, role) {
+        document.getElementById('user-modal-title').innerText = "Edit User";
+        document.getElementById('manage-user-old-name').value = name;
+        document.getElementById('manage-user-name').value = name;
+        document.getElementById('manage-user-pin').value = pin;
+        document.getElementById('manage-user-role').value = role;
+        document.getElementById('userManageModal').style.display = 'flex';
+    }
+
+    function closeUserModal() {
+        document.getElementById('userManageModal').style.display = 'none';
+    }
+
+    function saveUserManage() {
+        const oldName = document.getElementById('manage-user-old-name').value;
+        const newName = document.getElementById('manage-user-name').value.trim();
+        const pin = document.getElementById('manage-user-pin').value.trim();
+        const role = document.getElementById('manage-user-role').value;
+
+        if (!newName || !pin) return alert("Name and PIN are required.");
+
+        if (oldName) {
+            // Edit Existing
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateUser', oldName: oldName, newName: newName, pin: pin, role: role }) });
+            let u = users.find(x => (x.Name || x.name) === oldName);
+            if(u) { u.Name = newName; u.name = newName; u.PIN = pin; u.pin = pin; u.Role = role; u.role = role; }
+        } else {
+            // Add New
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addUser', name: newName, pin: pin, role: role }) });
+            users.push({ Name: newName, name: newName, PIN: pin, pin: pin, Role: role, role: role });
+        }
+        
+        renderAdminUsers();
+        closeUserModal();
+    }
+
+    function deleteUser(name) {
+        if (!confirm(`Are you sure you want to completely delete access for ${name}?`)) return;
+        
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', name: name }) });
+        users = users.filter(u => (u.Name || u.name) !== name);
+        renderAdminUsers();
     }
 
     async function forceAdminSync() {
