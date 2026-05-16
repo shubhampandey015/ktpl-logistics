@@ -44,12 +44,11 @@
         .section-divider { height: 1px; background: #dadce0; margin: 24px 0; }
 
         /* BUTTONS */
-        .btn-primary, .btn-whatsapp, .btn-secondary, .btn-business, .btn-danger { width: 100%; padding: 10px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; box-sizing: border-box; transition: background 0.2s, box-shadow 0.2s; }
+        .btn-primary, .btn-whatsapp, .btn-secondary, .btn-danger { width: 100%; padding: 10px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; box-sizing: border-box; transition: background 0.2s, box-shadow 0.2s; }
         .btn-primary { color: #ffffff; background: #1a73e8; }
         .btn-primary:hover { background: #1b66c9; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
         .btn-whatsapp { color: #ffffff; background: #188c38; }
         .btn-whatsapp:hover { background: #14792f; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
-        .btn-business { color: #ffffff; background: #005f73; }
         .btn-danger { color: #ffffff; background: #d93025; }
         .btn-secondary { border: 1px solid #dadce0; background: #ffffff; color: #1a73e8; }
         .btn-secondary:hover { background: #f8f9fa; }
@@ -286,18 +285,6 @@
 
 <div id="print-report-container" class="print-only"></div>
 
-<div id="whatsappChoiceModal" class="modal">
-    <div class="modal-content">
-        <h3 style="margin-top:0; color:#202124; font-weight:500;">Choose WhatsApp App</h3>
-        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Which app would you like to use to send this message?</p>
-        <div style="display:flex; flex-direction: column; gap:10px;">
-            <button class="btn-whatsapp" onclick="executeWhatsAppShare('regular')" style="margin-top:0;">Regular WhatsApp</button>
-            <button class="btn-business" onclick="executeWhatsAppShare('business')" style="margin-top:0;">WhatsApp Business</button>
-            <button class="btn-secondary" onclick="closeWhatsAppChoiceModal()" style="margin-top: 5px;">Cancel</button>
-        </div>
-    </div>
-</div>
-
 <div id="expenseModal" class="modal">
     <div class="modal-content">
         <h3 style="margin-top:0; color:#202124; font-weight:500;">Additional Expenses</h3>
@@ -407,13 +394,11 @@
     let currentUser = null; 
     let currentActiveMainTab = 'tab-placement';
     
-    // SEPARATED MEMORY FOR TABS
     let activeDeployedTab = 'In-Transit'; 
     let activePodTab = 'Pending'; 
 
     let lastSavedPlacementStr = "";
     let currentReportTrips = [];
-    let pendingWhatsAppMsg = ""; 
 
     // --- FUNCTION TO SAFELY EXTRACT NUMBERS ---
     function getSafeTel(num) {
@@ -1257,30 +1242,9 @@
         return isValid;
     }
 
-    // SMART WHATSAPP HANDLER
     function openWhatsAppDirectly(msg) {
-        pendingWhatsAppMsg = msg;
-        document.getElementById('whatsappChoiceModal').style.display = 'flex';
-        closeShareModal(); 
-    }
-
-    function closeWhatsAppChoiceModal() {
-        document.getElementById('whatsappChoiceModal').style.display = 'none';
-    }
-
-    function executeWhatsAppShare(appType) {
-        let url = "";
-        const encodedMsg = encodeURIComponent(pendingWhatsAppMsg);
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        
-        if (appType === 'regular') {
-            url = isMobile ? `whatsapp://send?text=${encodedMsg}` : `https://api.whatsapp.com/send?text=${encodedMsg}`;
-        } else if (appType === 'business') {
-            url = isMobile ? `whatsapp-business://send?text=${encodedMsg}` : `https://api.whatsapp.com/send?text=${encodedMsg}`;
-        }
-        
-        window.open(url, '_blank') || (window.location.href = url);
-        closeWhatsAppChoiceModal();
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+        window.open(whatsappUrl, '_blank') || (window.location.href = whatsappUrl);
     }
 
     function executeDatabaseSave() {
@@ -1402,6 +1366,7 @@
         }
         
         openWhatsAppDirectly(finalMessage);
+        closeShareModal();
     }
 
     function shareReportWhatsApp() {
