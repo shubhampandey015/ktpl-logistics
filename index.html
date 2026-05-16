@@ -379,6 +379,15 @@
     let lastSavedPlacementStr = "";
     let currentReportTrips = [];
 
+    // --- FUNCTION TO SAFELY EXTRACT NUMBERS ---
+    function getSafeTel(num) {
+        if (!num) return '';
+        let c = String(num).replace(/[\s-]/g, '').trim();
+        if (c.startsWith('+')) return c;
+        if (c.startsWith('91') && c.length > 10) return '+' + c;
+        return '+91' + c;
+    }
+
     // --- INITIALIZATION ---
     function setGreeting() {
         const hour = new Date().getHours();
@@ -695,13 +704,16 @@
             cardHtml += `<div style="margin-bottom: 5px; color:#137333;"><strong>Charged Freight:</strong> ${trip.cFreight}</div>`;
         }
 
-        // Contact Toggle (Aesthetic Pill)
+        // FIX: Added Safe Phone Formatter to Contact Links
+        const dTel = getSafeTel(trip.dContact);
+        const tTel = getSafeTel(trip.tContact);
+
         cardHtml += `
             <div style="font-size: 11px; margin-bottom: 10px;">
-                <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#0b57d0; font-weight:600; cursor:pointer;" onclick="document.getElementById('contact-${trip.id}').style.display = document.getElementById('contact-${trip.id}').style.display === 'block' ? 'none' : 'block';">View Contact Details ▼</span>
-                <div id="contact-${trip.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:8px; margin-top:5px; border:1px solid #e8eaed; color:#3c4043;">
-                    <div style="margin-bottom:6px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} <br> <a href="tel:${trip.dContact}" style="color:#0b57d0; text-decoration:none; font-size:13px; font-weight:bold;">📞 ${trip.dContact || 'N/A'}</a></div>
-                    <div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} <br> <a href="tel:${trip.tContact}" style="color:#0b57d0; text-decoration:none; font-size:13px; font-weight:bold;">📞 ${trip.tContact || 'N/A'}</a></div>
+                <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#0b57d0; font-weight:600; cursor:pointer;" onclick="document.getElementById('contact-${viewMode}-${trip.id}').style.display = document.getElementById('contact-${viewMode}-${trip.id}').style.display === 'block' ? 'none' : 'block';">View Contact Details ▼</span>
+                <div id="contact-${viewMode}-${trip.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:8px; margin-top:5px; border:1px solid #e8eaed; color:#3c4043;">
+                    <div style="margin-bottom:6px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} <br> <a href="tel:${dTel}" style="color:#0b57d0; text-decoration:none; font-size:13px; font-weight:bold;">📞 ${trip.dContact || 'N/A'}</a></div>
+                    <div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} <br> <a href="tel:${tTel}" style="color:#0b57d0; text-decoration:none; font-size:13px; font-weight:bold;">📞 ${trip.tContact || 'N/A'}</a></div>
                 </div>
             </div>
         `;
@@ -753,10 +765,10 @@
             
             cardHtml += `
                 <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                    <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}')">▶ View History</button>
+                    <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}', '${viewMode}')">▶ View History</button>
                     <button class="btn-secondary" style="font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer; width:auto;" onclick="openShareModal('${trip.id}')">Share</button>
                 </div>
-                <div id="hist-${trip.id}" class="history-panel"></div>
+                <div id="hist-${viewMode}-${trip.id}" class="history-panel"></div>
             `;
         }
 
@@ -809,7 +821,6 @@
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, 'deployed')).join('');
     }
 
-    // --- FIX: SHOW ALL TRIPS IN PENDING UNCONDITIONALLY ---
     function renderPOD(subTab) {
         activePodTab = subTab;
         document.getElementById('btn-pod-pending').classList.toggle('active', subTab === 'Pending');
@@ -936,7 +947,6 @@
                 let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : `In-Transit`;
                 printHtml += `<tr>`;
                 
-                // Group Party Name using rowspan for print aesthetics
                 if (i === 0) {
                     printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
                 }
@@ -954,7 +964,6 @@
                     </tr>
                 `;
             });
-            // Add a thick border bottom for separation between parties
             printHtml += `<tr><td colspan="10" style="border-left:none; border-right:none; padding:0; border-bottom:2px solid #000;"></td></tr>`;
         });
         
@@ -977,12 +986,12 @@
         }
     }
 
-    function toggleHistory(tripId) {
+    function toggleHistory(tripId, viewMode) {
         document.querySelectorAll('.history-panel').forEach(p => {
-            if (p.id !== `hist-${tripId}`) p.style.display = 'none';
+            if (p.id !== `hist-${viewMode}-${tripId}`) p.style.display = 'none';
         });
 
-        const p = document.getElementById(`hist-${tripId}`);
+        const p = document.getElementById(`hist-${viewMode}-${tripId}`);
         const logs = statusLogs.filter(l => String(l.tripId) === String(tripId));
         if (logs.length === 0) { p.innerHTML = "<div class='history-item'>No history found.</div>"; }
         else {
@@ -1022,8 +1031,6 @@
         const vFreight = document.getElementById('edit-vfreight').value;
         const cFreight = document.getElementById('edit-cfreight').value;
         const dName = document.getElementById('edit-dname').value;
-        
-        // FIX: Using formatPhoneString safely without passing the HTML element
         const dContact = formatPhoneString(document.getElementById('edit-dcontact').value);
         
         const payload = { action: 'adminEditTrip', id: tripId, vNum: vNum, vType: vType, weight: vCap, from: from, to: to, vFreight: vFreight, cFreight: cFreight, dName: dName, dContact: dContact };
@@ -1123,7 +1130,6 @@
         el.value = el.value.toUpperCase().replace(/[\s-]/g, '');
     }
 
-    // FIX: Separated raw string logic from HTML element logic to prevent undefined saving
     function formatPhoneString(numberStr) {
         if (!numberStr) return "";
         let cleanNumber = numberStr.replace(/[\s-]/g, '').trim(); 
@@ -1131,6 +1137,7 @@
         else if (cleanNumber.startsWith("91") && cleanNumber.length > 10) return "+" + cleanNumber;
         else return "+91" + cleanNumber;
     }
+    
     function formatPhoneInput(el) {
         el.value = formatPhoneString(el.value);
     }
@@ -1289,7 +1296,6 @@
         closeShareModal();
     }
 
-    // FIX: Asterisk Bold Formatting for Status
     function shareReportWhatsApp() {
         if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
         
