@@ -353,7 +353,7 @@
     let currentUser = null; 
     let currentActiveMainTab = 'tab-placement';
     
-    // BUG FIX: Seperated memory for Deployed and POD tabs!
+    // SEPARATED MEMORY FOR TABS (Fixes POD Blanking Issue)
     let activeDeployedTab = 'In-Transit'; 
     let activePodTab = 'Pending'; 
 
@@ -708,8 +708,13 @@
         }
 
         if (viewMode === 'pod-pending' && !isReadOnly) {
+            // NEW: Added C-Note input inside POD tab!
             cardHtml += `
-                <div style="margin-bottom: 5px; font-size:12px; color:#5f6368;"><strong>C-Note:</strong> ${trip.cNote || "Not Entered"}</div>
+                <div style="margin-bottom: 5px;">
+                    <input type="text" class="compact-input" style="border: 1px solid #dadce0; width:100%; box-sizing:border-box;" 
+                           placeholder="Enter C-Note" value="${trip.cNote || ''}" 
+                           onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
+                </div>
                 <div style="margin-bottom: 5px;"><input type="text" class="compact-input" style="width:100%; border:1px solid #dadce0; box-sizing:border-box;" placeholder="Add Remarks..." value="${trip.podRemark || ''}" onchange="updateBackendData('${trip.id}', 'updatePODRemark', this.value)"></div>
                 <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
                     <label style="margin:0;">POD Date:</label>
@@ -747,24 +752,35 @@
         let finalTrips = getFilteredTrips(base);
 
         const container = document.getElementById('deployed-container');
-        if (finalTrips.length === 0) { container.innerHTML = `<div style="text-align:center; color:#5f6368;">No trips found.</div>`; return; }
+        if (finalTrips.length === 0) { container.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No trips found.</div>`; return; }
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, 'deployed')).join('');
     }
 
+    // --- FIX: SHOW ALL TRIPS IN PENDING (No C-Note or Status blocking) ---
     function renderPOD(subTab) {
         activePodTab = subTab;
         document.getElementById('btn-pod-pending').classList.toggle('active', subTab === 'Pending');
         document.getElementById('btn-pod-received').classList.toggle('active', subTab === 'Received');
 
-        // ALL DELIVERED TRIPS SHOW HERE!
-        let base = allTrips.filter(t => (t.status || '').trim() === 'Delivered');
-        if (subTab === 'Pending') base = base.filter(t => !t.podDate || t.podDate.trim() === '');
-        if (subTab === 'Received') base = base.filter(t => t.podDate && t.podDate.trim() !== '');
+        let base = allTrips; // Pulls from ALL trips directly
+
+        if (subTab === 'Pending') {
+            base = base.filter(t => !t.podDate || String(t.podDate).trim() === '');
+        }
+        if (subTab === 'Received') {
+            base = base.filter(t => t.podDate && String(t.podDate).trim() !== '');
+        }
 
         let finalTrips = getFilteredTrips(base);
-
-        document.getElementById('pod-summary').innerText = `No. of ${subTab} POD: ${finalTrips.length}`;
         const container = document.getElementById('pod-container');
+        
+        document.getElementById('pod-summary').innerText = `No. of ${subTab} POD: ${finalTrips.length}`;
+
+        if (finalTrips.length === 0) { 
+            container.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No trips found.</div>`; 
+            return; 
+        }
+
         const viewMode = subTab === 'Pending' ? 'pod-pending' : 'pod-received';
         container.innerHTML = finalTrips.map((t, i) => buildTripCard(t, i, viewMode)).join('');
     }
@@ -777,15 +793,15 @@
 
         if (tripStat !== 'All') finalTrips = finalTrips.filter(t => (t.status || '').trim() === tripStat);
         if (podStat !== 'All') {
-            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => (t.status || '').trim() === 'Delivered' && (!t.podDate || t.podDate.trim() === ''));
-            if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && t.podDate.trim() !== '');
+            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => !t.podDate || String(t.podDate).trim() === '');
+            if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && String(t.podDate).trim() !== '');
         }
 
         const container = document.getElementById('printable-report');
         document.getElementById('report-actions').style.display = 'flex';
 
         if (finalTrips.length === 0) {
-            container.innerHTML = `<div style="text-align:center; color:#5f6368;">No data matches these filters.</div>`;
+            container.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No data matches these filters.</div>`;
             return;
         }
 
