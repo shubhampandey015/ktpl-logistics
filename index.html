@@ -6,104 +6,103 @@
     <title>KTPL Logistics Tracker</title>
     <link rel="manifest" href="manifest.json">
     <style>
-        /* GEMINI RADIANT STYLING */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: linear-gradient(180deg, #ffffff 0%, #e6f0fa 100%); min-height: 100vh; margin: 0; padding: 15px; color: #1f1f1f; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 600px; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 25px 20px; border-radius: 32px; box-shadow: 0 12px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.8); margin-top: 10px; margin-bottom: 40px; display: none; }
-        
+        /* OPTION 1: GOOGLE MATERIAL DESIGN */
+        body { font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #f8f9fa; min-height: 100vh; margin: 0; padding: 15px; color: #202124; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 600px; background: #ffffff; padding: 25px 20px; border-radius: 8px; border: 1px solid #dadce0; margin-top: 10px; margin-bottom: 40px; display: none; }
+
         /* PIN & LOADING SCREEN STYLING */
-        #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #ffffff 0%, #e6f0fa 100%); z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
-        #loading-overlay { background: linear-gradient(135deg, #0b57d0 0%, #0842a0 100%); display: none; }
-        .loader-text { color: white; font-size: 18px; font-weight: 600; margin-top: 20px; }
-        
-        .pin-box { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 35px 25px; border-radius: 32px; text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.8); width: 100%; max-width: 320px; }
-        .pin-box h2 { margin: 0 0 10px 0; color: #202124; font-size: 22px; }
-        .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: bold; margin-bottom: 20px; padding: 10px; width: 80%; border: 2px solid #dadce0; border-radius: 12px; }
-        .pin-input:focus { border-color: #0b57d0; outline: none; box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.2); }
-        
+        #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8f9fa; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
+        #loading-overlay { background: #ffffff; display: none; }
+        .loader-text { color: #1a73e8; font-size: 18px; font-weight: 500; margin-top: 20px; }
+
+        .pin-box { background: #ffffff; padding: 35px 25px; border-radius: 8px; border: 1px solid #dadce0; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
+        .pin-box h2 { margin: 0 0 10px 0; color: #202124; font-size: 22px; font-weight: 500; }
+        .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 20px; padding: 10px; width: 80%; border: 1px solid #dadce0; border-radius: 4px; }
+        .pin-input:focus { border-color: #1a73e8; outline: none; border-width: 2px; padding: 9px; }
+        .sync-text { font-size: 13px; font-weight: 500; margin-top: 15px; color: #5f6368; }
+
         /* UI ELEMENTS */
         .greeting { text-align: center; margin-bottom: 20px; }
-        .greeting h1 { font-size: 26px; font-weight: 400; margin: 0; color: #202124; }
-        .main-tabs { display: flex; background: #fff; border-radius: 20px; padding: 5px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto; white-space: nowrap; }
-        .main-tab { flex: 1; text-align: center; padding: 10px 15px; cursor: pointer; font-size: 13px; font-weight: 600; color: #5f6368; border-radius: 15px; transition: 0.3s; min-width: 70px; }
-        .main-tab.active { background: #e8f0fe; color: #0b57d0; }
-        .app-section { display: none; animation: fadeIn 0.4s ease; }
+        .greeting h1 { font-size: 24px; font-weight: 400; margin: 0; color: #202124; }
+        .main-tabs { display: flex; border-bottom: 1px solid #dadce0; margin-bottom: 20px; overflow-x: auto; white-space: nowrap; }
+        .main-tab { flex: 1; text-align: center; padding: 12px 15px; cursor: pointer; font-size: 14px; font-weight: 500; color: #5f6368; transition: 0.2s; min-width: 70px; border-bottom: 3px solid transparent; }
+        .main-tab.active { color: #1a73e8; border-bottom: 3px solid #1a73e8; }
+        .app-section { display: none; animation: fadeIn 0.3s ease; }
         .app-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* FORM ELEMENTS */
-        .form-group { margin-top: 12px; }
-        label { display: block; font-size: 13px; font-weight: 600; color: #5f6368; padding-left: 5px; margin-bottom: 4px; text-align: left; }
+        .form-group { margin-top: 16px; }
+        label { display: block; font-size: 12px; font-weight: 500; color: #5f6368; margin-bottom: 4px; text-align: left; }
         .required-star { color: #d93025; } 
-        input, select { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 12px; box-sizing: border-box; font-size: 14px; background-color: #ffffff; transition: 0.3s; }
-        input:focus, select:focus { outline: none; border-color: #a8c7fa; box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.2); }
-        input:disabled { background-color: #f1f3f4; color: #9aa0a6; cursor: not-allowed; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; padding-left: 5px; font-weight: 500; text-align: left; }
-        .section-divider { height: 1px; background: rgba(0,0,0,0.1); margin: 20px 0; }
+        input, select { width: 100%; padding: 10px 12px; border: 1px solid #dadce0; border-radius: 4px; box-sizing: border-box; font-size: 14px; color: #202124; background-color: #ffffff; transition: 0.2s; }
+        input:focus, select:focus { outline: none; border: 2px solid #1a73e8; padding: 9px 11px; }
+        input:disabled { background-color: #f1f3f4; color: #9aa0a6; cursor: not-allowed; border-color: #f1f3f4; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; font-weight: 500; text-align: left; }
+        .section-divider { height: 1px; background: #dadce0; margin: 24px 0; }
 
         /* BUTTONS */
-        .btn-primary, .btn-whatsapp, .btn-secondary, .btn-danger { width: 100%; padding: 12px 14px; border: none; border-radius: 16px; cursor: pointer; font-size: 14px; font-weight: 600; box-sizing: border-box; transition: 0.2s;}
-        .btn-primary { color: white; background: linear-gradient(135deg, #0b57d0 0%, #0842a0 100%); box-shadow: 0 4px 10px rgba(11, 87, 208, 0.2); }
-        .btn-whatsapp { color: white; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2); }
-        .btn-business { color: white; background: linear-gradient(135deg, #102d36 0%, #1e4d5c 100%); box-shadow: 0 4px 10px rgba(16, 45, 54, 0.2); }
-        .btn-danger { color: white; background: #d93025; box-shadow: 0 4px 10px rgba(217, 48, 37, 0.2); }
-        .btn-secondary { border: 1px solid #dadce0; background: #f1f3f4; color: #3c4043; box-shadow: none; }
-        .btn-primary:active, .btn-whatsapp:active, .btn-business:active, .btn-secondary:active, .btn-danger:active { transform: scale(0.98); }
+        .btn-primary, .btn-whatsapp, .btn-secondary, .btn-business, .btn-danger { width: 100%; padding: 10px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; box-sizing: border-box; transition: background 0.2s, box-shadow 0.2s; }
+        .btn-primary { color: #ffffff; background: #1a73e8; }
+        .btn-primary:hover { background: #1b66c9; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
+        .btn-whatsapp { color: #ffffff; background: #188c38; }
+        .btn-whatsapp:hover { background: #14792f; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
+        .btn-business { color: #ffffff; background: #005f73; }
+        .btn-danger { color: #ffffff; background: #d93025; }
+        .btn-secondary { border: 1px solid #dadce0; background: #ffffff; color: #1a73e8; }
+        .btn-secondary:hover { background: #f8f9fa; }
 
         /* AUTOCOMPLETE */
         .autocomplete { position: relative; display: block; text-align: left; }
-        .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border: 1px solid #dadce0; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); max-height: 200px; overflow-y: auto; display: none; margin-top: 4px; }
-        .autocomplete-items div { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 14px; }
-        .autocomplete-items div:hover { background-color: #e8f0fe; }
+        .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border: 1px solid #dadce0; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; display: none; margin-top: 2px; }
+        .autocomplete-items div { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 14px; color: #202124; }
+        .autocomplete-items div:hover { background-color: #f1f3f4; }
 
         /* CARDS & COMPONENTS */
-        .sub-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .sub-tab { flex: 1; text-align: center; padding: 8px; cursor: pointer; font-size: 13px; font-weight: 600; border-radius: 10px; background: #f1f3f4; color: #5f6368; }
-        .sub-tab.active { background: #0b57d0; color: #fff; }
-        .trip-card { background: #fff; border-radius: 16px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; font-size: 13px; text-align: left;}
-        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; }
-        .status-transit { background: #fff3e0; color: #e65100; }
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+        .sub-tab { flex: 1; text-align: center; padding: 6px; cursor: pointer; font-size: 13px; font-weight: 500; border-radius: 16px; border: 1px solid #dadce0; background: #ffffff; color: #5f6368; }
+        .sub-tab.active { background: #e8f0fe; color: #1a73e8; border-color: #e8f0fe; }
+        .trip-card { background: #ffffff; border-radius: 8px; padding: 16px; margin-bottom: 12px; border: 1px solid #dadce0; font-size: 13px; text-align: left; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.1); }
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+        .status-transit { background: #fef7e0; color: #b06000; }
         .status-delivered { background: #e6f4ea; color: #137333; }
         .status-cancelled { background: #fce8e6; color: #d93025; }
-        
-        #unified-filter-bar { background: #fff; padding: 15px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; display: none; animation: fadeIn 0.4s; text-align: left; }
-        .filter-header { font-size: 12px; font-weight: bold; color: #5f6368; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;}
-        .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 12px; font-weight: bold; cursor: pointer; padding: 5px 0; margin-top: 10px; text-align: left; box-shadow: none; width: auto;}
-        .history-panel { display: none; background: #f8f9fa; border-radius: 12px; padding: 10px; margin-top: 5px; font-size: 12px; color: #3c4043; border-left: 3px solid #0b57d0; max-height: 150px; overflow-y: auto;}
-        .history-item { margin-bottom: 8px; border-bottom: 1px solid #e8eaed; padding-bottom: 4px; }
-        .pod-badge { background: #e8f0fe; color: #0b57d0; padding: 6px 12px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; display: inline-block; font-size: 12px;}
-        .compact-input { padding: 8px; font-size: 13px; border-radius: 8px; }
+
+        #unified-filter-bar { background: #ffffff; padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #dadce0; display: none; animation: fadeIn 0.3s; text-align: left; }
+        .filter-header { font-size: 12px; font-weight: 500; color: #5f6368; margin-bottom: 12px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
+        .history-btn { background: transparent; border: none; color: #1a73e8; font-size: 12px; font-weight: 500; cursor: pointer; padding: 4px 0; margin-top: 8px; text-align: left; width: auto; box-shadow: none;}
+        .history-panel { display: none; background: #f8f9fa; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-size: 12px; color: #3c4043; border-left: 3px solid #1a73e8; max-height: 150px; overflow-y: auto;}
+        .history-item { margin-bottom: 8px; border-bottom: 1px solid #dadce0; padding-bottom: 4px; }
+        .pod-badge { background: #e8f0fe; color: #1a73e8; padding: 6px 12px; border-radius: 4px; font-weight: 500; margin-bottom: 16px; display: inline-block; font-size: 12px;}
+        .compact-input { padding: 8px 10px; font-size: 13px; }
 
         /* MODALS */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; padding: 20px;}
-        .modal-content { background: #fff; padding: 25px; border-radius: 24px; width: 100%; max-width: 320px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(32,33,36,0.6); justify-content: center; align-items: center; padding: 20px;}
+        .modal-content { background: #ffffff; padding: 24px; border-radius: 8px; width: 100%; max-width: 320px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
-        /* REPORTS TABLE */
-        .screen-report-container { overflow-x: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e8eaed; margin-top: 10px; }
+        /* REPORTS TABLE - SCREEN UI */
+        .screen-report-container { overflow-x: auto; background: #ffffff; border-radius: 8px; border: 1px solid #dadce0; margin-top: 16px; }
         .report-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
-        .report-table th, .report-table td { padding: 10px 12px; border-bottom: 1px solid #e8eaed; text-align: left; }
-        .report-table th { background: #f8f9fa; font-weight: 600; color: #5f6368; }
-        
+        .report-table th, .report-table td { padding: 10px 12px; border-bottom: 1px solid #dadce0; text-align: left; color: #202124; }
+        .report-table th { background: #f8f9fa; font-weight: 500; color: #5f6368; }
+
         .print-only { display: none; }
-        .admin-action-btn { background: transparent; border: 1px solid #dadce0; border-radius: 8px; padding: 4px 8px; font-size: 11px; cursor: pointer; color: #5f6368; margin-right: 5px;}
-        .admin-action-btn:hover { background: #f1f3f4; }
+        .admin-action-btn { background: transparent; border: 1px solid #dadce0; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; color: #1a73e8; margin-right: 5px; font-weight: 500;}
+        .admin-action-btn:hover { background: #f8f9fa; }
 
         /* STRICT PDF PRINT STYLES */
         @media print { 
             @page { margin: 0; }
             body * { visibility: hidden; }
             body { padding: 0; margin: 0; background: #fff; }
-            
             #print-report-container, #print-report-container * { visibility: visible; }
             #print-report-container { position: absolute; left: 0; top: 0; width: 100%; padding: 10mm; box-sizing: border-box; display: block !important; }
-            
             .screen-report-container { display: none !important; }
             #report-actions, .main-tabs, .greeting, #unified-filter-bar, #btn-logout { display: none !important; }
-
             .print-header { text-align: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; display: block; }
             .print-header h2 { font-size: 18px; color: #000; margin: 0; font-weight: bold; }
-            
             .print-table { border: 2px solid #000; box-shadow: none; border-radius: 0; border-collapse: collapse; width: 100%; font-size: 10px;}
             .print-table th, .print-table td { border: 1px solid #000; color: #000; padding: 4px 6px; text-align: left;}
             .print-table th { border-bottom: 2px solid #000; font-weight: bold; }
@@ -130,7 +129,7 @@
 </div>
 
 <div class="container" id="main-app">
-    <button id="btn-logout" onclick="logoutApp()" style="position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.8); border: 1px solid #dadce0; color: #5f6368; padding: 6px 12px; border-radius: 12px; font-size: 12px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">Logout</button>
+    <button id="btn-logout" onclick="logoutApp()" style="position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.8); border: 1px solid #dadce0; color: #5f6368; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; box-shadow: 0 1px 2px rgba(60,64,67,0.1);">Logout</button>
     
     <div class="greeting" style="margin-top: 10px;">
         <h2 id="user-name-text" style="font-size: 20px; font-weight: 500; color: #5f6368; margin: 0 0 5px 0; display: none;"></h2>
@@ -148,7 +147,7 @@
     <div id="unified-filter-bar">
         <div class="filter-header">
             Search Filter
-            <span style="color:#0b57d0; font-size:11px; cursor:pointer; padding: 4px;" onclick="clearFilters()">Reset</span>
+            <span style="color:#1a73e8; font-size:11px; cursor:pointer; padding: 4px;" onclick="clearFilters()">Reset</span>
         </div>
         <div class="grid-2">
             <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
@@ -229,11 +228,11 @@
     </div>
 
     <div id="tab-reports" class="app-section">
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e8eaed;">
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #dadce0;">
             <div class="grid-2">
                 <div>
                     <label>Trip Status:</label>
-                    <select id="report-trip-status" class="compact-input" style="background:#fff;">
+                    <select id="report-trip-status" class="compact-input">
                         <option value="All">All</option>
                         <option value="In-Transit">In-Transit</option>
                         <option value="Delivered">Delivered</option>
@@ -242,7 +241,7 @@
                 </div>
                 <div>
                     <label>POD Status:</label>
-                    <select id="report-pod-status" class="compact-input" style="background:#fff;">
+                    <select id="report-pod-status" class="compact-input">
                         <option value="All">All</option>
                         <option value="Pending">Pending</option>
                         <option value="Received">Received</option>
@@ -262,19 +261,19 @@
 
     <div id="tab-admin" class="app-section">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="color:#202124; margin:0;">User Access Control</h3>
-            <button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0; border-radius: 8px;" onclick="openAddUserModal()">+ Add User</button>
+            <h3 style="color:#202124; margin:0; font-weight:500;">User Access Control</h3>
+            <button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0; border-radius: 4px;" onclick="openAddUserModal()">+ Add User</button>
         </div>
         <p style="font-size:13px; color:#5f6368; margin-top: 5px;">Manage roles and PINs for the application.</p>
         
-        <div style="background: #fff; border: 1px solid #e8eaed; border-radius: 12px; overflow-x: auto; margin-top: 15px;">
+        <div style="background: #fff; border: 1px solid #dadce0; border-radius: 8px; overflow-x: auto; margin-top: 15px;">
             <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
                 <thead>
                     <tr style="background: #f8f9fa;">
-                        <th style="padding: 10px; border-bottom: 1px solid #e8eaed;">Name</th>
-                        <th style="padding: 10px; border-bottom: 1px solid #e8eaed;">Role</th>
-                        <th style="padding: 10px; border-bottom: 1px solid #e8eaed;">PIN</th>
-                        <th style="padding: 10px; border-bottom: 1px solid #e8eaed;">Actions</th>
+                        <th style="padding: 10px; border-bottom: 1px solid #dadce0;">Name</th>
+                        <th style="padding: 10px; border-bottom: 1px solid #dadce0;">Role</th>
+                        <th style="padding: 10px; border-bottom: 1px solid #dadce0;">PIN</th>
+                        <th style="padding: 10px; border-bottom: 1px solid #dadce0;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="admin-user-list">
@@ -289,7 +288,7 @@
 
 <div id="whatsappChoiceModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0; color:#202124;">Choose WhatsApp App</h3>
+        <h3 style="margin-top:0; color:#202124; font-weight:500;">Choose WhatsApp App</h3>
         <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Which app would you like to use to send this message?</p>
         <div style="display:flex; flex-direction: column; gap:10px;">
             <button class="btn-whatsapp" onclick="executeWhatsAppShare('regular')" style="margin-top:0;">Regular WhatsApp</button>
@@ -301,17 +300,17 @@
 
 <div id="expenseModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0; color:#202124;">Additional Expenses</h3>
+        <h3 style="margin-top:0; color:#202124; font-weight:500;">Additional Expenses</h3>
         <input type="hidden" id="expense-trip-id">
         <div class="grid-2">
-            <div class="form-group"><label style="text-align:left;">Loading</label><input type="number" id="exp-loading" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Amount"></div>
-            <div class="form-group"><label style="text-align:left;">Unloading</label><input type="number" id="exp-unloading" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Amount"></div>
-            <div class="form-group"><label style="text-align:left;">LR</label><input type="number" id="exp-lr" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Amount"></div>
-            <div class="form-group"><label style="text-align:left;">Others Amount</label><input type="number" id="exp-others" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Amount"></div>
+            <div class="form-group"><label style="text-align:left;">Loading</label><input type="number" id="exp-loading" class="compact-input" placeholder="Amount"></div>
+            <div class="form-group"><label style="text-align:left;">Unloading</label><input type="number" id="exp-unloading" class="compact-input" placeholder="Amount"></div>
+            <div class="form-group"><label style="text-align:left;">LR</label><input type="number" id="exp-lr" class="compact-input" placeholder="Amount"></div>
+            <div class="form-group"><label style="text-align:left;">Others Amount</label><input type="number" id="exp-others" class="compact-input" placeholder="Amount"></div>
         </div>
         <div class="form-group autocomplete" style="margin-top: 10px;">
             <label style="text-align:left;">Other Expense Type</label>
-            <input type="text" id="exp-other-reason" class="compact-input" style="border: 1px solid #dadce0;" placeholder="e.g. Toll, Weighbridge...">
+            <input type="text" id="exp-other-reason" class="compact-input" placeholder="e.g. Toll, Weighbridge...">
             <div id="exp-other-reason-list" class="autocomplete-items"></div>
         </div>
         <div style="display:flex; gap:10px; margin-top:20px;">
@@ -323,9 +322,9 @@
 
 <div id="deliveryModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0;">Confirm Delivery</h3>
+        <h3 style="margin-top:0; font-weight:500;">Confirm Delivery</h3>
         <label style="text-align:left;">Delivery Date:</label>
-        <input type="date" id="delivery-date-input" style="margin-bottom:15px; border: 1px solid #dadce0;" class="compact-input">
+        <input type="date" id="delivery-date-input" style="margin-bottom:15px;" class="compact-input">
         <input type="hidden" id="delivery-trip-id">
         <div style="display:flex; gap:10px;">
             <button class="btn-secondary" onclick="closeModal()" style="margin-top:0;">Cancel</button>
@@ -336,7 +335,7 @@
 
 <div id="shareModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0; color:#202124;">Share Trip Update</h3>
+        <h3 style="margin-top:0; color:#202124; font-weight:500;">Share Trip Update</h3>
         <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Choose who you want to share these details with via WhatsApp.</p>
         <input type="hidden" id="share-modal-trip-id">
         <div style="display:flex; flex-direction: column; gap:10px;">
@@ -349,23 +348,23 @@
 
 <div id="adminEditModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0;">Edit Trip (Admin)</h3>
+        <h3 style="margin-top:0; font-weight:500;">Edit Trip (Admin)</h3>
         <input type="hidden" id="edit-trip-id">
-        <div class="form-group"><label style="text-align:left;">Vehicle No.</label><input type="text" id="edit-vnum" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatVehicleNumber(this)"></div>
+        <div class="form-group"><label style="text-align:left;">Vehicle No.</label><input type="text" id="edit-vnum" class="compact-input" onchange="formatVehicleNumber(this)"></div>
         <div class="grid-2">
-            <div class="form-group"><label style="text-align:left;">Veh Type</label><input type="text" id="edit-vtype" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'upper')"></div>
-            <div class="form-group"><label style="text-align:left;">Capacity</label><input type="text" id="edit-vcap" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'upper')"></div>
+            <div class="form-group"><label style="text-align:left;">Veh Type</label><input type="text" id="edit-vtype" class="compact-input" onchange="formatCase(this, 'upper')"></div>
+            <div class="form-group"><label style="text-align:left;">Capacity</label><input type="text" id="edit-vcap" class="compact-input" onchange="formatCase(this, 'upper')"></div>
         </div>
-        <div class="form-group"><label style="text-align:left;">Route Origin</label><input type="text" id="edit-from" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'title')"></div>
-        <div class="form-group"><label style="text-align:left;">Route Destination</label><input type="text" id="edit-to" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'title')"></div>
+        <div class="form-group"><label style="text-align:left;">Route Origin</label><input type="text" id="edit-from" class="compact-input" onchange="formatCase(this, 'title')"></div>
+        <div class="form-group"><label style="text-align:left;">Route Destination</label><input type="text" id="edit-to" class="compact-input" onchange="formatCase(this, 'title')"></div>
         
         <div class="grid-2">
-            <div class="form-group"><label style="text-align:left;">Vehicle Freight</label><input type="text" id="edit-vfreight" class="compact-input" style="border: 1px solid #dadce0;"></div>
-            <div class="form-group"><label style="text-align:left;">Charged Freight</label><input type="text" id="edit-cfreight" class="compact-input" style="border: 1px solid #dadce0;"></div>
+            <div class="form-group"><label style="text-align:left;">Vehicle Freight</label><input type="text" id="edit-vfreight" class="compact-input"></div>
+            <div class="form-group"><label style="text-align:left;">Charged Freight</label><input type="text" id="edit-cfreight" class="compact-input"></div>
         </div>
         <div class="grid-2">
-            <div class="form-group"><label style="text-align:left;">Driver Name</label><input type="text" id="edit-dname" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatCase(this, 'title')"></div>
-            <div class="form-group"><label style="text-align:left;">Driver Contact</label><input type="text" id="edit-dcontact" class="compact-input" style="border: 1px solid #dadce0;" onchange="formatPhoneInput(this)"></div>
+            <div class="form-group"><label style="text-align:left;">Driver Name</label><input type="text" id="edit-dname" class="compact-input" onchange="formatCase(this, 'title')"></div>
+            <div class="form-group"><label style="text-align:left;">Driver Contact</label><input type="text" id="edit-dcontact" class="compact-input" onchange="formatPhoneInput(this)"></div>
         </div>
         
         <div style="display:flex; gap:10px; margin-top:15px;">
@@ -377,13 +376,13 @@
 
 <div id="userManageModal" class="modal">
     <div class="modal-content">
-        <h3 id="user-modal-title" style="margin-top:0;">Add / Edit User</h3>
+        <h3 id="user-modal-title" style="margin-top:0; font-weight:500;">Add / Edit User</h3>
         <input type="hidden" id="manage-user-old-name">
-        <div class="form-group"><label style="text-align:left;">User Name</label><input type="text" id="manage-user-name" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Name"></div>
-        <div class="form-group"><label style="text-align:left;">4-Digit PIN</label><input type="number" id="manage-user-pin" class="compact-input" style="border: 1px solid #dadce0;" placeholder="0711"></div>
+        <div class="form-group"><label style="text-align:left;">User Name</label><input type="text" id="manage-user-name" class="compact-input" placeholder="Name"></div>
+        <div class="form-group"><label style="text-align:left;">4-Digit PIN</label><input type="number" id="manage-user-pin" class="compact-input" placeholder="0711"></div>
         <div class="form-group">
             <label style="text-align:left;">Role Assignment</label>
-            <select id="manage-user-role" class="compact-input" style="border: 1px solid #dadce0;">
+            <select id="manage-user-role" class="compact-input">
                 <option value="Admin">Admin</option>
                 <option value="Manager">Manager</option>
                 <option value="SelfOnly">SelfOnly</option>
@@ -408,12 +407,13 @@
     let currentUser = null; 
     let currentActiveMainTab = 'tab-placement';
     
+    // SEPARATED MEMORY FOR TABS
     let activeDeployedTab = 'In-Transit'; 
     let activePodTab = 'Pending'; 
 
     let lastSavedPlacementStr = "";
     let currentReportTrips = [];
-    let pendingWhatsAppMsg = ""; // Holds the generated text while the user picks Business/Regular
+    let pendingWhatsAppMsg = ""; 
 
     // --- FUNCTION TO SAFELY EXTRACT NUMBERS ---
     function getSafeTel(num) {
@@ -745,7 +745,6 @@
         closeExpenseModal();
         alert("Additional expenses saved.");
         
-        // Refresh memory dropdown for reasons
         setupCustomDropdown('exp-other-reason', 'exp-other-reason-list', () => [...new Set(allTrips.map(tr => tr.otherExpReason).filter(Boolean))].sort());
     }
 
@@ -774,7 +773,7 @@
         `;
         
         if (isAdminOrMaster && trip.status.trim() === 'In-Transit') {
-            cardHtml += `<span style="cursor:pointer; color:#0b57d0; font-size:11px; text-decoration:underline;" onclick="openAdminEdit('${trip.id}')">Edit Trip</span>`;
+            cardHtml += `<span style="cursor:pointer; color:#1a73e8; font-size:11px; text-decoration:underline;" onclick="openAdminEdit('${trip.id}')">Edit Trip</span>`;
         }
         cardHtml += `</div>`;
 
@@ -790,10 +789,10 @@
 
         cardHtml += `
             <div style="font-size: 11px; margin-bottom: 10px;">
-                <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#0b57d0; font-weight:600; cursor:pointer;" onclick="document.getElementById('contact-${viewMode}-${trip.id}').style.display = document.getElementById('contact-${viewMode}-${trip.id}').style.display === 'block' ? 'none' : 'block';">View Contact Details ▼</span>
-                <div id="contact-${viewMode}-${trip.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:8px; margin-top:5px; border:1px solid #e8eaed; color:#3c4043;">
-                    <div style="margin-bottom:6px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} <br> <a href="tel:${dTel}" style="color:#0b57d0; text-decoration:none; font-size:13px; font-weight:bold;">📞 ${trip.dContact || 'N/A'}</a></div>
-                    <div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} <br> <a href="tel:${tTel}" style="color:#0b57d0; text-decoration:none; font-size:13px; font-weight:bold;">📞 ${trip.tContact || 'N/A'}</a></div>
+                <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#1a73e8; font-weight:500; cursor:pointer;" onclick="document.getElementById('contact-${viewMode}-${trip.id}').style.display = document.getElementById('contact-${viewMode}-${trip.id}').style.display === 'block' ? 'none' : 'block';">View Contact Details ▼</span>
+                <div id="contact-${viewMode}-${trip.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:4px; margin-top:5px; border:1px solid #dadce0; color:#3c4043;">
+                    <div style="margin-bottom:6px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} <br> <a href="tel:${dTel}" style="color:#1a73e8; text-decoration:none; font-size:13px; font-weight:500;">📞 ${trip.dContact || 'N/A'}</a></div>
+                    <div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none; font-size:13px; font-weight:500;">📞 ${trip.tContact || 'N/A'}</a></div>
                 </div>
             </div>
         `;
@@ -801,40 +800,40 @@
         if (viewMode === 'deployed' && !isReadOnly) {
             cardHtml += `
                 <div class="grid-2" style="margin-bottom: 5px;">
-                    <input type="text" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
-                    <input type="text" class="compact-input" style="border: 1px solid #dadce0;" placeholder="Remarks" value="${trip.remarks || ''}" onchange="updateBackendData('${trip.id}', 'updateTripRemark', this.value)">
+                    <input type="text" class="compact-input" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
+                    <input type="text" class="compact-input" placeholder="Remarks" value="${trip.remarks || ''}" onchange="updateBackendData('${trip.id}', 'updateTripRemark', this.value)">
                 </div>
             `;
             if (trip.status.trim() === 'In-Transit') {
                 cardHtml += `
                     <div style="display:flex; margin-top:5px;">
-                        <select class="select-status compact-input" onchange="handleStatusChange('${trip.id}', this.value, this)" style="flex:1; border: 1px solid #dadce0;">
+                        <select class="select-status compact-input" onchange="handleStatusChange('${trip.id}', this.value, this)" style="flex:1;">
                             <option value="In-Transit" selected>In-Transit</option>
                             <option value="Delivered">Delivered</option>
                             <option value="Cancelled Trip">Cancelled Trip</option>
                         </select>
                         <input type="text" class="compact-input custom-note-input" placeholder="Current location..." value="${trip.statusNote || ""}" 
-                               onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="border: 1px solid #dadce0; margin-left: 5px; flex:2;">
+                               onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="margin-left: 5px; flex:2;">
                     </div>
                 `;
             } else if (trip.status.trim() === 'Delivered') {
                 if (isMasterAdmin) {
                     cardHtml += `
                         <div style="display:flex; margin-top:5px;">
-                            <select class="select-status compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')" style="background: #fff3e0; color: #e65100; border: 1px solid #dadce0;">
+                            <select class="select-status compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')" style="background: #e6f4ea; color: #137333; border-color: #e6f4ea;">
                                 <option value="Delivered" selected>Status: Delivered</option>
                                 <option value="In-Transit">Undo: Back to In-Transit</option>
                             </select>
                         </div>
                     `;
                 } else {
-                    cardHtml += `<div style="margin-top: 5px; color:#137333; font-weight:bold; font-size: 12px;">Delivered on ${trip.deliveryDate}</div>`;
+                    cardHtml += `<div style="margin-top: 5px; color:#137333; font-weight:500; font-size: 12px;">Delivered on ${trip.deliveryDate}</div>`;
                 }
             } else if (trip.status.trim() === 'Cancelled Trip') {
                 if (isMasterAdmin) {
                     cardHtml += `
                         <div style="display:flex; margin-top:5px;">
-                            <select class="select-status compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')" style="background: #fce8e6; color: #d93025; border: 1px solid #dadce0;">
+                            <select class="select-status compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')" style="background: #fce8e6; color: #d93025; border-color: #fce8e6;">
                                 <option value="Cancelled Trip" selected>Status: Cancelled</option>
                                 <option value="In-Transit">Undo: Back to In-Transit</option>
                             </select>
@@ -846,9 +845,9 @@
             cardHtml += `
                 <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}', '${viewMode}')">▶ View History</button>
-                    <div>
-                        <button class="btn-secondary" style="font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer; width:auto; margin-right: 5px;" onclick="openExpenseModal('${trip.id}')">₹ Expenses</button>
-                        <button class="btn-secondary" style="font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer; width:auto;" onclick="openShareModal('${trip.id}')">Share</button>
+                    <div style="display:flex; gap: 5px;">
+                        <button class="btn-secondary" style="font-size:11px; padding:6px 10px; width:auto;" onclick="openExpenseModal('${trip.id}')">₹ Expenses</button>
+                        <button class="btn-secondary" style="font-size:11px; padding:6px 10px; width:auto;" onclick="openShareModal('${trip.id}')">Share</button>
                     </div>
                 </div>
                 <div id="hist-${viewMode}-${trip.id}" class="history-panel"></div>
@@ -858,15 +857,15 @@
         if (viewMode === 'pod-pending' && !isReadOnly) {
             cardHtml += `
                 <div style="margin-bottom: 5px;">
-                    <input type="text" class="compact-input" style="border: 1px solid #dadce0; width:100%; box-sizing:border-box;" 
-                           placeholder="Enter C-Note" value="${trip.cNote || ''}" 
-                           onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
+                    <input type="text" class="compact-input" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
                 </div>
-                <div style="margin-bottom: 5px;"><input type="text" class="compact-input" style="width:100%; border:1px solid #dadce0; box-sizing:border-box;" placeholder="Add POD Remarks..." value="${trip.podRemark || ''}" onchange="updateBackendData('${trip.id}', 'updatePODRemark', this.value)"></div>
+                <div style="margin-bottom: 5px;">
+                    <input type="text" class="compact-input" placeholder="Add POD Remarks..." value="${trip.podRemark || ''}" onchange="updateBackendData('${trip.id}', 'updatePODRemark', this.value)">
+                </div>
                 <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
                     <label style="margin:0;">POD Date:</label>
-                    <input type="date" class="compact-input" id="pod-date-${trip.id}" style="border:1px solid #dadce0;">
-                    <button class="btn-primary" style="padding: 6px 12px; margin:0; width:auto; border-radius:8px;" onclick="savePOD('${trip.id}')">Save</button>
+                    <input type="date" class="compact-input" id="pod-date-${trip.id}">
+                    <button class="btn-primary" style="padding: 6px 12px; margin:0; width:auto;" onclick="savePOD('${trip.id}')">Save</button>
                 </div>
             `;
         }
@@ -875,10 +874,10 @@
             cardHtml += `
                 <div style="margin-bottom: 5px; font-size:12px; color:#5f6368;"><strong>C-Note:</strong> ${trip.cNote || "Not Entered"}</div>
                 ${trip.podRemark ? `<div style="margin-bottom: 5px; font-size:12px; color:#5f6368;"><strong>Remarks:</strong> ${trip.podRemark}</div>` : ''}
-                <div style="margin-top:10px; color:#137333; font-weight:bold;">POD Received: ${trip.podDate}</div>
+                <div style="margin-top:10px; color:#137333; font-weight:500;">POD Received: ${trip.podDate}</div>
             `;
             if (!isReadOnly) {
-                cardHtml += `<button class="btn-secondary" style="font-size:11px; padding:4px 8px; margin-top:5px; border-radius:6px; cursor:pointer; width:auto;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove</button>`;
+                cardHtml += `<button class="btn-secondary" style="font-size:11px; padding:6px 10px; margin-top:5px; width:auto;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove</button>`;
             }
         }
 
@@ -978,7 +977,11 @@
             <tbody>
         `;
         finalTrips.forEach((t, i) => {
-            let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : `In-Transit`;
+            let stat = (t.status || '').trim();
+            if (stat === 'Delivered') stat = `Delivered`;
+            else if (stat === 'Cancelled Trip') stat = `Cancelled`;
+            else stat = `In-Transit`;
+            
             screenHtml += `
                 <tr>
                     <td>${i+1}</td>
@@ -1027,7 +1030,11 @@
             if (pTrips.length === 0) return;
             
             pTrips.forEach((t, i) => {
-                let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : `In-Transit`;
+                let stat = (t.status || '').trim();
+                if (stat === 'Delivered') stat = `Delivered`;
+                else if (stat === 'Cancelled Trip') stat = `Cancelled`;
+                else stat = `In-Transit`;
+                
                 printHtml += `<tr>`;
                 if (i === 0) {
                     printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
@@ -1250,11 +1257,11 @@
         return isValid;
     }
 
-    // NEW SMART WHATSAPP HANDLER
+    // SMART WHATSAPP HANDLER
     function openWhatsAppDirectly(msg) {
         pendingWhatsAppMsg = msg;
         document.getElementById('whatsappChoiceModal').style.display = 'flex';
-        closeShareModal(); // Closes Deployed share modal if open to prevent overlap
+        closeShareModal(); 
     }
 
     function closeWhatsAppChoiceModal() {
@@ -1434,10 +1441,10 @@
             const pin = u.PIN || u.pin;
             return `
             <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e8eaed; font-weight: 500;">${name || 'Unknown'}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e8eaed;">${role || 'Unassigned'}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e8eaed; font-family: monospace;">${pin || 'None'}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e8eaed;">
+                <td style="padding: 10px; border-bottom: 1px solid #dadce0; font-weight: 500;">${name || 'Unknown'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #dadce0;">${role || 'Unassigned'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #dadce0; font-family: monospace;">${pin || 'None'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #dadce0;">
                     <button class="admin-action-btn" onclick="openEditUserModal('${name}', '${pin}', '${role}')">Edit</button>
                     <button class="admin-action-btn" style="color: #d93025;" onclick="deleteUser('${name}')">Delete</button>
                 </td>
