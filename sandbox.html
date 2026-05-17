@@ -369,7 +369,7 @@
             <button class="btn-whatsapp" onclick="shareReportWhatsApp()" style="margin-top:0;">💬 WhatsApp</button>
             <button class="btn-team" onclick="triggerMISGeneration('Standard MIS')" style="margin-top:0;">📊 Standard MIS (.xlsx)</button>
             <button class="btn-team" onclick="triggerMISGeneration('Preset MIS')" style="margin-top:0;">📈 Preset MIS (.xlsx)</button>
-            <button class="btn-secondary" onclick="triggerRecoExcelDownload()" style="grid-column: span 2;">💰 Download Payments & Reco Report (.xlsx)</button>
+            <button class="btn-secondary" onclick="triggerRecoExcelDownload()" style="grid-column: span 2;">💰 Download Payments Ledger (.xlsx)</button>
         </div>
     </div>
 
@@ -478,7 +478,6 @@
         </div>
         <div class="form-group"><label style="text-align:left;">Route Origin</label><input type="text" id="edit-from" class="compact-input" onchange="formatCase(this, 'title')"></div>
         <div class="form-group"><label style="text-align:left;">Route Destination</label><input type="text" id="edit-to" class="compact-input" onchange="formatCase(this, 'title')"></div>
-        
         <div class="grid-2">
             <div class="form-group"><label style="text-align:left;">Vehicle Freight</label><input type="text" id="edit-vfreight" class="compact-input"></div>
             <div class="form-group"><label style="text-align:left;">Charged Freight</label><input type="text" id="edit-cfreight" class="compact-input"></div>
@@ -487,7 +486,6 @@
             <div class="form-group"><label style="text-align:left;">Driver Name</label><input type="text" id="edit-dname" class="compact-input" onchange="formatCase(this, 'title')"></div>
             <div class="form-group"><label style="text-align:left;">Driver Contact</label><input type="text" id="edit-dcontact" class="compact-input" onchange="formatPhoneInput(this)"></div>
         </div>
-        
         <div style="display:flex; gap:10px; margin-top:15px;">
             <button class="btn-clear" onclick="closeAdminEditModal()">Cancel</button>
             <button class="btn-primary" onclick="saveAdminEdit()">Update</button>
@@ -519,7 +517,6 @@
 </div>
 
 <script>
-    // --- APP CORE CONFIGURATION ---
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzc2y0Caupte-mahQ5R3Vlc--92gkvL-B_cc1tC37qyPDmNeWUaX44ufvZnxrdtR5W_AQ/exec"; 
     
     let vehicles = {}; let clients = []; let transporters = {}; 
@@ -535,9 +532,9 @@
     let currentRecoFilter = "Own Booking";
 
     let lastSavedPlacementStr = "";
-    let currentReportTrips = [];
     let pendingWhatsAppMsg = ""; 
 
+    // --- UTILITY FUNCTIONS ---
     function getSafeTel(num) {
         if (!num) return '';
         let c = String(num).replace(/[\s-]/g, '').trim();
@@ -546,7 +543,29 @@
         return '+91' + c;
     }
 
-    // --- DIRECT NATIVE WHATSAPP LAUNCHER ---
+    function formatCase(el, style) { if(!el.value) return; el.value = style==='upper' ? el.value.trim().toUpperCase() : el.value.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()); }
+    function formatSentence(el) { if(el.value) el.value = el.value.trim().charAt(0).toUpperCase() + el.value.trim().slice(1); }
+    function formatVehicleNumber(el) { if(!el.value) return; el.value = el.value.toUpperCase().replace(/[\s-]/g, ''); }
+    function formatPhoneString(numberStr) {
+        if (!numberStr) return "";
+        let cleanNumber = numberStr.replace(/[\s-]/g, '').trim(); 
+        if (cleanNumber.startsWith("+91")) return cleanNumber;
+        else if (cleanNumber.startsWith("91") && cleanNumber.length > 10) return "+" + cleanNumber;
+        else return "+91" + cleanNumber;
+    }
+    function formatPhoneInput(el) { el.value = formatPhoneString(el.value); }
+    function getFormattedDate() {
+        const dInput = document.getElementById('b-date').value;
+        if (!dInput) return "";
+        const dObj = new Date(dInput);
+        const dd = String(dObj.getDate()).padStart(2, '0');
+        const mm = String(dObj.getMonth() + 1).padStart(2, '0');
+        const yyyy = dObj.getFullYear();
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        return `${dd}/${mm}/${yyyy}, ${days[dObj.getDay()]}`;
+    }
+
+    // --- WHATSAPP LAUNCHER ---
     function openWhatsAppChoice(msg) {
         pendingWhatsAppMsg = msg;
         document.getElementById('whatsappChoiceModal').style.display = 'flex';
@@ -579,7 +598,6 @@
             url = `https://web.whatsapp.com/send?text=${encodedMsg}`;
             window.open(url, '_blank');
         }
-        
         closeWhatsAppChoiceModal();
     }
 
@@ -593,28 +611,6 @@
     function bypassLoading() {
         document.getElementById('loading-overlay').style.display = 'none';
         document.getElementById('pin-overlay').style.display = 'flex';
-    }
-
-    async function performDatabaseSync() {
-        const response = await fetch(GOOGLE_SCRIPT_URL);
-        if (!response.ok) throw new Error("Connection failed.");
-        const data = await response.json();
-        
-        vehicles = data.vehicles || {}; clients = data.clients || []; transporters = data.transporters || {}; 
-        allTrips = data.trips || []; users = data.users || []; statusLogs = data.statusLogs || [];
-
-        setupMemoryDropdowns();
-        
-        setupCustomDropdown('uf-party', 'uf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t.from))].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t.to))].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t.type))].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t.weight))].sort(), triggerCurrentRender);
-
-        setupCustomDropdown('rf-party', 'rf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
-
-        renderAdminUsers();
     }
 
     window.onload = async () => {
@@ -653,9 +649,7 @@
 
         try {
             await performDatabaseSync();
-            
             const user = users.find(u => String(u.PIN || u.pin) === String(pin)) || (pin === "1234" ? {Name: "Master Admin", Role: "Master Admin"} : null);
-
             if (user) {
                 currentUser = user;
                 sessionStorage.setItem('ktpl_unlocked', 'true');
@@ -676,7 +670,7 @@
             document.getElementById('bypass-btn').style.display = "inline-block";
         }
     }
-    
+
     function logoutApp() { sessionStorage.clear(); location.reload(); }
 
     function applyUserPermissions() {
@@ -687,8 +681,8 @@
         document.getElementById('user-name-text').style.display = 'block';
 
         const role = currentUser.Role || currentUser.role;
-
         const cFreightInput = document.getElementById('c-freight');
+        
         if (role === 'Admin' || role === 'Master Admin') {
             cFreightInput.disabled = false;
             cFreightInput.placeholder = "Amount";
@@ -704,11 +698,10 @@
             document.getElementById('nav-admin').style.display = 'none';
         }
         
-        // Ensure starting at homepage
         returnToHome();
     }
 
-    // --- WORKSPACE NAVIGATION ENGINE ---
+    // --- WORKSPACE NAVIGATION ---
     function openWorkspace(id) {
         document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -722,21 +715,7 @@
         currentActiveMainTab = 'panel-homepage';
     }
 
-    function switchMainTab(tabId) {
-        openWorkspace(tabId);
-        document.querySelectorAll('.main-tab').forEach(el => el.classList.remove('active'));
-        const navId = tabId.replace('tab-', 'nav-');
-        if(document.getElementById(navId)) document.getElementById(navId).classList.add('active');
-
-        document.getElementById('unified-filter-bar').style.display = (tabId === 'tab-placement' || tabId === 'tab-admin' || tabId === 'panel-homepage') ? 'none' : 'none'; // Keeping hidden globally per new UI style, elements have their own filters.
-        
-        if (tabId === 'tab-reports') {
-            document.getElementById('screen-report').innerHTML = '';
-            document.getElementById('print-report-container').innerHTML = '';
-            document.getElementById('report-actions').style.display = 'none';
-        }
-        clearFilters(); 
-    }
+    function switchMainTab(tabId) { openWorkspace(tabId); }
 
     function triggerCurrentRender() {
         if (currentActiveMainTab === 'tab-deployed') renderDeployed();
@@ -744,29 +723,19 @@
         if (currentActiveMainTab === 'tab-payments') renderReconciliation();
     }
 
-    // --- PLACEMENT ENGINE ---
-    function togglePlacementMode(mode) {
-        currentPlacementType = mode;
-        document.getElementById('btn-place-own').classList.toggle('active', mode === 'Own Booking');
-        document.getElementById('btn-place-rev').classList.toggle('active', mode === 'Reverse Logistics');
+    // --- RESTORED DROPDOWN MEMORY ENGINE ---
+    async function performDatabaseSync() {
+        const response = await fetch(GOOGLE_SCRIPT_URL);
+        if (!response.ok) throw new Error("Connection failed.");
+        const data = await response.json();
         
-        document.getElementById('group-broking-agent').style.display = mode === 'Reverse Logistics' ? 'block' : 'none';
-        document.getElementById('placement-driver-fields').style.display = mode === 'Own Booking' ? 'grid' : 'none';
-        document.getElementById('placement-transporter-fields').style.display = mode === 'Own Booking' ? 'block' : 'none';
-        document.getElementById('group-vfreight').style.display = mode === 'Own Booking' ? 'block' : 'none';
-        document.getElementById('btn-msg-team').style.display = mode === 'Own Booking' ? 'block' : 'none';
-        
-        // Reset Vehicle Autocomplete based on mode
-        setupCustomDropdown('v-num', 'v-num-list', () => {
-            let fleet = Object.keys(vehicles);
-            if (currentPlacementType === "Reverse Logistics") {
-                return fleet.sort(); // Strict company fleet matching
-            }
-            return fleet.sort();
-        }, autoFillVehicle);
+        vehicles = data.vehicles || {}; clients = data.clients || []; transporters = data.transporters || {}; 
+        allTrips = data.trips || []; users = data.users || []; statusLogs = data.statusLogs || [];
+
+        setupMemoryDropdowns();
+        renderAdminUsers();
     }
 
-    // --- DROPDOWN ENGINE ---
     function setupCustomDropdown(inputId, listId, dataFetchFn, onSelectFn = null) {
         const inputElement = document.getElementById(inputId);
         const listContainer = document.getElementById(listId);
@@ -794,6 +763,51 @@
         document.addEventListener("click", function (e) { if (e.target !== inputElement) listContainer.style.display = "none"; });
     }
 
+    function setupMemoryDropdowns() {
+        setupCustomDropdown('p-name', 'p-name-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+        setupCustomDropdown('v-num', 'v-num-list', () => {
+            let fleet = Object.keys(vehicles);
+            if (currentPlacementType === "Reverse Logistics") return fleet.sort(); 
+            return fleet.sort();
+        }, autoFillVehicle);
+        setupCustomDropdown('t-name', 't-name-list', () => Object.keys(transporters).sort());
+        setupCustomDropdown('t-person', 't-person-list', () => transporters[document.getElementById('t-name').value]?.map(p => p.name).sort() || [], autoFillContact);
+        setupCustomDropdown('route-from', 'route-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
+        setupCustomDropdown('route-to', 'route-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
+        
+        setupCustomDropdown('rf-party', 'rf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+
+        allTrips.forEach(t => {
+            if (t.dName && t.dName.trim() !== "" && t.dContact) {
+                let n = t.dName.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+                driverData[n] = t.dContact.trim();
+            }
+        });
+        
+        setupCustomDropdown('d-name', 'd-name-list', () => Object.keys(driverData).sort(), (selectedName) => {
+            document.getElementById('d-contact').value = driverData[selectedName] || "";
+        });
+
+        const driverNums = [...new Set(Object.values(driverData))];
+        const dcInput = document.getElementById('d-contact');
+        const dcList = document.getElementById('d-contact-list');
+        if(dcInput && dcList) {
+            dcInput.addEventListener("input", function() {
+                dcList.innerHTML = "";
+                if (this.value.length > 2) {
+                    let c = this.value.replace(/[\s-]/g, '').trim();
+                    const matches = driverNums.filter(n => n.includes(c));
+                    matches.forEach(m => {
+                        let div = document.createElement("div"); div.innerHTML = m;
+                        div.onclick = () => { dcInput.value = m; dcList.style.display = "none"; };
+                        dcList.appendChild(div);
+                    });
+                    dcList.style.display = matches.length ? "block" : "none";
+                } else { dcList.style.display = "none"; }
+            });
+        }
+    }
+
     function autoFillVehicle(vNum) { 
         const u = vNum.toUpperCase(); 
         if (vehicles[u]) { 
@@ -810,6 +824,136 @@
         } 
     }
 
+    // --- PLACEMENT ENGINE ---
+    function togglePlacementMode(mode) {
+        currentPlacementType = mode;
+        document.getElementById('btn-place-own').classList.toggle('active', mode === 'Own Booking');
+        document.getElementById('btn-place-rev').classList.toggle('active', mode === 'Reverse Logistics');
+        
+        document.getElementById('group-broking-agent').style.display = mode === 'Reverse Logistics' ? 'block' : 'none';
+        document.getElementById('placement-driver-fields').style.display = mode === 'Own Booking' ? 'grid' : 'none';
+        document.getElementById('placement-transporter-fields').style.display = mode === 'Own Booking' ? 'block' : 'none';
+        document.getElementById('group-vfreight').style.display = mode === 'Own Booking' ? 'block' : 'none';
+        document.getElementById('btn-msg-team').style.display = mode === 'Own Booking' ? 'block' : 'none';
+        
+        setupMemoryDropdowns(); // Refresh fleet strictness
+    }
+
+    function clearPlacementForm() {
+        document.querySelectorAll('#tab-placement input').forEach(i => i.value = '');
+        document.getElementById('b-date').valueAsDate = new Date();
+    }
+
+    function validateForm() {
+        let isValid = true;
+        let requiredFields = ['b-date', 'p-name', 'route-from', 'route-to', 'v-num', 'v-type', 'v-weight'];
+        
+        if (currentPlacementType === 'Own Booking') {
+            requiredFields.push('d-contact', 't-name', 't-contact');
+        } else {
+            requiredFields.push('p-agent');
+        }
+
+        document.querySelectorAll('.error-msg').forEach(msg => msg.style.display = 'none');
+        document.querySelectorAll('input').forEach(input => input.style.borderColor = '#dadce0');
+        
+        requiredFields.forEach(id => {
+            const inputField = document.getElementById(id);
+            if (inputField && !inputField.value.trim()) { 
+                document.getElementById('err-' + id).style.display = 'block'; 
+                inputField.style.borderColor = '#d93025'; 
+                isValid = false; 
+            }
+        });
+        if (!isValid) alert("Please fill in all mandatory fields marked with an asterisk (*).");
+        return isValid;
+    }
+
+    function savePlacementDetails() {
+        if (!validateForm()) return;
+
+        const date = getFormattedDate();
+        const party = document.getElementById('p-name').value;
+        const rFrom = document.getElementById('route-from').value;
+        const rTo = document.getElementById('route-to').value;
+        const vNum = document.getElementById('v-num').value.toUpperCase();
+        
+        if (currentPlacementType === "Reverse Logistics" && !vehicles[vNum]) {
+            return alert("Error: Reverse Logistics mode strictly requires a valid KTPL fleet vehicle asset.");
+        }
+
+        const currentPlacementStr = `${date}-${party}-${rFrom}-${rTo}-${vNum}`;
+        const isDuplicate = allTrips.some(t => String(t.date).trim() === String(date).trim() && String(t.vNum).trim().toUpperCase() === String(vNum).trim().toUpperCase());
+
+        if (!isDuplicate && lastSavedPlacementStr !== currentPlacementStr) {
+            const tripId = "TRP-" + Date.now();
+            const createdByName = currentUser.Name || currentUser.name || "Unknown";
+            
+            const payload = {
+                action: 'saveTrip', id: tripId, date: date, party: party, 
+                from: rFrom, to: rTo, vNum: vNum, vType: document.getElementById('v-type').value, weight: document.getElementById('v-weight').value,
+                createdBy: createdByName,
+                vFreight: document.getElementById('v-freight').value || "", cFreight: document.getElementById('c-freight').value || "",
+                dName: document.getElementById('d-name').value, dContact: formatPhoneString(document.getElementById('d-contact').value), 
+                tName: document.getElementById('t-name').value, tPerson: document.getElementById('t-person').value, 
+                tContact: formatPhoneString(document.getElementById('t-contact').value), remarks: document.getElementById('remarks').value,
+                bookingType: currentPlacementType, brokingAgent: document.getElementById('p-agent').value
+            };
+            
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            
+            allTrips.push({
+                id: tripId, date: payload.date, party: payload.party, from: payload.from, to: payload.to, vNum: payload.vNum,
+                type: payload.vType, weight: payload.weight, status: "In-Transit", deliveryDate: "", statusNote: "",
+                cNote: "", podDate: "", vFreight: payload.vFreight, cFreight: payload.cFreight, bookingType: payload.bookingType,
+                brokingAgent: payload.brokingAgent, financialLedger: '{"income":[],"expense":[]}', invoiceNo: "",
+                receivableStatus: "Pending", amtReceived: "", advancePaid: "", payableStatus: "Pending", remarks: payload.remarks
+            });
+            lastSavedPlacementStr = currentPlacementStr; 
+            alert("Details saved successfully!");
+            clearPlacementForm();
+            returnToHome();
+        }
+    }
+
+    function generatePlacementMessage(type) {
+        if (!validateForm()) return; 
+        
+        const date = getFormattedDate();
+        const party = document.getElementById('p-name').value;
+        const rFrom = document.getElementById('route-from').value;
+        const rTo = document.getElementById('route-to').value;
+        const vNum = document.getElementById('v-num').value.toUpperCase();
+        const vType = document.getElementById('v-type').value; 
+        const vWeight = document.getElementById('v-weight').value;
+        const dName = document.getElementById('d-name').value; 
+        const dContact = formatPhoneString(document.getElementById('d-contact').value);
+        const tName = document.getElementById('t-name').value;
+        const tPerson = document.getElementById('t-person').value;
+        const tContact = formatPhoneString(document.getElementById('t-contact').value);
+        const remarks = document.getElementById('remarks').value;
+
+        let header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n`;
+        header += `*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${rFrom}\n*To:* ${rTo}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n\n`;
+        
+        if (currentPlacementType === 'Own Booking') {
+            if (dName) header += `*Driver Name:* ${dName}\n`;
+            if (dContact) header += `*Driver Contact No:* ${dContact}\n\n`;
+            if (type === 'team') {
+                header += `*Transporter:* ${tName}\n`;
+                if (tPerson) header += `*Person Name:* ${tPerson}\n`;
+                if (tContact) header += `*Contact Number:* ${tContact}\n\n`;
+                if (remarks) header += `*Remarks:* ${remarks}`;
+            }
+        } else {
+            let pAgent = document.getElementById('p-agent').value;
+            header += `*Broking Agent:* ${pAgent}\n\n`;
+            if (remarks) header += `*Remarks:* ${remarks}`;
+        }
+        
+        openWhatsAppChoice(header);
+    }
+
     // --- DYNAMIC FINANCIAL LEDGER ENGINE ---
     function openFinancialAllocation(tripId) {
         const trip = allTrips.find(t => t.id === tripId);
@@ -824,17 +968,6 @@
 
         if(ledger.income) ledger.income.forEach(row => addFinancialRow('income', row.type, row.amt));
         if(ledger.expense) ledger.expense.forEach(row => addFinancialRow('expense', row.type, row.amt));
-
-        // Add old format generic expenses if present and JSON is empty to migrate data seamlessly
-        if(ledger.expense.length === 0 && trip.otherExp && trip.otherExp > 0) {
-            addFinancialRow('expense', trip.otherExpReason || 'Generic Others', trip.otherExp);
-        }
-        if(ledger.expense.length === 0 && trip.loadingExp && trip.loadingExp > 0) {
-            addFinancialRow('expense', 'Loading', trip.loadingExp);
-        }
-        if(ledger.expense.length === 0 && trip.unloadingExp && trip.unloadingExp > 0) {
-            addFinancialRow('expense', 'Unloading', trip.unloadingExp);
-        }
 
         document.getElementById('financialModal').style.display = "flex";
     }
@@ -975,14 +1108,6 @@
             let ledger = { income: [], expense: [] };
             try { ledger = JSON.parse(t.financialLedger); } catch(e){}
             
-            // Legacy Migration Support
-            if(ledger.expense.length === 0 && (t.otherExp || t.loadingExp || t.unloadingExp || t.lrExp)) {
-                if(t.otherExp) ledger.expense.push({amt: parseFloat(t.otherExp)});
-                if(t.loadingExp) ledger.expense.push({amt: parseFloat(t.loadingExp)});
-                if(t.unloadingExp) ledger.expense.push({amt: parseFloat(t.unloadingExp)});
-                if(t.lrExp) ledger.expense.push({amt: parseFloat(t.lrExp)});
-            }
-
             let baseRev = parseFloat(t.cFreight || 0);
             let extraRev = ledger.income ? ledger.income.reduce((s, r) => s + r.amt, 0) : 0;
             let totalReceivable = baseRev + extraRev;
@@ -1088,7 +1213,7 @@
         alert("Financial settlement criteria updated.");
     }
 
-    // --- SHARED CARD RENDERER HELPERS ---
+    // --- SHARED CARD HELPER ---
     function buildTripCard(trip, index, viewMode) {
         const role = currentUser.Role || currentUser.role;
         let isReadOnly = (role === 'ReadOnly');
@@ -1367,7 +1492,6 @@
         
         const wb = XLSX.utils.book_new();
         
-        // Group logic by month
         let grouped = {};
         tripsToExport.forEach(t => {
             let mName = "Master";
@@ -1385,7 +1509,6 @@
 
         for (let mKey in grouped) {
             let rawRows = [];
-            // EXACT FORMAT REQUESTED
             rawRows.push(["Sr. No.", "C-Note No.", "Booking Date", "Delivery Date", "TAT", "From", "To", "Qty", "Pkg Type", "Vehicle No.", "Vehicle Type", "Vehicle Capacity", "Remarks"]);
             
             grouped[mKey].forEach((t, i) => {
@@ -1419,11 +1542,7 @@
             });
 
             const ws = XLSX.utils.aoa_to_sheet(rawRows);
-            // Hide gridlines and apply basic styling via SheetJS free limits
             ws['!views'] = [{ showGridLines: false }];
-            
-            // Note: SheetJS Community Edition does not fully support injecting embedded Font families (like Calibri 12) directly without the Pro version, 
-            // but the data layout, clean alignment, and no-gridline structure is fully established.
             XLSX.utils.book_append_sheet(wb, ws, mKey);
         }
 
@@ -1465,13 +1584,7 @@
         XLSX.writeFile(wb, `KTPL_Payments_Ledger.xlsx`);
     }
 
-    // --- STANDARD APP FUNCTIONS CONTINUED ---
-    function clearFilters() {
-        const filterIds = ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-origin', 'uf-dest'];
-        filterIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
-        triggerCurrentRender();
-    }
-
+    // --- SHARED BACKEND LOGIC ---
     function handleStatusChange(tripId, value, selectElement) {
         if (value === 'Delivered') {
             triggerDeliveryModal(tripId);
@@ -1620,111 +1733,7 @@
         statusLogs.push({tripId: tripId, note: noteValue, time: timeNow});
     }
 
-    function formatCase(el, style) { if(!el.value) return; el.value = style==='upper' ? el.value.trim().toUpperCase() : el.value.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()); }
-    function formatSentence(el) { if(el.value) el.value = el.value.trim().charAt(0).toUpperCase() + el.value.trim().slice(1); }
-    function formatVehicleNumber(el) { if(!el.value) return; el.value = el.value.toUpperCase().replace(/[\s-]/g, ''); }
-    function formatPhoneString(numberStr) {
-        if (!numberStr) return "";
-        let cleanNumber = numberStr.replace(/[\s-]/g, '').trim(); 
-        if (cleanNumber.startsWith("+91")) return cleanNumber;
-        else if (cleanNumber.startsWith("91") && cleanNumber.length > 10) return "+" + cleanNumber;
-        else return "+91" + cleanNumber;
-    }
-    function formatPhoneInput(el) { el.value = formatPhoneString(el.value); }
-
-    function getFormattedDate() {
-        const dInput = document.getElementById('b-date').value;
-        if (!dInput) return "";
-        const dObj = new Date(dInput);
-        const dd = String(dObj.getDate()).padStart(2, '0');
-        const mm = String(dObj.getMonth() + 1).padStart(2, '0');
-        const yyyy = dObj.getFullYear();
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        return `${dd}/${mm}/${yyyy}, ${days[dObj.getDay()]}`;
-    }
-
-    function validateForm() {
-        let isValid = true;
-        let requiredFields = ['b-date', 'p-name', 'route-from', 'route-to', 'v-num', 'v-type', 'v-weight'];
-        
-        if (currentPlacementType === 'Own Booking') {
-            requiredFields.push('d-contact', 't-name', 't-contact');
-        } else {
-            requiredFields.push('p-agent');
-        }
-
-        document.querySelectorAll('.error-msg').forEach(msg => msg.style.display = 'none');
-        document.querySelectorAll('input').forEach(input => input.style.borderColor = '#dadce0');
-        
-        requiredFields.forEach(id => {
-            const inputField = document.getElementById(id);
-            if (inputField && !inputField.value.trim()) { 
-                document.getElementById('err-' + id).style.display = 'block'; 
-                inputField.style.borderColor = '#d93025'; 
-                isValid = false; 
-            }
-        });
-        if (!isValid) alert("Please fill in all mandatory fields marked with an asterisk (*).");
-        return isValid;
-    }
-
-    function generatePlacementMessage(type) {
-        if (!validateForm()) return; 
-
-        const date = getFormattedDate();
-        const party = document.getElementById('p-name').value;
-        const rFrom = document.getElementById('route-from').value;
-        const rTo = document.getElementById('route-to').value;
-        const vNum = document.getElementById('v-num').value.toUpperCase();
-        const vType = document.getElementById('v-type').value; 
-        const vWeight = document.getElementById('v-weight').value;
-        const dName = document.getElementById('d-name').value; 
-        const dContact = formatPhoneString(document.getElementById('d-contact').value);
-        const tName = document.getElementById('t-name').value;
-        const tPerson = document.getElementById('t-person').value;
-        const tContact = formatPhoneString(document.getElementById('t-contact').value);
-        const remarks = document.getElementById('remarks').value;
-
-        let header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n`;
-        header += `*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${rFrom}\n*To:* ${rTo}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n\n`;
-        if (dName) header += `*Driver Name:* ${dName}\n`;
-        if (dContact) header += `*Driver Contact No:* ${dContact}\n\n`;
-
-        let finalMessage = header;
-        if (type === 'team') {
-            finalMessage += `*Transporter:* ${tName}\n`;
-            if (tPerson) finalMessage += `*Person Name:* ${tPerson}\n`;
-            if (tContact) finalMessage += `*Contact Number:* ${tContact}\n\n`;
-            if (remarks) finalMessage += `*Remarks:* ${remarks}`;
-        }
-        
-        openWhatsAppChoice(finalMessage);
-    }
-
-    function shareReportWhatsApp() {
-        if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
-        const today = new Date();
-        const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        
-        let message = `*Vehicle Status Update - ${dateStr}, ${days[today.getDay()]}*\n\n`;
-        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party))];
-        uniqueParties.forEach(p => {
-            message += `*Client:* ${p}\n`; let counter = 1;
-            currentReportTrips.forEach(t => {
-                if (t.party === p) {
-                    let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
-                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight}\n*Status:* *${stat}*\n`;
-                    if (t.statusNote) message += `*Current Location:* ${t.statusNote}\n`;
-                    message += `\n`;
-                    counter++;
-                }
-            });
-        });
-        openWhatsAppChoice(message);
-    }
-
-    // --- ADMIN USER MANAGEMENT LOGIC ---
+    // --- ADMIN SYSTEM ---
     function renderAdminUsers() {
         const tbody = document.getElementById('admin-user-list');
         if(!tbody) return;
@@ -1764,9 +1773,7 @@
         document.getElementById('userManageModal').style.display = 'flex';
     }
 
-    function closeUserModal() {
-        document.getElementById('userManageModal').style.display = 'none';
-    }
+    function closeUserModal() { document.getElementById('userManageModal').style.display = 'none'; }
 
     function saveUserManage() {
         const oldName = document.getElementById('manage-user-old-name').value;
