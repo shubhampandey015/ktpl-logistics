@@ -6,13 +6,12 @@
     <title>KTPL Logistics Tracker</title>
     <link rel="manifest" href="manifest.json">
     <style>
-        /* CRITICAL MOBILE FIXES: Prevents padding and grids from breaking widths */
+        /* CRITICAL MOBILE FIXES */
         * { box-sizing: border-box; }
 
         /* GOOGLE MATERIAL DESIGN */
         body { font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #f8f9fa; min-height: 100vh; margin: 0; padding: 10px; color: #202124; display: flex; justify-content: center; }
         
-        /* Container has position: relative to anchor the Logout button securely */
         .container { position: relative; width: 100%; max-width: 600px; background: #ffffff; padding: 20px 15px; border-radius: 8px; border: 1px solid #dadce0; margin-top: 10px; margin-bottom: 40px; display: none; }
 
         /* PIN & LOADING SCREEN STYLING */
@@ -30,9 +29,9 @@
         .greeting { text-align: center; margin-bottom: 20px; padding-top: 10px; }
         .greeting h1 { font-size: 24px; font-weight: 400; margin: 0; color: #202124; }
         
-        /* TABS FIX: Evenly spaced, no overlapping */
-        .main-tabs { display: flex; border-bottom: 1px solid #dadce0; margin-bottom: 20px; width: 100%; justify-content: space-between; }
-        .main-tab { flex: 1; text-align: center; padding: 12px 2px; cursor: pointer; font-size: 13px; font-weight: 500; color: #5f6368; transition: 0.2s; border-bottom: 3px solid transparent; white-space: nowrap; }
+        .main-tabs { display: flex; border-bottom: 1px solid #dadce0; margin-bottom: 20px; width: 100%; justify-content: space-between; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .main-tabs::-webkit-scrollbar { display: none; }
+        .main-tab { flex: 1 0 auto; text-align: center; padding: 12px 10px; cursor: pointer; font-size: 13px; font-weight: 500; color: #5f6368; transition: 0.2s; border-bottom: 3px solid transparent; }
         .main-tab.active { color: #1a73e8; border-bottom: 3px solid #1a73e8; }
         
         .app-section { display: none; animation: fadeIn 0.3s ease; }
@@ -47,9 +46,12 @@
         input:focus, select:focus { outline: none; border: 2px solid #1a73e8; padding: 9px 11px; }
         input:disabled { background-color: #f1f3f4; color: #9aa0a6; cursor: not-allowed; border-color: #f1f3f4; }
         
-        /* STRICT GRID FIXES FOR MOBILE: 3 columns will ALWAYS remain 3 columns */
+        /* STRICT GRID FIXES FOR MOBILE */
         .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: 100%; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; }
+        @media (max-width: 400px) {
+            .grid-3 { grid-template-columns: 1fr; } 
+        }
         
         .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; font-weight: 500; text-align: left; }
         .section-divider { height: 1px; background: #dadce0; margin: 24px 0; }
@@ -66,10 +68,10 @@
         .btn-business { color: #ffffff; background: #005f73; }
         .btn-business:hover { background: #004654; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
         
-        .btn-team { color: #ffffff; background: #673ab7; }
+        .btn-team { color: #ffffff; background: #673ab7; } /* Deep Purple */
         .btn-team:hover { background: #512da8; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
         
-        .btn-clear { border: 1px solid #dadce0; background: #ffffff; color: #5f6368; }
+        .btn-clear { border: 1px solid #dadce0; background: #ffffff; color: #5f6368; } /* Neutral Grey */
         .btn-clear:hover { background: #f1f3f4; color: #202124; }
 
         .btn-danger { color: #ffffff; background: #d93025; }
@@ -99,11 +101,11 @@
         .history-panel { display: none; background: #f8f9fa; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-size: 12px; color: #3c4043; border-left: 3px solid #1a73e8; max-height: 150px; overflow-y: auto;}
         .history-item { margin-bottom: 8px; border-bottom: 1px solid #dadce0; padding-bottom: 4px; }
         .pod-badge { background: #e8f0fe; color: #1a73e8; padding: 6px 12px; border-radius: 4px; font-weight: 500; margin-bottom: 16px; display: inline-block; font-size: 12px;}
-        .compact-input { padding: 8px 5px; font-size: 12px; width: 100%; }
+        .compact-input { padding: 8px 10px; font-size: 13px; }
 
         /* MODALS */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(32,33,36,0.6); justify-content: center; align-items: center; padding: 15px;}
-        .modal-content { background: #ffffff; padding: 20px; border-radius: 8px; width: 100%; max-width: 340px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .modal-content { background: #ffffff; padding: 24px; border-radius: 8px; width: 100%; max-width: 340px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
         /* REPORTS TABLE - SCREEN UI */
         .screen-report-container { overflow-x: auto; background: #ffffff; border-radius: 8px; border: 1px solid #dadce0; margin-top: 16px; -webkit-overflow-scrolling: touch;}
@@ -448,11 +450,12 @@
         return '+91' + c;
     }
 
-    // --- DIRECT WHATSAPP LAUNCHER W/ MODAL ---
-    function openWhatsAppDirectly(msg) {
+    // --- DIRECT NATIVE WHATSAPP LAUNCHER (WITH INTENTS FIX) ---
+    function openWhatsAppChoice(msg) {
         pendingWhatsAppMsg = msg;
         document.getElementById('whatsappChoiceModal').style.display = 'flex';
-        closeShareModal(); 
+        // Hide the share modal if it was open
+        document.getElementById('shareModal').style.display = 'none';
     }
 
     function closeWhatsAppChoiceModal() {
@@ -461,22 +464,31 @@
 
     function executeWhatsAppShare(appType) {
         const encodedMsg = encodeURIComponent(pendingWhatsAppMsg);
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        let url = "";
         
-        if (isMobile) {
-            // Native Direct Linking
-            if (appType === 'regular') {
-                url = `whatsapp://send?text=${encodedMsg}`;
-            } else if (appType === 'business') {
-                url = `whatsapp-business://send?text=${encodedMsg}`;
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        const isAndroid = /android/i.test(userAgent);
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+
+        let url = "";
+
+        if (isAndroid) {
+            // ANDROID: Force OS to open exact app package to bypass browsers blocking custom schemes
+            if (appType === 'business') {
+                url = `intent://send?text=${encodedMsg}#Intent;package=com.whatsapp.w4b;scheme=whatsapp;end`;
+            } else {
+                url = `intent://send?text=${encodedMsg}#Intent;package=com.whatsapp;scheme=whatsapp;end`;
             }
             window.location.href = url;
+        } else if (isIOS) {
+            // iOS: Direct API link works perfectly and prompts safely in Safari
+            url = `https://api.whatsapp.com/send?text=${encodedMsg}`;
+            window.location.href = url;
         } else {
-            // Desktop fallback
+            // DESKTOP
             url = `https://web.whatsapp.com/send?text=${encodedMsg}`;
             window.open(url, '_blank');
         }
+        
         closeWhatsAppChoiceModal();
     }
 
@@ -1400,7 +1412,67 @@
             if (remarks) finalMessage += `*Remarks:* ${remarks}`;
         }
         
-        openWhatsAppDirectly(finalMessage);
+        openWhatsAppChoice(finalMessage);
+    }
+
+    // --- SHARE FROM DEPLOYED TAB LOGIC ---
+    function openShareModal(tripId) {
+        const trip = allTrips.find(t => t.id === tripId);
+        if (!trip) return;
+        document.getElementById('share-modal-trip-id').value = tripId;
+        document.getElementById('shareModal').style.display = "flex";
+    }
+    
+    function closeShareModal() {
+        document.getElementById('shareModal').style.display = "none";
+    }
+
+    function executeDeployedShare(type) {
+        const tripId = document.getElementById('share-modal-trip-id').value;
+        const trip = allTrips.find(t => t.id === tripId);
+        if (!trip) return;
+
+        let header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n`;
+        header += `*Booking Date:* ${trip.date}\n\n*Party Name:* ${trip.party}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n`;
+        if (trip.dName) header += `*Driver Name:* ${trip.dName}\n`;
+        if (trip.dContact) header += `*Driver Contact No:* ${trip.dContact}\n\n`;
+
+        let finalMessage = header;
+        if (type === 'team') {
+            if(trip.tName) finalMessage += `*Transporter:* ${trip.tName}\n`;
+            if(trip.tPerson) finalMessage += `*Person Name:* ${trip.tPerson}\n`;
+            if(trip.tContact) finalMessage += `*Contact Number:* ${trip.tContact}\n\n`;
+            if(trip.remarks) finalMessage += `*Remarks:* ${trip.remarks}`;
+        }
+        
+        openWhatsAppChoice(finalMessage);
+    }
+
+    function shareReportWhatsApp() {
+        if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
+        
+        const today = new Date();
+        const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayStr = days[today.getDay()];
+        
+        let message = `*Vehicle Status Update - ${dateStr}, ${dayStr}*\n\n`;
+        
+        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party))];
+        uniqueParties.forEach(p => {
+            message += `*Client:* ${p}\n`; let counter = 1;
+            currentReportTrips.forEach(t => {
+                if (t.party === p) {
+                    let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
+                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight}\n*Status:* *${stat}*\n`;
+                    if (t.statusNote) message += `*Current Location:* ${t.statusNote}\n`;
+                    message += `\n`;
+                    counter++;
+                }
+            });
+        });
+        
+        openWhatsAppChoice(message);
     }
 
     // --- ADMIN USER MANAGEMENT LOGIC ---
