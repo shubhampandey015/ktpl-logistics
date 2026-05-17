@@ -2,13 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KTPL Logistics Tracker</title>
     <link rel="manifest" href="manifest.json">
     <style>
+        /* CRITICAL MOBILE FIX: Prevents padding from breaking 100% widths */
+        * { box-sizing: border-box; }
+
         /* OPTION 1: GOOGLE MATERIAL DESIGN */
-        body { font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #f8f9fa; min-height: 100vh; margin: 0; padding: 15px; color: #202124; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 600px; background: #ffffff; padding: 25px 20px; border-radius: 8px; border: 1px solid #dadce0; margin-top: 10px; margin-bottom: 40px; display: none; }
+        body { font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #f8f9fa; min-height: 100vh; margin: 0; padding: 10px; color: #202124; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 600px; background: #ffffff; padding: 20px 15px; border-radius: 8px; border: 1px solid #dadce0; margin-top: 10px; margin-bottom: 40px; display: none; overflow-x: hidden; }
 
         /* PIN & LOADING SCREEN STYLING */
         #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8f9fa; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
@@ -17,14 +20,14 @@
 
         .pin-box { background: #ffffff; padding: 35px 25px; border-radius: 8px; border: 1px solid #dadce0; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
         .pin-box h2 { margin: 0 0 10px 0; color: #202124; font-size: 22px; font-weight: 500; }
-        .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 20px; padding: 10px; width: 80%; border: 1px solid #dadce0; border-radius: 4px; }
+        .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 20px; padding: 10px; width: 100%; border: 1px solid #dadce0; border-radius: 4px; }
         .pin-input:focus { border-color: #1a73e8; outline: none; border-width: 2px; padding: 9px; }
         .sync-text { font-size: 13px; font-weight: 500; margin-top: 15px; color: #5f6368; }
 
         /* UI ELEMENTS */
         .greeting { text-align: center; margin-bottom: 20px; }
         .greeting h1 { font-size: 24px; font-weight: 400; margin: 0; color: #202124; }
-        .main-tabs { display: flex; border-bottom: 1px solid #dadce0; margin-bottom: 20px; overflow-x: auto; white-space: nowrap; }
+        .main-tabs { display: flex; border-bottom: 1px solid #dadce0; margin-bottom: 20px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
         .main-tab { flex: 1; text-align: center; padding: 12px 15px; cursor: pointer; font-size: 14px; font-weight: 500; color: #5f6368; transition: 0.2s; min-width: 70px; border-bottom: 3px solid transparent; }
         .main-tab.active { color: #1a73e8; border-bottom: 3px solid #1a73e8; }
         .app-section { display: none; animation: fadeIn 0.3s ease; }
@@ -32,39 +35,46 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* FORM ELEMENTS */
-        .form-group { margin-top: 16px; }
+        .form-group { margin-top: 16px; width: 100%; }
         label { display: block; font-size: 12px; font-weight: 500; color: #5f6368; margin-bottom: 4px; text-align: left; }
         .required-star { color: #d93025; } 
-        input, select { width: 100%; padding: 10px 12px; border: 1px solid #dadce0; border-radius: 4px; box-sizing: border-box; font-size: 14px; color: #202124; background-color: #ffffff; transition: 0.2s; }
+        input, select { width: 100%; padding: 10px 12px; border: 1px solid #dadce0; border-radius: 4px; font-size: 14px; color: #202124; background-color: #ffffff; transition: 0.2s; }
         input:focus, select:focus { outline: none; border: 2px solid #1a73e8; padding: 9px 11px; }
         input:disabled { background-color: #f1f3f4; color: #9aa0a6; cursor: not-allowed; border-color: #f1f3f4; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        
+        /* RESPONSIVE GRIDS */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; }
+        @media (max-width: 400px) {
+            .grid-3 { grid-template-columns: 1fr; } /* Stacks the 3-column items vertically on tiny screens so they don't break */
+        }
+        
         .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; font-weight: 500; text-align: left; }
         .section-divider { height: 1px; background: #dadce0; margin: 24px 0; }
 
         /* BUTTONS */
-        .btn-primary, .btn-whatsapp, .btn-secondary, .btn-danger { width: 100%; padding: 10px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; box-sizing: border-box; transition: background 0.2s, box-shadow 0.2s; }
+        .btn-primary, .btn-whatsapp, .btn-secondary, .btn-danger { width: 100%; padding: 10px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s, box-shadow 0.2s; }
         .btn-primary { color: #ffffff; background: #1a73e8; }
         .btn-primary:hover { background: #1b66c9; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
         .btn-whatsapp { color: #ffffff; background: #188c38; }
         .btn-whatsapp:hover { background: #14792f; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
+        .btn-business { color: #ffffff; background: #005f73; padding: 10px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;}
         .btn-danger { color: #ffffff; background: #d93025; }
         .btn-secondary { border: 1px solid #dadce0; background: #ffffff; color: #1a73e8; }
         .btn-secondary:hover { background: #f8f9fa; }
 
         /* AUTOCOMPLETE */
-        .autocomplete { position: relative; display: block; text-align: left; }
+        .autocomplete { position: relative; display: block; text-align: left; width: 100%; }
         .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border: 1px solid #dadce0; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; display: none; margin-top: 2px; }
         .autocomplete-items div { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 14px; color: #202124; }
         .autocomplete-items div:hover { background-color: #f1f3f4; }
 
         /* CARDS & COMPONENTS */
-        .sub-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-        .sub-tab { flex: 1; text-align: center; padding: 6px; cursor: pointer; font-size: 13px; font-weight: 500; border-radius: 16px; border: 1px solid #dadce0; background: #ffffff; color: #5f6368; }
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px;}
+        .sub-tab { flex: 1; text-align: center; padding: 8px 12px; cursor: pointer; font-size: 13px; font-weight: 500; border-radius: 16px; border: 1px solid #dadce0; background: #ffffff; color: #5f6368; }
         .sub-tab.active { background: #e8f0fe; color: #1a73e8; border-color: #e8f0fe; }
-        .trip-card { background: #ffffff; border-radius: 8px; padding: 16px; margin-bottom: 12px; border: 1px solid #dadce0; font-size: 13px; text-align: left; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.1); }
-        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+        .trip-card { background: #ffffff; border-radius: 8px; padding: 16px; margin-bottom: 12px; border: 1px solid #dadce0; font-size: 13px; text-align: left; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.1); word-wrap: break-word;}
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; white-space: nowrap;}
         .status-transit { background: #fef7e0; color: #b06000; }
         .status-delivered { background: #e6f4ea; color: #137333; }
         .status-cancelled { background: #fce8e6; color: #d93025; }
@@ -78,11 +88,11 @@
         .compact-input { padding: 8px 10px; font-size: 13px; }
 
         /* MODALS */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(32,33,36,0.6); justify-content: center; align-items: center; padding: 20px;}
-        .modal-content { background: #ffffff; padding: 24px; border-radius: 8px; width: 100%; max-width: 320px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(32,33,36,0.6); justify-content: center; align-items: center; padding: 15px;}
+        .modal-content { background: #ffffff; padding: 20px; border-radius: 8px; width: 100%; max-width: 340px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
         /* REPORTS TABLE - SCREEN UI */
-        .screen-report-container { overflow-x: auto; background: #ffffff; border-radius: 8px; border: 1px solid #dadce0; margin-top: 16px; }
+        .screen-report-container { overflow-x: auto; background: #ffffff; border-radius: 8px; border: 1px solid #dadce0; margin-top: 16px; -webkit-overflow-scrolling: touch;}
         .report-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
         .report-table th, .report-table td { padding: 10px 12px; border-bottom: 1px solid #dadce0; text-align: left; color: #202124; }
         .report-table th { background: #f8f9fa; font-weight: 500; color: #5f6368; }
@@ -124,11 +134,11 @@
 <div id="loading-overlay">
     <div class="loader-text" id="loader-text">Syncing Databank...</div>
     <div id="error-box" style="display:none; color: #ffcccc; font-size: 12px; margin-top: 10px; max-width: 300px; word-wrap: break-word;"></div>
-    <button id="bypass-btn" class="btn-primary" style="display:none; width:auto; padding:8px 20px; border-radius: 12px;" onclick="bypassLoading()">Continue Offline</button>
+    <button id="bypass-btn" class="btn-primary" style="display:none; width:auto; padding:8px 20px; border-radius: 4px;" onclick="bypassLoading()">Continue Offline</button>
 </div>
 
 <div class="container" id="main-app">
-    <button id="btn-logout" onclick="logoutApp()" style="position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.8); border: 1px solid #dadce0; color: #5f6368; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; box-shadow: 0 1px 2px rgba(60,64,67,0.1);">Logout</button>
+    <button id="btn-logout" onclick="logoutApp()" style="position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.9); border: 1px solid #dadce0; color: #5f6368; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; box-shadow: 0 1px 2px rgba(60,64,67,0.1); z-index: 100;">Logout</button>
     
     <div class="greeting" style="margin-top: 10px;">
         <h2 id="user-name-text" style="font-size: 20px; font-weight: 500; color: #5f6368; margin: 0 0 5px 0; display: none;"></h2>
@@ -285,6 +295,18 @@
 
 <div id="print-report-container" class="print-only"></div>
 
+<div id="whatsappChoiceModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:#202124; font-weight:500;">Choose WhatsApp App</h3>
+        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Which app would you like to use to send this message?</p>
+        <div style="display:flex; flex-direction: column; gap:10px;">
+            <button class="btn-whatsapp" onclick="executeWhatsAppShare('regular')" style="margin-top:0;">Regular WhatsApp</button>
+            <button class="btn-business" onclick="executeWhatsAppShare('business')" style="margin-top:0;">WhatsApp Business</button>
+            <button class="btn-secondary" onclick="closeWhatsAppChoiceModal()" style="margin-top: 5px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <div id="expenseModal" class="modal">
     <div class="modal-content">
         <h3 style="margin-top:0; color:#202124; font-weight:500;">Additional Expenses</h3>
@@ -311,7 +333,7 @@
     <div class="modal-content">
         <h3 style="margin-top:0; font-weight:500;">Confirm Delivery</h3>
         <label style="text-align:left;">Delivery Date:</label>
-        <input type="date" id="delivery-date-input" style="margin-bottom:15px;" class="compact-input">
+        <input type="date" id="delivery-date-input" style="margin-bottom:15px; width: 100%;" class="compact-input">
         <input type="hidden" id="delivery-trip-id">
         <div style="display:flex; gap:10px;">
             <button class="btn-secondary" onclick="closeModal()" style="margin-top:0;">Cancel</button>
@@ -323,7 +345,7 @@
 <div id="shareModal" class="modal">
     <div class="modal-content">
         <h3 style="margin-top:0; color:#202124; font-weight:500;">Share Trip Update</h3>
-        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Share these details with your team or client.</p>
+        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Choose who you want to share these details with.</p>
         <input type="hidden" id="share-modal-trip-id">
         <div style="display:flex; flex-direction: column; gap:10px;">
             <button class="btn-primary" onclick="executeDeployedShare('team')" style="margin-top:0;">For Team</button>
@@ -399,6 +421,7 @@
 
     let lastSavedPlacementStr = "";
     let currentReportTrips = [];
+    let pendingWhatsAppMsg = ""; 
 
     // --- FUNCTION TO SAFELY EXTRACT NUMBERS ---
     function getSafeTel(num) {
@@ -409,11 +432,34 @@
         return '+91' + c;
     }
 
-    // --- DIRECT WHATSAPP LAUNCHER (NO MODAL) ---
+    // --- DIRECT WHATSAPP LAUNCHER ---
     function openWhatsAppDirectly(msg) {
-        const encodedMsg = encodeURIComponent(msg);
-        const url = `https://api.whatsapp.com/send?text=${encodedMsg}`;
-        window.open(url, '_blank') || (window.location.href = url);
+        pendingWhatsAppMsg = msg;
+        document.getElementById('whatsappChoiceModal').style.display = 'flex';
+        closeShareModal(); 
+    }
+
+    function closeWhatsAppChoiceModal() {
+        document.getElementById('whatsappChoiceModal').style.display = 'none';
+    }
+
+    function executeWhatsAppShare(appType) {
+        const encodedMsg = encodeURIComponent(pendingWhatsAppMsg);
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        let url = "";
+        
+        if (isMobile) {
+            if (appType === 'regular') {
+                url = `whatsapp://send?text=${encodedMsg}`;
+            } else if (appType === 'business') {
+                url = `whatsapp-business://send?text=${encodedMsg}`;
+            }
+            window.location.href = url;
+        } else {
+            url = `https://web.whatsapp.com/send?text=${encodedMsg}`;
+            window.open(url, '_blank');
+        }
+        closeWhatsAppChoiceModal();
     }
 
     // --- INITIALIZATION ---
@@ -798,14 +844,14 @@
             `;
             if (trip.status.trim() === 'In-Transit') {
                 cardHtml += `
-                    <div style="display:flex; margin-top:5px;">
+                    <div style="display:flex; margin-top:5px; gap: 10px; width: 100%;">
                         <select class="select-status compact-input" onchange="handleStatusChange('${trip.id}', this.value, this)" style="flex:1;">
                             <option value="In-Transit" selected>In-Transit</option>
                             <option value="Delivered">Delivered</option>
                             <option value="Cancelled Trip">Cancelled Trip</option>
                         </select>
                         <input type="text" class="compact-input custom-note-input" placeholder="Current location..." value="${trip.statusNote || ""}" 
-                               onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="margin-left: 5px; flex:2;">
+                               onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="flex:2;">
                     </div>
                 `;
             } else if (trip.status.trim() === 'Delivered') {
@@ -854,7 +900,7 @@
                 <div style="margin-bottom: 5px;">
                     <input type="text" class="compact-input" placeholder="Add POD Remarks..." value="${trip.podRemark || ''}" onchange="updateBackendData('${trip.id}', 'updatePODRemark', this.value)">
                 </div>
-                <div style="display:flex; gap:10px; margin-top:10px; align-items:center;">
+                <div style="display:flex; gap:10px; margin-top:10px; align-items:center; width: 100%;">
                     <label style="margin:0;">POD Date:</label>
                     <input type="date" class="compact-input" id="pod-date-${trip.id}">
                     <button class="btn-primary" style="padding: 6px 12px; margin:0; width:auto;" onclick="savePOD('${trip.id}')">Save</button>
@@ -1337,79 +1383,6 @@
         }
         
         openWhatsAppDirectly(finalMessage);
-    }
-
-    function openShareModal(tripId) {
-        const trip = allTrips.find(t => t.id === tripId);
-        if (!trip) return;
-
-        let header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n`;
-        header += `*Booking Date:* ${trip.date}\n\n*Party Name:* ${trip.party}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n`;
-        if (trip.dName) header += `*Driver Name:* ${trip.dName}\n`;
-        if (trip.dContact) header += `*Driver Contact No:* ${trip.dContact}\n\n`;
-
-        let teamMessage = header;
-        if(trip.tName) teamMessage += `*Transporter:* ${trip.tName}\n`;
-        if(trip.tPerson) teamMessage += `*Person Name:* ${trip.tPerson}\n`;
-        if(trip.tContact) teamMessage += `*Contact Number:* ${trip.tContact}\n\n`;
-        if(trip.remarks) teamMessage += `*Remarks:* ${trip.remarks}`;
-
-        // Directly store team message globally for quick access, but open modal first to choose team/client
-        document.getElementById('share-modal-trip-id').value = tripId;
-        document.getElementById('shareModal').style.display = "flex";
-    }
-    
-    function closeShareModal() {
-        document.getElementById('shareModal').style.display = "none";
-    }
-
-    function executeDeployedShare(type) {
-        const tripId = document.getElementById('share-modal-trip-id').value;
-        const trip = allTrips.find(t => t.id === tripId);
-        if (!trip) return;
-
-        let header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n`;
-        header += `*Booking Date:* ${trip.date}\n\n*Party Name:* ${trip.party}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n`;
-        if (trip.dName) header += `*Driver Name:* ${trip.dName}\n`;
-        if (trip.dContact) header += `*Driver Contact No:* ${trip.dContact}\n\n`;
-
-        let finalMessage = header;
-        if (type === 'team') {
-            if(trip.tName) finalMessage += `*Transporter:* ${trip.tName}\n`;
-            if(trip.tPerson) finalMessage += `*Person Name:* ${trip.tPerson}\n`;
-            if(trip.tContact) finalMessage += `*Contact Number:* ${trip.tContact}\n\n`;
-            if(trip.remarks) finalMessage += `*Remarks:* ${trip.remarks}`;
-        }
-        
-        closeShareModal();
-        openWhatsAppDirectly(finalMessage);
-    }
-
-    function shareReportWhatsApp() {
-        if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
-        
-        const today = new Date();
-        const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const dayStr = days[today.getDay()];
-        
-        let message = `*Vehicle Status Update - ${dateStr}, ${dayStr}*\n\n`;
-        
-        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party))];
-        uniqueParties.forEach(p => {
-            message += `*Client:* ${p}\n`; let counter = 1;
-            currentReportTrips.forEach(t => {
-                if (t.party === p) {
-                    let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
-                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight}\n*Status:* *${stat}*\n`;
-                    if (t.statusNote) message += `*Current Location:* ${t.statusNote}\n`;
-                    message += `\n`;
-                    counter++;
-                }
-            });
-        });
-        
-        openWhatsAppDirectly(message);
     }
 
     // --- ADMIN USER MANAGEMENT LOGIC ---
