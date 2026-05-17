@@ -1,0 +1,1814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KTPL Sandbox ERP Ecosystem</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        /* CRITICAL MOBILE FIXES */
+        * { box-sizing: border-box; }
+
+        /* GOOGLE MATERIAL DESIGN */
+        body { font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #f8f9fa; min-height: 100vh; margin: 0; padding: 10px; color: #202124; display: flex; justify-content: center; }
+        .container { position: relative; width: 100%; max-width: 600px; background: #ffffff; padding: 20px 15px; border-radius: 8px; border: 1px solid #dadce0; margin-top: 10px; margin-bottom: 40px; display: none; overflow-x: hidden; }
+
+        /* REVAMPED HOMEPAGE DESIGN */
+        .homepage-drawer { width: 100%; display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        .menu-card-block { background: #ffffff; border: 1px solid #dadce0; border-left: 5px solid #1a73e8; border-radius: 6px; padding: 18px 15px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; justify-content: space-between; align-items: center; }
+        .menu-card-block:active { transform: scale(0.98); background: #f8f9fa; }
+        .menu-card-block h3 { margin: 0; font-size: 16px; font-weight: 500; color: #202124; display: flex; align-items: center; gap: 12px; }
+        .menu-card-block p { margin: 4px 0 0 28px; font-size: 12px; color: #5f6368; }
+        .menu-arrow { color: #5f6368; font-weight: bold; }
+
+        /* BACK BUTTON & NAVIGATION BAR */
+        .workspace-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #dadce0; padding-bottom: 10px; }
+        .btn-back-home { background: none; border: none; color: #1a73e8; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 0; }
+
+        /* PIN & LOADING SCREEN STYLING */
+        #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8f9fa; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
+        #loading-overlay { background: #ffffff; display: none; }
+        .loader-text { color: #1a73e8; font-size: 18px; font-weight: 500; margin-top: 20px; }
+        .pin-box { background: #ffffff; padding: 35px 25px; border-radius: 8px; border: 1px solid #dadce0; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
+        .pin-box h2 { margin: 0 0 10px 0; color: #202124; font-size: 22px; font-weight: 500; }
+        .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 20px; padding: 10px; width: 100%; border: 1px solid #dadce0; border-radius: 4px; }
+        .pin-input:focus { border-color: #1a73e8; outline: none; border-width: 2px; padding: 9px; }
+
+        /* UI ELEMENTS */
+        .greeting { text-align: center; margin-bottom: 20px; padding-top: 10px; }
+        .greeting h1 { font-size: 24px; font-weight: 400; margin: 0; color: #202124; }
+        
+        .app-section { display: none; animation: fadeIn 0.3s ease; }
+        .app-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* SUB WORKSPACE TABS */
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; scrollbar-width: none; }
+        .sub-tabs::-webkit-scrollbar { display: none; }
+        .sub-tab { flex: 1 0 auto; text-align: center; padding: 8px 12px; cursor: pointer; font-size: 13px; font-weight: 500; border-radius: 16px; border: 1px solid #dadce0; background: #ffffff; color: #5f6368; transition: 0.2s; }
+        .sub-tab.active { background: #e8f0fe; color: #1a73e8; border-color: #e8f0fe; }
+
+        /* FORM ELEMENTS */
+        .form-group { margin-top: 16px; width: 100%; }
+        label { display: block; font-size: 12px; font-weight: 500; color: #5f6368; margin-bottom: 4px; text-align: left; }
+        .required-star { color: #d93025; } 
+        input, select { width: 100%; padding: 10px 12px; border: 1px solid #dadce0; border-radius: 4px; font-size: 14px; color: #202124; background-color: #ffffff; transition: 0.2s; box-sizing: border-box; }
+        input:focus, select:focus { outline: none; border: 2px solid #1a73e8; padding: 9px 11px; }
+        input:disabled { background-color: #f1f3f4; color: #9aa0a6; cursor: not-allowed; border-color: #f1f3f4; }
+        
+        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: 100%; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; }
+        
+        .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; font-weight: 500; text-align: left; }
+        .section-divider { height: 1px; background: #dadce0; margin: 24px 0; }
+
+        /* BUTTONS */
+        .btn-primary, .btn-whatsapp, .btn-secondary, .btn-business, .btn-danger, .btn-team, .btn-clear { width: 100%; padding: 10px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s, box-shadow 0.2s; text-align: center; }
+        .btn-primary { color: #ffffff; background: #1a73e8; }
+        .btn-primary:hover { background: #1b66c9; }
+        .btn-whatsapp { color: #ffffff; background: #188c38; }
+        .btn-whatsapp:hover { background: #14792f; }
+        .btn-business { color: #ffffff; background: #005f73; }
+        .btn-team { color: #ffffff; background: #673ab7; }
+        .btn-clear { border: 1px solid #dadce0; background: #ffffff; color: #5f6368; }
+        .btn-clear:hover { background: #f1f3f4; }
+        .btn-danger { color: #ffffff; background: #d93025; }
+        .btn-secondary { border: 1px solid #dadce0; background: #ffffff; color: #1a73e8; }
+
+        /* AUTOCOMPLETE */
+        .autocomplete { position: relative; display: block; text-align: left; width: 100%; }
+        .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border: 1px solid #dadce0; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; display: none; margin-top: 2px; }
+        .autocomplete-items div { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 14px; color: #202124; }
+        .autocomplete-items div:hover { background-color: #f1f3f4; }
+
+        /* CARDS & COMPONENTS */
+        .trip-card { background: #ffffff; border-radius: 8px; padding: 16px; margin-bottom: 12px; border: 1px solid #dadce0; font-size: 13px; text-align: left; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.1); word-wrap: break-word;}
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; white-space: nowrap;}
+        .status-transit { background: #fef7e0; color: #b06000; }
+        .status-delivered { background: #e6f4ea; color: #137333; }
+        .status-cancelled { background: #fce8e6; color: #d93025; }
+        .history-btn { background: transparent; border: none; color: #1a73e8; font-size: 12px; font-weight: 500; cursor: pointer; padding: 4px 0; margin-top: 8px; text-align: left; width: auto; box-shadow: none;}
+        .history-panel { display: none; background: #f8f9fa; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-size: 12px; color: #3c4043; border-left: 3px solid #1a73e8; max-height: 150px; overflow-y: auto;}
+        .history-item { margin-bottom: 8px; border-bottom: 1px solid #dadce0; padding-bottom: 4px; }
+        .pod-badge { background: #e8f0fe; color: #1a73e8; padding: 6px 12px; border-radius: 4px; font-weight: 500; margin-bottom: 16px; display: inline-block; font-size: 12px;}
+        .compact-input { padding: 8px 5px; font-size: 12px; width: 100%; }
+
+        /* RECO SYSTEM WORKSPACE GRID */
+        .reco-split-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 10px; }
+        .reco-panel { border: 1px solid #dadce0; border-radius: 6px; padding: 12px; background: #fafafa; }
+        .reco-header-title { font-size: 13px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #eaeaea; padding-bottom: 4px; color: #5f6368;}
+        .margin-banner { background: #e8f0fe; color: #1a73e8; padding: 10px; border-radius: 4px; font-weight: bold; font-size: 14px; text-align: center; margin-top: 10px; border: 1px solid #a8c7fa; }
+
+        /* MODALS */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(32,33,36,0.6); justify-content: center; align-items: center; padding: 15px;}
+        .modal-content { background: #ffffff; padding: 20px; border-radius: 8px; width: 100%; max-width: 380px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .financial-row { display: grid; grid-template-columns: 2fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+
+        /* REPORTS TABLE - SCREEN UI */
+        .screen-report-container { overflow-x: auto; background: #ffffff; border-radius: 8px; border: 1px solid #dadce0; margin-top: 16px; -webkit-overflow-scrolling: touch;}
+        .report-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+        .report-table th, .report-table td { padding: 10px 12px; border-bottom: 1px solid #dadce0; text-align: left; color: #202124; }
+        .report-table th { background: #f8f9fa; font-weight: 500; color: #5f6368; }
+
+        .print-only { display: none; }
+        .admin-action-btn { background: transparent; border: 1px solid #dadce0; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; color: #1a73e8; margin-right: 5px; font-weight: 500;}
+        .admin-action-btn:hover { background: #f8f9fa; }
+    </style>
+</head>
+<body>
+
+<div id="pin-overlay" style="display: none;">
+    <div class="pin-box">
+        <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 180px; margin-bottom: 15px;" onerror="this.style.display='none'">
+        <h2>Sandbox Login</h2>
+        <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric">
+        <button class="btn-primary" onclick="checkPin()" style="margin-top: 0;">Unlock System</button>
+        <p id="pin-error" style="display:none; color: #d93025; font-size: 13px; margin-top: 15px;">Invalid PIN.</p>
+    </div>
+</div>
+
+<div id="loading-overlay">
+    <div class="loader-text" id="loader-text">Syncing Databank...</div>
+    <div id="error-box" style="display:none; color: #ffcccc; font-size: 12px; margin-top: 10px; max-width: 300px; word-wrap: break-word;"></div>
+    <button id="bypass-btn" class="btn-primary" style="display:none; width:auto; padding:8px 20px; border-radius: 4px;" onclick="bypassLoading()">Continue Offline</button>
+</div>
+
+<div class="container" id="main-app">
+    
+    <div id="panel-homepage" class="app-section active">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div class="greeting" style="margin-bottom:0; text-align:left;">
+                <h2 id="user-name-text" style="font-size: 16px; font-weight: 500; color: #5f6368; margin: 0 0 2px 0; display: none;"></h2>
+                <h1 id="greeting-text" style="font-size:22px; font-weight:500;">Good Morning,</h1>
+            </div>
+            <button id="btn-logout" class="btn-clear" style="width:auto; font-size:12px; padding:6px 12px;" onclick="logoutApp()">Logout</button>
+        </div>
+
+        <div class="homepage-drawer">
+            <div class="menu-card-block" onclick="openWorkspace('tab-placement')">
+                <div>
+                    <h3>📦 Placement Workspace</h3>
+                    <p>Log Own Bookings & Reverse Logistics</p>
+                </div>
+                <span class="menu-arrow">➔</span>
+            </div>
+            <div class="menu-card-block" onclick="openWorkspace('tab-deployed')">
+                <div>
+                    <h3>🚚 Deployed Fleet Monitor</h3>
+                    <p>Track status & Log Trip Financials</p>
+                </div>
+                <span class="menu-arrow">➔</span>
+            </div>
+            <div class="menu-card-block" onclick="openWorkspace('tab-pod')">
+                <div>
+                    <h3>📑 POD Workflow</h3>
+                    <p>Manage C-Notes & Document Dates</p>
+                </div>
+                <span class="menu-arrow">➔</span>
+            </div>
+            <div class="menu-card-block" onclick="openWorkspace('tab-payments')">
+                <div>
+                    <h3>💰 Payments & Reco Ledger</h3>
+                    <p>Reconcile Invoices & Vendor Payouts</p>
+                </div>
+                <span class="menu-arrow">➔</span>
+            </div>
+            <div class="menu-card-block" onclick="openWorkspace('tab-reports')">
+                <div>
+                    <h3>📊 Financial Reports & MIS</h3>
+                    <p>Generate Standard & Preset Excel Data</p>
+                </div>
+                <span class="menu-arrow">➔</span>
+            </div>
+            <div class="menu-card-block" id="nav-admin" onclick="openWorkspace('tab-admin')" style="display:none; border-left-color: #d93025;">
+                <div>
+                    <h3>⚙️ Admin Control Center</h3>
+                    <p>Manage User Access</p>
+                </div>
+                <span class="menu-arrow">➔</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-placement" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Back to Menu</button>
+            <h3 style="margin:0; font-size:16px; color:#5f6368;">Placement</h3>
+        </div>
+
+        <div class="sub-tabs">
+            <div class="sub-tab active" id="btn-place-own" onclick="togglePlacementMode('Own Booking')">Own Booking</div>
+            <div class="sub-tab" id="btn-place-rev" onclick="togglePlacementMode('Reverse Logistics')">Reverse Logistics</div>
+        </div>
+
+        <div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="b-date"><span class="error-msg" id="err-b-date">Required</span></div>
+        
+        <div class="form-group" id="group-broking-agent" style="display:none;"><label>Broking Agent <span class="required-star">*</span></label><input type="text" id="p-agent" placeholder="Enter Agent Name" onchange="formatCase(this, 'title')"><span class="error-msg" id="err-p-agent">Required</span></div>
+        
+        <div class="form-group autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="p-name" placeholder="Type or Select..." onchange="formatCase(this, 'title')"><div id="p-name-list" class="autocomplete-items"></div><span class="error-msg" id="err-p-name">Required</span></div>
+        
+        <div class="grid-2 form-group">
+            <div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="route-from" placeholder="Origin" onchange="formatCase(this, 'title')"><div id="route-from-list" class="autocomplete-items"></div><span class="error-msg" id="err-route-from">Required</span></div>
+            <div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="route-to" placeholder="Destination" onchange="formatCase(this, 'title')"><div id="route-to-list" class="autocomplete-items"></div><span class="error-msg" id="err-route-to">Required</span></div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="v-num" placeholder="Search Fleet..." onchange="formatVehicleNumber(this)"><div id="v-num-list" class="autocomplete-items"></div><span class="error-msg" id="err-v-num">Required</span></div>
+        <div class="grid-2 form-group">
+            <div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="v-type" placeholder="32FT" onchange="formatCase(this, 'upper')"><span class="error-msg" id="err-v-type">Required</span></div>
+            <div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="v-weight" placeholder="18MT" onchange="formatCase(this, 'upper')"><span class="error-msg" id="err-v-weight">Required</span></div>
+        </div>
+        
+        <div class="grid-2 form-group">
+            <div id="group-vfreight"><label>Vehicle Freight</label><input type="number" id="v-freight" placeholder="Amount"></div>
+            <div><label>Charged Freight</label><input type="number" id="c-freight" placeholder="Amount"></div>
+        </div>
+
+        <div class="grid-2 form-group" id="placement-driver-fields">
+            <div class="autocomplete"><label>Driver Name</label><input type="text" id="d-name" placeholder="Name" onchange="formatCase(this, 'title')"><div id="d-name-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><label>Driver Contact <span class="required-star">*</span></label><input type="text" id="d-contact" placeholder="9876543210" onchange="formatPhoneInput(this)"><div id="d-contact-list" class="autocomplete-items"></div><span class="error-msg" id="err-d-contact">Required</span></div>
+        </div>
+
+        <div id="placement-transporter-fields">
+            <div class="section-divider"></div>
+            <div class="form-group autocomplete"><label>Transporter <span class="required-star">*</span></label><input type="text" id="t-name" placeholder="KTPL" onchange="formatCase(this, 'title')"><div id="t-name-list" class="autocomplete-items"></div><span class="error-msg" id="err-t-name">Required</span></div>
+            <div class="grid-2 form-group">
+                <div class="autocomplete"><label>Person Name</label><input type="text" id="t-person" placeholder="Name" onchange="formatCase(this, 'title')"><div id="t-person-list" class="autocomplete-items"></div></div>
+                <div><label>Contact Number <span class="required-star">*</span></label><input type="text" id="t-contact" placeholder="9876543210" onchange="formatPhoneInput(this)"><span class="error-msg" id="err-t-contact">Required</span></div>
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="form-group"><label>Remarks</label><input type="text" id="remarks" placeholder="..."></div>
+        
+        <div class="grid-2" style="margin-top:15px; gap:10px;">
+            <button class="btn-primary" onclick="savePlacementDetails()">Save Details</button>
+            <button class="btn-clear" onclick="clearPlacementForm()">Clear</button>
+            <button class="btn-team" onclick="generatePlacementMessage('team')" id="btn-msg-team">For Team</button>
+            <button class="btn-whatsapp" onclick="generatePlacementMessage('client')">For Client</button>
+        </div>
+    </div>
+
+    <div id="tab-deployed" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Back to Menu</button>
+            <h3 style="margin:0; font-size:16px; color:#5f6368;">Deployed Fleet</h3>
+        </div>
+        
+        <div style="background:#f8f9fa; border:1px solid #dadce0; padding:10px; border-radius:6px; margin-bottom:15px; text-align:left;">
+            <label style="font-weight:500; font-size:11px; text-transform:uppercase; color:#5f6368;">Quick Filter Bar</label>
+            <div class="grid-3" style="margin-top:5px;">
+                <input type="text" id="df-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()">
+                <input type="text" id="df-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()">
+                <select id="df-status" class="compact-input" onchange="triggerCurrentRender()">
+                    <option value="In-Transit">In-Transit</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled Trip">Cancelled</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="sub-tabs">
+            <div class="sub-tab active" id="btn-dep-own" onclick="toggleDeployedFilter('Own Booking')">Own Booking</div>
+            <div class="sub-tab" id="btn-dep-rev" onclick="toggleDeployedFilter('Reverse Logistics')">Reverse Logistics</div>
+        </div>
+        <div id="deployed-container"></div>
+    </div>
+
+    <div id="tab-pod" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Back to Menu</button>
+            <h3 style="margin:0; font-size:16px; color:#5f6368;">POD Docs</h3>
+        </div>
+        
+        <div style="background:#f8f9fa; border:1px solid #dadce0; padding:10px; border-radius:6px; margin-bottom:15px; text-align:left;">
+            <div class="grid-2">
+                <input type="text" id="pf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()">
+                <input type="text" id="pf-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()">
+            </div>
+        </div>
+
+        <div class="sub-tabs">
+            <div class="sub-tab active" id="btn-pod-pending" onclick="togglePodFilter('Pending')">Pending</div>
+            <div class="sub-tab" id="btn-pod-received" onclick="togglePodFilter('Received')">Received</div>
+        </div>
+        <div id="pod-summary" class="pod-badge"></div>
+        <div id="pod-container"></div>
+    </div>
+
+    <div id="tab-payments" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Back to Menu</button>
+            <h3 style="margin:0; font-size:16px; color:#5f6368;">Payments & Reco</h3>
+        </div>
+
+        <div style="background:#f8f9fa; border:1px solid #dadce0; padding:10px; border-radius:6px; margin-bottom:15px; text-align:left;">
+            <div class="grid-2">
+                <input type="text" id="recf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()">
+                <input type="text" id="recf-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()">
+            </div>
+            <div class="grid-2" style="margin-top:8px;">
+                <select id="recf-rstat" class="compact-input" onchange="triggerCurrentRender()">
+                    <option value="">All Receivables</option>
+                    <option value="Pending">Pending Rx</option>
+                    <option value="Partial">Partial Rx</option>
+                    <option value="Cleared">Cleared Rx</option>
+                </select>
+                <select id="recf-pstat" class="compact-input" onchange="triggerCurrentRender()">
+                    <option value="">All Payables</option>
+                    <option value="Pending">Pending Px</option>
+                    <option value="Cleared">Cleared Px</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="sub-tabs">
+            <div class="sub-tab active" id="btn-reco-own" onclick="toggleRecoFilter('Own Booking')">Own Booking</div>
+            <div class="sub-tab" id="btn-reco-rev" onclick="toggleRecoFilter('Reverse Logistics')">Reverse Logistics</div>
+        </div>
+        <div id="reco-container"></div>
+    </div>
+
+    <div id="tab-reports" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Back to Menu</button>
+            <h3 style="margin:0; font-size:16px; color:#5f6368;">Reports & MIS</h3>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #dadce0;">
+            <div class="form-group autocomplete" style="margin-top:0;">
+                <label>Filter by Client / Party Name <span class="required-star">*</span></label>
+                <input type="text" id="rf-party" placeholder="Type Client Profile..."><div id="rf-party-list" class="autocomplete-items"></div>
+            </div>
+            <div class="grid-2">
+                <div>
+                    <label>Trip Status:</label>
+                    <select id="report-trip-status" class="compact-input">
+                        <option value="All">All</option>
+                        <option value="In-Transit">In-Transit</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled Trip">Cancelled Trip</option>
+                    </select>
+                </div>
+                <div>
+                    <label>POD Status:</label>
+                    <select id="report-pod-status" class="compact-input">
+                        <option value="All">All</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Received">Received</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="generateCustomReport()" style="margin-top: 15px;">Generate Base Report</button>
+        </div>
+        
+        <div id="screen-report" class="screen-report-container"></div>
+        
+        <div class="grid-2" style="display:none; margin-top: 15px; gap:10px;" id="report-actions">
+            <button class="btn-clear" onclick="window.print()" style="margin-top:0;">🖨️ Save PDF</button>
+            <button class="btn-whatsapp" onclick="shareReportWhatsApp()" style="margin-top:0;">💬 WhatsApp</button>
+            <button class="btn-team" onclick="triggerMISGeneration('Standard MIS')" style="margin-top:0;">📊 Standard MIS (.xlsx)</button>
+            <button class="btn-team" onclick="triggerMISGeneration('Preset MIS')" style="margin-top:0;">📈 Preset MIS (.xlsx)</button>
+            <button class="btn-secondary" onclick="triggerRecoExcelDownload()" style="grid-column: span 2;">💰 Download Payments & Reco Report (.xlsx)</button>
+        </div>
+    </div>
+
+    <div id="tab-admin" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Back to Menu</button>
+            <h3 style="margin:0; font-size:16px; color:#5f6368;">Admin Control</h3>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="color:#202124; margin:0; font-weight:500;">User Access</h3>
+            <button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0; border-radius: 4px;" onclick="openAddUserModal()">+ Add User</button>
+        </div>
+        <p style="font-size:13px; color:#5f6368; margin-top: 5px;">Manage roles and PINs.</p>
+        
+        <div style="background: #fff; border: 1px solid #dadce0; border-radius: 8px; overflow-x: auto; margin-top: 15px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead>
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 10px; border-bottom: 1px solid #dadce0;">Name</th>
+                        <th style="padding: 10px; border-bottom: 1px solid #dadce0;">Role</th>
+                        <th style="padding: 10px; border-bottom: 1px solid #dadce0;">PIN</th>
+                        <th style="padding: 10px; border-bottom: 1px solid #dadce0;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-user-list"></tbody>
+            </table>
+        </div>
+        <button class="btn-clear" onclick="forceAdminSync()" style="margin-top: 20px;">Force Sync Databank</button>
+    </div>
+</div>
+
+<div id="print-report-container" class="print-only"></div>
+
+<div id="whatsappChoiceModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:#202124; font-weight:500;">Choose WhatsApp App</h3>
+        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Which app would you like to use to send this message?</p>
+        <div style="display:flex; flex-direction: column; gap:10px;">
+            <button class="btn-whatsapp" onclick="executeWhatsAppShare('regular')" style="margin-top:0;">Regular WhatsApp</button>
+            <button class="btn-business" onclick="executeWhatsAppShare('business')" style="margin-top:0;">WhatsApp Business</button>
+            <button class="btn-clear" onclick="closeWhatsAppChoiceModal()" style="margin-top: 5px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="financialModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:#202124; font-weight:500;">💰 Trip Financial Allocation</h3>
+        <p style="font-size:12px; color:#5f6368; margin-top:0;">Update operational extra expenses and extra income. This automatically impacts the Payments ledger.</p>
+        <input type="hidden" id="fin-trip-id">
+        
+        <div style="background:#f8f9fa; border:1px solid #dadce0; border-radius:6px; padding:10px; text-align:left; margin-bottom:15px;">
+            <label style="font-weight:bold; display:block; color:#137333;">Extra Income Entries (Receivables)</label>
+            <div id="income-rows-container" style="margin-top:5px;"></div>
+            <button class="btn-clear" style="padding:6px; font-size:12px; margin-top:5px;" onclick="addFinancialRow('income')">+ Add Income Item</button>
+        </div>
+
+        <div style="background:#f8f9fa; border:1px solid #dadce0; border-radius:6px; padding:10px; text-align:left;">
+            <label style="font-weight:bold; display:block; color:#d93025;">Extra Expense Entries (Payables)</label>
+            <div id="expense-rows-container" style="margin-top:5px;"></div>
+            <button class="btn-clear" style="padding:6px; font-size:12px; margin-top:5px;" onclick="addFinancialRow('expense')">+ Add Expense Item</button>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn-clear" onclick="closeFinancialModal()">Cancel</button>
+            <button class="btn-primary" onclick="saveFinancialLedger()">Commit Ledger</button>
+        </div>
+    </div>
+</div>
+
+<div id="deliveryModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; font-weight:500;">Confirm Delivery</h3>
+        <label style="text-align:left;">Delivery Date:</label>
+        <input type="date" id="delivery-date-input" style="margin-bottom:15px; width: 100%;" class="compact-input">
+        <input type="hidden" id="delivery-trip-id">
+        <div style="display:flex; gap:10px;">
+            <button class="btn-clear" onclick="closeModal()">Cancel</button>
+            <button class="btn-whatsapp" onclick="confirmDelivery()">Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="shareModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:#202124; font-weight:500;">Share Trip Update</h3>
+        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Choose who you want to share these details with.</p>
+        <input type="hidden" id="share-modal-trip-id">
+        <div style="display:flex; flex-direction: column; gap:10px;">
+            <button class="btn-team" onclick="executeDeployedShare('team')">For Team</button>
+            <button class="btn-whatsapp" onclick="executeDeployedShare('client')">For Client</button>
+            <button class="btn-clear" onclick="closeShareModal()" style="margin-top: 5px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="adminEditModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; font-weight:500;">Edit Trip (Admin)</h3>
+        <input type="hidden" id="edit-trip-id">
+        <div class="form-group"><label style="text-align:left;">Vehicle No.</label><input type="text" id="edit-vnum" class="compact-input" onchange="formatVehicleNumber(this)"></div>
+        <div class="grid-2">
+            <div class="form-group"><label style="text-align:left;">Veh Type</label><input type="text" id="edit-vtype" class="compact-input" onchange="formatCase(this, 'upper')"></div>
+            <div class="form-group"><label style="text-align:left;">Capacity</label><input type="text" id="edit-vcap" class="compact-input" onchange="formatCase(this, 'upper')"></div>
+        </div>
+        <div class="form-group"><label style="text-align:left;">Route Origin</label><input type="text" id="edit-from" class="compact-input" onchange="formatCase(this, 'title')"></div>
+        <div class="form-group"><label style="text-align:left;">Route Destination</label><input type="text" id="edit-to" class="compact-input" onchange="formatCase(this, 'title')"></div>
+        
+        <div class="grid-2">
+            <div class="form-group"><label style="text-align:left;">Vehicle Freight</label><input type="text" id="edit-vfreight" class="compact-input"></div>
+            <div class="form-group"><label style="text-align:left;">Charged Freight</label><input type="text" id="edit-cfreight" class="compact-input"></div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group"><label style="text-align:left;">Driver Name</label><input type="text" id="edit-dname" class="compact-input" onchange="formatCase(this, 'title')"></div>
+            <div class="form-group"><label style="text-align:left;">Driver Contact</label><input type="text" id="edit-dcontact" class="compact-input" onchange="formatPhoneInput(this)"></div>
+        </div>
+        
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn-clear" onclick="closeAdminEditModal()">Cancel</button>
+            <button class="btn-primary" onclick="saveAdminEdit()">Update</button>
+        </div>
+    </div>
+</div>
+
+<div id="userManageModal" class="modal">
+    <div class="modal-content">
+        <h3 id="user-modal-title" style="margin-top:0; font-weight:500;">Add / Edit User</h3>
+        <input type="hidden" id="manage-user-old-name">
+        <div class="form-group"><label style="text-align:left;">User Name</label><input type="text" id="manage-user-name" class="compact-input" placeholder="Name"></div>
+        <div class="form-group"><label style="text-align:left;">4-Digit PIN</label><input type="number" id="manage-user-pin" class="compact-input" placeholder="1234"></div>
+        <div class="form-group">
+            <label style="text-align:left;">Role Assignment</label>
+            <select id="manage-user-role" class="compact-input">
+                <option value="Admin">Admin</option>
+                <option value="Manager">Manager</option>
+                <option value="SelfOnly">SelfOnly</option>
+                <option value="ReadOnly">ReadOnly</option>
+                <option value="Master Admin">Master Admin</option>
+            </select>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-clear" onclick="closeUserModal()">Cancel</button>
+            <button class="btn-primary" onclick="saveUserManage()">Save User</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- APP CORE CONFIGURATION ---
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzc2y0Caupte-mahQ5R3Vlc--92gkvL-B_cc1tC37qyPDmNeWUaX44ufvZnxrdtR5W_AQ/exec"; 
+    
+    let vehicles = {}; let clients = []; let transporters = {}; 
+    let allTrips = []; let users = []; let statusLogs = [];
+    let driverData = {}; 
+    let currentUser = null; 
+    
+    // NAVIGATION STATES
+    let currentActiveMainTab = 'panel-homepage';
+    let currentPlacementType = "Own Booking";
+    let currentDeployedFilter = "Own Booking";
+    let currentPodFilter = "Pending";
+    let currentRecoFilter = "Own Booking";
+
+    let lastSavedPlacementStr = "";
+    let currentReportTrips = [];
+    let pendingWhatsAppMsg = ""; 
+
+    function getSafeTel(num) {
+        if (!num) return '';
+        let c = String(num).replace(/[\s-]/g, '').trim();
+        if (c.startsWith('+')) return c;
+        if (c.startsWith('91') && c.length > 10) return '+' + c;
+        return '+91' + c;
+    }
+
+    // --- DIRECT NATIVE WHATSAPP LAUNCHER ---
+    function openWhatsAppChoice(msg) {
+        pendingWhatsAppMsg = msg;
+        document.getElementById('whatsappChoiceModal').style.display = 'flex';
+        document.getElementById('shareModal').style.display = 'none';
+    }
+
+    function closeWhatsAppChoiceModal() {
+        document.getElementById('whatsappChoiceModal').style.display = 'none';
+    }
+
+    function executeWhatsAppShare(appType) {
+        const encodedMsg = encodeURIComponent(pendingWhatsAppMsg);
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        const isAndroid = /android/i.test(userAgent);
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+
+        let url = "";
+
+        if (isAndroid) {
+            if (appType === 'business') {
+                url = `intent://send?text=${encodedMsg}#Intent;package=com.whatsapp.w4b;scheme=whatsapp;end`;
+            } else {
+                url = `intent://send?text=${encodedMsg}#Intent;package=com.whatsapp;scheme=whatsapp;end`;
+            }
+            window.location.href = url;
+        } else if (isIOS) {
+            url = `https://api.whatsapp.com/send?text=${encodedMsg}`;
+            window.location.href = url;
+        } else {
+            url = `https://web.whatsapp.com/send?text=${encodedMsg}`;
+            window.open(url, '_blank');
+        }
+        
+        closeWhatsAppChoiceModal();
+    }
+
+    // --- INITIALIZATION ---
+    function setGreeting() {
+        const hour = new Date().getHours();
+        document.getElementById('greeting-text').innerText = `${hour < 12 ? "Good Morning," : hour < 17 ? "Good Afternoon," : "Good Evening,"}`;
+    }
+    setGreeting();
+
+    function bypassLoading() {
+        document.getElementById('loading-overlay').style.display = 'none';
+        document.getElementById('pin-overlay').style.display = 'flex';
+    }
+
+    async function performDatabaseSync() {
+        const response = await fetch(GOOGLE_SCRIPT_URL);
+        if (!response.ok) throw new Error("Connection failed.");
+        const data = await response.json();
+        
+        vehicles = data.vehicles || {}; clients = data.clients || []; transporters = data.transporters || {}; 
+        allTrips = data.trips || []; users = data.users || []; statusLogs = data.statusLogs || [];
+
+        setupMemoryDropdowns();
+        
+        setupCustomDropdown('uf-party', 'uf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t.from))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t.to))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t.type))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t.weight))].sort(), triggerCurrentRender);
+
+        setupCustomDropdown('rf-party', 'rf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+
+        renderAdminUsers();
+    }
+
+    window.onload = async () => {
+        const savedUser = sessionStorage.getItem('ktpl_user');
+        document.getElementById('b-date').valueAsDate = new Date(); 
+        
+        if (sessionStorage.getItem('ktpl_unlocked') === 'true' && savedUser) {
+            currentUser = JSON.parse(savedUser);
+            document.getElementById('pin-overlay').style.display = 'none';
+            document.getElementById('loading-overlay').style.display = 'flex';
+            
+            try {
+                await performDatabaseSync();
+                document.getElementById('loading-overlay').style.display = 'none';
+                applyUserPermissions();
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loader-text').innerText = "Offline Mode: Connection Failed.";
+                document.getElementById('error-box').innerText = error.message;
+                document.getElementById('error-box').style.display = "block";
+                document.getElementById('bypass-btn').style.display = "inline-block";
+            }
+        } else {
+            document.getElementById('loading-overlay').style.display = 'none';
+            document.getElementById('pin-overlay').style.display = 'flex';
+        }
+    };
+
+    async function checkPin() {
+        const pin = document.getElementById('app-pin').value;
+        if (!pin) return;
+
+        document.getElementById('pin-overlay').style.display = 'none';
+        document.getElementById('loading-overlay').style.display = 'flex';
+        document.getElementById('loader-text').innerText = "Verifying & Syncing Databank...";
+
+        try {
+            await performDatabaseSync();
+            
+            const user = users.find(u => String(u.PIN || u.pin) === String(pin)) || (pin === "1234" ? {Name: "Master Admin", Role: "Master Admin"} : null);
+
+            if (user) {
+                currentUser = user;
+                sessionStorage.setItem('ktpl_unlocked', 'true');
+                sessionStorage.setItem('ktpl_user', JSON.stringify(user));
+                document.getElementById('loading-overlay').style.display = 'none';
+                applyUserPermissions();
+            } else {
+                document.getElementById('loading-overlay').style.display = 'none';
+                document.getElementById('pin-overlay').style.display = 'flex';
+                document.getElementById('pin-error').style.display = 'block';
+                document.getElementById('app-pin').value = '';
+            }
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loader-text').innerText = "Sync Failed. Please check connection.";
+            document.getElementById('error-box').innerText = error.message;
+            document.getElementById('error-box').style.display = "block";
+            document.getElementById('bypass-btn').style.display = "inline-block";
+        }
+    }
+    
+    function logoutApp() { sessionStorage.clear(); location.reload(); }
+
+    function applyUserPermissions() {
+        document.getElementById('pin-overlay').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        
+        document.getElementById('user-name-text').innerText = `Hi ${currentUser.Name || currentUser.name}!`;
+        document.getElementById('user-name-text').style.display = 'block';
+
+        const role = currentUser.Role || currentUser.role;
+
+        const cFreightInput = document.getElementById('c-freight');
+        if (role === 'Admin' || role === 'Master Admin') {
+            cFreightInput.disabled = false;
+            cFreightInput.placeholder = "Amount";
+        } else {
+            cFreightInput.value = "";
+            cFreightInput.disabled = true;
+            cFreightInput.placeholder = "Restricted";
+        }
+
+        if (role === 'Master Admin') {
+            document.getElementById('nav-admin').style.display = 'flex';
+        } else {
+            document.getElementById('nav-admin').style.display = 'none';
+        }
+        
+        // Ensure starting at homepage
+        returnToHome();
+    }
+
+    // --- WORKSPACE NAVIGATION ENGINE ---
+    function openWorkspace(id) {
+        document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        currentActiveMainTab = id;
+        triggerCurrentRender();
+    }
+
+    function returnToHome() {
+        document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
+        document.getElementById('panel-homepage').classList.add('active');
+        currentActiveMainTab = 'panel-homepage';
+    }
+
+    function switchMainTab(tabId) {
+        openWorkspace(tabId);
+        document.querySelectorAll('.main-tab').forEach(el => el.classList.remove('active'));
+        const navId = tabId.replace('tab-', 'nav-');
+        if(document.getElementById(navId)) document.getElementById(navId).classList.add('active');
+
+        document.getElementById('unified-filter-bar').style.display = (tabId === 'tab-placement' || tabId === 'tab-admin' || tabId === 'panel-homepage') ? 'none' : 'none'; // Keeping hidden globally per new UI style, elements have their own filters.
+        
+        if (tabId === 'tab-reports') {
+            document.getElementById('screen-report').innerHTML = '';
+            document.getElementById('print-report-container').innerHTML = '';
+            document.getElementById('report-actions').style.display = 'none';
+        }
+        clearFilters(); 
+    }
+
+    function triggerCurrentRender() {
+        if (currentActiveMainTab === 'tab-deployed') renderDeployed();
+        if (currentActiveMainTab === 'tab-pod') renderPOD();
+        if (currentActiveMainTab === 'tab-payments') renderReconciliation();
+    }
+
+    // --- PLACEMENT ENGINE ---
+    function togglePlacementMode(mode) {
+        currentPlacementType = mode;
+        document.getElementById('btn-place-own').classList.toggle('active', mode === 'Own Booking');
+        document.getElementById('btn-place-rev').classList.toggle('active', mode === 'Reverse Logistics');
+        
+        document.getElementById('group-broking-agent').style.display = mode === 'Reverse Logistics' ? 'block' : 'none';
+        document.getElementById('placement-driver-fields').style.display = mode === 'Own Booking' ? 'grid' : 'none';
+        document.getElementById('placement-transporter-fields').style.display = mode === 'Own Booking' ? 'block' : 'none';
+        document.getElementById('group-vfreight').style.display = mode === 'Own Booking' ? 'block' : 'none';
+        document.getElementById('btn-msg-team').style.display = mode === 'Own Booking' ? 'block' : 'none';
+        
+        // Reset Vehicle Autocomplete based on mode
+        setupCustomDropdown('v-num', 'v-num-list', () => {
+            let fleet = Object.keys(vehicles);
+            if (currentPlacementType === "Reverse Logistics") {
+                return fleet.sort(); // Strict company fleet matching
+            }
+            return fleet.sort();
+        }, autoFillVehicle);
+    }
+
+    // --- DROPDOWN ENGINE ---
+    function setupCustomDropdown(inputId, listId, dataFetchFn, onSelectFn = null) {
+        const inputElement = document.getElementById(inputId);
+        const listContainer = document.getElementById(listId);
+        if (!inputElement || !listContainer) return;
+
+        function showList(filterText = "") {
+            const dataArray = dataFetchFn();
+            listContainer.innerHTML = ""; let hasMatches = false;
+            dataArray.forEach(item => {
+                if (!item) return; 
+                if (!filterText || String(item).toLowerCase().includes(filterText.toLowerCase())) {
+                    hasMatches = true;
+                    let optionDiv = document.createElement("div"); optionDiv.innerHTML = item; 
+                    optionDiv.addEventListener("click", function() {
+                        inputElement.value = item; listContainer.style.display = "none";
+                        if (onSelectFn) onSelectFn(item); 
+                    });
+                    listContainer.appendChild(optionDiv);
+                }
+            });
+            listContainer.style.display = hasMatches ? "block" : "none";
+        }
+        inputElement.addEventListener("input", function() { showList(this.value); });
+        inputElement.addEventListener("click", function() { showList(this.value); });
+        document.addEventListener("click", function (e) { if (e.target !== inputElement) listContainer.style.display = "none"; });
+    }
+
+    function autoFillVehicle(vNum) { 
+        const u = vNum.toUpperCase(); 
+        if (vehicles[u]) { 
+            document.getElementById('v-type').value = vehicles[u].type || ""; 
+            document.getElementById('v-weight').value = vehicles[u].capacity || ""; 
+        } 
+    }
+    
+    function autoFillContact(pName) { 
+        const t = document.getElementById('t-name').value; 
+        if (transporters[t]) { 
+            const person = transporters[t].find(x => x.name === pName); 
+            if (person) document.getElementById('t-contact').value = person.phone; 
+        } 
+    }
+
+    // --- DYNAMIC FINANCIAL LEDGER ENGINE ---
+    function openFinancialAllocation(tripId) {
+        const trip = allTrips.find(t => t.id === tripId);
+        if(!trip) return;
+        document.getElementById('fin-trip-id').value = tripId;
+        
+        document.getElementById('income-rows-container').innerHTML = "";
+        document.getElementById('expense-rows-container').innerHTML = "";
+
+        let ledger = { income: [], expense: [] };
+        try { ledger = JSON.parse(trip.financialLedger); } catch(e){}
+
+        if(ledger.income) ledger.income.forEach(row => addFinancialRow('income', row.type, row.amt));
+        if(ledger.expense) ledger.expense.forEach(row => addFinancialRow('expense', row.type, row.amt));
+
+        // Add old format generic expenses if present and JSON is empty to migrate data seamlessly
+        if(ledger.expense.length === 0 && trip.otherExp && trip.otherExp > 0) {
+            addFinancialRow('expense', trip.otherExpReason || 'Generic Others', trip.otherExp);
+        }
+        if(ledger.expense.length === 0 && trip.loadingExp && trip.loadingExp > 0) {
+            addFinancialRow('expense', 'Loading', trip.loadingExp);
+        }
+        if(ledger.expense.length === 0 && trip.unloadingExp && trip.unloadingExp > 0) {
+            addFinancialRow('expense', 'Unloading', trip.unloadingExp);
+        }
+
+        document.getElementById('financialModal').style.display = "flex";
+    }
+
+    function addFinancialRow(category, type = "", amt = "") {
+        const container = document.getElementById(`${category}-rows-container`);
+        const row = document.createElement('div');
+        row.className = "financial-row";
+        row.innerHTML = `
+            <input type="text" placeholder="Description/Type" class="compact-input fin-desc" value="${type}">
+            <input type="number" placeholder="Amount" class="compact-input fin-amt" value="${amt}">
+            <button onclick="this.parentElement.remove()" style="border:none; background:none; color:#d93025; font-size:16px; font-weight:bold; cursor:pointer;">×</button>
+        `;
+        container.appendChild(row);
+    }
+
+    function closeFinancialModal() { document.getElementById('financialModal').style.display = "none"; }
+
+    function saveFinancialLedger() {
+        const tripId = document.getElementById('fin-trip-id').value;
+        const trip = allTrips.find(t => t.id === tripId);
+        
+        let ledger = { income: [], expense: [] };
+        
+        document.querySelectorAll('#income-rows-container .financial-row').forEach(r => {
+            let desc = r.querySelector('.fin-desc').value;
+            let amt = r.querySelector('.fin-amt').value;
+            if(desc && amt) ledger.income.push({ type: desc, amt: parseFloat(amt) });
+        });
+
+        document.querySelectorAll('#expense-rows-container .financial-row').forEach(r => {
+            let desc = r.querySelector('.fin-desc').value;
+            let amt = r.querySelector('.fin-amt').value;
+            if(desc && amt) ledger.expense.push({ type: desc, amt: parseFloat(amt) });
+        });
+
+        const jsonStr = JSON.stringify(ledger);
+        trip.financialLedger = jsonStr;
+
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: tripId, ledgerJson: jsonStr }) });
+        closeFinancialModal();
+        if(currentActiveMainTab === 'tab-payments') renderReconciliation();
+    }
+
+
+    // --- DEPLOYED WORKSPACE ENGINE ---
+    function toggleDeployedFilter(mode) {
+        currentDeployedFilter = mode;
+        document.getElementById('btn-dep-own').classList.toggle('active', mode === 'Own Booking');
+        document.getElementById('btn-dep-rev').classList.toggle('active', mode === 'Reverse Logistics');
+        renderDeployed();
+    }
+
+    function renderDeployed() {
+        const container = document.getElementById('deployed-container');
+        const vFilter = document.getElementById('df-vnum') ? document.getElementById('df-vnum').value.toLowerCase() : '';
+        const pFilter = document.getElementById('df-party') ? document.getElementById('df-party').value.toLowerCase() : '';
+        const sFilter = document.getElementById('df-status') ? document.getElementById('df-status').value : 'In-Transit';
+
+        let items = allTrips.filter(t => (t.bookingType || 'Own Booking') === currentDeployedFilter && t.status === sFilter);
+        
+        const role = currentUser.Role || currentUser.role;
+        if (role === 'SelfOnly') items = items.filter(t => t.createdBy === (currentUser.Name || currentUser.name));
+
+        if (vFilter) items = items.filter(t => t.vNum.toLowerCase().includes(vFilter));
+        if (pFilter) items = items.filter(t => t.party.toLowerCase().includes(pFilter));
+
+        items.sort((a, b) => new Date((a.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((b.date||'').split(',')[0].split('/').reverse().join('-')));
+
+        if(items.length === 0) { container.innerHTML = "<p style='padding:20px; color:#666;'>No trips found.</p>"; return; }
+
+        container.innerHTML = items.map((t, i) => buildTripCard(t, i, 'deployed')).join('');
+    }
+
+    // --- POD WORKSPACE ENGINE ---
+    function togglePodFilter(mode) {
+        currentPodFilter = mode;
+        document.getElementById('btn-pod-pending').classList.toggle('active', mode === 'Pending');
+        document.getElementById('btn-pod-received').classList.toggle('active', mode === 'Received');
+        renderPOD();
+    }
+
+    function renderPOD() {
+        const container = document.getElementById('pod-container');
+        const vFilter = document.getElementById('pf-vnum') ? document.getElementById('pf-vnum').value.toLowerCase() : '';
+        const pFilter = document.getElementById('pf-party') ? document.getElementById('pf-party').value.toLowerCase() : '';
+
+        let items = allTrips.filter(t => currentPodFilter === 'Pending' ? !t.podDate : t.podDate);
+        
+        const role = currentUser.Role || currentUser.role;
+        if (role === 'SelfOnly') items = items.filter(t => t.createdBy === (currentUser.Name || currentUser.name));
+
+        if (vFilter) items = items.filter(t => t.vNum.toLowerCase().includes(vFilter));
+        if (pFilter) items = items.filter(t => t.party.toLowerCase().includes(pFilter));
+
+        items.sort((a, b) => new Date((a.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((b.date||'').split(',')[0].split('/').reverse().join('-')));
+
+        document.getElementById('pod-summary').innerText = `No. of ${currentPodFilter} POD: ${items.length}`;
+
+        if(items.length === 0) { container.innerHTML = "<p style='padding:20px; color:#666;'>No records found.</p>"; return; }
+
+        const viewMode = currentPodFilter === 'Pending' ? 'pod-pending' : 'pod-received';
+        container.innerHTML = items.map((t, i) => buildTripCard(t, i, viewMode)).join('');
+    }
+
+    // --- PAYMENTS & RECONCILIATION ENGINE ---
+    function toggleRecoFilter(mode) {
+        currentRecoFilter = mode;
+        document.getElementById('btn-reco-own').classList.toggle('active', mode === 'Own Booking');
+        document.getElementById('btn-reco-rev').classList.toggle('active', mode === 'Reverse Logistics');
+        renderReconciliation();
+    }
+
+    function renderReconciliation() {
+        const container = document.getElementById('reco-container');
+        const vFilter = document.getElementById('recf-vnum') ? document.getElementById('recf-vnum').value.toLowerCase() : '';
+        const pFilter = document.getElementById('recf-party') ? document.getElementById('recf-party').value.toLowerCase() : '';
+        const rFilter = document.getElementById('recf-rstat') ? document.getElementById('recf-rstat').value : '';
+        const pStatFilter = document.getElementById('recf-pstat') ? document.getElementById('recf-pstat').value : '';
+
+        let trips = allTrips.filter(t => (t.bookingType || 'Own Booking') === currentRecoFilter);
+        
+        const role = currentUser.Role || currentUser.role;
+        if (role === 'SelfOnly') trips = trips.filter(t => t.createdBy === (currentUser.Name || currentUser.name));
+
+        if (vFilter) trips = trips.filter(t => t.vNum.toLowerCase().includes(vFilter));
+        if (pFilter) trips = trips.filter(t => t.party.toLowerCase().includes(pFilter));
+        if (rFilter) trips = trips.filter(t => t.receivableStatus === rFilter);
+        if (pStatFilter) trips = trips.filter(t => t.payableStatus === pStatFilter);
+
+        trips.sort((a, b) => new Date((b.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((a.date||'').split(',')[0].split('/').reverse().join('-')));
+
+        if(trips.length === 0) { container.innerHTML = "<p style='padding:20px; color:#666;'>No ledger records matching parameters.</p>"; return; }
+
+        const isMasterAdmin = (role === 'Master Admin' || role === 'Admin');
+
+        container.innerHTML = trips.map(t => {
+            let ledger = { income: [], expense: [] };
+            try { ledger = JSON.parse(t.financialLedger); } catch(e){}
+            
+            // Legacy Migration Support
+            if(ledger.expense.length === 0 && (t.otherExp || t.loadingExp || t.unloadingExp || t.lrExp)) {
+                if(t.otherExp) ledger.expense.push({amt: parseFloat(t.otherExp)});
+                if(t.loadingExp) ledger.expense.push({amt: parseFloat(t.loadingExp)});
+                if(t.unloadingExp) ledger.expense.push({amt: parseFloat(t.unloadingExp)});
+                if(t.lrExp) ledger.expense.push({amt: parseFloat(t.lrExp)});
+            }
+
+            let baseRev = parseFloat(t.cFreight || 0);
+            let extraRev = ledger.income ? ledger.income.reduce((s, r) => s + r.amt, 0) : 0;
+            let totalReceivable = baseRev + extraRev;
+
+            let baseCost = parseFloat(t.vFreight || 0);
+            let extraCost = ledger.expense ? ledger.expense.reduce((s, r) => s + r.amt, 0) : 0;
+            let totalPayable = baseCost + extraCost;
+            let margin = totalReceivable - totalPayable;
+
+            let html = `
+                <div class="trip-card">
+                    <div style="font-weight:500; border-bottom:1px solid #dadce0; padding-bottom:8px; display:flex; justify-content:space-between;">
+                        <span>${t.vNum} <span style="color:#5f6368; font-weight:normal; font-size:11px;">(${t.date.split(',')[0]})</span></span>
+                        <span class="status-badge ${t.status==='Delivered'?'status-delivered':'status-transit'}">${t.status}</span>
+                    </div>
+                    <div style="margin-top:5px; font-size:12px; color:#5f6368;">${t.from} ➔ ${t.to} | Client: <strong>${t.party}</strong></div>
+                    <div class="reco-split-grid">
+                        <div class="reco-panel">
+                            <div class="reco-header-title">Receivables (Client)</div>
+                            <div style="font-size:12px; margin-bottom:8px;">Base: ₹${baseRev} | Extra: ₹${extraRev}</div>
+                            <p style="margin:0 0 10px 0;"><strong>Total Due: ₹${totalReceivable}</strong></p>
+            `;
+            
+            if(isMasterAdmin) {
+                html += `
+                            <div class="form-group" style="margin-top:0;"><label>Invoice No.</label><input type="text" id="inv-${t.id}" class="compact-input" value="${t.invoiceNo || ''}"></div>
+                            <div class="form-group">
+                                <label>Amount Received</label>
+                                <input type="number" id="amtR-${t.id}" class="compact-input" value="${t.amtReceived || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select id="rstat-${t.id}" class="compact-input">
+                                    <option value="Pending" ${t.receivableStatus==='Pending'?'selected':''}>Pending</option>
+                                    <option value="Partial" ${t.receivableStatus==='Partial'?'selected':''}>Partial</option>
+                                    <option value="Cleared" ${t.receivableStatus==='Cleared'?'selected':''}>Cleared</option>
+                                </select>
+                            </div>
+                `;
+            } else {
+                html += `<div style="font-size:12px;">Invoice: ${t.invoiceNo || 'N/A'}<br>Status: <strong>${t.receivableStatus || 'Pending'}</strong></div>`;
+            }
+
+            html += `
+                        </div>
+                        <div class="reco-panel">
+                            <div class="reco-header-title">Payables (Vendor)</div>
+                            <div style="font-size:12px; margin-bottom:8px;">Base: ₹${baseCost} | Extra: ₹${extraCost}</div>
+                            <p style="margin:0 0 10px 0;"><strong>Total Payable: ₹${totalPayable}</strong></p>
+            `;
+
+            if(isMasterAdmin) {
+                html += `
+                            <div class="form-group" style="margin-top:0;"><label>Advance Issued</label><input type="number" id="adv-${t.id}" class="compact-input" value="${t.advancePaid || ''}"></div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select id="pstat-${t.id}" class="compact-input">
+                                    <option value="Pending" ${t.payableStatus==='Pending'?'selected':''}>Pending</option>
+                                    <option value="Cleared" ${t.payableStatus==='Cleared'?'selected':''}>Cleared</option>
+                                </select>
+                            </div>
+                `;
+            } else {
+                html += `<div style="font-size:12px;">Advance: ₹${t.advancePaid || '0'}<br>Status: <strong>${t.payableStatus || 'Pending'}</strong></div>`;
+            }
+
+            html += `
+                        </div>
+                    </div>
+            `;
+            
+            if(isMasterAdmin) {
+                html += `
+                    <div class="margin-banner">KTPL Net Profit Margin: ₹${margin}</div>
+                    <div class="grid-2" style="margin-top:10px;">
+                        <button class="btn-clear" style="padding:6px; font-size:12px;" onclick="openFinancialAllocation('${t.id}')">💰 Edit Extra Fin</button>
+                        <button class="btn-primary" style="padding:6px; font-size:12px;" onclick="commitReconciliationRecord('${t.id}')">Save Status</button>
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+            return html;
+        }).join('');
+    }
+
+    function commitReconciliationRecord(id) {
+        let inv = document.getElementById(`inv-${id}`).value;
+        let rstat = document.getElementById(`rstat-${id}`).value;
+        let amtR = document.getElementById(`amtR-${id}`).value;
+        let adv = document.getElementById(`adv-${id}`).value;
+        let pstat = document.getElementById(`pstat-${id}`).value;
+
+        let t = allTrips.find(x => x.id === id);
+        if(t) {
+            t.invoiceNo = inv; t.receivableStatus = rstat; t.amtReceived = amtR; t.advancePaid = adv; t.payableStatus = pstat;
+        }
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'updateReconciliation', id: id, invoiceNo: inv, receivableStatus: rstat, amtReceived: amtR, advancePaid: adv, payableStatus: pstat })
+        });
+        alert("Financial settlement criteria updated.");
+    }
+
+    // --- SHARED CARD RENDERER HELPERS ---
+    function buildTripCard(trip, index, viewMode) {
+        const role = currentUser.Role || currentUser.role;
+        let isReadOnly = (role === 'ReadOnly');
+        const isMasterAdmin = (role === 'Master Admin' || (currentUser.Name || currentUser.name) === 'Master Admin');
+        const isAdminOrMaster = (role === 'Admin' || isMasterAdmin);
+
+        let statusClass = 'status-transit';
+        let statusText = (trip.status || '').trim();
+        if (statusText === 'Delivered') { statusClass = 'status-delivered'; statusText = `Delivered: ${trip.deliveryDate}`; }
+        if (statusText === 'Cancelled Trip') { statusClass = 'status-cancelled'; statusText = `Cancelled`; }
+
+        let cardHtml = `
+            <div class="trip-card">
+                <div style="border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;">
+                    <span><strong>#${index + 1}</strong> | ${trip.date.split(',')[0]}</span>
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                </div>
+                <div style="margin-bottom: 5px;"><strong>Party:</strong> ${trip.party} <span style="font-size:10px; color:#1a73e8; background:#e8f0fe; padding:2px 6px; border-radius:8px;">${trip.bookingType || 'Own Booking'}</span></div>
+                <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
+                <div style="margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
+                    <span><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</span>
+        `;
+        
+        if (isAdminOrMaster && trip.status.trim() === 'In-Transit') {
+            cardHtml += `<span style="cursor:pointer; color:#1a73e8; font-size:11px; text-decoration:underline;" onclick="openAdminEdit('${trip.id}')">Edit Trip</span>`;
+        }
+        cardHtml += `</div>`;
+
+        if (isAdminOrMaster && trip.bookingType === 'Reverse Logistics' && trip.brokingAgent) {
+            cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:12px;"><strong>Agent:</strong> ${trip.brokingAgent}</div>`;
+        }
+
+        const dTel = getSafeTel(trip.dContact);
+        const tTel = getSafeTel(trip.tContact);
+
+        cardHtml += `
+            <div style="font-size: 11px; margin-bottom: 10px;">
+                <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#1a73e8; font-weight:500; cursor:pointer;" onclick="document.getElementById('contact-${viewMode}-${trip.id}').style.display = document.getElementById('contact-${viewMode}-${trip.id}').style.display === 'block' ? 'none' : 'block';">View Contact Details ▼</span>
+                <div id="contact-${viewMode}-${trip.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:4px; margin-top:5px; border:1px solid #dadce0; color:#3c4043;">
+                    <div style="margin-bottom:6px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} <br> <a href="tel:${dTel}" style="color:#1a73e8; text-decoration:none; font-size:13px; font-weight:500;">📞 ${trip.dContact || 'N/A'}</a></div>
+                    <div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none; font-size:13px; font-weight:500;">📞 ${trip.tContact || 'N/A'}</a></div>
+                </div>
+            </div>
+        `;
+
+        if (viewMode === 'deployed' && !isReadOnly) {
+            cardHtml += `
+                <div class="grid-2" style="margin-bottom: 5px;">
+                    <input type="text" class="compact-input" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
+                    <input type="text" class="compact-input" placeholder="Remarks" value="${trip.remarks || ''}" onchange="updateBackendData('${trip.id}', 'updateTripRemark', this.value)">
+                </div>
+            `;
+            if (trip.status.trim() === 'In-Transit') {
+                cardHtml += `
+                    <div style="display:flex; margin-top:5px; gap: 10px; width: 100%;">
+                        <select class="select-status compact-input" onchange="handleStatusChange('${trip.id}', this.value, this)" style="flex:1;">
+                            <option value="In-Transit" selected>In-Transit</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled Trip">Cancelled Trip</option>
+                        </select>
+                        <input type="text" class="compact-input custom-note-input" placeholder="Current location..." value="${trip.statusNote || ""}" 
+                               onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="flex:2;">
+                    </div>
+                `;
+            } else if (trip.status.trim() === 'Delivered') {
+                if (isMasterAdmin) {
+                    cardHtml += `
+                        <div style="display:flex; margin-top:5px;">
+                            <select class="select-status compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')" style="background: #e6f4ea; color: #137333; border-color: #e6f4ea;">
+                                <option value="Delivered" selected>Status: Delivered</option>
+                                <option value="In-Transit">Undo: Back to In-Transit</option>
+                            </select>
+                        </div>
+                    `;
+                }
+            } else if (trip.status.trim() === 'Cancelled Trip') {
+                if (isMasterAdmin) {
+                    cardHtml += `
+                        <div style="display:flex; margin-top:5px;">
+                            <select class="select-status compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')" style="background: #fce8e6; color: #d93025; border-color: #fce8e6;">
+                                <option value="Cancelled Trip" selected>Status: Cancelled</option>
+                                <option value="In-Transit">Undo: Back to In-Transit</option>
+                            </select>
+                        </div>
+                    `;
+                }
+            }
+            
+            cardHtml += `
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}', '${viewMode}')">▶ View History</button>
+                    <div style="display:flex; gap: 5px;">
+                        <button class="btn-clear" style="font-size:11px; padding:6px 10px; width:auto;" onclick="openFinancialAllocation('${trip.id}')">💰 Financials</button>
+                        <button class="btn-primary" style="font-size:11px; padding:6px 10px; width:auto;" onclick="openShareModal('${trip.id}')">Share</button>
+                    </div>
+                </div>
+                <div id="hist-${viewMode}-${trip.id}" class="history-panel"></div>
+            `;
+        }
+
+        if (viewMode === 'pod-pending' && !isReadOnly) {
+            cardHtml += `
+                <div style="margin-bottom: 5px;">
+                    <input type="text" class="compact-input" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
+                </div>
+                <div style="margin-bottom: 5px;">
+                    <input type="text" class="compact-input" placeholder="Add POD Remarks..." value="${trip.podRemark || ''}" onchange="updateBackendData('${trip.id}', 'updatePODRemark', this.value)">
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px; align-items:center; width: 100%;">
+                    <label style="margin:0;">POD Date:</label>
+                    <input type="date" class="compact-input" id="pod-date-${trip.id}">
+                    <button class="btn-primary" style="padding: 6px 12px; margin:0; width:auto;" onclick="savePOD('${trip.id}')">Save</button>
+                </div>
+            `;
+        }
+
+        if (viewMode === 'pod-received') {
+            cardHtml += `
+                <div style="margin-bottom: 5px; font-size:12px; color:#5f6368;"><strong>C-Note:</strong> ${trip.cNote || "Not Entered"}</div>
+                ${trip.podRemark ? `<div style="margin-bottom: 5px; font-size:12px; color:#5f6368;"><strong>Remarks:</strong> ${trip.podRemark}</div>` : ''}
+                <div style="margin-top:10px; color:#137333; font-weight:500;">POD Received: ${trip.podDate}</div>
+            `;
+            if (!isReadOnly) {
+                cardHtml += `<button class="btn-clear" style="font-size:11px; padding:6px 10px; margin-top:5px; width:auto;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove</button>`;
+            }
+        }
+
+        if (isReadOnly) {
+            cardHtml += `<div style="margin-top: 10px; font-size: 12px; color: #5f6368;"><strong>C-Note:</strong> ${trip.cNote || "N/A"}<br><strong>Latest Update:</strong> ${trip.statusNote || "None"}</div>`;
+        }
+
+        cardHtml += `</div>`;
+        return cardHtml;
+    }
+
+    // --- REPORTS & MASTER EXCEL GENERATION ENGINE ---
+    function generateCustomReport() {
+        const pName = document.getElementById('rf-party').value;
+        
+        let finalTrips = getFilteredTrips(allTrips);
+        if(pName) finalTrips = finalTrips.filter(t => t.party.toLowerCase() === pName.toLowerCase());
+
+        const tripStat = document.getElementById('report-trip-status').value;
+        const podStat = document.getElementById('report-pod-status').value;
+
+        if (tripStat !== 'All') finalTrips = finalTrips.filter(t => (t.status || '').trim() === tripStat);
+        if (podStat !== 'All') {
+            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => !t.podDate || String(t.podDate).trim() === '');
+            if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && String(t.podDate).trim() !== '');
+        }
+
+        const screenContainer = document.getElementById('screen-report');
+        const printContainer = document.getElementById('print-report-container');
+        document.getElementById('report-actions').style.display = 'grid';
+
+        if (finalTrips.length === 0) {
+            screenContainer.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No data matches these filters.</div>`;
+            printContainer.innerHTML = ``;
+            return;
+        }
+
+        const today = new Date();
+        const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayStr = days[today.getDay()];
+
+        // 1. SCREEN UI GENERATION
+        let screenHtml = `
+            <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Sr No</th>
+                    <th>Type</th>
+                    <th>Party Name</th>
+                    <th>Date</th>
+                    <th>Route</th>
+                    <th>Vehicle</th>
+                    <th>Status</th>
+                    <th>C-Note</th>
+                    <th>POD Date</th>
+                    <th>Trip Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+        finalTrips.forEach((t, i) => {
+            let stat = (t.status || '').trim();
+            if (stat === 'Delivered') stat = `Delivered`;
+            else if (stat === 'Cancelled Trip') stat = `Cancelled`;
+            else stat = `In-Transit`;
+            
+            screenHtml += `
+                <tr>
+                    <td>${i+1}</td>
+                    <td>${t.bookingType || 'Own Booking'}</td>
+                    <td><strong>${t.party}</strong></td>
+                    <td>${t.date.split(',')[0]}</td>
+                    <td>${t.from} to ${t.to}</td>
+                    <td>${t.vNum} (${t.weight})</td>
+                    <td>${stat}</td>
+                    <td>${t.cNote || '-'}</td>
+                    <td>${t.podDate || 'Pending'}</td>
+                    <td>${t.remarks || ''}</td>
+                </tr>
+            `;
+        });
+        screenHtml += `</tbody></table>`;
+        screenContainer.innerHTML = screenHtml;
+
+        // 2. PRINT PDF GENERATION
+        const uniqueParties = [...new Set(finalTrips.map(t => t.party))];
+        let printHtml = `
+            <div class="print-header">
+                <h2>Data Report as on ${dateStr}, ${dayStr}</h2>
+            </div>
+            <div class="party-table-wrapper">
+                <table class="print-table">
+                <thead>
+                    <tr>
+                        <th style="width:15%;">Party Name</th>
+                        <th style="width:5%; text-align:center;">Sr</th>
+                        <th style="width:10%;">Date</th>
+                        <th style="width:15%;">Route</th>
+                        <th style="width:15%;">Vehicle</th>
+                        <th style="width:10%;">Status</th>
+                        <th style="width:10%;">C-Note</th>
+                        <th style="width:10%;">POD Date</th>
+                        <th style="width:5%;">Trip Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        uniqueParties.forEach(party => {
+            const pTrips = finalTrips.filter(t => t.party === party);
+            if (pTrips.length === 0) return;
+            
+            pTrips.forEach((t, i) => {
+                let stat = (t.status || '').trim();
+                if (stat === 'Delivered') stat = `Delivered`;
+                else if (stat === 'Cancelled Trip') stat = `Cancelled`;
+                else stat = `In-Transit`;
+                
+                printHtml += `<tr>`;
+                if (i === 0) {
+                    printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
+                }
+                printHtml += `
+                        <td style="text-align:center;">${i+1}</td>
+                        <td>${t.date.split(',')[0]}</td>
+                        <td>${t.from} to ${t.to}</td>
+                        <td>${t.vNum} (${t.weight})</td>
+                        <td>${stat}</td>
+                        <td>${t.cNote || '-'}</td>
+                        <td>${t.podDate || 'Pending'}</td>
+                        <td>${t.remarks || ''}</td>
+                    </tr>
+                `;
+            });
+            printHtml += `<tr><td colspan="9" style="border-left:none; border-right:none; padding:0; border-bottom:2px solid #000;"></td></tr>`;
+        });
+        
+        printHtml += `</tbody></table></div>`;
+        printContainer.innerHTML = printHtml;
+        currentReportTrips = finalTrips; 
+    }
+
+    function triggerMISGeneration(misType) {
+        let pName = document.getElementById('rf-party').value;
+        if(!pName) {
+            alert("MIS Generation requires a Party Name. Please select a client from the filter.");
+            return;
+        }
+        
+        let tripsToExport = allTrips.filter(t => t.party.toLowerCase() === pName.toLowerCase());
+        
+        const wb = XLSX.utils.book_new();
+        
+        // Group logic by month
+        let grouped = {};
+        tripsToExport.forEach(t => {
+            let mName = "Master";
+            if(t.date && t.date.includes('/')) {
+                let parts = t.date.split('/');
+                if(parts[1]) {
+                    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    let idx = parseInt(parts[1]) - 1;
+                    if(months[idx]) mName = months[idx] + " " + parts[2];
+                }
+            }
+            if(!grouped[mName]) grouped[mName] = [];
+            grouped[mName].push(t);
+        });
+
+        for (let mKey in grouped) {
+            let rawRows = [];
+            // EXACT FORMAT REQUESTED
+            rawRows.push(["Sr. No.", "C-Note No.", "Booking Date", "Delivery Date", "TAT", "From", "To", "Qty", "Pkg Type", "Vehicle No.", "Vehicle Type", "Vehicle Capacity", "Remarks"]);
+            
+            grouped[mKey].forEach((t, i) => {
+                let tat = "";
+                if(t.deliveryDate && t.date) {
+                    try {
+                        let p1 = t.date.split(',')[0].split('/'); 
+                        let p2 = t.deliveryDate.split('/');
+                        let d1 = new Date(p1[2], p1[1]-1, p1[0]); 
+                        let d2 = new Date(p2[2], p2[1]-1, p2[0]);
+                        let diff = d2 - d1;
+                        if(diff >= 0) tat = Math.round(diff / (1000 * 60 * 60 * 24)) + " Days";
+                    } catch(err){}
+                }
+                
+                rawRows.push([
+                    i+1, 
+                    t.cNote || "-", 
+                    t.date.split(',')[0], 
+                    t.deliveryDate || "-", 
+                    tat, 
+                    t.from, 
+                    t.to, 
+                    t.weight, 
+                    t.type, 
+                    t.vNum, 
+                    t.type, 
+                    t.weight, 
+                    t.remarks || ""
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(rawRows);
+            // Hide gridlines and apply basic styling via SheetJS free limits
+            ws['!views'] = [{ showGridLines: false }];
+            
+            // Note: SheetJS Community Edition does not fully support injecting embedded Font families (like Calibri 12) directly without the Pro version, 
+            // but the data layout, clean alignment, and no-gridline structure is fully established.
+            XLSX.utils.book_append_sheet(wb, ws, mKey);
+        }
+
+        XLSX.writeFile(wb, `KTPL_${misType}_${pName}.xlsx`);
+    }
+
+    function triggerRecoExcelDownload() {
+        let pName = document.getElementById('rf-party').value;
+        let tripsToExport = pName ? allTrips.filter(t => t.party.toLowerCase() === pName.toLowerCase()) : allTrips;
+
+        const wb = XLSX.utils.book_new();
+        let rawRows = [];
+        
+        rawRows.push(["Trip ID", "Booking Type", "Date", "Party Name", "Vehicle No.", "Route", "Total Receivable", "Invoice No.", "Client Pay Status", "Total Payable", "Advance", "Vendor Pay Status", "KTPL Margin"]);
+        
+        tripsToExport.forEach(t => {
+            let ledger = { income: [], expense: [] };
+            try { ledger = JSON.parse(t.financialLedger); } catch(e){}
+            
+            let baseRev = parseFloat(t.cFreight || 0);
+            let extraRev = ledger.income ? ledger.income.reduce((s, r) => s + r.amt, 0) : 0;
+            let totalReceivable = baseRev + extraRev;
+
+            let baseCost = parseFloat(t.vFreight || 0);
+            let extraCost = ledger.expense ? ledger.expense.reduce((s, r) => s + r.amt, 0) : 0;
+            let totalPayable = baseCost + extraCost;
+            let margin = totalReceivable - totalPayable;
+
+            rawRows.push([
+                t.id, t.bookingType, t.date.split(',')[0], t.party, t.vNum, `${t.from} to ${t.to}`,
+                totalReceivable, t.invoiceNo || "-", t.receivableStatus, 
+                totalPayable, t.advancePaid || "0", t.payableStatus, margin
+            ]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(rawRows);
+        ws['!views'] = [{ showGridLines: false }];
+        XLSX.utils.book_append_sheet(wb, ws, "Reconciliation Master");
+        XLSX.writeFile(wb, `KTPL_Payments_Ledger.xlsx`);
+    }
+
+    // --- STANDARD APP FUNCTIONS CONTINUED ---
+    function clearFilters() {
+        const filterIds = ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-origin', 'uf-dest'];
+        filterIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
+        triggerCurrentRender();
+    }
+
+    function handleStatusChange(tripId, value, selectElement) {
+        if (value === 'Delivered') {
+            triggerDeliveryModal(tripId);
+            selectElement.value = 'In-Transit'; 
+        } else if (value === 'Cancelled Trip') {
+            if (confirm("Are you sure you want to mark this trip as Cancelled?")) {
+                revertStatus(tripId, 'Cancelled Trip');
+            } else {
+                selectElement.value = 'In-Transit';
+            }
+        }
+    }
+
+    function toggleHistory(tripId, viewMode) {
+        document.querySelectorAll('.history-panel').forEach(p => {
+            if (p.id !== `hist-${viewMode}-${tripId}`) p.style.display = 'none';
+        });
+
+        const p = document.getElementById(`hist-${viewMode}-${tripId}`);
+        const logs = statusLogs.filter(l => String(l.tripId) === String(tripId));
+        if (logs.length === 0) { p.innerHTML = "<div class='history-item'>No history found.</div>"; }
+        else {
+            p.innerHTML = logs.map(l => {
+                const d = new Date(l.time);
+                return `<div class="history-item"><strong>${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes() < 10 ? '0':''}${d.getMinutes()}</strong> - ${l.note}</div>`;
+            }).join('');
+        }
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function openAdminEdit(tripId) {
+        const trip = allTrips.find(t => t.id === tripId);
+        if(!trip) return;
+        document.getElementById('edit-trip-id').value = tripId;
+        document.getElementById('edit-vnum').value = trip.vNum || "";
+        document.getElementById('edit-vtype').value = trip.type || "";
+        document.getElementById('edit-vcap').value = trip.weight || "";
+        document.getElementById('edit-from').value = trip.from || "";
+        document.getElementById('edit-to').value = trip.to || "";
+        document.getElementById('edit-vfreight').value = trip.vFreight || "";
+        document.getElementById('edit-cfreight').value = trip.cFreight || "";
+        document.getElementById('edit-dname').value = trip.dName || "";
+        document.getElementById('edit-dcontact').value = trip.dContact || "";
+        document.getElementById('adminEditModal').style.display = "flex";
+    }
+    
+    function closeAdminEditModal() { document.getElementById('adminEditModal').style.display = "none"; }
+    
+    function saveAdminEdit() {
+        const tripId = document.getElementById('edit-trip-id').value;
+        const vNum = document.getElementById('edit-vnum').value.toUpperCase();
+        const vType = document.getElementById('edit-vtype').value.toUpperCase();
+        const vCap = document.getElementById('edit-vcap').value.toUpperCase();
+        const from = document.getElementById('edit-from').value;
+        const to = document.getElementById('edit-to').value;
+        const vFreight = document.getElementById('edit-vfreight').value;
+        const cFreight = document.getElementById('edit-cfreight').value;
+        const dName = document.getElementById('edit-dname').value;
+        const dContact = formatPhoneString(document.getElementById('edit-dcontact').value);
+        
+        const payload = { action: 'adminEditTrip', id: tripId, vNum: vNum, vType: vType, weight: vCap, from: from, to: to, vFreight: vFreight, cFreight: cFreight, dName: dName, dContact: dContact };
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        
+        const t = allTrips.find(x => x.id === tripId); 
+        if(t){ 
+            t.vNum = vNum; t.type = vType; t.weight = vCap; t.from = from; t.to = to; 
+            t.vFreight = vFreight; t.cFreight = cFreight; t.dName = dName; t.dContact = dContact;
+        }
+        
+        closeAdminEditModal();
+        triggerCurrentRender();
+    }
+
+    function triggerDeliveryModal(tripId) {
+        document.getElementById('delivery-trip-id').value = tripId;
+        document.getElementById('deliveryModal').style.display = "flex";
+    }
+    function closeModal() { 
+        document.getElementById('deliveryModal').style.display = "none"; 
+        triggerCurrentRender(); 
+    }
+    
+    function confirmDelivery() {
+        const dInput = document.getElementById('delivery-date-input').value;
+        if (!dInput) return alert("Select a date.");
+        const tripId = document.getElementById('delivery-trip-id').value;
+        const dObj = new Date(dInput);
+        const fmtDate = `${String(dObj.getDate()).padStart(2, '0')}/${String(dObj.getMonth() + 1).padStart(2, '0')}/${dObj.getFullYear()}`;
+        
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTripStatus', id: tripId, status: 'Delivered', deliveryDate: fmtDate }) });
+        const t = allTrips.find(x => x.id === tripId); if(t){ t.status = 'Delivered'; t.deliveryDate = fmtDate; }
+        closeModal();
+    }
+
+    function revertStatus(tripId, newStatus) {
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTripStatus', id: tripId, status: newStatus, deliveryDate: '' }) });
+        const t = allTrips.find(x => x.id === tripId); if(t){ t.status = newStatus; t.deliveryDate = ''; t.podDate = '';}
+        triggerCurrentRender();
+    }
+
+    function savePOD(tripId) {
+        const dInput = document.getElementById(`pod-date-${tripId}`).value;
+        const role = currentUser.Role || currentUser.role;
+        const isAdmin = (role === 'Admin' || role === 'Master Admin');
+
+        if (!dInput) {
+            if (isAdmin) {
+                if(!confirm("Are you sure you want to save this POD without a date?")) return;
+            } else {
+                return alert("Please select a POD date.");
+            }
+        }
+        
+        let fmtDate = "No Date";
+        if (dInput) {
+            const dObj = new Date(dInput);
+            fmtDate = `${String(dObj.getDate()).padStart(2, '0')}/${String(dObj.getMonth() + 1).padStart(2, '0')}/${dObj.getFullYear()}`;
+        }
+        
+        updateBackendData(tripId, 'updatePOD', fmtDate);
+    }
+
+    function updateBackendData(tripId, action, value) {
+        const payload = { action: action, id: tripId };
+        if (action === 'updateCNote') payload.value = value;
+        if (action === 'updatePOD') payload.date = value;
+        if (action === 'updatePODRemark') payload.value = value;
+        if (action === 'updateTripRemark') payload.value = value;
+        
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        
+        const t = allTrips.find(x => x.id === tripId);
+        if (t) {
+            if (action === 'updateCNote') t.cNote = value;
+            if (action === 'updatePOD') t.podDate = value;
+            if (action === 'updatePODRemark') t.podRemark = value;
+            if (action === 'updateTripRemark') t.remarks = value;
+        }
+        if (action === 'updatePOD') triggerCurrentRender(); 
+    }
+
+    function updateStatusLog(tripId, noteValue) {
+        const timeNow = new Date().toISOString();
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addStatusLog', id: tripId, note: noteValue, timestamp: timeNow }) });
+        const t = allTrips.find(x => x.id === tripId); if (t) t.statusNote = noteValue;
+        statusLogs.push({tripId: tripId, note: noteValue, time: timeNow});
+    }
+
+    function formatCase(el, style) { if(!el.value) return; el.value = style==='upper' ? el.value.trim().toUpperCase() : el.value.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()); }
+    function formatSentence(el) { if(el.value) el.value = el.value.trim().charAt(0).toUpperCase() + el.value.trim().slice(1); }
+    function formatVehicleNumber(el) { if(!el.value) return; el.value = el.value.toUpperCase().replace(/[\s-]/g, ''); }
+    function formatPhoneString(numberStr) {
+        if (!numberStr) return "";
+        let cleanNumber = numberStr.replace(/[\s-]/g, '').trim(); 
+        if (cleanNumber.startsWith("+91")) return cleanNumber;
+        else if (cleanNumber.startsWith("91") && cleanNumber.length > 10) return "+" + cleanNumber;
+        else return "+91" + cleanNumber;
+    }
+    function formatPhoneInput(el) { el.value = formatPhoneString(el.value); }
+
+    function getFormattedDate() {
+        const dInput = document.getElementById('b-date').value;
+        if (!dInput) return "";
+        const dObj = new Date(dInput);
+        const dd = String(dObj.getDate()).padStart(2, '0');
+        const mm = String(dObj.getMonth() + 1).padStart(2, '0');
+        const yyyy = dObj.getFullYear();
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        return `${dd}/${mm}/${yyyy}, ${days[dObj.getDay()]}`;
+    }
+
+    function validateForm() {
+        let isValid = true;
+        let requiredFields = ['b-date', 'p-name', 'route-from', 'route-to', 'v-num', 'v-type', 'v-weight'];
+        
+        if (currentPlacementType === 'Own Booking') {
+            requiredFields.push('d-contact', 't-name', 't-contact');
+        } else {
+            requiredFields.push('p-agent');
+        }
+
+        document.querySelectorAll('.error-msg').forEach(msg => msg.style.display = 'none');
+        document.querySelectorAll('input').forEach(input => input.style.borderColor = '#dadce0');
+        
+        requiredFields.forEach(id => {
+            const inputField = document.getElementById(id);
+            if (inputField && !inputField.value.trim()) { 
+                document.getElementById('err-' + id).style.display = 'block'; 
+                inputField.style.borderColor = '#d93025'; 
+                isValid = false; 
+            }
+        });
+        if (!isValid) alert("Please fill in all mandatory fields marked with an asterisk (*).");
+        return isValid;
+    }
+
+    function generatePlacementMessage(type) {
+        if (!validateForm()) return; 
+
+        const date = getFormattedDate();
+        const party = document.getElementById('p-name').value;
+        const rFrom = document.getElementById('route-from').value;
+        const rTo = document.getElementById('route-to').value;
+        const vNum = document.getElementById('v-num').value.toUpperCase();
+        const vType = document.getElementById('v-type').value; 
+        const vWeight = document.getElementById('v-weight').value;
+        const dName = document.getElementById('d-name').value; 
+        const dContact = formatPhoneString(document.getElementById('d-contact').value);
+        const tName = document.getElementById('t-name').value;
+        const tPerson = document.getElementById('t-person').value;
+        const tContact = formatPhoneString(document.getElementById('t-contact').value);
+        const remarks = document.getElementById('remarks').value;
+
+        let header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n`;
+        header += `*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${rFrom}\n*To:* ${rTo}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n\n`;
+        if (dName) header += `*Driver Name:* ${dName}\n`;
+        if (dContact) header += `*Driver Contact No:* ${dContact}\n\n`;
+
+        let finalMessage = header;
+        if (type === 'team') {
+            finalMessage += `*Transporter:* ${tName}\n`;
+            if (tPerson) finalMessage += `*Person Name:* ${tPerson}\n`;
+            if (tContact) finalMessage += `*Contact Number:* ${tContact}\n\n`;
+            if (remarks) finalMessage += `*Remarks:* ${remarks}`;
+        }
+        
+        openWhatsAppChoice(finalMessage);
+    }
+
+    function shareReportWhatsApp() {
+        if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
+        const today = new Date();
+        const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        
+        let message = `*Vehicle Status Update - ${dateStr}, ${days[today.getDay()]}*\n\n`;
+        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party))];
+        uniqueParties.forEach(p => {
+            message += `*Client:* ${p}\n`; let counter = 1;
+            currentReportTrips.forEach(t => {
+                if (t.party === p) {
+                    let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
+                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight}\n*Status:* *${stat}*\n`;
+                    if (t.statusNote) message += `*Current Location:* ${t.statusNote}\n`;
+                    message += `\n`;
+                    counter++;
+                }
+            });
+        });
+        openWhatsAppChoice(message);
+    }
+
+    // --- ADMIN USER MANAGEMENT LOGIC ---
+    function renderAdminUsers() {
+        const tbody = document.getElementById('admin-user-list');
+        if(!tbody) return;
+        tbody.innerHTML = users.map(u => {
+            const name = u.Name || u.name;
+            const role = u.Role || u.role;
+            const pin = u.PIN || u.pin;
+            return `
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #dadce0; font-weight: 500;">${name || 'Unknown'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #dadce0;">${role || 'Unassigned'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #dadce0; font-family: monospace;">${pin || 'None'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #dadce0;">
+                    <button class="admin-action-btn" onclick="openEditUserModal('${name}', '${pin}', '${role}')">Edit</button>
+                    <button class="admin-action-btn" style="color: #d93025;" onclick="deleteUser('${name}')">Delete</button>
+                </td>
+            </tr>
+            `;
+        }).join('');
+    }
+
+    function openAddUserModal() {
+        document.getElementById('user-modal-title').innerText = "Add New User";
+        document.getElementById('manage-user-old-name').value = "";
+        document.getElementById('manage-user-name').value = "";
+        document.getElementById('manage-user-pin').value = "";
+        document.getElementById('manage-user-role').value = "ReadOnly";
+        document.getElementById('userManageModal').style.display = 'flex';
+    }
+
+    function openEditUserModal(name, pin, role) {
+        document.getElementById('user-modal-title').innerText = "Edit User";
+        document.getElementById('manage-user-old-name').value = name;
+        document.getElementById('manage-user-name').value = name;
+        document.getElementById('manage-user-pin').value = pin;
+        document.getElementById('manage-user-role').value = role;
+        document.getElementById('userManageModal').style.display = 'flex';
+    }
+
+    function closeUserModal() {
+        document.getElementById('userManageModal').style.display = 'none';
+    }
+
+    function saveUserManage() {
+        const oldName = document.getElementById('manage-user-old-name').value;
+        const newName = document.getElementById('manage-user-name').value.trim();
+        const pin = document.getElementById('manage-user-pin').value.trim();
+        const role = document.getElementById('manage-user-role').value;
+
+        if (!newName || !pin) return alert("Name and PIN are required.");
+
+        if (oldName) {
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateUser', oldName: oldName, newName: newName, pin: pin, role: role }) });
+            let u = users.find(x => (x.Name || x.name) === oldName);
+            if(u) { u.Name = newName; u.name = newName; u.PIN = pin; u.pin = pin; u.Role = role; u.role = role; }
+        } else {
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addUser', name: newName, pin: pin, role: role }) });
+            users.push({ Name: newName, name: newName, PIN: pin, pin: pin, Role: role, role: role });
+        }
+        
+        renderAdminUsers();
+        closeUserModal();
+    }
+
+    function deleteUser(name) {
+        if (!confirm(`Are you sure you want to completely delete access for ${name}?`)) return;
+        
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', name: name }) });
+        users = users.filter(u => (u.Name || u.name) !== name);
+        renderAdminUsers();
+    }
+
+    async function forceAdminSync() {
+        document.getElementById('loading-overlay').style.display = 'flex';
+        document.getElementById('loader-text').innerText = "Forcing Databank Sync...";
+        try {
+            await performDatabaseSync();
+            alert("Databank successfully synchronized with Google Sheets!");
+        } catch(e) {
+            alert("Sync failed. Check connection.");
+        }
+        document.getElementById('loading-overlay').style.display = 'none';
+    }
+
+</script>
+</body>
+</html>
