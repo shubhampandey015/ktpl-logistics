@@ -6,14 +6,10 @@
     <title>KTPL Sandbox ERP Ecosystem</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        /* CRITICAL MOBILE FIXES */
         * { box-sizing: border-box; }
-
-        /* GOOGLE MATERIAL DESIGN */
         body { font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #f8f9fa; min-height: 100vh; margin: 0; padding: 10px; color: #202124; display: flex; justify-content: center; }
         .container { position: relative; width: 100%; max-width: 600px; background: #ffffff; padding: 20px 15px; border-radius: 8px; border: 1px solid #dadce0; margin-top: 10px; margin-bottom: 40px; display: none; overflow-x: hidden; }
 
-        /* REVAMPED HOMEPAGE DESIGN */
         .homepage-drawer { width: 100%; display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
         .menu-card-block { background: #ffffff; border: 1px solid #dadce0; border-left: 5px solid #1a73e8; border-radius: 6px; padding: 18px 15px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .menu-card-block:active { transform: scale(0.98); background: #f8f9fa; }
@@ -21,11 +17,9 @@
         .menu-card-block p { margin: 4px 0 0 28px; font-size: 12px; color: #5f6368; }
         .menu-arrow { color: #5f6368; font-weight: bold; }
 
-        /* BACK BUTTON & NAVIGATION BAR */
         .workspace-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #dadce0; padding-bottom: 10px; }
         .btn-back-home { background: none; border: none; color: #1a73e8; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 0; }
 
-        /* PIN & LOADING SCREEN STYLING */
         #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8f9fa; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
         #loading-overlay { background: #ffffff; display: none; }
         .loader-text { color: #1a73e8; font-size: 18px; font-weight: 500; margin-top: 20px; }
@@ -34,7 +28,6 @@
         .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 20px; padding: 10px; width: 100%; border: 1px solid #dadce0; border-radius: 4px; }
         .pin-input:focus { border-color: #1a73e8; outline: none; border-width: 2px; padding: 9px; }
 
-        /* UI ELEMENTS */
         .greeting { text-align: center; margin-bottom: 20px; padding-top: 10px; }
         .greeting h1 { font-size: 24px; font-weight: 400; margin: 0; color: #202124; }
         
@@ -42,13 +35,11 @@
         .app-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* SUB WORKSPACE TABS */
-        .sub-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; scrollbar-width: none; }
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; scrollbar-width: none; }
         .sub-tabs::-webkit-scrollbar { display: none; }
         .sub-tab { flex: 1 0 auto; text-align: center; padding: 8px 12px; cursor: pointer; font-size: 13px; font-weight: 500; border-radius: 16px; border: 1px solid #dadce0; background: #ffffff; color: #5f6368; transition: 0.2s; }
         .sub-tab.active { background: #e8f0fe; color: #1a73e8; border-color: #e8f0fe; }
 
-        /* FORM ELEMENTS */
         .form-group { margin-top: 16px; width: 100%; }
         label { display: block; font-size: 12px; font-weight: 500; color: #5f6368; margin-bottom: 4px; text-align: left; }
         .required-star { color: #d93025; } 
@@ -62,7 +53,6 @@
         .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; font-weight: 500; text-align: left; }
         .section-divider { height: 1px; background: #dadce0; margin: 24px 0; }
 
-        /* BUTTONS */
         .btn-primary, .btn-whatsapp, .btn-secondary, .btn-business, .btn-danger, .btn-team, .btn-clear { width: 100%; padding: 10px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s, box-shadow 0.2s; text-align: center; }
         .btn-primary { color: #ffffff; background: #1a73e8; }
         .btn-primary:hover { background: #1b66c9; }
@@ -75,13 +65,11 @@
         .btn-danger { color: #ffffff; background: #d93025; }
         .btn-secondary { border: 1px solid #dadce0; background: #ffffff; color: #1a73e8; }
 
-        /* AUTOCOMPLETE */
         .autocomplete { position: relative; display: block; text-align: left; width: 100%; }
         .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border: 1px solid #dadce0; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; display: none; margin-top: 2px; }
         .autocomplete-items div { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 14px; color: #202124; }
         .autocomplete-items div:hover { background-color: #f1f3f4; }
 
-        /* CARDS & COMPONENTS */
         .trip-card { background: #ffffff; border-radius: 8px; padding: 16px; margin-bottom: 12px; border: 1px solid #dadce0; font-size: 13px; text-align: left; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.1); word-wrap: break-word;}
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; white-space: nowrap;}
         .status-transit { background: #fef7e0; color: #b06000; }
@@ -93,18 +81,18 @@
         .pod-badge { background: #e8f0fe; color: #1a73e8; padding: 6px 12px; border-radius: 4px; font-weight: 500; margin-bottom: 16px; display: inline-block; font-size: 12px;}
         .compact-input { padding: 8px 5px; font-size: 12px; width: 100%; }
 
-        /* RECO SYSTEM WORKSPACE GRID */
+        #unified-filter-bar { background: #ffffff; padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #dadce0; display: none; animation: fadeIn 0.3s; text-align: left; }
+        .filter-header { font-size: 12px; font-weight: 500; color: #5f6368; margin-bottom: 12px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
+
         .reco-split-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 10px; }
         .reco-panel { border: 1px solid #dadce0; border-radius: 6px; padding: 12px; background: #fafafa; }
         .reco-header-title { font-size: 13px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #eaeaea; padding-bottom: 4px; color: #5f6368;}
         .margin-banner { background: #e8f0fe; color: #1a73e8; padding: 10px; border-radius: 4px; font-weight: bold; font-size: 14px; text-align: center; margin-top: 10px; border: 1px solid #a8c7fa; }
 
-        /* MODALS */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(32,33,36,0.6); justify-content: center; align-items: center; padding: 15px;}
         .modal-content { background: #ffffff; padding: 20px; border-radius: 8px; width: 100%; max-width: 380px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .financial-row { display: grid; grid-template-columns: 2fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
 
-        /* REPORTS TABLE - SCREEN UI */
         .screen-report-container { overflow-x: auto; background: #ffffff; border-radius: 8px; border: 1px solid #dadce0; margin-top: 16px; -webkit-overflow-scrolling: touch;}
         .report-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
         .report-table th, .report-table td { padding: 10px 12px; border-bottom: 1px solid #dadce0; text-align: left; color: #202124; }
@@ -190,6 +178,27 @@
         </div>
     </div>
 
+    <div id="unified-filter-bar">
+        <div class="filter-header">
+            Search Filter
+            <span style="color:#1a73e8; font-size:11px; cursor:pointer; padding: 4px;" onclick="clearFilters()">Reset</span>
+        </div>
+        <div class="grid-2">
+            <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
+            <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
+        </div>
+        <div class="grid-3" style="margin-top: 8px;">
+            <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerCurrentRender()"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><input type="text" id="uf-vcap" class="compact-input" placeholder="Capacity" oninput="triggerCurrentRender()"><div id="uf-vcap-list" class="autocomplete-items"></div></div>
+        </div>
+        <div class="grid-3" style="margin-top: 8px;">
+            <div class="autocomplete"><input type="text" id="uf-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerCurrentRender()"><div id="uf-origin-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerCurrentRender()"><div id="uf-dest-list" class="autocomplete-items"></div></div>
+        </div>
+    </div>
+
     <div id="tab-placement" class="app-section">
         <div class="workspace-header">
             <button class="btn-back-home" onclick="returnToHome()">← Back to Menu</button>
@@ -201,51 +210,73 @@
             <div class="sub-tab" id="btn-place-rev" onclick="togglePlacementMode('Reverse Logistics')">Reverse Logistics</div>
         </div>
 
-        <div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="b-date"><span class="error-msg" id="err-b-date">Required</span></div>
-        
-        <div class="form-group" id="group-broking-agent" style="display:none;"><label>Broking Agent <span class="required-star">*</span></label><input type="text" id="p-agent" placeholder="Enter Agent Name" onchange="formatCase(this, 'title')"><span class="error-msg" id="err-p-agent">Required</span></div>
-        
-        <div class="form-group autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="p-name" placeholder="Type or Select..." onchange="formatCase(this, 'title')"><div id="p-name-list" class="autocomplete-items"></div><span class="error-msg" id="err-p-name">Required</span></div>
-        
-        <div class="grid-2 form-group">
-            <div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="route-from" placeholder="Origin" onchange="formatCase(this, 'title')"><div id="route-from-list" class="autocomplete-items"></div><span class="error-msg" id="err-route-from">Required</span></div>
-            <div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="route-to" placeholder="Destination" onchange="formatCase(this, 'title')"><div id="route-to-list" class="autocomplete-items"></div><span class="error-msg" id="err-route-to">Required</span></div>
-        </div>
-
-        <div class="section-divider"></div>
-        <div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="v-num" placeholder="Search Fleet..." onchange="formatVehicleNumber(this)"><div id="v-num-list" class="autocomplete-items"></div><span class="error-msg" id="err-v-num">Required</span></div>
-        <div class="grid-2 form-group">
-            <div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="v-type" placeholder="32FT" onchange="formatCase(this, 'upper')"><span class="error-msg" id="err-v-type">Required</span></div>
-            <div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="v-weight" placeholder="18MT" onchange="formatCase(this, 'upper')"><span class="error-msg" id="err-v-weight">Required</span></div>
-        </div>
-        
-        <div class="grid-2 form-group">
-            <div id="group-vfreight"><label>Vehicle Freight</label><input type="number" id="v-freight" placeholder="Amount"></div>
-            <div><label>Charged Freight</label><input type="number" id="c-freight" placeholder="Amount"></div>
-        </div>
-
-        <div class="grid-2 form-group" id="placement-driver-fields">
-            <div class="autocomplete"><label>Driver Name</label><input type="text" id="d-name" placeholder="Name" onchange="formatCase(this, 'title')"><div id="d-name-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><label>Driver Contact <span class="required-star">*</span></label><input type="text" id="d-contact" placeholder="9876543210" onchange="formatPhoneInput(this)"><div id="d-contact-list" class="autocomplete-items"></div><span class="error-msg" id="err-d-contact">Required</span></div>
-        </div>
-
-        <div id="placement-transporter-fields">
-            <div class="section-divider"></div>
-            <div class="form-group autocomplete"><label>Transporter <span class="required-star">*</span></label><input type="text" id="t-name" placeholder="KTPL" onchange="formatCase(this, 'title')"><div id="t-name-list" class="autocomplete-items"></div><span class="error-msg" id="err-t-name">Required</span></div>
+        <div id="form-own-booking">
+            <div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="ob-date"></div>
+            <div class="form-group autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="ob-party" placeholder="Type or Select..." onchange="formatCase(this, 'title')"><div id="ob-party-list" class="autocomplete-items"></div></div>
             <div class="grid-2 form-group">
-                <div class="autocomplete"><label>Person Name</label><input type="text" id="t-person" placeholder="Name" onchange="formatCase(this, 'title')"><div id="t-person-list" class="autocomplete-items"></div></div>
-                <div><label>Contact Number <span class="required-star">*</span></label><input type="text" id="t-contact" placeholder="9876543210" onchange="formatPhoneInput(this)"><span class="error-msg" id="err-t-contact">Required</span></div>
+                <div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="ob-from" placeholder="Origin" onchange="formatCase(this, 'title')"><div id="ob-from-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="ob-to" placeholder="Destination" onchange="formatCase(this, 'title')"><div id="ob-to-list" class="autocomplete-items"></div></div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="ob-vnum" placeholder="Search Fleet..." onchange="formatVehicleNumber(this)"><div id="ob-vnum-list" class="autocomplete-items"></div></div>
+            <div class="grid-2 form-group">
+                <div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="ob-vtype" placeholder="32FT" onchange="formatCase(this, 'upper')"></div>
+                <div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="ob-weight" placeholder="18MT" onchange="formatCase(this, 'upper')"></div>
+            </div>
+            <div class="grid-2 form-group">
+                <div><label>Vehicle Freight</label><input type="number" id="ob-vfreight" placeholder="Amount"></div>
+                <div><label>Charged Freight</label><input type="number" id="ob-cfreight" placeholder="Amount"></div>
+            </div>
+            <div class="grid-2 form-group">
+                <div class="autocomplete"><label>Driver Name</label><input type="text" id="ob-dname" placeholder="Name" onchange="formatCase(this, 'title')"><div id="ob-dname-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><label>Driver Contact <span class="required-star">*</span></label><input type="text" id="ob-dcontact" placeholder="9876543210" onchange="formatPhoneInput(this)"><div id="ob-dcontact-list" class="autocomplete-items"></div></div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="form-group autocomplete"><label>Transporter <span class="required-star">*</span></label><input type="text" id="ob-tname" placeholder="KTPL" onchange="formatCase(this, 'title')"><div id="ob-tname-list" class="autocomplete-items"></div></div>
+            <div class="grid-2 form-group">
+                <div class="autocomplete"><label>Person Name</label><input type="text" id="ob-tperson" placeholder="Name" onchange="formatCase(this, 'title')"><div id="ob-tperson-list" class="autocomplete-items"></div></div>
+                <div><label>Contact Number <span class="required-star">*</span></label><input type="text" id="ob-tcontact" placeholder="9876543210" onchange="formatPhoneInput(this)"></div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="form-group"><label>Remarks</label><input type="text" id="ob-remarks" placeholder="..."></div>
+            <div class="grid-2" style="margin-top:15px; gap:10px;">
+                <button class="btn-primary" onclick="savePlacementOwn()">Save Details</button>
+                <button class="btn-clear" onclick="clearPlacementForm()">Clear</button>
+                <button class="btn-team" onclick="generatePlacementMessageOwn('team')">For Team</button>
+                <button class="btn-whatsapp" onclick="generatePlacementMessageOwn('client')">For Client</button>
             </div>
         </div>
 
-        <div class="section-divider"></div>
-        <div class="form-group"><label>Remarks</label><input type="text" id="remarks" placeholder="..."></div>
-        
-        <div class="grid-2" style="margin-top:15px; gap:10px;">
-            <button class="btn-primary" onclick="savePlacementDetails()">Save Details</button>
-            <button class="btn-clear" onclick="clearPlacementForm()">Clear</button>
-            <button class="btn-team" onclick="generatePlacementMessage('team')" id="btn-msg-team">For Team</button>
-            <button class="btn-whatsapp" onclick="generatePlacementMessage('client')">For Client</button>
+        <div id="form-rev-logistics" style="display:none;">
+            <div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="rl-date"></div>
+            <div class="grid-2 form-group">
+                <div class="autocomplete"><label>Party Name</label><input type="text" id="rl-party" placeholder="Type..." onchange="formatCase(this, 'title')"><div id="rl-party-list" class="autocomplete-items"></div></div>
+                <div><label>Type of Co.</label><input type="text" id="rl-typeco" placeholder="e.g. Pvt Ltd" onchange="formatCase(this, 'title')"></div>
+            </div>
+            <div class="grid-2 form-group">
+                <div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="rl-from" placeholder="Origin" onchange="formatCase(this, 'title')"><div id="rl-from-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="rl-to" placeholder="Destination" onchange="formatCase(this, 'title')"><div id="rl-to-list" class="autocomplete-items"></div></div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="rl-vnum" placeholder="Strictly KTPL Fleet..." onchange="formatVehicleNumber(this)"><div id="rl-vnum-list" class="autocomplete-items"></div></div>
+            <div class="grid-2 form-group">
+                <div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="rl-vtype" placeholder="32FT" onchange="formatCase(this, 'upper')"></div>
+                <div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="rl-weight" placeholder="18MT" onchange="formatCase(this, 'upper')"></div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="form-group"><label>Broking Agency <span class="required-star">*</span></label><input type="text" id="rl-agency" placeholder="Agency Name" onchange="formatCase(this, 'title')"></div>
+            <div class="grid-2 form-group">
+                <div><label>Agent Name</label><input type="text" id="rl-agent" placeholder="Name" onchange="formatCase(this, 'title')"></div>
+                <div><label>Contact No. <span class="required-star">*</span></label><input type="text" id="rl-contact" placeholder="9876543210" onchange="formatPhoneInput(this)"></div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="form-group"><label>Charged Freight</label><input type="number" id="rl-cfreight" placeholder="Amount"></div>
+            <div class="form-group"><label>Remarks</label><input type="text" id="rl-remarks" placeholder="..."></div>
+            <div class="grid-2" style="margin-top:15px; gap:10px;">
+                <button class="btn-primary" onclick="savePlacementRev()">Save Details</button>
+                <button class="btn-clear" onclick="clearPlacementForm()">Clear</button>
+                <button class="btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">Share For Team</button>
+            </div>
         </div>
     </div>
 
@@ -255,22 +286,14 @@
             <h3 style="margin:0; font-size:16px; color:#5f6368;">Deployed Fleet</h3>
         </div>
         
-        <div style="background:#f8f9fa; border:1px solid #dadce0; padding:10px; border-radius:6px; margin-bottom:15px; text-align:left;">
-            <label style="font-weight:500; font-size:11px; text-transform:uppercase; color:#5f6368;">Quick Filter Bar</label>
-            <div class="grid-3" style="margin-top:5px;">
-                <input type="text" id="df-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()">
-                <input type="text" id="df-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()">
-                <select id="df-status" class="compact-input" onchange="triggerCurrentRender()">
-                    <option value="In-Transit">In-Transit</option>
-                    <option value="Delivered">Delivered</option>
-                    <option value="Cancelled Trip">Cancelled</option>
-                </select>
-            </div>
-        </div>
-
         <div class="sub-tabs">
-            <div class="sub-tab active" id="btn-dep-own" onclick="toggleDeployedFilter('Own Booking')">Own Booking</div>
-            <div class="sub-tab" id="btn-dep-rev" onclick="toggleDeployedFilter('Reverse Logistics')">Reverse Logistics</div>
+            <div class="sub-tab active" id="btn-dep-type-own" onclick="setDepType('Own Booking')">Own Booking</div>
+            <div class="sub-tab" id="btn-dep-type-rev" onclick="setDepType('Reverse Logistics')">Reverse Logistics</div>
+        </div>
+        <div class="sub-tabs">
+            <div class="sub-tab active" id="btn-dep-stat-ong" onclick="setDepStat('In-Transit')">On-Going</div>
+            <div class="sub-tab" id="btn-dep-stat-com" onclick="setDepStat('Delivered')">Completed</div>
+            <div class="sub-tab" id="btn-dep-stat-can" onclick="setDepStat('Cancelled Trip')">Cancelled</div>
         </div>
         <div id="deployed-container"></div>
     </div>
@@ -281,16 +304,13 @@
             <h3 style="margin:0; font-size:16px; color:#5f6368;">POD Docs</h3>
         </div>
         
-        <div style="background:#f8f9fa; border:1px solid #dadce0; padding:10px; border-radius:6px; margin-bottom:15px; text-align:left;">
-            <div class="grid-2">
-                <input type="text" id="pf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()">
-                <input type="text" id="pf-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()">
-            </div>
-        </div>
-
         <div class="sub-tabs">
-            <div class="sub-tab active" id="btn-pod-pending" onclick="togglePodFilter('Pending')">Pending</div>
-            <div class="sub-tab" id="btn-pod-received" onclick="togglePodFilter('Received')">Received</div>
+            <div class="sub-tab active" id="btn-pod-type-own" onclick="setPodType('Own Booking')">Own Booking</div>
+            <div class="sub-tab" id="btn-pod-type-rev" onclick="setPodType('Reverse Logistics')">Reverse Logistics</div>
+        </div>
+        <div class="sub-tabs">
+            <div class="sub-tab active" id="btn-pod-stat-pen" onclick="setPodStat('Pending')">Pending</div>
+            <div class="sub-tab" id="btn-pod-stat-rec" onclick="setPodStat('Received')">Received</div>
         </div>
         <div id="pod-summary" class="pod-badge"></div>
         <div id="pod-container"></div>
@@ -300,26 +320,6 @@
         <div class="workspace-header">
             <button class="btn-back-home" onclick="returnToHome()">← Back to Menu</button>
             <h3 style="margin:0; font-size:16px; color:#5f6368;">Payments & Reco</h3>
-        </div>
-
-        <div style="background:#f8f9fa; border:1px solid #dadce0; padding:10px; border-radius:6px; margin-bottom:15px; text-align:left;">
-            <div class="grid-2">
-                <input type="text" id="recf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()">
-                <input type="text" id="recf-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()">
-            </div>
-            <div class="grid-2" style="margin-top:8px;">
-                <select id="recf-rstat" class="compact-input" onchange="triggerCurrentRender()">
-                    <option value="">All Receivables</option>
-                    <option value="Pending">Pending Rx</option>
-                    <option value="Partial">Partial Rx</option>
-                    <option value="Cleared">Cleared Rx</option>
-                </select>
-                <select id="recf-pstat" class="compact-input" onchange="triggerCurrentRender()">
-                    <option value="">All Payables</option>
-                    <option value="Pending">Pending Px</option>
-                    <option value="Cleared">Cleared Px</option>
-                </select>
-            </div>
         </div>
 
         <div class="sub-tabs">
@@ -336,30 +336,7 @@
         </div>
         
         <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #dadce0;">
-            <div class="form-group autocomplete" style="margin-top:0;">
-                <label>Filter by Client / Party Name <span class="required-star">*</span></label>
-                <input type="text" id="rf-party" placeholder="Type Client Profile..."><div id="rf-party-list" class="autocomplete-items"></div>
-            </div>
-            <div class="grid-2">
-                <div>
-                    <label>Trip Status:</label>
-                    <select id="report-trip-status" class="compact-input">
-                        <option value="All">All</option>
-                        <option value="In-Transit">In-Transit</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled Trip">Cancelled Trip</option>
-                    </select>
-                </div>
-                <div>
-                    <label>POD Status:</label>
-                    <select id="report-pod-status" class="compact-input">
-                        <option value="All">All</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Received">Received</option>
-                    </select>
-                </div>
-            </div>
-            <button class="btn-primary" onclick="generateCustomReport()" style="margin-top: 15px;">Generate Base Report</button>
+            <button class="btn-primary" onclick="generateCustomReport()">Generate Base Report</button>
         </div>
         
         <div id="screen-report" class="screen-report-container"></div>
@@ -467,32 +444,6 @@
     </div>
 </div>
 
-<div id="adminEditModal" class="modal">
-    <div class="modal-content">
-        <h3 style="margin-top:0; font-weight:500;">Edit Trip (Admin)</h3>
-        <input type="hidden" id="edit-trip-id">
-        <div class="form-group"><label style="text-align:left;">Vehicle No.</label><input type="text" id="edit-vnum" class="compact-input" onchange="formatVehicleNumber(this)"></div>
-        <div class="grid-2">
-            <div class="form-group"><label style="text-align:left;">Veh Type</label><input type="text" id="edit-vtype" class="compact-input" onchange="formatCase(this, 'upper')"></div>
-            <div class="form-group"><label style="text-align:left;">Capacity</label><input type="text" id="edit-vcap" class="compact-input" onchange="formatCase(this, 'upper')"></div>
-        </div>
-        <div class="form-group"><label style="text-align:left;">Route Origin</label><input type="text" id="edit-from" class="compact-input" onchange="formatCase(this, 'title')"></div>
-        <div class="form-group"><label style="text-align:left;">Route Destination</label><input type="text" id="edit-to" class="compact-input" onchange="formatCase(this, 'title')"></div>
-        <div class="grid-2">
-            <div class="form-group"><label style="text-align:left;">Vehicle Freight</label><input type="text" id="edit-vfreight" class="compact-input"></div>
-            <div class="form-group"><label style="text-align:left;">Charged Freight</label><input type="text" id="edit-cfreight" class="compact-input"></div>
-        </div>
-        <div class="grid-2">
-            <div class="form-group"><label style="text-align:left;">Driver Name</label><input type="text" id="edit-dname" class="compact-input" onchange="formatCase(this, 'title')"></div>
-            <div class="form-group"><label style="text-align:left;">Driver Contact</label><input type="text" id="edit-dcontact" class="compact-input" onchange="formatPhoneInput(this)"></div>
-        </div>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button class="btn-clear" onclick="closeAdminEditModal()">Cancel</button>
-            <button class="btn-primary" onclick="saveAdminEdit()">Update</button>
-        </div>
-    </div>
-</div>
-
 <div id="userManageModal" class="modal">
     <div class="modal-content">
         <h3 id="user-modal-title" style="margin-top:0; font-weight:500;">Add / Edit User</h3>
@@ -516,6 +467,35 @@
     </div>
 </div>
 
+<div id="adminEditModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; font-weight:500;">Edit Trip (Admin)</h3>
+        <input type="hidden" id="edit-trip-id">
+        <div class="form-group"><label style="text-align:left;">Vehicle No.</label><input type="text" id="edit-vnum" class="compact-input" onchange="formatVehicleNumber(this)"></div>
+        <div class="grid-2">
+            <div class="form-group"><label style="text-align:left;">Veh Type</label><input type="text" id="edit-vtype" class="compact-input" onchange="formatCase(this, 'upper')"></div>
+            <div class="form-group"><label style="text-align:left;">Capacity</label><input type="text" id="edit-vcap" class="compact-input" onchange="formatCase(this, 'upper')"></div>
+        </div>
+        <div class="form-group"><label style="text-align:left;">Route Origin</label><input type="text" id="edit-from" class="compact-input" onchange="formatCase(this, 'title')"></div>
+        <div class="form-group"><label style="text-align:left;">Route Destination</label><input type="text" id="edit-to" class="compact-input" onchange="formatCase(this, 'title')"></div>
+        
+        <div class="grid-2">
+            <div class="form-group"><label style="text-align:left;">Vehicle Freight</label><input type="text" id="edit-vfreight" class="compact-input"></div>
+            <div class="form-group"><label style="text-align:left;">Charged Freight</label><input type="text" id="edit-cfreight" class="compact-input"></div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group"><label style="text-align:left;">Driver Name</label><input type="text" id="edit-dname" class="compact-input" onchange="formatCase(this, 'title')"></div>
+            <div class="form-group"><label style="text-align:left;">Driver Contact</label><input type="text" id="edit-dcontact" class="compact-input" onchange="formatPhoneInput(this)"></div>
+        </div>
+        
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn-clear" onclick="closeAdminEditModal()">Cancel</button>
+            <button class="btn-primary" onclick="saveAdminEdit()">Update</button>
+        </div>
+    </div>
+</div>
+
+
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzc2y0Caupte-mahQ5R3Vlc--92gkvL-B_cc1tC37qyPDmNeWUaX44ufvZnxrdtR5W_AQ/exec"; 
     
@@ -524,17 +504,19 @@
     let driverData = {}; 
     let currentUser = null; 
     
-    // NAVIGATION STATES
     let currentActiveMainTab = 'panel-homepage';
     let currentPlacementType = "Own Booking";
-    let currentDeployedFilter = "Own Booking";
-    let currentPodFilter = "Pending";
+    
+    let currentDeployedType = "Own Booking";
+    let currentDeployedStatus = "In-Transit";
+    
+    let currentPodType = "Own Booking";
+    let currentPodStatus = "Pending";
+
     let currentRecoFilter = "Own Booking";
 
-    let lastSavedPlacementStr = "";
     let pendingWhatsAppMsg = ""; 
 
-    // --- UTILITY FUNCTIONS ---
     function getSafeTel(num) {
         if (!num) return '';
         let c = String(num).replace(/[\s-]/g, '').trim();
@@ -543,29 +525,6 @@
         return '+91' + c;
     }
 
-    function formatCase(el, style) { if(!el.value) return; el.value = style==='upper' ? el.value.trim().toUpperCase() : el.value.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()); }
-    function formatSentence(el) { if(el.value) el.value = el.value.trim().charAt(0).toUpperCase() + el.value.trim().slice(1); }
-    function formatVehicleNumber(el) { if(!el.value) return; el.value = el.value.toUpperCase().replace(/[\s-]/g, ''); }
-    function formatPhoneString(numberStr) {
-        if (!numberStr) return "";
-        let cleanNumber = numberStr.replace(/[\s-]/g, '').trim(); 
-        if (cleanNumber.startsWith("+91")) return cleanNumber;
-        else if (cleanNumber.startsWith("91") && cleanNumber.length > 10) return "+" + cleanNumber;
-        else return "+91" + cleanNumber;
-    }
-    function formatPhoneInput(el) { el.value = formatPhoneString(el.value); }
-    function getFormattedDate() {
-        const dInput = document.getElementById('b-date').value;
-        if (!dInput) return "";
-        const dObj = new Date(dInput);
-        const dd = String(dObj.getDate()).padStart(2, '0');
-        const mm = String(dObj.getMonth() + 1).padStart(2, '0');
-        const yyyy = dObj.getFullYear();
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        return `${dd}/${mm}/${yyyy}, ${days[dObj.getDay()]}`;
-    }
-
-    // --- WHATSAPP LAUNCHER ---
     function openWhatsAppChoice(msg) {
         pendingWhatsAppMsg = msg;
         document.getElementById('whatsappChoiceModal').style.display = 'flex';
@@ -601,7 +560,6 @@
         closeWhatsAppChoiceModal();
     }
 
-    // --- INITIALIZATION ---
     function setGreeting() {
         const hour = new Date().getHours();
         document.getElementById('greeting-text').innerText = `${hour < 12 ? "Good Morning," : hour < 17 ? "Good Afternoon," : "Good Evening,"}`;
@@ -613,9 +571,124 @@
         document.getElementById('pin-overlay').style.display = 'flex';
     }
 
+    // THE CRITICAL RESTORED DROPDOWN MEMORY ENGINE
+    async function performDatabaseSync() {
+        const response = await fetch(GOOGLE_SCRIPT_URL);
+        if (!response.ok) throw new Error("Connection failed.");
+        const data = await response.json();
+        
+        vehicles = data.vehicles || {}; clients = data.clients || []; transporters = data.transporters || {}; 
+        allTrips = data.trips || []; users = data.users || []; statusLogs = data.statusLogs || [];
+
+        setupMemoryDropdowns();
+        renderAdminUsers();
+    }
+
+    function setupCustomDropdown(inputId, listId, dataFetchFn, onSelectFn = null) {
+        const inputElement = document.getElementById(inputId);
+        const listContainer = document.getElementById(listId);
+        if (!inputElement || !listContainer) return;
+
+        function showList(filterText = "") {
+            const dataArray = dataFetchFn();
+            listContainer.innerHTML = ""; let hasMatches = false;
+            dataArray.forEach(item => {
+                if (!item) return; 
+                if (!filterText || String(item).toLowerCase().includes(filterText.toLowerCase())) {
+                    hasMatches = true;
+                    let optionDiv = document.createElement("div"); optionDiv.innerHTML = item; 
+                    optionDiv.addEventListener("click", function() {
+                        inputElement.value = item; listContainer.style.display = "none";
+                        if (onSelectFn) onSelectFn(item); 
+                    });
+                    listContainer.appendChild(optionDiv);
+                }
+            });
+            listContainer.style.display = hasMatches ? "block" : "none";
+        }
+        inputElement.addEventListener("input", function() { showList(this.value); });
+        inputElement.addEventListener("click", function() { showList(this.value); });
+        document.addEventListener("click", function (e) { if (e.target !== inputElement) listContainer.style.display = "none"; });
+    }
+
+    function setupMemoryDropdowns() {
+        // Global Filters
+        setupCustomDropdown('uf-party', 'uf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t.from))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t.to))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t.type))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t.weight))].sort(), triggerCurrentRender);
+
+        // Own Booking Forms
+        setupCustomDropdown('ob-party', 'ob-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+        setupCustomDropdown('ob-vnum', 'ob-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'ob'));
+        setupCustomDropdown('ob-tname', 'ob-tname-list', () => Object.keys(transporters).sort());
+        setupCustomDropdown('ob-tperson', 'ob-tperson-list', () => transporters[document.getElementById('ob-tname').value]?.map(p => p.name).sort() || [], (p) => autoFillContact(p, 'ob'));
+        setupCustomDropdown('ob-from', 'ob-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
+        setupCustomDropdown('ob-to', 'ob-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
+
+        // Reverse Logistics Forms
+        setupCustomDropdown('rl-party', 'rl-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+        setupCustomDropdown('rl-vnum', 'rl-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'rl'));
+        setupCustomDropdown('rl-from', 'rl-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
+        setupCustomDropdown('rl-to', 'rl-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
+
+        // Reports
+        setupCustomDropdown('rf-party', 'rf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+
+        // Driver Memory
+        allTrips.forEach(t => {
+            if (t.dName && t.dName.trim() !== "" && t.dContact) {
+                let n = t.dName.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+                driverData[n] = t.dContact.trim();
+            }
+        });
+        
+        setupCustomDropdown('ob-dname', 'ob-dname-list', () => Object.keys(driverData).sort(), (selectedName) => {
+            document.getElementById('ob-dcontact').value = driverData[selectedName] || "";
+        });
+
+        const driverNums = [...new Set(Object.values(driverData))];
+        const dcInput = document.getElementById('ob-dcontact');
+        const dcList = document.getElementById('ob-dcontact-list');
+        if(dcInput && dcList) {
+            dcInput.addEventListener("input", function() {
+                dcList.innerHTML = "";
+                if (this.value.length > 2) {
+                    let c = this.value.replace(/[\s-]/g, '').trim();
+                    const matches = driverNums.filter(n => n.includes(c));
+                    matches.forEach(m => {
+                        let div = document.createElement("div"); div.innerHTML = m;
+                        div.onclick = () => { dcInput.value = m; dcList.style.display = "none"; };
+                        dcList.appendChild(div);
+                    });
+                    dcList.style.display = matches.length ? "block" : "none";
+                } else { dcList.style.display = "none"; }
+            });
+        }
+    }
+
+    function autoFillVehicle(vNum, prefix) { 
+        const u = vNum.toUpperCase(); 
+        if (vehicles[u]) { 
+            document.getElementById(`${prefix}-vtype`).value = vehicles[u].type || ""; 
+            document.getElementById(`${prefix}-weight`).value = vehicles[u].capacity || ""; 
+        } 
+    }
+    
+    function autoFillContact(pName, prefix) { 
+        const t = document.getElementById(`${prefix}-tname`).value; 
+        if (transporters[t]) { 
+            const person = transporters[t].find(x => x.name === pName); 
+            if (person) document.getElementById(`${prefix}-tcontact`).value = person.phone; 
+        } 
+    }
+
     window.onload = async () => {
         const savedUser = sessionStorage.getItem('ktpl_user');
-        document.getElementById('b-date').valueAsDate = new Date(); 
+        document.getElementById('ob-date').valueAsDate = new Date(); 
+        document.getElementById('rl-date').valueAsDate = new Date(); 
         
         if (sessionStorage.getItem('ktpl_unlocked') === 'true' && savedUser) {
             currentUser = JSON.parse(savedUser);
@@ -681,15 +754,14 @@
         document.getElementById('user-name-text').style.display = 'block';
 
         const role = currentUser.Role || currentUser.role;
-        const cFreightInput = document.getElementById('c-freight');
         
         if (role === 'Admin' || role === 'Master Admin') {
-            cFreightInput.disabled = false;
-            cFreightInput.placeholder = "Amount";
+            document.getElementById('ob-cfreight').disabled = false;
+            document.getElementById('ob-cfreight').placeholder = "Amount";
         } else {
-            cFreightInput.value = "";
-            cFreightInput.disabled = true;
-            cFreightInput.placeholder = "Restricted";
+            document.getElementById('ob-cfreight').value = "";
+            document.getElementById('ob-cfreight').disabled = true;
+            document.getElementById('ob-cfreight').placeholder = "Restricted";
         }
 
         if (role === 'Master Admin') {
@@ -706,12 +778,32 @@
         document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         currentActiveMainTab = id;
+        
+        document.querySelectorAll('.main-tab').forEach(el => el.classList.remove('active'));
+        const navId = id.replace('tab-', 'nav-');
+        if(document.getElementById(navId)) document.getElementById(navId).classList.add('active');
+
+        // Show Full Filter Bar on everything except Home, Placement, Admin
+        if (id === 'tab-deployed' || id === 'tab-pod' || id === 'tab-payments' || id === 'tab-reports') {
+            document.getElementById('unified-filter-bar').style.display = 'block';
+        } else {
+            document.getElementById('unified-filter-bar').style.display = 'none';
+        }
+
+        if (id === 'tab-reports') {
+            document.getElementById('screen-report').innerHTML = '';
+            document.getElementById('print-report-container').innerHTML = '';
+            document.getElementById('report-actions').style.display = 'none';
+        }
+
         triggerCurrentRender();
     }
 
     function returnToHome() {
         document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
         document.getElementById('panel-homepage').classList.add('active');
+        document.querySelectorAll('.main-tab').forEach(el => el.classList.remove('active'));
+        document.getElementById('unified-filter-bar').style.display = 'none';
         currentActiveMainTab = 'panel-homepage';
     }
 
@@ -723,105 +815,57 @@
         if (currentActiveMainTab === 'tab-payments') renderReconciliation();
     }
 
-    // --- RESTORED DROPDOWN MEMORY ENGINE ---
-    async function performDatabaseSync() {
-        const response = await fetch(GOOGLE_SCRIPT_URL);
-        if (!response.ok) throw new Error("Connection failed.");
-        const data = await response.json();
-        
-        vehicles = data.vehicles || {}; clients = data.clients || []; transporters = data.transporters || {}; 
-        allTrips = data.trips || []; users = data.users || []; statusLogs = data.statusLogs || [];
-
-        setupMemoryDropdowns();
-        renderAdminUsers();
+    function clearFilters() {
+        const filterIds = ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-origin', 'uf-dest'];
+        filterIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
+        triggerCurrentRender();
     }
 
-    function setupCustomDropdown(inputId, listId, dataFetchFn, onSelectFn = null) {
-        const inputElement = document.getElementById(inputId);
-        const listContainer = document.getElementById(listId);
-        if (!inputElement || !listContainer) return;
+    function getFilteredTrips(baseTrips) {
+        let result = [...baseTrips];
+        const role = currentUser.Role || currentUser.role;
 
-        function showList(filterText = "") {
-            const dataArray = dataFetchFn();
-            listContainer.innerHTML = ""; let hasMatches = false;
-            dataArray.forEach(item => {
-                if (!item) return; 
-                if (!filterText || String(item).toLowerCase().includes(filterText.toLowerCase())) {
-                    hasMatches = true;
-                    let optionDiv = document.createElement("div"); optionDiv.innerHTML = item; 
-                    optionDiv.addEventListener("click", function() {
-                        inputElement.value = item; listContainer.style.display = "none";
-                        if (onSelectFn) onSelectFn(item); 
-                    });
-                    listContainer.appendChild(optionDiv);
+        if (role === 'SelfOnly') {
+            result = result.filter(t => t.createdBy === (currentUser.Name || currentUser.name));
+        }
+
+        const startDateStr = document.getElementById('uf-start').value;
+        const endDateStr = document.getElementById('uf-end').value;
+        const vNumMatch = document.getElementById('uf-vnum').value.trim().toLowerCase();
+        const vTypeMatch = document.getElementById('uf-vtype').value.trim().toLowerCase();
+        const vCapMatch = document.getElementById('uf-vcap').value.trim().toLowerCase();
+        const partyMatch = document.getElementById('uf-party').value.trim().toLowerCase();
+        const originMatch = document.getElementById('uf-origin').value.trim().toLowerCase();
+        const destMatch = document.getElementById('uf-dest').value.trim().toLowerCase();
+
+        let sDate = startDateStr ? new Date(startDateStr) : null;
+        if(sDate) sDate.setHours(0,0,0,0);
+        let eDate = endDateStr ? new Date(endDateStr) : null;
+        if(eDate) eDate.setHours(23,59,59,999);
+
+        result = result.filter(t => {
+            let passDate = true;
+            if (sDate || eDate) {
+                const parts = t.date ? t.date.split(',')[0].split('/') : []; 
+                if (parts.length === 3) {
+                    const tDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                    const tTime = tDate.getTime();
+                    if (sDate && tTime < sDate.getTime()) passDate = false;
+                    if (eDate && tTime > eDate.getTime()) passDate = false;
                 }
-            });
-            listContainer.style.display = hasMatches ? "block" : "none";
-        }
-        inputElement.addEventListener("input", function() { showList(this.value); });
-        inputElement.addEventListener("click", function() { showList(this.value); });
-        document.addEventListener("click", function (e) { if (e.target !== inputElement) listContainer.style.display = "none"; });
-    }
-
-    function setupMemoryDropdowns() {
-        setupCustomDropdown('p-name', 'p-name-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
-        setupCustomDropdown('v-num', 'v-num-list', () => {
-            let fleet = Object.keys(vehicles);
-            if (currentPlacementType === "Reverse Logistics") return fleet.sort(); 
-            return fleet.sort();
-        }, autoFillVehicle);
-        setupCustomDropdown('t-name', 't-name-list', () => Object.keys(transporters).sort());
-        setupCustomDropdown('t-person', 't-person-list', () => transporters[document.getElementById('t-name').value]?.map(p => p.name).sort() || [], autoFillContact);
-        setupCustomDropdown('route-from', 'route-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
-        setupCustomDropdown('route-to', 'route-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
-        
-        setupCustomDropdown('rf-party', 'rf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
-
-        allTrips.forEach(t => {
-            if (t.dName && t.dName.trim() !== "" && t.dContact) {
-                let n = t.dName.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-                driverData[n] = t.dContact.trim();
             }
-        });
-        
-        setupCustomDropdown('d-name', 'd-name-list', () => Object.keys(driverData).sort(), (selectedName) => {
-            document.getElementById('d-contact').value = driverData[selectedName] || "";
+            const passV = !vNumMatch || (t.vNum && t.vNum.toLowerCase().includes(vNumMatch));
+            const passVType = !vTypeMatch || (t.type && t.type.toLowerCase().includes(vTypeMatch));
+            const passVCap = !vCapMatch || (t.weight && t.weight.toLowerCase().includes(vCapMatch));
+            const passP = !partyMatch || (t.party && t.party.toLowerCase().includes(partyMatch));
+            const passO = !originMatch || (t.from && t.from.toLowerCase().includes(originMatch));
+            const passD = !destMatch || (t.to && t.to.toLowerCase().includes(destMatch));
+
+            return passDate && passV && passVType && passVCap && passP && passO && passD;
         });
 
-        const driverNums = [...new Set(Object.values(driverData))];
-        const dcInput = document.getElementById('d-contact');
-        const dcList = document.getElementById('d-contact-list');
-        if(dcInput && dcList) {
-            dcInput.addEventListener("input", function() {
-                dcList.innerHTML = "";
-                if (this.value.length > 2) {
-                    let c = this.value.replace(/[\s-]/g, '').trim();
-                    const matches = driverNums.filter(n => n.includes(c));
-                    matches.forEach(m => {
-                        let div = document.createElement("div"); div.innerHTML = m;
-                        div.onclick = () => { dcInput.value = m; dcList.style.display = "none"; };
-                        dcList.appendChild(div);
-                    });
-                    dcList.style.display = matches.length ? "block" : "none";
-                } else { dcList.style.display = "none"; }
-            });
-        }
-    }
-
-    function autoFillVehicle(vNum) { 
-        const u = vNum.toUpperCase(); 
-        if (vehicles[u]) { 
-            document.getElementById('v-type').value = vehicles[u].type || ""; 
-            document.getElementById('v-weight').value = vehicles[u].capacity || ""; 
-        } 
-    }
-    
-    function autoFillContact(pName) { 
-        const t = document.getElementById('t-name').value; 
-        if (transporters[t]) { 
-            const person = transporters[t].find(x => x.name === pName); 
-            if (person) document.getElementById('t-contact').value = person.phone; 
-        } 
+        result.sort((a, b) => new Date((a.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((b.date||'').split(',')[0].split('/').reverse().join('-')));
+        return result;
     }
 
     // --- PLACEMENT ENGINE ---
@@ -830,246 +874,234 @@
         document.getElementById('btn-place-own').classList.toggle('active', mode === 'Own Booking');
         document.getElementById('btn-place-rev').classList.toggle('active', mode === 'Reverse Logistics');
         
-        document.getElementById('group-broking-agent').style.display = mode === 'Reverse Logistics' ? 'block' : 'none';
-        document.getElementById('placement-driver-fields').style.display = mode === 'Own Booking' ? 'grid' : 'none';
-        document.getElementById('placement-transporter-fields').style.display = mode === 'Own Booking' ? 'block' : 'none';
-        document.getElementById('group-vfreight').style.display = mode === 'Own Booking' ? 'block' : 'none';
-        document.getElementById('btn-msg-team').style.display = mode === 'Own Booking' ? 'block' : 'none';
+        document.getElementById('form-own-booking').style.display = mode === 'Own Booking' ? 'block' : 'none';
+        document.getElementById('form-rev-logistics').style.display = mode === 'Reverse Logistics' ? 'block' : 'none';
         
-        setupMemoryDropdowns(); // Refresh fleet strictness
+        setupMemoryDropdowns(); 
     }
 
     function clearPlacementForm() {
-        document.querySelectorAll('#tab-placement input').forEach(i => i.value = '');
-        document.getElementById('b-date').valueAsDate = new Date();
+        document.querySelectorAll('#form-own-booking input, #form-rev-logistics input').forEach(i => i.value = '');
+        document.getElementById('ob-date').valueAsDate = new Date();
+        document.getElementById('rl-date').valueAsDate = new Date();
     }
 
-    function validateForm() {
+    function validatePlacementOwn() {
         let isValid = true;
-        let requiredFields = ['b-date', 'p-name', 'route-from', 'route-to', 'v-num', 'v-type', 'v-weight'];
-        
-        if (currentPlacementType === 'Own Booking') {
-            requiredFields.push('d-contact', 't-name', 't-contact');
-        } else {
-            requiredFields.push('p-agent');
-        }
-
+        let req = ['ob-date', 'ob-party', 'ob-from', 'ob-to', 'ob-vnum', 'ob-vtype', 'ob-weight', 'ob-dcontact', 'ob-tname', 'ob-tcontact'];
         document.querySelectorAll('.error-msg').forEach(msg => msg.style.display = 'none');
         document.querySelectorAll('input').forEach(input => input.style.borderColor = '#dadce0');
-        
-        requiredFields.forEach(id => {
-            const inputField = document.getElementById(id);
-            if (inputField && !inputField.value.trim()) { 
-                document.getElementById('err-' + id).style.display = 'block'; 
-                inputField.style.borderColor = '#d93025'; 
-                isValid = false; 
-            }
+        req.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && !el.value.trim()) { el.style.borderColor = '#d93025'; isValid = false; }
         });
-        if (!isValid) alert("Please fill in all mandatory fields marked with an asterisk (*).");
+        if (!isValid) alert("Please fill in all mandatory fields (*).");
         return isValid;
     }
 
-    function savePlacementDetails() {
-        if (!validateForm()) return;
-
-        const date = getFormattedDate();
-        const party = document.getElementById('p-name').value;
-        const rFrom = document.getElementById('route-from').value;
-        const rTo = document.getElementById('route-to').value;
-        const vNum = document.getElementById('v-num').value.toUpperCase();
-        
-        if (currentPlacementType === "Reverse Logistics" && !vehicles[vNum]) {
-            return alert("Error: Reverse Logistics mode strictly requires a valid KTPL fleet vehicle asset.");
-        }
-
-        const currentPlacementStr = `${date}-${party}-${rFrom}-${rTo}-${vNum}`;
-        const isDuplicate = allTrips.some(t => String(t.date).trim() === String(date).trim() && String(t.vNum).trim().toUpperCase() === String(vNum).trim().toUpperCase());
-
-        if (!isDuplicate && lastSavedPlacementStr !== currentPlacementStr) {
-            const tripId = "TRP-" + Date.now();
-            const createdByName = currentUser.Name || currentUser.name || "Unknown";
-            
-            const payload = {
-                action: 'saveTrip', id: tripId, date: date, party: party, 
-                from: rFrom, to: rTo, vNum: vNum, vType: document.getElementById('v-type').value, weight: document.getElementById('v-weight').value,
-                createdBy: createdByName,
-                vFreight: document.getElementById('v-freight').value || "", cFreight: document.getElementById('c-freight').value || "",
-                dName: document.getElementById('d-name').value, dContact: formatPhoneString(document.getElementById('d-contact').value), 
-                tName: document.getElementById('t-name').value, tPerson: document.getElementById('t-person').value, 
-                tContact: formatPhoneString(document.getElementById('t-contact').value), remarks: document.getElementById('remarks').value,
-                bookingType: currentPlacementType, brokingAgent: document.getElementById('p-agent').value
-            };
-            
-            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            
-            allTrips.push({
-                id: tripId, date: payload.date, party: payload.party, from: payload.from, to: payload.to, vNum: payload.vNum,
-                type: payload.vType, weight: payload.weight, status: "In-Transit", deliveryDate: "", statusNote: "",
-                cNote: "", podDate: "", vFreight: payload.vFreight, cFreight: payload.cFreight, bookingType: payload.bookingType,
-                brokingAgent: payload.brokingAgent, financialLedger: '{"income":[],"expense":[]}', invoiceNo: "",
-                receivableStatus: "Pending", amtReceived: "", advancePaid: "", payableStatus: "Pending", remarks: payload.remarks
-            });
-            lastSavedPlacementStr = currentPlacementStr; 
-            alert("Details saved successfully!");
-            clearPlacementForm();
-            returnToHome();
-        }
+    function validatePlacementRev() {
+        let isValid = true;
+        // Non-mandatory: Party Name, Type of Co, Agent Name, Remarks
+        let req = ['rl-date', 'rl-from', 'rl-to', 'rl-vnum', 'rl-vtype', 'rl-weight', 'rl-agency', 'rl-contact'];
+        document.querySelectorAll('.error-msg').forEach(msg => msg.style.display = 'none');
+        document.querySelectorAll('input').forEach(input => input.style.borderColor = '#dadce0');
+        req.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && !el.value.trim()) { el.style.borderColor = '#d93025'; isValid = false; }
+        });
+        if (!isValid) alert("Please fill in all mandatory fields (*).");
+        return isValid;
     }
 
-    function generatePlacementMessage(type) {
-        if (!validateForm()) return; 
-        
-        const date = getFormattedDate();
-        const party = document.getElementById('p-name').value;
-        const rFrom = document.getElementById('route-from').value;
-        const rTo = document.getElementById('route-to').value;
-        const vNum = document.getElementById('v-num').value.toUpperCase();
-        const vType = document.getElementById('v-type').value; 
-        const vWeight = document.getElementById('v-weight').value;
-        const dName = document.getElementById('d-name').value; 
-        const dContact = formatPhoneString(document.getElementById('d-contact').value);
-        const tName = document.getElementById('t-name').value;
-        const tPerson = document.getElementById('t-person').value;
-        const tContact = formatPhoneString(document.getElementById('t-contact').value);
-        const remarks = document.getElementById('remarks').value;
+    function formatPhoneString(numberStr) {
+        if (!numberStr) return "";
+        let cleanNumber = numberStr.replace(/[\s-]/g, '').trim(); 
+        if (cleanNumber.startsWith("+91")) return cleanNumber;
+        else if (cleanNumber.startsWith("91") && cleanNumber.length > 10) return "+" + cleanNumber;
+        else return "+91" + cleanNumber;
+    }
+    function formatPhoneInput(el) { el.value = formatPhoneString(el.value); }
+    function formatCase(el, style) { if(!el.value) return; el.value = style==='upper' ? el.value.trim().toUpperCase() : el.value.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()); }
+    function formatSentence(el) { if(el.value) el.value = el.value.trim().charAt(0).toUpperCase() + el.value.trim().slice(1); }
+    function formatVehicleNumber(el) { if(!el.value) return; el.value = el.value.toUpperCase().replace(/[\s-]/g, ''); }
 
+    function getFormattedDateVal(dateInputVal) {
+        if (!dateInputVal) return "";
+        const dObj = new Date(dateInputVal);
+        const dd = String(dObj.getDate()).padStart(2, '0');
+        const mm = String(dObj.getMonth() + 1).padStart(2, '0');
+        const yyyy = dObj.getFullYear();
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        return `${dd}/${mm}/${yyyy}, ${days[dObj.getDay()]}`;
+    }
+
+    function savePlacementOwn() {
+        if (!validatePlacementOwn()) return;
+        
+        const date = getFormattedDateVal(document.getElementById('ob-date').value);
+        const party = document.getElementById('ob-party').value;
+        const rFrom = document.getElementById('ob-from').value;
+        const rTo = document.getElementById('ob-to').value;
+        const vNum = document.getElementById('ob-vnum').value.toUpperCase();
+
+        const payload = {
+            action: 'saveTrip', id: "TRP-" + Date.now(), date: date, party: party, 
+            from: rFrom, to: rTo, vNum: vNum, vType: document.getElementById('ob-vtype').value, weight: document.getElementById('ob-weight').value,
+            createdBy: currentUser.Name || currentUser.name || "Unknown",
+            vFreight: document.getElementById('ob-vfreight').value || "", cFreight: document.getElementById('ob-cfreight').value || "",
+            dName: document.getElementById('ob-dname').value, dContact: formatPhoneString(document.getElementById('ob-dcontact').value), 
+            tName: document.getElementById('ob-tname').value, tPerson: document.getElementById('ob-tperson').value, 
+            tContact: formatPhoneString(document.getElementById('ob-tcontact').value), remarks: document.getElementById('ob-remarks').value,
+            bookingType: 'Own Booking', brokingAgent: ''
+        };
+
+        finalizePlacementSave(payload);
+    }
+
+    function savePlacementRev() {
+        if (!validatePlacementRev()) return;
+        
+        const vNum = document.getElementById('rl-vnum').value.toUpperCase();
+        if (!vehicles[vNum]) { return alert("Error: Reverse Logistics mode strictly requires a valid KTPL fleet vehicle asset."); }
+
+        const date = getFormattedDateVal(document.getElementById('rl-date').value);
+        let party = document.getElementById('rl-party').value;
+        let typeCo = document.getElementById('rl-typeco').value;
+        if(typeCo) party = party + " (" + typeCo + ")";
+
+        const payload = {
+            action: 'saveTrip', id: "TRP-" + Date.now(), date: date, party: party, 
+            from: document.getElementById('rl-from').value, to: document.getElementById('rl-to').value, vNum: vNum, 
+            vType: document.getElementById('rl-vtype').value, weight: document.getElementById('rl-weight').value,
+            createdBy: currentUser.Name || currentUser.name || "Unknown",
+            vFreight: "", cFreight: document.getElementById('rl-cfreight').value || "",
+            dName: "", dContact: "", tName: "", 
+            tPerson: document.getElementById('rl-agent').value, tContact: formatPhoneString(document.getElementById('rl-contact').value), 
+            remarks: document.getElementById('rl-remarks').value, bookingType: 'Reverse Logistics', brokingAgent: document.getElementById('rl-agency').value
+        };
+
+        finalizePlacementSave(payload);
+    }
+
+    function finalizePlacementSave(payload) {
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        allTrips.push({
+            id: payload.id, date: payload.date, party: payload.party, from: payload.from, to: payload.to, vNum: payload.vNum,
+            type: payload.vType, weight: payload.weight, status: "In-Transit", deliveryDate: "", statusNote: "", createdBy: payload.createdBy,
+            cNote: "", podDate: "", vFreight: payload.vFreight, cFreight: payload.cFreight, bookingType: payload.bookingType,
+            brokingAgent: payload.brokingAgent, financialLedger: '{"income":[],"expense":[]}', invoiceNo: "",
+            receivableStatus: "Pending", amtReceived: "", advancePaid: "", payableStatus: "Pending", remarks: payload.remarks, 
+            dName: payload.dName, dContact: payload.dContact, tName: payload.tName, tPerson: payload.tPerson, tContact: payload.tContact
+        });
+        alert("Details saved successfully!");
+        clearPlacementForm();
+        returnToHome();
+    }
+
+    function generatePlacementMessageOwn(type) {
+        if (!validatePlacementOwn()) return; 
+
+        const date = getFormattedDateVal(document.getElementById('ob-date').value);
+        const party = document.getElementById('ob-party').value;
+        const rFrom = document.getElementById('ob-from').value;
+        const rTo = document.getElementById('ob-to').value;
+        const vNum = document.getElementById('ob-vnum').value.toUpperCase();
+        const vType = document.getElementById('ob-vtype').value; 
+        const vWeight = document.getElementById('ob-weight').value;
+        
         let header = `*Placement Details - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n`;
         header += `*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${rFrom}\n*To:* ${rTo}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n\n`;
         
-        if (currentPlacementType === 'Own Booking') {
-            if (dName) header += `*Driver Name:* ${dName}\n`;
-            if (dContact) header += `*Driver Contact No:* ${dContact}\n\n`;
-            if (type === 'team') {
-                header += `*Transporter:* ${tName}\n`;
-                if (tPerson) header += `*Person Name:* ${tPerson}\n`;
-                if (tContact) header += `*Contact Number:* ${tContact}\n\n`;
-                if (remarks) header += `*Remarks:* ${remarks}`;
-            }
-        } else {
-            let pAgent = document.getElementById('p-agent').value;
-            header += `*Broking Agent:* ${pAgent}\n\n`;
-            if (remarks) header += `*Remarks:* ${remarks}`;
+        let dName = document.getElementById('ob-dname').value; 
+        let dContact = formatPhoneString(document.getElementById('ob-dcontact').value);
+        if (dName) header += `*Driver Name:* ${dName}\n`;
+        if (dContact) header += `*Driver Contact No:* ${dContact}\n\n`;
+
+        if (type === 'team') {
+            header += `*Transporter:* ${document.getElementById('ob-tname').value}\n`;
+            if (document.getElementById('ob-tperson').value) header += `*Person Name:* ${document.getElementById('ob-tperson').value}\n`;
+            if (document.getElementById('ob-tcontact').value) header += `*Contact Number:* ${document.getElementById('ob-tcontact').value}\n\n`;
+            if (document.getElementById('ob-remarks').value) header += `*Remarks:* ${document.getElementById('ob-remarks').value}`;
         }
+        openWhatsAppChoice(header);
+    }
+
+    function generatePlacementMessageRev(type) {
+        if (!validatePlacementRev()) return; 
+
+        const date = getFormattedDateVal(document.getElementById('rl-date').value);
+        let party = document.getElementById('rl-party').value;
+        let typeCo = document.getElementById('rl-typeco').value;
+        if(typeCo) party = party + " (" + typeCo + ")";
+        
+        const rFrom = document.getElementById('rl-from').value;
+        const rTo = document.getElementById('rl-to').value;
+        const vNum = document.getElementById('rl-vnum').value.toUpperCase();
+        const vType = document.getElementById('rl-vtype').value; 
+        const vWeight = document.getElementById('rl-weight').value;
+        
+        let header = `*Placement Details (Rev Log) - ${vNum} - ${rFrom} to ${rTo} - ${vType} - ${vWeight}*\n\n`;
+        header += `*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${rFrom}\n*To:* ${rTo}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${vType}\n*Charged Weight:* ${vWeight}\n\n`;
+        header += `*Broking Agency:* ${document.getElementById('rl-agency').value}\n`;
+        if(document.getElementById('rl-agent').value) header += `*Agent Name:* ${document.getElementById('rl-agent').value}\n`;
+        if(document.getElementById('rl-contact').value) header += `*Contact No:* ${document.getElementById('rl-contact').value}\n\n`;
+        if(document.getElementById('rl-remarks').value) header += `*Remarks:* ${document.getElementById('rl-remarks').value}`;
         
         openWhatsAppChoice(header);
     }
 
-    // --- DYNAMIC FINANCIAL LEDGER ENGINE ---
-    function openFinancialAllocation(tripId) {
-        const trip = allTrips.find(t => t.id === tripId);
-        if(!trip) return;
-        document.getElementById('fin-trip-id').value = tripId;
-        
-        document.getElementById('income-rows-container').innerHTML = "";
-        document.getElementById('expense-rows-container').innerHTML = "";
-
-        let ledger = { income: [], expense: [] };
-        try { ledger = JSON.parse(trip.financialLedger); } catch(e){}
-
-        if(ledger.income) ledger.income.forEach(row => addFinancialRow('income', row.type, row.amt));
-        if(ledger.expense) ledger.expense.forEach(row => addFinancialRow('expense', row.type, row.amt));
-
-        document.getElementById('financialModal').style.display = "flex";
-    }
-
-    function addFinancialRow(category, type = "", amt = "") {
-        const container = document.getElementById(`${category}-rows-container`);
-        const row = document.createElement('div');
-        row.className = "financial-row";
-        row.innerHTML = `
-            <input type="text" placeholder="Description/Type" class="compact-input fin-desc" value="${type}">
-            <input type="number" placeholder="Amount" class="compact-input fin-amt" value="${amt}">
-            <button onclick="this.parentElement.remove()" style="border:none; background:none; color:#d93025; font-size:16px; font-weight:bold; cursor:pointer;">×</button>
-        `;
-        container.appendChild(row);
-    }
-
-    function closeFinancialModal() { document.getElementById('financialModal').style.display = "none"; }
-
-    function saveFinancialLedger() {
-        const tripId = document.getElementById('fin-trip-id').value;
-        const trip = allTrips.find(t => t.id === tripId);
-        
-        let ledger = { income: [], expense: [] };
-        
-        document.querySelectorAll('#income-rows-container .financial-row').forEach(r => {
-            let desc = r.querySelector('.fin-desc').value;
-            let amt = r.querySelector('.fin-amt').value;
-            if(desc && amt) ledger.income.push({ type: desc, amt: parseFloat(amt) });
-        });
-
-        document.querySelectorAll('#expense-rows-container .financial-row').forEach(r => {
-            let desc = r.querySelector('.fin-desc').value;
-            let amt = r.querySelector('.fin-amt').value;
-            if(desc && amt) ledger.expense.push({ type: desc, amt: parseFloat(amt) });
-        });
-
-        const jsonStr = JSON.stringify(ledger);
-        trip.financialLedger = jsonStr;
-
-        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: tripId, ledgerJson: jsonStr }) });
-        closeFinancialModal();
-        if(currentActiveMainTab === 'tab-payments') renderReconciliation();
-    }
-
-
     // --- DEPLOYED WORKSPACE ENGINE ---
-    function toggleDeployedFilter(mode) {
-        currentDeployedFilter = mode;
-        document.getElementById('btn-dep-own').classList.toggle('active', mode === 'Own Booking');
-        document.getElementById('btn-dep-rev').classList.toggle('active', mode === 'Reverse Logistics');
-        renderDeployed();
+    function setDepType(type) {
+        currentDeployedType = type;
+        document.getElementById('btn-dep-type-own').classList.toggle('active', type === 'Own Booking');
+        document.getElementById('btn-dep-type-rev').classList.toggle('active', type === 'Reverse Logistics');
+        triggerCurrentRender();
+    }
+    
+    function setDepStat(stat) {
+        currentDeployedStatus = stat;
+        document.getElementById('btn-dep-stat-ong').classList.toggle('active', stat === 'In-Transit');
+        document.getElementById('btn-dep-stat-com').classList.toggle('active', stat === 'Delivered');
+        document.getElementById('btn-dep-stat-can').classList.toggle('active', stat === 'Cancelled Trip');
+        triggerCurrentRender();
     }
 
     function renderDeployed() {
         const container = document.getElementById('deployed-container');
-        const vFilter = document.getElementById('df-vnum') ? document.getElementById('df-vnum').value.toLowerCase() : '';
-        const pFilter = document.getElementById('df-party') ? document.getElementById('df-party').value.toLowerCase() : '';
-        const sFilter = document.getElementById('df-status') ? document.getElementById('df-status').value : 'In-Transit';
-
-        let items = allTrips.filter(t => (t.bookingType || 'Own Booking') === currentDeployedFilter && t.status === sFilter);
+        let items = getFilteredTrips(allTrips);
         
-        const role = currentUser.Role || currentUser.role;
-        if (role === 'SelfOnly') items = items.filter(t => t.createdBy === (currentUser.Name || currentUser.name));
-
-        if (vFilter) items = items.filter(t => t.vNum.toLowerCase().includes(vFilter));
-        if (pFilter) items = items.filter(t => t.party.toLowerCase().includes(pFilter));
-
-        items.sort((a, b) => new Date((a.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((b.date||'').split(',')[0].split('/').reverse().join('-')));
+        items = items.filter(t => (t.bookingType || 'Own Booking') === currentDeployedType && (t.status || 'In-Transit').trim() === currentDeployedStatus);
 
         if(items.length === 0) { container.innerHTML = "<p style='padding:20px; color:#666;'>No trips found.</p>"; return; }
-
         container.innerHTML = items.map((t, i) => buildTripCard(t, i, 'deployed')).join('');
     }
 
     // --- POD WORKSPACE ENGINE ---
-    function togglePodFilter(mode) {
-        currentPodFilter = mode;
-        document.getElementById('btn-pod-pending').classList.toggle('active', mode === 'Pending');
-        document.getElementById('btn-pod-received').classList.toggle('active', mode === 'Received');
-        renderPOD();
+    function setPodType(type) {
+        currentPodType = type;
+        document.getElementById('btn-pod-type-own').classList.toggle('active', type === 'Own Booking');
+        document.getElementById('btn-pod-type-rev').classList.toggle('active', type === 'Reverse Logistics');
+        triggerCurrentRender();
+    }
+    
+    function setPodStat(stat) {
+        currentPodStatus = stat;
+        document.getElementById('btn-pod-stat-pen').classList.toggle('active', stat === 'Pending');
+        document.getElementById('btn-pod-stat-rec').classList.toggle('active', stat === 'Received');
+        triggerCurrentRender();
     }
 
     function renderPOD() {
         const container = document.getElementById('pod-container');
-        const vFilter = document.getElementById('pf-vnum') ? document.getElementById('pf-vnum').value.toLowerCase() : '';
-        const pFilter = document.getElementById('pf-party') ? document.getElementById('pf-party').value.toLowerCase() : '';
-
-        let items = allTrips.filter(t => currentPodFilter === 'Pending' ? !t.podDate : t.podDate);
+        let items = getFilteredTrips(allTrips);
         
-        const role = currentUser.Role || currentUser.role;
-        if (role === 'SelfOnly') items = items.filter(t => t.createdBy === (currentUser.Name || currentUser.name));
+        items = items.filter(t => (t.bookingType || 'Own Booking') === currentPodType);
+        items = items.filter(t => currentPodStatus === 'Pending' ? !t.podDate : t.podDate);
 
-        if (vFilter) items = items.filter(t => t.vNum.toLowerCase().includes(vFilter));
-        if (pFilter) items = items.filter(t => t.party.toLowerCase().includes(pFilter));
-
-        items.sort((a, b) => new Date((a.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((b.date||'').split(',')[0].split('/').reverse().join('-')));
-
-        document.getElementById('pod-summary').innerText = `No. of ${currentPodFilter} POD: ${items.length}`;
+        document.getElementById('pod-summary').innerText = `No. of ${currentPodStatus} POD: ${items.length}`;
 
         if(items.length === 0) { container.innerHTML = "<p style='padding:20px; color:#666;'>No records found.</p>"; return; }
-
-        const viewMode = currentPodFilter === 'Pending' ? 'pod-pending' : 'pod-received';
+        const viewMode = currentPodStatus === 'Pending' ? 'pod-pending' : 'pod-received';
         container.innerHTML = items.map((t, i) => buildTripCard(t, i, viewMode)).join('');
     }
 
@@ -1083,31 +1115,26 @@
 
     function renderReconciliation() {
         const container = document.getElementById('reco-container');
-        const vFilter = document.getElementById('recf-vnum') ? document.getElementById('recf-vnum').value.toLowerCase() : '';
-        const pFilter = document.getElementById('recf-party') ? document.getElementById('recf-party').value.toLowerCase() : '';
-        const rFilter = document.getElementById('recf-rstat') ? document.getElementById('recf-rstat').value : '';
-        const pStatFilter = document.getElementById('recf-pstat') ? document.getElementById('recf-pstat').value : '';
-
-        let trips = allTrips.filter(t => (t.bookingType || 'Own Booking') === currentRecoFilter);
+        let trips = getFilteredTrips(allTrips);
         
-        const role = currentUser.Role || currentUser.role;
-        if (role === 'SelfOnly') trips = trips.filter(t => t.createdBy === (currentUser.Name || currentUser.name));
-
-        if (vFilter) trips = trips.filter(t => t.vNum.toLowerCase().includes(vFilter));
-        if (pFilter) trips = trips.filter(t => t.party.toLowerCase().includes(pFilter));
-        if (rFilter) trips = trips.filter(t => t.receivableStatus === rFilter);
-        if (pStatFilter) trips = trips.filter(t => t.payableStatus === pStatFilter);
-
-        trips.sort((a, b) => new Date((b.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((a.date||'').split(',')[0].split('/').reverse().join('-')));
+        trips = trips.filter(t => (t.bookingType || 'Own Booking') === currentRecoFilter);
 
         if(trips.length === 0) { container.innerHTML = "<p style='padding:20px; color:#666;'>No ledger records matching parameters.</p>"; return; }
 
+        const role = currentUser.Role || currentUser.role;
         const isMasterAdmin = (role === 'Master Admin' || role === 'Admin');
 
         container.innerHTML = trips.map(t => {
             let ledger = { income: [], expense: [] };
             try { ledger = JSON.parse(t.financialLedger); } catch(e){}
             
+            if(ledger.expense.length === 0 && (t.otherExp || t.loadingExp || t.unloadingExp || t.lrExp)) {
+                if(t.otherExp) ledger.expense.push({amt: parseFloat(t.otherExp)});
+                if(t.loadingExp) ledger.expense.push({amt: parseFloat(t.loadingExp)});
+                if(t.unloadingExp) ledger.expense.push({amt: parseFloat(t.unloadingExp)});
+                if(t.lrExp) ledger.expense.push({amt: parseFloat(t.lrExp)});
+            }
+
             let baseRev = parseFloat(t.cFreight || 0);
             let extraRev = ledger.income ? ledger.income.reduce((s, r) => s + r.amt, 0) : 0;
             let totalReceivable = baseRev + extraRev;
@@ -1242,8 +1269,14 @@
         }
         cardHtml += `</div>`;
 
-        if (isAdminOrMaster && trip.bookingType === 'Reverse Logistics' && trip.brokingAgent) {
-            cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:12px;"><strong>Agent:</strong> ${trip.brokingAgent}</div>`;
+        if (trip.bookingType === 'Reverse Logistics' && trip.brokingAgent) {
+            cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:12px;"><strong>Agency:</strong> ${trip.brokingAgent}</div>`;
+        } else if (trip.vFreight && trip.vFreight.trim() !== '') {
+            cardHtml += `<div style="margin-bottom: 5px; color:#5f6368;"><strong>Vehicle Freight:</strong> ${trip.vFreight}</div>`;
+        }
+        
+        if (isAdminOrMaster && trip.cFreight && trip.cFreight.trim() !== '') {
+            cardHtml += `<div style="margin-bottom: 5px; color:#137333;"><strong>Charged Freight:</strong> ${trip.cFreight}</div>`;
         }
 
         const dTel = getSafeTel(trip.dContact);
@@ -1253,11 +1286,16 @@
             <div style="font-size: 11px; margin-bottom: 10px;">
                 <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#1a73e8; font-weight:500; cursor:pointer;" onclick="document.getElementById('contact-${viewMode}-${trip.id}').style.display = document.getElementById('contact-${viewMode}-${trip.id}').style.display === 'block' ? 'none' : 'block';">View Contact Details ▼</span>
                 <div id="contact-${viewMode}-${trip.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:4px; margin-top:5px; border:1px solid #dadce0; color:#3c4043;">
-                    <div style="margin-bottom:6px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} <br> <a href="tel:${dTel}" style="color:#1a73e8; text-decoration:none; font-size:13px; font-weight:500;">📞 ${trip.dContact || 'N/A'}</a></div>
-                    <div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none; font-size:13px; font-weight:500;">📞 ${trip.tContact || 'N/A'}</a></div>
-                </div>
-            </div>
         `;
+        
+        if (trip.bookingType === 'Own Booking') {
+            cardHtml += `<div style="margin-bottom:6px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} <br> <a href="tel:${dTel}" style="color:#1a73e8; text-decoration:none; font-size:13px; font-weight:500;">📞 ${trip.dContact || 'N/A'}</a></div>`;
+            cardHtml += `<div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none; font-size:13px; font-weight:500;">📞 ${trip.tContact || 'N/A'}</a></div>`;
+        } else {
+            cardHtml += `<div><strong>Broking Agent:</strong> ${trip.tPerson || 'N/A'} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none; font-size:13px; font-weight:500;">📞 ${trip.tContact || 'N/A'}</a></div>`;
+        }
+        
+        cardHtml += `</div></div>`;
 
         if (viewMode === 'deployed' && !isReadOnly) {
             cardHtml += `
@@ -1288,6 +1326,8 @@
                             </select>
                         </div>
                     `;
+                } else {
+                    cardHtml += `<div style="margin-top: 5px; color:#137333; font-weight:500; font-size: 12px;">Delivered on ${trip.deliveryDate}</div>`;
                 }
             } else if (trip.status.trim() === 'Cancelled Trip') {
                 if (isMasterAdmin) {
@@ -1584,7 +1624,7 @@
         XLSX.writeFile(wb, `KTPL_Payments_Ledger.xlsx`);
     }
 
-    // --- SHARED BACKEND LOGIC ---
+    // --- STATUS UPDATES & MODALS ---
     function handleStatusChange(tripId, value, selectElement) {
         if (value === 'Delivered') {
             triggerDeliveryModal(tripId);
