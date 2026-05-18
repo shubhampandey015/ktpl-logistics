@@ -6,69 +6,61 @@
     <title>KTPL Sandbox ERP Ecosystem</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        /* CRITICAL MOBILE FIXES */
-        * { box-sizing: border-box; }
+        /* CRITICAL MOBILE & RESET FIXES */
+        * { box-sizing: border-box; font-family: "Google Sans", "Roboto", -apple-system, sans-serif; }
+        body { background: #f0f4f9; min-height: 100vh; margin: 0; padding: 10px; color: #1f1f1f; display: flex; justify-content: center; }
+        .container { position: relative; width: 100%; max-width: 600px; padding: 10px 0; margin-top: 10px; margin-bottom: 40px; display: none; overflow-x: hidden; }
 
-        /* GEMINI-STYLE MATERIAL DESIGN */
-        body { font-family: "Google Sans", "Roboto", -apple-system, sans-serif; background: #f0f4f9; min-height: 100vh; margin: 0; padding: 10px; color: #1f1f1f; display: flex; justify-content: center; }
-        
-        .container { position: relative; width: 100%; max-width: 600px; background: transparent; padding: 10px 0; margin-top: 10px; margin-bottom: 40px; display: none; }
-
-        /* PIN & LOADING SCREEN STYLING */
+        /* LOADING & OVERLAYS */
         #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f4f9; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
-        #loading-overlay { background: #f0f4f9; display: none; }
-        .loader-text { color: #0b57d0; font-size: 16px; font-weight: 500; margin-top: 20px; }
-
+        #loading-overlay { display: none; }
         .pin-box { background: #ffffff; padding: 35px 25px; border-radius: 16px; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .pin-box h2 { margin: 0 0 10px 0; color: #1f1f1f; font-size: 20px; font-weight: 500; }
         .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 20px; padding: 10px; width: 100%; border: none; background: #f1f3f4; border-radius: 8px; }
         .pin-input:focus { outline: 2px solid #0b57d0; background: #ffffff; }
 
-        /* UI ELEMENTS */
-        .greeting { text-align: left; margin-bottom: 20px; padding: 10px 15px; }
-        .greeting h1 { font-size: 26px; font-weight: 500; margin: 0; color: #1f1f1f; }
-        
+        /* APP SECTIONS & ANIMATIONS */
         .app-section { display: none; animation: fadeIn 0.3s ease; }
         .app-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* HOMEPAGE GRID */
         .homepage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 10px; }
-        .menu-card { background: #ffffff; border-radius: 16px; padding: 20px 15px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; border: 1px solid transparent; }
-        .menu-card:active { transform: scale(0.96); background: #f8f9fa; border: 1px solid #d3e3fd; }
+        .menu-card { background: #ffffff; border-radius: 16px; padding: 20px 15px; cursor: pointer; transition: 0.15s ease-in-out; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; border: 1px solid transparent; }
+        .menu-card:active { transform: scale(0.95); background: #f8f9fa; border: 1px solid #d3e3fd; }
         .menu-icon { font-size: 24px; margin-bottom: 12px; background: #e8f0fe; width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
         .menu-card h3 { margin: 0; font-size: 14px; font-weight: 500; color: #1f1f1f; }
         .menu-card p { margin: 4px 0 0 0; font-size: 11px; color: #5f6368; line-height: 1.3;}
 
-        /* TOP WORKSPACE HEADER */
-        .workspace-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 10px 15px; background: #ffffff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-        .btn-back-home { background: #f1f3f4; border: none; color: #444746; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 20px; }
+        /* HEADERS */
+        .workspace-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 12px 15px; background: #ffffff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-left: 10px; margin-right: 10px; }
+        .btn-back-home { background: #f1f3f4; border: none; color: #444746; font-size: 13px; font-weight: 500; cursor: pointer; padding: 6px 12px; border-radius: 20px; transition: 0.2s;}
+        .btn-back-home:active { transform: scale(0.95); background: #e3e3e3;}
         .workspace-title { font-size: 15px; font-weight: 500; color: #1f1f1f; margin: 0; }
 
-        /* SUB WORKSPACE TABS */
+        /* TABS (SUB & FLOW) */
         .sub-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 10px; }
         .sub-tabs::-webkit-scrollbar { display: none; }
-        .sub-tab { flex: 1 0 auto; text-align: center; padding: 8px 12px; cursor: pointer; font-size: 13px; font-weight: 500; border-radius: 20px; background: #ffffff; color: #444746; border: 1px solid #dadce0; transition: 0.2s; }
+        .sub-tab { flex: 1 0 auto; text-align: center; padding: 10px 12px; cursor: pointer; font-size: 13px; font-weight: 500; border-radius: 20px; background: #ffffff; color: #444746; border: 1px solid #dadce0; transition: 0.15s ease-in-out; }
+        .sub-tab:active { transform: scale(0.95); }
         .sub-tab.active { background: #0b57d0; color: #ffffff; border-color: #0b57d0; }
 
-        /* FORM ELEMENTS */
-        .form-card { background: #ffffff; border-radius: 16px; padding: 20px; margin: 0 10px 20px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        /* FORMS & INPUTS */
+        .form-card { background: #ffffff; border-radius: 16px; padding: 20px; margin: 0 10px 15px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
         .form-group { margin-top: 14px; width: 100%; }
         label { display: block; font-size: 11px; font-weight: 500; color: #444746; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;}
         .required-star { color: #b3261e; } 
-        input, select { width: 100%; padding: 12px 14px; border: none; border-radius: 8px; font-size: 14px; color: #1f1f1f; background-color: #f1f3f4; transition: 0.2s; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px 14px; border: none; border-radius: 8px; font-size: 14px; color: #1f1f1f; background-color: #f1f3f4; transition: 0.2s; }
         input:focus, select:focus { outline: 2px solid #0b57d0; background-color: #ffffff; }
-        input:disabled { background-color: #e3e3e3; color: #8e8e8e; cursor: not-allowed; }
+        input:disabled { background-color: #e3e3e3; color: #8e8e8e; }
         
         .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; }
-        .error-msg { display: none; color: #b3261e; font-size: 11px; margin-top: 4px; font-weight: 500; }
         .section-divider { height: 1px; background: #e0e0e0; margin: 20px 0; }
 
-        /* BUTTONS */
-        .btn-primary, .btn-whatsapp, .btn-secondary, .btn-business, .btn-danger, .btn-team, .btn-clear { width: 100%; padding: 12px 16px; border: none; border-radius: 24px; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.2s; text-align: center; }
+        /* BUTTONS WITH TACTILE FEEDBACK */
+        .btn { width: 100%; padding: 12px 16px; border: none; border-radius: 24px; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.15s ease-in-out; text-align: center; }
+        .btn:active { transform: scale(0.96); box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
         .btn-primary { color: #ffffff; background: #0b57d0; }
-        .btn-primary:active { transform: scale(0.98); background: #0842a0; }
         .btn-whatsapp { color: #ffffff; background: #146c2e; }
         .btn-business { color: #ffffff; background: #004d40; }
         .btn-team { color: #ffffff; background: #65558f; } 
@@ -82,35 +74,40 @@
         .autocomplete-items div { padding: 12px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 13px; color: #1f1f1f; }
         .autocomplete-items div:hover { background-color: #f8f9fa; }
 
-        /* CARDS & COMPONENTS */
+        /* TRIP CARDS & LEDGER */
         .list-container { padding: 0 10px; }
         .trip-card { background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); font-size: 12px; color: #444746;}
-        .trip-card strong { color: #1f1f1f; }
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;}
         .status-transit { background: #fef7e0; color: #b06000; }
         .status-delivered { background: #e6f4ea; color: #137333; }
         .status-cancelled { background: #fce8e6; color: #b3261e; }
         
-        .compact-input { padding: 8px 10px; font-size: 12px; border-radius: 6px; background: #f8f9fa; border: 1px solid #dadce0;}
+        .compact-input { padding: 8px 10px; font-size: 12px; border-radius: 6px; background: #f8f9fa; border: 1px solid #dadce0; outline: none; transition: 0.2s;}
         .compact-input:focus { background: #ffffff; border-color: #0b57d0;}
 
-        /* NATIVE DROPDOWN DETAILS */
-        details { background: #f8f9fa; border-radius: 8px; padding: 8px; margin: 8px 0; border: 1px solid #dadce0;}
+        /* MASTER SEARCH FILTER BAR */
+        #unified-filter-bar { background: #ffffff; border-radius: 12px; padding: 15px; margin: 0 10px 15px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+        .filter-header { font-size: 12px; font-weight: 600; color: #1f1f1f; margin-bottom: 12px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
+        .filter-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .filter-grid > * { flex: 1 1 calc(50% - 8px); min-width: 120px; }
+
+        /* PAYMENTS LEDGER STYLES */
+        details { background: #f8f9fa; border-radius: 6px; padding: 6px 10px; margin: 6px 0; border: 1px solid #dadce0;}
         summary { font-size: 11px; font-weight: 500; cursor: pointer; outline: none; color: #0b57d0; }
         .details-list { margin: 5px 0 0 0; padding-left: 20px; font-size: 11px; color: #444746; }
-
-        /* RECO SYSTEM WORKSPACE GRID */
-        .reco-split-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
-        .reco-panel { border-radius: 8px; padding: 12px; background: #ffffff; border: 1px solid #dadce0; }
-        .reco-header-title { font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #f1f3f4; padding-bottom: 4px; color: #5f6368; display: flex; justify-content: space-between;}
         
+        .reco-panel { border-radius: 8px; padding: 10px; background: #ffffff; border: 1px solid #dadce0; margin-bottom: 10px;}
+        .reco-title { font-size: 12px; font-weight: 600; color: #1f1f1f; margin-bottom: 8px; display: flex; justify-content: space-between;}
         .calc-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; }
-        .calc-total { font-weight: bold; font-size: 13px; color: #1f1f1f; margin: 8px 0; }
-        .calc-danger { font-weight: bold; font-size: 13px; color: #b3261e; margin: 8px 0; text-align: right;}
+        .calc-danger { font-weight: 600; font-size: 13px; color: #b3261e; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f3f4; text-align: right;}
+        
+        .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 11px; font-weight: 500; cursor: pointer; padding: 4px 0; margin-top: 8px; text-align: left; width: auto;}
+        .history-panel { display: none; background: #f8f9fa; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-size: 11px; color: #444746; border-left: 3px solid #0b57d0;}
+        .history-item { margin-bottom: 8px; border-bottom: 1px solid #dadce0; padding-bottom: 4px; }
 
         /* MODALS */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(31,31,31,0.5); justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(2px);}
-        .modal-content { background: #ffffff; padding: 24px; border-radius: 16px; width: 100%; max-width: 380px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+        .modal-content { background: #ffffff; padding: 24px; border-radius: 16px; width: 100%; max-width: 380px; max-height: 90vh; overflow-y: auto; text-align: left; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
         .financial-row { display: grid; grid-template-columns: 2fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
 
         /* REPORTS TABLE */
@@ -120,11 +117,6 @@
         .report-table th { background: #f8f9fa; font-weight: 500; color: #1f1f1f; }
 
         .print-only { display: none; }
-        .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 11px; font-weight: 500; cursor: pointer; padding: 4px 0; margin-top: 8px; text-align: left; width: auto;}
-        .history-panel { display: none; background: #f8f9fa; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-size: 11px; color: #444746; border-left: 3px solid #0b57d0; max-height: 150px; overflow-y: auto;}
-        .history-item { margin-bottom: 8px; border-bottom: 1px solid #dadce0; padding-bottom: 4px; }
-        
-        .admin-action-btn { background: transparent; border: 1px solid #dadce0; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; color: #0b57d0; margin-right: 5px; font-weight: 500;}
 
         /* STRICT PDF PRINT STYLES */
         @media print { 
@@ -133,13 +125,12 @@
             body { padding: 0; margin: 0; background: #fff; }
             #print-report-container, #print-report-container * { visibility: visible; }
             #print-report-container { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
-            .screen-report-container { display: none !important; }
-            #main-app, .modal, #unified-filter-bar { display: none !important; }
+            .screen-report-container, #main-app, .modal, #unified-filter-bar { display: none !important; }
             .print-header { text-align: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; display: block; }
             .print-header h2 { font-size: 18px; color: #000; margin: 0; font-weight: bold; }
-            .print-table { width: 100%; border-collapse: collapse; font-family: Calibri, sans-serif; font-size: 10pt; }
-            .print-table th, .print-table td { border: 1px solid #000; padding: 5px; text-align: left; color: #000;}
-            .print-table th { background-color: #f0f0f0; font-weight: bold; }
+            .print-table { width: 100%; border-collapse: collapse; font-family: Calibri, sans-serif; font-size: 10pt; border: 2px solid #000;}
+            .print-table th, .print-table td { border: 1px solid #000; padding: 6px; color: #000; text-align: left; vertical-align: top;}
+            .print-table th { background-color: #f0f0f0; font-weight: bold; text-align: center;}
             .party-table-wrapper { margin-bottom: 20px; page-break-inside: avoid; }
         }
     </style>
@@ -151,7 +142,7 @@
         <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 160px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <h2>Sandbox Access</h2>
         <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric">
-        <button class="btn-primary" onclick="checkPin()">Unlock System</button>
+        <button class="btn btn-primary" onclick="checkPin()">Unlock System</button>
         <p id="pin-error" style="display:none; color: #b3261e; font-size: 12px; margin-top: 15px;">Invalid Authorization PIN.</p>
     </div>
 </div>
@@ -168,7 +159,7 @@
                 <h2 id="user-name-text" style="font-size: 14px; font-weight: 500; color: #5f6368; margin: 0 0 2px 0; display: none;"></h2>
                 <h1 id="greeting-text" style="font-size:24px;">Welcome,</h1>
             </div>
-            <button id="btn-logout" class="btn-clear" style="width:auto; font-size:11px; padding:6px 12px;" onclick="logoutApp()">Logout</button>
+            <button class="btn btn-clear" style="width:auto; font-size:11px; padding:6px 12px;" onclick="logoutApp()">Logout</button>
         </div>
 
         <div class="homepage-grid" style="margin-top: 25px;">
@@ -209,25 +200,19 @@
         </div>
     </div>
 
-    <div id="unified-filter-bar" style="display:none; padding: 0 10px; margin-bottom:15px;">
-        <div class="form-card" style="margin:0; padding:15px;">
-            <div style="font-size: 11px; font-weight: 600; color: #5f6368; margin-bottom: 10px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;">
-                Global Search Filter <span style="color:#0b57d0; cursor:pointer;" onclick="clearFilters()">Reset</span>
-            </div>
-            <div class="grid-2">
-                <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
-                <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
-            </div>
-            <div class="grid-3" style="margin-top: 8px;">
-                <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
-                <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerCurrentRender()"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
-                <div class="autocomplete"><input type="text" id="uf-vcap" class="compact-input" placeholder="Capacity" oninput="triggerCurrentRender()"><div id="uf-vcap-list" class="autocomplete-items"></div></div>
-            </div>
-            <div class="grid-3" style="margin-top: 8px;">
-                <div class="autocomplete"><input type="text" id="uf-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
-                <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerCurrentRender()"><div id="uf-origin-list" class="autocomplete-items"></div></div>
-                <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerCurrentRender()"><div id="uf-dest-list" class="autocomplete-items"></div></div>
-            </div>
+    <div id="unified-filter-bar">
+        <div class="filter-header">
+            Global Search Filter 
+            <span style="color:#0b57d0; cursor:pointer; font-size:10px; background:#e8f0fe; padding:4px 8px; border-radius:12px;" onclick="clearFilters()">Reset Filters</span>
+        </div>
+        <div class="filter-grid">
+            <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
+            <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
+            <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerCurrentRender()"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><input type="text" id="uf-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerCurrentRender()"><div id="uf-origin-list" class="autocomplete-items"></div></div>
+            <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerCurrentRender()"><div id="uf-dest-list" class="autocomplete-items"></div></div>
         </div>
     </div>
 
@@ -240,15 +225,15 @@
         <div id="placement-selection-screen" style="padding: 0 10px;">
             <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select the operational flow to log a new entry.</p>
             <div style="display:flex; flex-direction:column; gap:15px;">
-                <button class="btn-primary" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Own Booking')">Own Booking Flow</button>
-                <button class="btn-team" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Reverse Logistics')">Reverse Logistics Flow</button>
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Own Booking')">Own Booking Flow</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Reverse Logistics')">Reverse Logistics Flow</button>
             </div>
         </div>
 
         <div id="placement-form-container" style="display:none;" class="form-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f3f4; padding-bottom:10px;">
-                <span id="placement-form-title" style="font-weight:600; color:#1a73e8;">Form</span>
-                <span style="font-size:11px; color:#b3261e; cursor:pointer;" onclick="showPlacementSelection()">Cancel</span>
+                <span id="placement-form-title" style="font-weight:600; color:#0b57d0;">Form</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600;" onclick="showPlacementSelection()">Cancel</span>
             </div>
 
             <div id="form-own-booking">
@@ -282,10 +267,10 @@
                 <div class="form-group"><label>Remarks</label><input type="text" id="ob-remarks" placeholder="..."></div>
                 
                 <div class="grid-2" style="margin-top:20px; gap:10px;">
-                    <button class="btn-clear" onclick="clearPlacementForm()">Clear</button>
-                    <button class="btn-primary" onclick="savePlacementOwn()">Save Entry</button>
-                    <button class="btn-team" onclick="generatePlacementMessageOwn('team')">Share For Team</button>
-                    <button class="btn-whatsapp" onclick="generatePlacementMessageOwn('client')">Share For Client</button>
+                    <button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button>
+                    <button class="btn btn-primary" onclick="savePlacementOwn()">Save Entry</button>
+                    <button class="btn btn-team" onclick="generatePlacementMessageOwn('team')">Share For Team</button>
+                    <button class="btn btn-whatsapp" onclick="generatePlacementMessageOwn('client')">Share For Client</button>
                 </div>
             </div>
 
@@ -316,9 +301,9 @@
                 <div class="form-group"><label>Remarks</label><input type="text" id="rl-remarks" placeholder="..."></div>
                 
                 <div class="grid-2" style="margin-top:20px; gap:10px;">
-                    <button class="btn-clear" onclick="clearPlacementForm()">Clear</button>
-                    <button class="btn-primary" onclick="savePlacementRev()">Save Entry</button>
-                    <button class="btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">Share For Team</button>
+                    <button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button>
+                    <button class="btn btn-primary" onclick="savePlacementRev()">Save Entry</button>
+                    <button class="btn btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">Share For Team</button>
                 </div>
             </div>
         </div>
@@ -333,15 +318,15 @@
         <div id="deployed-selection-screen" style="padding: 0 10px;">
             <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select fleet category to monitor.</p>
             <div style="display:flex; flex-direction:column; gap:15px;">
-                <button class="btn-primary" style="padding: 16px; font-size: 15px;" onclick="setDepType('Own Booking')">Own Booking Fleet</button>
-                <button class="btn-team" style="padding: 16px; font-size: 15px;" onclick="setDepType('Reverse Logistics')">Reverse Logistics Fleet</button>
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setDepType('Own Booking')">Own Booking Fleet</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setDepType('Reverse Logistics')">Reverse Logistics Fleet</button>
             </div>
         </div>
 
         <div id="deployed-content-area" style="display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f3f4; padding-bottom:10px; margin-left:10px; margin-right:10px;">
-                <span id="deployed-title-text" style="font-weight:600; color:#0b57d0;">Workspace</span>
-                <span style="font-size:11px; color:#b3261e; cursor:pointer;" onclick="showDeployedSelection()">Cancel</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
+                <span id="deployed-title-text" style="font-weight:600; color:#0b57d0; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600; background:#fce8e6; padding:4px 8px; border-radius:12px;" onclick="showSelectionScreen('deployed')">Change Category</span>
             </div>
             <div class="sub-tabs" style="margin-bottom:15px;">
                 <div class="sub-tab active" id="btn-dep-stat-ong" onclick="setDepStat('In-Transit')">On-Going</div>
@@ -361,21 +346,21 @@
         <div id="pod-selection-screen" style="padding: 0 10px;">
             <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select category to manage PODs.</p>
             <div style="display:flex; flex-direction:column; gap:15px;">
-                <button class="btn-primary" style="padding: 16px; font-size: 15px;" onclick="setPodType('Own Booking')">Own Booking PODs</button>
-                <button class="btn-team" style="padding: 16px; font-size: 15px;" onclick="setPodType('Reverse Logistics')">Reverse Logistics PODs</button>
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setPodType('Own Booking')">Own Booking PODs</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setPodType('Reverse Logistics')">Reverse Logistics PODs</button>
             </div>
         </div>
 
         <div id="pod-content-area" style="display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f3f4; padding-bottom:10px; margin-left:10px; margin-right:10px;">
-                <span id="pod-title-text" style="font-weight:600; color:#0b57d0;">Workspace</span>
-                <span style="font-size:11px; color:#b3261e; cursor:pointer;" onclick="showPodSelection()">Cancel</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
+                <span id="pod-title-text" style="font-weight:600; color:#0b57d0; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600; background:#fce8e6; padding:4px 8px; border-radius:12px;" onclick="showSelectionScreen('pod')">Change Category</span>
             </div>
             <div class="sub-tabs" style="margin-bottom:15px;">
                 <div class="sub-tab active" id="btn-pod-stat-pen" onclick="setPodStat('Pending')">Pending</div>
                 <div class="sub-tab" id="btn-pod-stat-rec" onclick="setPodStat('Received')">Received</div>
             </div>
-            <div style="padding:0 10px;"><div id="pod-summary" class="pod-badge"></div></div>
+            <div style="padding:0 10px;"><div id="pod-summary" style="font-size:11px; font-weight:600; color:#0b57d0; margin-bottom:10px;"></div></div>
             <div id="pod-container" class="list-container"></div>
         </div>
     </div>
@@ -389,15 +374,15 @@
         <div id="reco-selection-screen" style="padding: 0 10px;">
             <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select ledger category to reconcile.</p>
             <div style="display:flex; flex-direction:column; gap:15px;">
-                <button class="btn-primary" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Own Booking')">Own Booking Ledger</button>
-                <button class="btn-team" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Reverse Logistics')">Reverse Logistics Ledger</button>
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Own Booking')">Own Booking Ledger</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Reverse Logistics')">Reverse Logistics Ledger</button>
             </div>
         </div>
 
         <div id="reco-content-area" style="display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f3f4; padding-bottom:10px; margin-left:10px; margin-right:10px;">
-                <span id="reco-title-text" style="font-weight:600; color:#0b57d0;">Workspace</span>
-                <span style="font-size:11px; color:#b3261e; cursor:pointer;" onclick="showRecoSelection()">Cancel</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
+                <span id="reco-title-text" style="font-weight:600; color:#0b57d0; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600; background:#fce8e6; padding:4px 8px; border-radius:12px;" onclick="showSelectionScreen('reco')">Change Category</span>
             </div>
             <div class="sub-tabs" style="margin-bottom:15px;">
                 <div class="sub-tab active" id="btn-reco-stat-pen" onclick="setRecoStat('Pending')">Pending</div>
@@ -413,41 +398,51 @@
             <h3 class="workspace-title">Financial Reports</h3>
         </div>
         
-        <div class="form-card" style="padding:15px; margin-bottom:15px;">
-            <div class="form-group autocomplete" style="margin-top:0;">
-                <label>Filter by Party Name <span class="required-star">*</span></label>
-                <input type="text" id="rf-party" placeholder="Type Client Profile..."><div id="rf-party-list" class="autocomplete-items"></div>
+        <div id="report-selection-screen" style="padding: 0 10px;">
+            <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select report category.</p>
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setReportType('Own Booking')">Own Booking Reports</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setReportType('Reverse Logistics')">Reverse Logistics Reports</button>
             </div>
-            <div class="grid-2">
-                <div>
-                    <label>Trip Status:</label>
-                    <select id="report-trip-status" class="compact-input">
-                        <option value="All">All</option>
-                        <option value="In-Transit">In-Transit</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled Trip">Cancelled Trip</option>
-                    </select>
-                </div>
-                <div>
-                    <label>POD Status:</label>
-                    <select id="report-pod-status" class="compact-input">
-                        <option value="All">All</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Received">Received</option>
-                    </select>
-                </div>
-            </div>
-            <button class="btn-primary" onclick="generateCustomReport()" style="margin-top: 15px;">Generate Base View</button>
         </div>
-        
-        <div id="screen-report" class="screen-report-container"></div>
-        
-        <div class="grid-2 list-container" style="display:none; margin-bottom: 20px; gap:10px;" id="report-actions">
-            <button class="btn-clear" onclick="window.print()">🖨️ Save PDF</button>
-            <button class="btn-whatsapp" onclick="shareReportWhatsApp()">💬 WhatsApp</button>
-            <button class="btn-team" onclick="triggerMISGeneration('Standard MIS')">📊 Standard MIS (.xlsx)</button>
-            <button class="btn-team" onclick="triggerMISGeneration('Preset MIS')">📈 Preset MIS (.xlsx)</button>
-            <button class="btn-secondary" onclick="triggerRecoExcelDownload()" style="grid-column: span 2;">💰 Download Payments Ledger (.xlsx)</button>
+
+        <div id="report-content-area" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
+                <span id="report-title-text" style="font-weight:600; color:#0b57d0; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600; background:#fce8e6; padding:4px 8px; border-radius:12px;" onclick="showSelectionScreen('report')">Change Category</span>
+            </div>
+            <div class="form-card" style="padding:15px; margin-bottom:15px;">
+                <div class="grid-2">
+                    <div>
+                        <label>Trip Status:</label>
+                        <select id="report-trip-status" class="compact-input">
+                            <option value="All">All</option>
+                            <option value="In-Transit">In-Transit</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled Trip">Cancelled Trip</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>POD Status:</label>
+                        <select id="report-pod-status" class="compact-input">
+                            <option value="All">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Received">Received</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="generateCustomReport()" style="margin-top: 15px;">Generate Base View</button>
+            </div>
+            
+            <div id="screen-report" class="screen-report-container"></div>
+            
+            <div class="grid-2 list-container" style="display:none; margin-bottom: 20px; gap:10px;" id="report-actions">
+                <button class="btn btn-clear" onclick="window.print()">🖨️ Save PDF</button>
+                <button class="btn btn-whatsapp" onclick="shareReportWhatsApp()">💬 WhatsApp</button>
+                <button class="btn btn-team" onclick="triggerMISGeneration('Standard MIS')">📊 Standard MIS</button>
+                <button class="btn btn-team" onclick="triggerMISGeneration('Preset MIS')">📈 Preset MIS</button>
+                <button class="btn btn-secondary" onclick="triggerRecoExcelDownload()" style="grid-column: span 2;">💰 Payments Ledger (.xlsx)</button>
+            </div>
         </div>
     </div>
 
@@ -460,7 +455,7 @@
         <div class="form-card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="color:#1f1f1f; margin:0; font-weight:500; font-size:15px;">User Access</h3>
-                <button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 11px;" onclick="openAddUserModal()">+ Add</button>
+                <button class="btn btn-primary" style="width: auto; padding: 6px 12px; font-size: 11px;" onclick="openAddUserModal()">+ Add</button>
             </div>
             
             <div style="border: 1px solid #dadce0; border-radius: 8px; overflow-x: auto; margin-top: 15px;">
@@ -469,7 +464,7 @@
                     <tbody id="admin-user-list"></tbody>
                 </table>
             </div>
-            <button class="btn-clear" onclick="forceAdminSync()" style="margin-top: 20px;">Force Databank Sync</button>
+            <button class="btn btn-clear" onclick="forceAdminSync()" style="margin-top: 20px;">Force Databank Sync</button>
         </div>
     </div>
 </div>
@@ -477,13 +472,13 @@
 <div id="print-report-container" class="print-only"></div>
 
 <div id="whatsappChoiceModal" class="modal">
-    <div class="modal-content" style="max-width: 300px;">
-        <h3 style="margin-top:0; color:#1f1f1f; font-weight:500;">Choose App</h3>
-        <p style="font-size: 12px; color: #5f6368; margin-bottom: 20px;">Which WhatsApp application would you like to use?</p>
+    <div class="modal-content" style="max-width: 300px; padding: 20px;">
+        <h3 style="margin:0; color:#1f1f1f; font-weight:500; font-size:16px;">Share Details</h3>
+        <p style="font-size: 12px; color: #5f6368; margin-bottom: 20px;">Which app would you like to use?</p>
         <div style="display:flex; flex-direction: column; gap:10px;">
-            <button class="btn-whatsapp" onclick="executeWhatsAppShare('regular')">Regular WhatsApp</button>
-            <button class="btn-business" onclick="executeWhatsAppShare('business')">WhatsApp Business</button>
-            <button class="btn-clear" onclick="closeWhatsAppChoiceModal()" style="margin-top: 5px;">Cancel</button>
+            <button class="btn btn-whatsapp" onclick="executeWhatsAppShare('regular')">Regular WhatsApp</button>
+            <button class="btn btn-business" onclick="executeWhatsAppShare('business')">WhatsApp Business</button>
+            <button class="btn btn-clear" onclick="closeWhatsAppChoiceModal()" style="margin-top: 5px;">Cancel</button>
         </div>
     </div>
 </div>
@@ -491,88 +486,86 @@
 <div id="financialModal" class="modal">
     <div class="modal-content">
         <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">💰 Financial Allocation</h3>
-        <p style="font-size:11px; color:#5f6368; margin-top:0; line-height:1.4;">Add operational extra expenses or income. This automatically impacts the Payments ledger.</p>
+        <p style="font-size:11px; color:#5f6368; margin-top:0; line-height:1.4;">Add extra expenses or income. This directly updates the Payments ledger.</p>
         <input type="hidden" id="fin-trip-id">
         
         <div style="background:#f8f9fa; border:1px solid #dadce0; border-radius:8px; padding:12px; text-align:left; margin-bottom:12px;">
             <label style="font-weight:600; display:block; color:#146c2e; margin-bottom:8px;">+ Receivables (Income)</label>
             <div id="income-rows-container"></div>
-            <button class="btn-secondary" style="padding:6px; font-size:11px; width:auto; border-radius:12px; margin-top:4px;" onclick="addFinancialRow('income')">+ Add Item</button>
+            <button class="btn btn-secondary" style="padding:6px; font-size:11px; width:auto; margin-top:4px;" onclick="addFinancialRow('income')">+ Add Item</button>
         </div>
 
         <div style="background:#f8f9fa; border:1px solid #dadce0; border-radius:8px; padding:12px; text-align:left;">
             <label style="font-weight:600; display:block; color:#b3261e; margin-bottom:8px;">- Payables (Expense)</label>
             <div id="expense-rows-container"></div>
-            <button class="btn-secondary" style="padding:6px; font-size:11px; width:auto; border-radius:12px; margin-top:4px;" onclick="addFinancialRow('expense')">+ Add Item</button>
+            <button class="btn btn-secondary" style="padding:6px; font-size:11px; width:auto; margin-top:4px;" onclick="addFinancialRow('expense')">+ Add Item</button>
         </div>
 
         <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-clear" onclick="closeFinancialModal()">Cancel</button>
-            <button class="btn-primary" onclick="saveFinancialLedger()">Save Ledger</button>
+            <button class="btn btn-clear" onclick="closeFinancialModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveFinancialLedger()">Save Ledger</button>
         </div>
     </div>
 </div>
 
 <div id="deliveryModal" class="modal">
-    <div class="modal-content" style="max-width: 300px;">
-        <h3 style="margin-top:0; font-weight:500;">Confirm Delivery</h3>
-        <label style="text-align:left;">Delivery Date:</label>
-        <input type="date" id="delivery-date-input" style="margin-bottom:15px; width: 100%;">
+    <div class="modal-content" style="max-width: 300px; padding: 20px;">
+        <h3 style="margin-top:0; font-weight:500; font-size:16px;">Confirm Delivery</h3>
+        <input type="date" id="delivery-date-input" class="compact-input" style="margin-top:10px; margin-bottom:20px; width: 100%;">
         <input type="hidden" id="delivery-trip-id">
         <div style="display:flex; gap:10px;">
-            <button class="btn-clear" onclick="closeModal()">Cancel</button>
-            <button class="btn-primary" onclick="confirmDelivery()">Save</button>
+            <button class="btn btn-clear" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmDelivery()">Save Status</button>
         </div>
     </div>
 </div>
 
 <div id="shareModal" class="modal">
-    <div class="modal-content" style="max-width: 300px;">
-        <h3 style="margin-top:0; color:#1f1f1f; font-weight:500;">Share Trip Update</h3>
-        <p style="font-size: 12px; color: #5f6368; margin-bottom: 20px;">Choose who you want to share these details with.</p>
+    <div class="modal-content" style="max-width: 300px; padding: 20px;">
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">Share Trip Update</h3>
         <input type="hidden" id="share-modal-trip-id">
-        <div style="display:flex; flex-direction: column; gap:10px;">
-            <button class="btn-team" onclick="executeDeployedShare('team')">For Team</button>
-            <button class="btn-whatsapp" onclick="executeDeployedShare('client')">For Client</button>
-            <button class="btn-clear" onclick="closeShareModal()" style="margin-top: 5px;">Cancel</button>
+        <div style="display:flex; flex-direction: column; gap:10px; margin-top:15px;">
+            <button class="btn btn-team" onclick="executeDeployedShare('team')">For Team</button>
+            <button class="btn btn-whatsapp" onclick="executeDeployedShare('client')">For Client</button>
+            <button class="btn btn-clear" onclick="closeShareModal()" style="margin-top: 5px;">Cancel</button>
         </div>
     </div>
 </div>
 
 <div id="adminEditModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0; font-weight:500;">Edit Trip (Admin)</h3>
+        <h3 style="margin-top:0; font-weight:500; font-size:16px; text-align:center;">Edit Trip</h3>
         <input type="hidden" id="edit-trip-id">
-        <div class="form-group"><label style="text-align:left;">Vehicle No.</label><input type="text" id="edit-vnum" onchange="formatVehicleNumber(this)"></div>
+        <div class="form-group"><label>Vehicle No.</label><input type="text" id="edit-vnum" onchange="formatVehicleNumber(this)"></div>
         <div class="grid-2">
-            <div class="form-group"><label style="text-align:left;">Veh Type</label><input type="text" id="edit-vtype" onchange="formatCase(this, 'upper')"></div>
-            <div class="form-group"><label style="text-align:left;">Capacity</label><input type="text" id="edit-vcap" onchange="formatCase(this, 'upper')"></div>
+            <div class="form-group"><label>Veh Type</label><input type="text" id="edit-vtype" onchange="formatCase(this, 'upper')"></div>
+            <div class="form-group"><label>Capacity</label><input type="text" id="edit-vcap" onchange="formatCase(this, 'upper')"></div>
         </div>
-        <div class="form-group"><label style="text-align:left;">Route Origin</label><input type="text" id="edit-from" onchange="formatCase(this, 'title')"></div>
-        <div class="form-group"><label style="text-align:left;">Route Destination</label><input type="text" id="edit-to" onchange="formatCase(this, 'title')"></div>
+        <div class="form-group"><label>Origin</label><input type="text" id="edit-from" onchange="formatCase(this, 'title')"></div>
+        <div class="form-group"><label>Destination</label><input type="text" id="edit-to" onchange="formatCase(this, 'title')"></div>
         <div class="grid-2">
-            <div class="form-group"><label style="text-align:left;">Vehicle Freight</label><input type="text" id="edit-vfreight"></div>
-            <div class="form-group"><label style="text-align:left;">Charged Freight</label><input type="text" id="edit-cfreight"></div>
+            <div class="form-group"><label>Vehicle Freight</label><input type="number" id="edit-vfreight"></div>
+            <div class="form-group"><label>Charged Freight</label><input type="number" id="edit-cfreight"></div>
         </div>
         <div class="grid-2">
-            <div class="form-group"><label style="text-align:left;">Driver Name</label><input type="text" id="edit-dname" onchange="formatCase(this, 'title')"></div>
-            <div class="form-group"><label style="text-align:left;">Driver Contact</label><input type="text" id="edit-dcontact" onchange="formatPhoneInput(this)"></div>
+            <div class="form-group"><label>Driver Name</label><input type="text" id="edit-dname" onchange="formatCase(this, 'title')"></div>
+            <div class="form-group"><label>Driver Contact</label><input type="text" id="edit-dcontact" onchange="formatPhoneInput(this)"></div>
         </div>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button class="btn-clear" onclick="closeAdminEditModal()">Cancel</button>
-            <button class="btn-primary" onclick="saveAdminEdit()">Update</button>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn btn-clear" onclick="closeAdminEditModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveAdminEdit()">Update</button>
         </div>
     </div>
 </div>
 
 <div id="userManageModal" class="modal">
-    <div class="modal-content">
-        <h3 id="user-modal-title" style="margin-top:0; font-weight:500;">Add / Edit User</h3>
+    <div class="modal-content" style="padding: 20px;">
+        <h3 id="user-modal-title" style="margin-top:0; font-weight:500; font-size:16px; text-align:center;">User Action</h3>
         <input type="hidden" id="manage-user-old-name">
-        <div class="form-group"><label style="text-align:left;">User Name</label><input type="text" id="manage-user-name"></div>
-        <div class="form-group"><label style="text-align:left;">4-Digit PIN</label><input type="number" id="manage-user-pin"></div>
+        <div class="form-group"><label>User Name</label><input type="text" id="manage-user-name"></div>
+        <div class="form-group"><label>4-Digit PIN</label><input type="number" id="manage-user-pin"></div>
         <div class="form-group">
-            <label style="text-align:left;">Role Assignment</label>
+            <label>Role</label>
             <select id="manage-user-role">
                 <option value="Admin">Admin</option>
                 <option value="Manager">Manager</option>
@@ -582,8 +575,8 @@
             </select>
         </div>
         <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-clear" onclick="closeUserModal()">Cancel</button>
-            <button class="btn-primary" onclick="saveUserManage()">Save User</button>
+            <button class="btn btn-clear" onclick="closeUserModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveUserManage()">Save User</button>
         </div>
     </div>
 </div>
@@ -605,6 +598,7 @@
     let currentPodStatus = "Pending";
     let currentRecoType = "";
     let currentRecoStat = "Pending";
+    let currentReportType = "";
     let pendingWhatsAppMsg = ""; 
     let currentReportTrips = [];
 
@@ -650,7 +644,7 @@
             url = `whatsapp://send?text=${encodedMsg}`;
             window.location.href = url;
         } else {
-            // DESKTOP MAC/PC DIRECT NATIVE APP
+            // NATIVE DESKTOP PROTOCOL (Mac/Windows App)
             url = `whatsapp://send?text=${encodedMsg}`;
             window.open(url, '_self');
         }
@@ -785,11 +779,12 @@
         document.getElementById(id).classList.add('active');
         currentActiveMainTab = id;
 
+        // Selection Screen Enforcement
         if(id === 'tab-placement') showPlacementSelection();
-        if(id === 'tab-deployed') { currentDeployedType = ""; showDeployedSelection(); }
-        if(id === 'tab-pod') { currentPodType = ""; showPodSelection(); }
-        if(id === 'tab-payments') { currentRecoType = ""; showRecoSelection(); }
-        if(id === 'tab-reports') { document.getElementById('screen-report').innerHTML = ''; document.getElementById('print-report-container').innerHTML = ''; document.getElementById('report-actions').style.display = 'none'; }
+        if(id === 'tab-deployed') { currentDeployedType = ""; showSelectionScreen('deployed'); }
+        if(id === 'tab-pod') { currentPodType = ""; showSelectionScreen('pod'); }
+        if(id === 'tab-payments') { currentRecoType = ""; showSelectionScreen('reco'); }
+        if(id === 'tab-reports') { currentReportType = ""; showSelectionScreen('report'); document.getElementById('screen-report').innerHTML = ''; document.getElementById('print-report-container').innerHTML = ''; document.getElementById('report-actions').style.display = 'none'; }
 
         if (id === 'tab-deployed' || id === 'tab-pod' || id === 'tab-payments' || id === 'tab-reports') { document.getElementById('unified-filter-bar').style.display = 'block'; } 
         else { document.getElementById('unified-filter-bar').style.display = 'none'; }
@@ -803,15 +798,21 @@
         document.getElementById('unified-filter-bar').style.display = 'none';
         currentActiveMainTab = 'panel-homepage';
     }
+    
+    function showSelectionScreen(workspace) {
+        document.getElementById(`${workspace}-selection-screen`).style.display = 'block';
+        document.getElementById(`${workspace}-content-area`).style.display = 'none';
+    }
 
     function triggerCurrentRender() {
-        if (currentActiveMainTab === 'tab-deployed') renderDeployed();
-        if (currentActiveMainTab === 'tab-pod') renderPOD();
-        if (currentActiveMainTab === 'tab-payments') renderReconciliation();
+        if (currentActiveMainTab === 'tab-deployed' && currentDeployedType !== "") renderDeployed();
+        if (currentActiveMainTab === 'tab-pod' && currentPodType !== "") renderPOD();
+        if (currentActiveMainTab === 'tab-payments' && currentRecoType !== "") renderReconciliation();
+        if (currentActiveMainTab === 'tab-reports' && currentReportType !== "") generateCustomReport();
     }
 
     function clearFilters() {
-        const filterIds = ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-origin', 'uf-dest'];
+        const filterIds = ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-origin', 'uf-dest', 'rf-party'];
         filterIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
         triggerCurrentRender();
     }
@@ -855,9 +856,11 @@
         currentPlacementType = mode;
         document.getElementById('placement-selection-screen').style.display = 'none';
         document.getElementById('placement-form-container').style.display = 'block';
-        document.getElementById('placement-form-title').innerText = mode + " Entry";
+        document.getElementById('placement-form-title').innerText = mode;
+        
         document.getElementById('form-own-booking').style.display = mode === 'Own Booking' ? 'block' : 'none';
         document.getElementById('form-rev-logistics').style.display = mode === 'Reverse Logistics' ? 'block' : 'none';
+        
         setupMemoryDropdowns(); 
     }
 
@@ -868,6 +871,7 @@
 
     function validatePlacementOwn() {
         let isValid = true; let req = ['ob-date', 'ob-party', 'ob-from', 'ob-to', 'ob-vnum', 'ob-vtype', 'ob-weight', 'ob-dcontact', 'ob-tname', 'ob-tcontact'];
+        document.querySelectorAll('.error-msg').forEach(msg => msg.style.display = 'none');
         document.querySelectorAll('input').forEach(input => input.style.borderColor = 'transparent');
         req.forEach(id => { const el = document.getElementById(id); if (el && !el.value.trim()) { el.style.borderColor = '#b3261e'; isValid = false; }});
         if (!isValid) alert("Please fill in all mandatory fields (*)."); return isValid;
@@ -944,8 +948,6 @@
     }
 
     // --- DEPLOYED WORKSPACE ---
-    function showDeployedSelection() { document.getElementById('deployed-selection-screen').style.display = 'block'; document.getElementById('deployed-content-area').style.display = 'none'; }
-    
     function setDepType(type) {
         currentDeployedType = type;
         document.getElementById('deployed-selection-screen').style.display = 'none';
@@ -972,8 +974,6 @@
     }
 
     // --- POD WORKSPACE ---
-    function showPodSelection() { document.getElementById('pod-selection-screen').style.display = 'block'; document.getElementById('pod-content-area').style.display = 'none'; }
-    
     function setPodType(type) {
         currentPodType = type;
         document.getElementById('pod-selection-screen').style.display = 'none';
@@ -1002,8 +1002,6 @@
     }
 
     // --- PAYMENTS & RECONCILIATION ---
-    function showRecoSelection() { document.getElementById('reco-selection-screen').style.display = 'block'; document.getElementById('reco-content-area').style.display = 'none'; }
-    
     function setRecoType(type) {
         currentRecoType = type;
         document.getElementById('reco-selection-screen').style.display = 'none';
@@ -1029,8 +1027,8 @@
         if (currentRecoType === 'Own Booking') trips = trips.filter(t => !vehicles[t.vNum.toUpperCase()]); 
 
         trips = trips.filter(t => {
-            let s = t.payableStatus || "Pending";
-            if (currentRecoType === 'Reverse Logistics') s = t.receivableStatus || "Pending";
+            let ledger = { reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.reco) ledger.reco=p.reco; } catch(e){}
+            let s = ledger.reco.status || "Pending";
             if (currentRecoStat === "Completed") return s === "Cleared";
             return s !== "Cleared";
         });
@@ -1044,6 +1042,7 @@
             try { let p = JSON.parse(t.financialLedger); if(p.income) ledger=p; } catch(e){}
             if(!ledger.reco) ledger.reco = {};
             
+            // Legacy Migration Support
             if(ledger.expense.length === 0 && (t.otherExp || t.loadingExp || t.unloadingExp || t.lrExp)) {
                 if(t.otherExp) ledger.expense.push({type: t.otherExpReason || 'Generic', amt: parseFloat(t.otherExp)});
                 if(t.loadingExp) ledger.expense.push({type: 'Loading', amt: parseFloat(t.loadingExp)});
@@ -1054,37 +1053,34 @@
             let baseRev = parseFloat(t.cFreight || 0); let extraRev = ledger.income ? ledger.income.reduce((s, r) => s + r.amt, 0) : 0;
             let baseCost = parseFloat(t.vFreight || 0); let extraCost = ledger.expense ? ledger.expense.reduce((s, r) => s + r.amt, 0) : 0;
             let totalPayable = baseCost + extraCost; let totalReceivable = baseRev + extraRev;
-            let margin = totalReceivable - totalPayable;
 
             let html = `<div class="trip-card"><div style="font-weight:500; border-bottom:1px solid #f1f3f4; padding-bottom:8px; display:flex; justify-content:space-between;"><span><strong>#${i+1}</strong> | ${t.vNum} <span style="color:#5f6368; font-weight:normal; font-size:11px;">(${(t.date||'').split(',')[0]})</span></span><span class="status-badge ${t.status==='Delivered'?'status-delivered':'status-transit'}">${t.status}</span></div><div style="margin-top:5px; margin-bottom:10px; font-size:11px; color:#5f6368;">${t.from} ➔ ${t.to} | Party: <strong>${t.party}</strong></div><div class="reco-split-grid">`;
 
-            // OWN BOOKING LOGIC
             if (currentRecoType === 'Own Booking') {
-                let advPaid = parseFloat(t.advancePaid || ledger.reco.advPaid || 0); let balPaid = parseFloat(ledger.reco.balPaid || 0); let balToPay = totalPayable - advPaid - balPaid;
-                html += `<div class="reco-panel"><div class="reco-header-title">Receivables</div><div class="calc-row"><span>Add. Charges:</span> <span>₹${extraRev}</span></div>${extraRev > 0 ? `<details><summary>View Breakdown</summary><ul class="details-list">${ledger.income.map(x=>`<li>${x.type}: ₹${x.amt}</li>`).join('')}</ul></details>` : ''}</div><div class="reco-panel"><div class="reco-header-title">Payables <span style="color:#1f1f1f; font-size:13px;">₹${totalPayable}</span></div><div style="font-size:10px; color:#5f6368; margin-bottom:10px;">Base: ₹${baseCost} | Add.: ₹${extraCost}</div>${extraCost > 0 ? `<details><summary>View Breakdown</summary><ul class="details-list">${ledger.expense.map(x=>`<li>${x.type}: ₹${x.amt}</li>`).join('')}</ul></details>` : ''}`;
+                let advPaid = parseFloat(ledger.reco.advPaid || t.advancePaid || 0); let balPaid = parseFloat(ledger.reco.balPaid || 0); let balToPay = totalPayable - advPaid - balPaid;
+                html += `<div class="reco-panel"><div class="reco-header-title">Receivables <span>₹${totalReceivable}</span></div><div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div><div class="calc-row"><span>Extra Adds:</span> <span>₹${extraRev}</span></div>${extraRev > 0 ? `<details><summary>View Breakdown</summary><ul class="details-list">${ledger.income.map(x=>`<li>${x.type}: ₹${x.amt}</li>`).join('')}</ul></details>` : ''}</div><div class="reco-panel"><div class="reco-header-title">Payables <span>₹${totalPayable}</span></div><div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div><div class="calc-row"><span>Extra Cost:</span> <span>₹${extraCost}</span></div>${extraCost > 0 ? `<details><summary>View Breakdown</summary><ul class="details-list">${ledger.expense.map(x=>`<li>${x.type}: ₹${x.amt}</li>`).join('')}</ul></details>` : ''}`;
                 if(isMasterAdmin) {
-                    html += `<div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Paid</label><input type="number" id="reco-adv-${t.id}" class="compact-input" value="${advPaid || ''}"></div><div><label>Date</label><input type="date" id="reco-advD-${t.id}" class="compact-input" value="${ledger.reco.advDate || ''}"></div></div><div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid</label><input type="number" id="reco-bal-${t.id}" class="compact-input" value="${balPaid || ''}"></div><div><label>Date</label><input type="date" id="reco-balD-${t.id}" class="compact-input" value="${ledger.reco.balDate || ''}"></div></div><div class="calc-danger">Balance to Pay: ₹${balToPay}</div><div class="grid-2 form-group" style="margin-top:5px; align-items:end;"><select id="pstat-${t.id}" class="compact-input"><option value="Pending" ${t.payableStatus!=='Cleared'?'selected':''}>Pending</option><option value="Cleared" ${t.payableStatus==='Cleared'?'selected':''}>Cleared</option></select></div>`;
+                    html += `<div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Paid</label><input type="number" id="reco-adv-${t.id}" class="compact-input" value="${advPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-advD-${t.id}" class="compact-input" value="${ledger.reco.advDate || ''}"></div></div><div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid</label><input type="number" id="reco-bal-${t.id}" class="compact-input" value="${balPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD-${t.id}" class="compact-input" value="${ledger.reco.balDate || ''}"></div></div><div class="calc-danger">Balance to Pay: ₹${balToPay}</div>`;
                 }
                 html += `</div>`;
             } 
-            // REVERSE LOGISTICS LOGIC
             else {
                 let advRec = parseFloat(ledger.reco.advRec || 0); let osDues = parseFloat(ledger.reco.osDues || 0); let totalOs = totalReceivable - advRec - osDues;
-                html += `<div class="reco-panel"><div class="reco-header-title">Receivables <span style="color:#1f1f1f; font-size:13px;">₹${totalReceivable}</span></div><div style="font-size:10px; color:#5f6368; margin-bottom:10px;">Base: ₹${baseRev} | Add.: ₹${extraRev}</div>${extraRev > 0 ? `<details><summary>View Breakdown</summary><ul class="details-list">${ledger.income.map(x=>`<li>${x.type}: ₹${x.amt}</li>`).join('')}</ul></details>` : ''}`;
+                html += `<div class="reco-panel"><div class="reco-header-title">Receivables <span>₹${totalReceivable}</span></div><div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div><div class="calc-row"><span>Extra Adds:</span> <span>₹${extraRev}</span></div>${extraRev > 0 ? `<details><summary>View Breakdown</summary><ul class="details-list">${ledger.income.map(x=>`<li>${x.type}: ₹${x.amt}</li>`).join('')}</ul></details>` : ''}`;
                 if(isMasterAdmin) {
-                    html += `<div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Rcvd</label><input type="number" id="reco-advR-${t.id}" class="compact-input" value="${advRec || ''}"></div><div><label>Date</label><input type="date" id="reco-advRD-${t.id}" class="compact-input" value="${ledger.reco.advRecDate || ''}"></div></div><div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues</label><input type="number" id="reco-os-${t.id}" class="compact-input" value="${osDues || ''}"></div><div><label>Date</label><input type="date" id="reco-osD-${t.id}" class="compact-input" value="${ledger.reco.osDate || ''}"></div></div><div class="calc-danger">Total Outstanding: ₹${totalOs}</div><div class="grid-2 form-group" style="margin-top:5px; align-items:end;"><select id="rstat-${t.id}" class="compact-input"><option value="Pending" ${t.receivableStatus!=='Cleared'?'selected':''}>Pending</option><option value="Cleared" ${t.receivableStatus==='Cleared'?'selected':''}>Cleared</option></select></div>`;
+                    html += `<div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Rcvd</label><input type="number" id="reco-advR-${t.id}" class="compact-input" value="${advRec || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-advRD-${t.id}" class="compact-input" value="${ledger.reco.advRecDate || ''}"></div></div><div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues</label><input type="number" id="reco-os-${t.id}" class="compact-input" value="${osDues || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD-${t.id}" class="compact-input" value="${ledger.reco.osDate || ''}"></div></div><div class="calc-danger">Total Outstanding Dues: ₹${totalOs}</div>`;
                 }
-                html += `</div><div class="reco-panel"><div class="reco-header-title">Payables <span style="color:#1f1f1f; font-size:13px;">₹${totalPayable}</span></div><div style="font-size:10px; color:#5f6368; margin-bottom:10px;">Base: ₹${baseCost} | Add.: ₹${extraCost}</div>${extraCost > 0 ? `<details><summary>View Breakdown</summary><ul class="details-list">${ledger.expense.map(x=>`<li>${x.type}: ₹${x.amt}</li>`).join('')}</ul></details>` : ''}`;
+                html += `</div><div class="reco-panel"><div class="reco-header-title">Payables <span>₹${totalPayable}</span></div><div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div><div class="calc-row"><span>Extra Cost:</span> <span>₹${extraCost}</span></div>${extraCost > 0 ? `<details><summary>View Breakdown</summary><ul class="details-list">${ledger.expense.map(x=>`<li>${x.type}: ₹${x.amt}</li>`).join('')}</ul></details>` : ''}`;
                 if(isMasterAdmin) {
-                    let advPaid = parseFloat(t.advancePaid || ledger.reco.advPaid || 0); let balPaid = parseFloat(ledger.reco.balPaid || 0);
-                    html += `<div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Paid</label><input type="number" id="reco-adv-${t.id}" class="compact-input" value="${advPaid || ''}"></div><div><label>Date</label><input type="date" id="reco-advD-${t.id}" class="compact-input" value="${ledger.reco.advDate || ''}"></div></div><div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid</label><input type="number" id="reco-bal-${t.id}" class="compact-input" value="${balPaid || ''}"></div><div><label>Date</label><input type="date" id="reco-balD-${t.id}" class="compact-input" value="${ledger.reco.balDate || ''}"></div></div><div class="grid-2 form-group" style="margin-top:5px; align-items:end;"><select id="pstat-${t.id}" class="compact-input"><option value="Pending" ${t.payableStatus!=='Cleared'?'selected':''}>Pending</option><option value="Cleared" ${t.payableStatus==='Cleared'?'selected':''}>Cleared</option></select></div>`;
+                    let advPaid = parseFloat(ledger.reco.advPaid || t.advancePaid || 0); let balPaid = parseFloat(ledger.reco.balPaid || 0); let balToPay = totalPayable - advPaid - balPaid;
+                    html += `<div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Paid</label><input type="number" id="reco-adv-${t.id}" class="compact-input" value="${advPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-advD-${t.id}" class="compact-input" value="${ledger.reco.advDate || ''}"></div></div><div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid</label><input type="number" id="reco-bal-${t.id}" class="compact-input" value="${balPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD-${t.id}" class="compact-input" value="${ledger.reco.balDate || ''}"></div></div><div class="calc-danger">Balance to Pay: ₹${balToPay}</div>`;
                 }
                 html += `</div>`;
             }
 
             html += `</div>`; 
             if(isMasterAdmin) {
-                html += `<div class="grid-2" style="margin-top:12px;"><button class="btn-clear" style="padding:6px; font-size:11px;" onclick="openFinancialAllocation('${t.id}')">💰 Edit Extra Fin</button><button class="btn-primary" style="padding:6px; font-size:11px;" onclick="commitRecoRecord('${t.id}', '${currentRecoType}')">Save & Update</button></div>`;
+                html += `<div style="border-top: 1px solid #f1f3f4; margin-top:15px; padding-top:10px;"><div style="display:flex; justify-content:space-between; align-items:center;"><select id="mstat-${t.id}" class="compact-input" style="width:120px;"><option value="Pending" ${ledger.reco.status!=='Cleared'?'selected':''}>Pending</option><option value="Cleared" ${ledger.reco.status==='Cleared'?'selected':''}>Cleared</option></select><button class="btn btn-primary" style="padding:8px 12px; font-size:12px; width:auto;" onclick="commitRecoRecord('${t.id}', '${currentRecoType}')">Save Status</button></div><button class="btn btn-clear" style="padding:8px; font-size:11px; margin-top:10px;" onclick="openFinancialAllocation('${t.id}')">💰 Edit Extra Financials</button></div>`;
             }
             html += `</div>`;
             return html;
@@ -1097,80 +1093,170 @@
         try { let p = JSON.parse(t.financialLedger); if(p.income) ledger=p; } catch(e){}
         if(!ledger.reco) ledger.reco = {};
 
-        let pstat = t.payableStatus; let rstat = t.receivableStatus;
+        ledger.reco.status = document.getElementById(`mstat-${id}`).value;
 
         if (mode === 'Own Booking') {
             ledger.reco.advPaid = document.getElementById(`reco-adv-${id}`).value; ledger.reco.advDate = document.getElementById(`reco-advD-${id}`).value;
             ledger.reco.balPaid = document.getElementById(`reco-bal-${id}`).value; ledger.reco.balDate = document.getElementById(`reco-balD-${id}`).value;
-            pstat = document.getElementById(`pstat-${id}`).value; t.payableStatus = pstat;
         } else {
-            // Rev Log Saves BOTH sides
             ledger.reco.advRec = document.getElementById(`reco-advR-${id}`).value; ledger.reco.advRecDate = document.getElementById(`reco-advRD-${id}`).value;
             ledger.reco.osDues = document.getElementById(`reco-os-${id}`).value; ledger.reco.osDate = document.getElementById(`reco-osD-${id}`).value;
-            rstat = document.getElementById(`rstat-${id}`).value; t.receivableStatus = rstat;
-            
             ledger.reco.advPaid = document.getElementById(`reco-adv-${id}`).value; ledger.reco.advDate = document.getElementById(`reco-advD-${id}`).value;
             ledger.reco.balPaid = document.getElementById(`reco-bal-${id}`).value; ledger.reco.balDate = document.getElementById(`reco-balD-${id}`).value;
-            pstat = document.getElementById(`pstat-${id}`).value; t.payableStatus = pstat;
         }
 
         const jsonStr = JSON.stringify(ledger); t.financialLedger = jsonStr;
-        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateReconciliation', id: id, invoiceNo: t.invoiceNo, receivableStatus: rstat, amtReceived: 0, advancePaid: ledger.reco.advPaid || 0, payableStatus: pstat }) });
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: id, ledgerJson: jsonStr }) });
 
         alert("Ledger updated. Moving to relevant status board."); renderReconciliation();
     }
 
-    // --- SHARED MODALS (FINANCIAL / DELIVERY / SHARE / ADMIN) ---
-    function openFinancialAllocation(tripId) {
-        const trip = allTrips.find(t => t.id === tripId); if(!trip) return;
-        document.getElementById('fin-trip-id').value = tripId;
-        document.getElementById('income-rows-container').innerHTML = ""; document.getElementById('expense-rows-container').innerHTML = "";
-        let ledger = { income: [], expense: [] }; try { ledger = JSON.parse(trip.financialLedger); } catch(e){}
-        if(ledger.income) ledger.income.forEach(row => addFinancialRow('income', row.type, row.amt));
-        if(ledger.expense) ledger.expense.forEach(row => addFinancialRow('expense', row.type, row.amt));
-        document.getElementById('financialModal').style.display = "flex";
+    // --- REPORTS ENGINE ---
+    function setReportType(type) {
+        currentReportType = type;
+        document.getElementById('report-selection-screen').style.display = 'none';
+        document.getElementById('report-content-area').style.display = 'block';
+        document.getElementById('report-title-text').innerText = type + " Reports";
     }
 
-    function addFinancialRow(category, type = "", amt = "") {
-        const container = document.getElementById(`${category}-rows-container`); const row = document.createElement('div'); row.className = "financial-row";
-        row.innerHTML = `<input type="text" placeholder="Description/Type" class="compact-input fin-desc" value="${type}"><input type="number" placeholder="Amount" class="compact-input fin-amt" value="${amt}"><button onclick="this.parentElement.remove()" style="border:none; background:none; color:#b3261e; font-size:18px; font-weight:bold; cursor:pointer;">×</button>`;
-        container.appendChild(row);
-    }
+    function generateCustomReport() {
+        const pName = document.getElementById('rf-party').value;
+        let finalTrips = getFilteredTrips(allTrips);
+        finalTrips = finalTrips.filter(t => (t.bookingType || 'Own Booking') === currentReportType);
+        if(pName) finalTrips = finalTrips.filter(t => t.party.toLowerCase() === pName.toLowerCase());
 
-    function closeFinancialModal() { document.getElementById('financialModal').style.display = "none"; }
-
-    function saveFinancialLedger() {
-        const tripId = document.getElementById('fin-trip-id').value; const trip = allTrips.find(t => t.id === tripId);
-        let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(trip.financialLedger); if(p.reco) ledger.reco = p.reco; } catch(e){}
-        
-        document.querySelectorAll('#income-rows-container .financial-row').forEach(r => { let desc = r.querySelector('.fin-desc').value; let amt = r.querySelector('.fin-amt').value; if(desc && amt) ledger.income.push({ type: desc, amt: parseFloat(amt) }); });
-        document.querySelectorAll('#expense-rows-container .financial-row').forEach(r => { let desc = r.querySelector('.fin-desc').value; let amt = r.querySelector('.fin-amt').value; if(desc && amt) ledger.expense.push({ type: desc, amt: parseFloat(amt) }); });
-
-        const jsonStr = JSON.stringify(ledger); trip.financialLedger = jsonStr;
-        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: tripId, ledgerJson: jsonStr }) });
-        closeFinancialModal(); triggerCurrentRender();
-    }
-
-    function openShareModal(tripId) {
-        const trip = allTrips.find(t => t.id === tripId); if (!trip) return;
-        document.getElementById('share-modal-trip-id').value = tripId; document.getElementById('shareModal').style.display = "flex";
-    }
-    function closeShareModal() { document.getElementById('shareModal').style.display = "none"; }
-
-    function executeDeployedShare(type) {
-        const tripId = document.getElementById('share-modal-trip-id').value; const trip = allTrips.find(t => t.id === tripId); if (!trip) return;
-        let header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n*Booking Date:* ${(trip.date||'').split(',')[0]}\n\n*Party Name:* ${trip.party}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n`;
-        if(trip.bookingType === 'Reverse Logistics') { header += `*Broking Agency:* ${trip.brokingAgent}\n`; if(trip.tPerson) header += `*Agent Name:* ${trip.tPerson}\n`; if(trip.tContact) header += `*Contact No:* ${trip.tContact}\n\n`; }
-        else { if(trip.dName) header += `*Driver Name:* ${trip.dName}\n`; if(trip.dContact) header += `*Driver Contact No:* ${trip.dContact}\n\n`; }
-        
-        if (type === 'team' && trip.bookingType === 'Own Booking') {
-            if(trip.tName) header += `*Transporter:* ${trip.tName}\n`; if(trip.tPerson) header += `*Person Name:* ${trip.tPerson}\n`; if(trip.tContact) header += `*Contact Number:* ${trip.tContact}\n\n`;
+        const tripStat = document.getElementById('report-trip-status').value; const podStat = document.getElementById('report-pod-status').value;
+        if (tripStat !== 'All') finalTrips = finalTrips.filter(t => (t.status || '').trim() === tripStat);
+        if (podStat !== 'All') {
+            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => !t.podDate || String(t.podDate).trim() === '');
+            if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && String(t.podDate).trim() !== '');
         }
-        if(trip.remarks) header += `*Remarks:* ${trip.remarks}`;
-        openWhatsAppChoice(header);
+
+        const screenContainer = document.getElementById('screen-report'); const printContainer = document.getElementById('print-report-container');
+        document.getElementById('report-actions').style.display = 'grid';
+
+        if (finalTrips.length === 0) { screenContainer.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No data matches these filters.</div>`; printContainer.innerHTML = ``; return; }
+
+        const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']; const dayStr = days[today.getDay()];
+
+        // 1. SCREEN UI GENERATION
+        let screenHtml = `<table class="report-table"><thead><tr><th>Sr No</th><th>Party Name</th><th>Date</th><th>Route</th><th>Vehicle</th><th>Status</th><th>C-Note</th><th>POD Date</th><th>Remarks</th></tr></thead><tbody>`;
+        finalTrips.forEach((t, i) => {
+            let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
+            screenHtml += `<tr><td>${i+1}</td><td><strong>${t.party}</strong></td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum}</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
+        });
+        screenHtml += `</tbody></table>`; screenContainer.innerHTML = screenHtml;
+
+        // 2. PRINT PDF GENERATION
+        const uniqueParties = [...new Set(finalTrips.map(t => t.party))];
+        let printHtml = `<div class="print-header"><h2>Data Report as on ${dateStr}, ${dayStr} - ${currentReportType}</h2></div><div class="party-table-wrapper"><table class="print-table"><thead><tr><th style="width:15%;">Party Name</th><th style="width:5%; text-align:center;">Sr</th><th style="width:10%;">Date</th><th style="width:15%;">Route</th><th style="width:15%;">Vehicle</th><th style="width:10%;">Status</th><th style="width:10%;">C-Note</th><th style="width:10%;">POD Date</th><th style="width:10%;">Remarks</th></tr></thead><tbody>`;
+        uniqueParties.forEach(party => {
+            const pTrips = finalTrips.filter(t => t.party === party); if (pTrips.length === 0) return;
+            pTrips.forEach((t, i) => {
+                let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
+                printHtml += `<tr>`; if (i === 0) printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
+                printHtml += `<td style="text-align:center;">${i+1}</td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum} (${t.weight})</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
+            });
+            printHtml += `<tr><td colspan="9" style="border-bottom:2px solid #000; padding:0; height:0;"></td></tr>`;
+        });
+        printHtml += `</tbody></table></div>`; printContainer.innerHTML = printHtml; currentReportTrips = finalTrips; 
     }
 
+    function shareReportWhatsApp() {
+        if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
+        const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        let message = `*Vehicle Status Update - ${dateStr}*\n\n`;
+        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party))];
+        uniqueParties.forEach(p => {
+            message += `*Client:* ${p}\n`; let counter = 1;
+            currentReportTrips.forEach(t => {
+                if (t.party === p) {
+                    let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
+                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight}\n*Status:* *${stat}*\n`;
+                    if (t.statusNote) message += `*Current Location:* ${t.statusNote}\n`;
+                    message += `\n`; counter++;
+                }
+            });
+        });
+        openWhatsAppChoice(message);
+    }
+
+    function triggerMISGeneration(misType) {
+        let pName = document.getElementById('rf-party').value;
+        if(!pName) return alert("MIS Generation requires a Party Name. Please select a client from the filter.");
+        let tripsToExport = allTrips.filter(t => t.party.toLowerCase() === pName.toLowerCase() && (t.bookingType || 'Own Booking') === currentReportType);
+        if(tripsToExport.length === 0) return alert("No records found for this party under the current booking type.");
+        const wb = XLSX.utils.book_new(); let grouped = {};
+        
+        tripsToExport.forEach(t => {
+            let mName = "Master";
+            if(t.date && t.date.includes('/')) { let parts = t.date.split('/'); if(parts[1]) { const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]; let idx = parseInt(parts[1]) - 1; if(months[idx]) mName = months[idx] + " " + parts[2]; } }
+            if(!grouped[mName]) grouped[mName] = []; grouped[mName].push(t);
+        });
+
+        for (let mKey in grouped) {
+            let rawRows = []; rawRows.push(["Sr. No.", "C-Note No.", "Booking Date", "Delivery Date", "TAT", "From", "To", "Qty", "Pkg Type", "Vehicle No.", "Vehicle Type", "Vehicle Capacity", "Remarks"]);
+            grouped[mKey].forEach((t, i) => {
+                let tat = "";
+                if(t.deliveryDate && t.date) {
+                    try { let p1 = t.date.split(',')[0].split('/'); let p2 = t.deliveryDate.split('/'); let d1 = new Date(p1[2], p1[1]-1, p1[0]); let d2 = new Date(p2[2], p2[1]-1, p2[0]); let diff = d2 - d1; if(diff >= 0) tat = Math.round(diff / (1000 * 60 * 60 * 24)) + " Days"; } catch(err){}
+                }
+                rawRows.push([i+1, t.cNote || "-", (t.date || '').split(',')[0], t.deliveryDate || "-", tat, t.from, t.to, t.weight, t.type, t.vNum, t.type, t.weight, t.remarks || ""]);
+            });
+            const ws = XLSX.utils.aoa_to_sheet(rawRows); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, mKey);
+        }
+        XLSX.writeFile(wb, `KTPL_${misType}_${pName}.xlsx`);
+    }
+
+    function triggerRecoExcelDownload() {
+        let pName = document.getElementById('rf-party').value; 
+        let tripsToExport = allTrips.filter(t => (t.bookingType || 'Own Booking') === currentReportType);
+        if(pName) tripsToExport = tripsToExport.filter(t => t.party.toLowerCase() === pName.toLowerCase());
+
+        const wb = XLSX.utils.book_new(); let rawRows = [];
+        rawRows.push(["Trip ID", "Booking Type", "Date", "Party Name", "Vehicle No.", "Route", "Total Receivable", "Ledger Status", "Total Payable", "KTPL Margin"]);
+        
+        tripsToExport.forEach(t => {
+            let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.income) ledger=p; } catch(e){}
+            if(!ledger.reco) ledger.reco = {};
+            let baseRev = parseFloat(t.cFreight || 0); let extraRev = ledger.income ? ledger.income.reduce((s, r) => s + r.amt, 0) : 0; let totalReceivable = baseRev + extraRev;
+            let baseCost = parseFloat(t.vFreight || 0); let extraCost = ledger.expense ? ledger.expense.reduce((s, r) => s + r.amt, 0) : 0; let totalPayable = baseCost + extraCost;
+            let margin = totalReceivable - totalPayable;
+            rawRows.push([t.id, t.bookingType, (t.date || '').split(',')[0], t.party, t.vNum, `${t.from} to ${t.to}`, totalReceivable, ledger.reco.status || "Pending", totalPayable, margin]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(rawRows); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, "Reconciliation Master"); XLSX.writeFile(wb, `KTPL_Payments_Ledger.xlsx`);
+    }
+
+    // --- ADMIN SYSTEM ---
+    function renderAdminUsers() {
+        const tbody = document.getElementById('admin-user-list'); if(!tbody) return;
+        tbody.innerHTML = users.map(u => `<tr><td>${u.Name || u.name || 'Unknown'}</td><td>${u.Role || u.role || 'Unassigned'}</td><td style="font-family: monospace;">${u.PIN || u.pin || 'None'}</td><td><button class="admin-action-btn" onclick="openEditUserModal('${u.Name || u.name}', '${u.PIN || u.pin}', '${u.Role || u.role}')">Edit</button><button class="admin-action-btn" style="color: #b3261e;" onclick="deleteUser('${u.Name || u.name}')">Del</button></td></tr>`).join('');
+    }
+    function openAddUserModal() { document.getElementById('user-modal-title').innerText = "Add New User"; document.getElementById('manage-user-old-name').value = ""; document.getElementById('manage-user-name').value = ""; document.getElementById('manage-user-pin').value = ""; document.getElementById('manage-user-role').value = "ReadOnly"; document.getElementById('userManageModal').style.display = 'flex'; }
+    function openEditUserModal(name, pin, role) { document.getElementById('user-modal-title').innerText = "Edit User"; document.getElementById('manage-user-old-name').value = name; document.getElementById('manage-user-name').value = name; document.getElementById('manage-user-pin').value = pin; document.getElementById('manage-user-role').value = role; document.getElementById('userManageModal').style.display = 'flex'; }
+    function closeUserModal() { document.getElementById('userManageModal').style.display = 'none'; }
+    
+    function saveUserManage() {
+        const oldName = document.getElementById('manage-user-old-name').value; const newName = document.getElementById('manage-user-name').value.trim(); const pin = document.getElementById('manage-user-pin').value.trim(); const role = document.getElementById('manage-user-role').value;
+        if (!newName || !pin) return alert("Name and PIN are required.");
+        if (oldName) { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateUser', oldName: oldName, newName: newName, pin: pin, role: role }) }); let u = users.find(x => (x.Name || x.name) === oldName); if(u) { u.Name = newName; u.name = newName; u.PIN = pin; u.pin = pin; u.Role = role; u.role = role; } } 
+        else { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addUser', name: newName, pin: pin, role: role }) }); users.push({ Name: newName, name: newName, PIN: pin, pin: pin, Role: role, role: role }); }
+        renderAdminUsers(); closeUserModal();
+    }
+    function deleteUser(name) {
+        if (!confirm(`Are you sure you want to delete access for ${name}?`)) return;
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', name: name }) });
+        users = users.filter(u => (u.Name || u.name) !== name); renderAdminUsers();
+    }
+    async function forceAdminSync() {
+        document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Forcing Databank Sync...";
+        try { await performDatabaseSync(); alert("Databank successfully synchronized with Google Sheets!"); } catch(e) { alert("Sync failed. Check connection."); }
+        document.getElementById('loading-overlay').style.display = 'none';
+    }
+
+    // --- SHARED STATUS MODALS ---
     function openAdminEdit(tripId) {
         const trip = allTrips.find(t => t.id === tripId); if(!trip) return;
         document.getElementById('edit-trip-id').value = tripId;
@@ -1183,8 +1269,7 @@
     function closeAdminEditModal() { document.getElementById('adminEditModal').style.display = "none"; }
     
     function saveAdminEdit() {
-        const tripId = document.getElementById('edit-trip-id').value;
-        const vNum = document.getElementById('edit-vnum').value.toUpperCase();
+        const tripId = document.getElementById('edit-trip-id').value; const vNum = document.getElementById('edit-vnum').value.toUpperCase();
         const payload = { action: 'adminEditTrip', id: tripId, vNum: vNum, vType: document.getElementById('edit-vtype').value.toUpperCase(), weight: document.getElementById('edit-vcap').value.toUpperCase(), from: document.getElementById('edit-from').value, to: document.getElementById('edit-to').value, vFreight: document.getElementById('edit-vfreight').value, cFreight: document.getElementById('edit-cfreight').value, dName: document.getElementById('edit-dname').value, dContact: formatPhoneString(document.getElementById('edit-dcontact').value) };
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
         const t = allTrips.find(x => x.id === tripId); if(t){ t.vNum = payload.vNum; t.type = payload.vType; t.weight = payload.weight; t.from = payload.from; t.to = payload.to; t.vFreight = payload.vFreight; t.cFreight = payload.cFreight; t.dName = payload.dName; t.dContact = payload.dContact; }
@@ -1239,135 +1324,23 @@
         p.style.display = p.style.display === 'block' ? 'none' : 'block';
     }
 
-    // --- REPORTS ENGINE ---
-    function generateCustomReport() {
-        const pName = document.getElementById('rf-party').value;
-        let finalTrips = getFilteredTrips(allTrips);
-        if(pName) finalTrips = finalTrips.filter(t => t.party.toLowerCase() === pName.toLowerCase());
+    function openShareModal(tripId) {
+        const trip = allTrips.find(t => t.id === tripId); if (!trip) return;
+        document.getElementById('share-modal-trip-id').value = tripId; document.getElementById('shareModal').style.display = "flex";
+    }
+    function closeShareModal() { document.getElementById('shareModal').style.display = "none"; }
 
-        const tripStat = document.getElementById('report-trip-status').value; const podStat = document.getElementById('report-pod-status').value;
-        if (tripStat !== 'All') finalTrips = finalTrips.filter(t => (t.status || '').trim() === tripStat);
-        if (podStat !== 'All') {
-            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => !t.podDate || String(t.podDate).trim() === '');
-            if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && String(t.podDate).trim() !== '');
+    function executeDeployedShare(type) {
+        const tripId = document.getElementById('share-modal-trip-id').value; const trip = allTrips.find(t => t.id === tripId); if (!trip) return;
+        let header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n*Booking Date:* ${(trip.date||'').split(',')[0]}\n\n*Party Name:* ${trip.party}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n`;
+        if(trip.bookingType === 'Reverse Logistics') { header += `*Broking Agency:* ${trip.brokingAgent}\n`; if(trip.tPerson) header += `*Agent Name:* ${trip.tPerson}\n`; if(trip.tContact) header += `*Contact No:* ${trip.tContact}\n\n`; }
+        else { if(trip.dName) header += `*Driver Name:* ${trip.dName}\n`; if(trip.dContact) header += `*Driver Contact No:* ${trip.dContact}\n\n`; }
+        
+        if (type === 'team' && trip.bookingType === 'Own Booking') {
+            if(trip.tName) header += `*Transporter:* ${trip.tName}\n`; if(trip.tPerson) header += `*Person Name:* ${trip.tPerson}\n`; if(trip.tContact) header += `*Contact Number:* ${trip.tContact}\n\n`;
         }
-
-        const screenContainer = document.getElementById('screen-report'); const printContainer = document.getElementById('print-report-container');
-        document.getElementById('report-actions').style.display = 'grid';
-
-        if (finalTrips.length === 0) { screenContainer.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No data matches these filters.</div>`; printContainer.innerHTML = ``; return; }
-
-        const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-        
-        // 1. SCREEN UI GENERATION
-        let screenHtml = `<table class="report-table"><thead><tr><th>Sr No</th><th>Type</th><th>Party Name</th><th>Date</th><th>Route</th><th>Vehicle</th><th>Status</th><th>C-Note</th><th>POD Date</th><th>Remarks</th></tr></thead><tbody>`;
-        finalTrips.forEach((t, i) => {
-            let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
-            screenHtml += `<tr><td>${i+1}</td><td>${t.bookingType || 'Own'}</td><td><strong>${t.party}</strong></td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum}</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
-        });
-        screenHtml += `</tbody></table>`; screenContainer.innerHTML = screenHtml;
-
-        // 2. PRINT PDF GENERATION
-        const uniqueParties = [...new Set(finalTrips.map(t => t.party))];
-        let printHtml = `<div class="print-header"><h2>Data Report as on ${dateStr}</h2></div><div class="party-table-wrapper"><table class="print-table"><thead><tr><th style="width:15%;">Party Name</th><th style="width:5%; text-align:center;">Sr</th><th style="width:10%;">Date</th><th style="width:15%;">Route</th><th style="width:15%;">Vehicle</th><th style="width:10%;">Status</th><th style="width:10%;">C-Note</th><th style="width:10%;">POD Date</th><th style="width:10%;">Remarks</th></tr></thead><tbody>`;
-        uniqueParties.forEach(party => {
-            const pTrips = finalTrips.filter(t => t.party === party); if (pTrips.length === 0) return;
-            pTrips.forEach((t, i) => {
-                let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
-                printHtml += `<tr>`; if (i === 0) printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
-                printHtml += `<td style="text-align:center;">${i+1}</td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum} (${t.weight})</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
-            });
-            printHtml += `<tr><td colspan="9" style="border-left:none; border-right:none; padding:0; border-bottom:2px solid #000;"></td></tr>`;
-        });
-        printHtml += `</tbody></table></div>`; printContainer.innerHTML = printHtml; currentReportTrips = finalTrips; 
-    }
-
-    function shareReportWhatsApp() {
-        if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
-        const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-        let message = `*Vehicle Status Update - ${dateStr}*\n\n`;
-        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party))];
-        uniqueParties.forEach(p => {
-            message += `*Client:* ${p}\n`; let counter = 1;
-            currentReportTrips.forEach(t => {
-                if (t.party === p) {
-                    let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
-                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight}\n*Status:* *${stat}*\n`;
-                    if (t.statusNote) message += `*Current Location:* ${t.statusNote}\n`;
-                    message += `\n`; counter++;
-                }
-            });
-        });
-        openWhatsAppChoice(message);
-    }
-
-    function triggerMISGeneration(misType) {
-        let pName = document.getElementById('rf-party').value;
-        if(!pName) return alert("MIS Generation requires a Party Name. Please select a client from the filter.");
-        let tripsToExport = allTrips.filter(t => t.party.toLowerCase() === pName.toLowerCase());
-        const wb = XLSX.utils.book_new(); let grouped = {};
-        
-        tripsToExport.forEach(t => {
-            let mName = "Master";
-            if(t.date && t.date.includes('/')) { let parts = t.date.split('/'); if(parts[1]) { const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]; let idx = parseInt(parts[1]) - 1; if(months[idx]) mName = months[idx] + " " + parts[2]; } }
-            if(!grouped[mName]) grouped[mName] = []; grouped[mName].push(t);
-        });
-
-        for (let mKey in grouped) {
-            let rawRows = []; rawRows.push(["Sr. No.", "C-Note No.", "Booking Date", "Delivery Date", "TAT", "From", "To", "Qty", "Pkg Type", "Vehicle No.", "Vehicle Type", "Vehicle Capacity", "Remarks"]);
-            grouped[mKey].forEach((t, i) => {
-                let tat = "";
-                if(t.deliveryDate && t.date) {
-                    try { let p1 = t.date.split(',')[0].split('/'); let p2 = t.deliveryDate.split('/'); let d1 = new Date(p1[2], p1[1]-1, p1[0]); let d2 = new Date(p2[2], p2[1]-1, p2[0]); let diff = d2 - d1; if(diff >= 0) tat = Math.round(diff / (1000 * 60 * 60 * 24)) + " Days"; } catch(err){}
-                }
-                rawRows.push([i+1, t.cNote || "-", (t.date || '').split(',')[0], t.deliveryDate || "-", tat, t.from, t.to, t.weight, t.type, t.vNum, t.type, t.weight, t.remarks || ""]);
-            });
-            const ws = XLSX.utils.aoa_to_sheet(rawRows); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, mKey);
-        }
-        XLSX.writeFile(wb, `KTPL_${misType}_${pName}.xlsx`);
-    }
-
-    function triggerRecoExcelDownload() {
-        let pName = document.getElementById('rf-party').value; let tripsToExport = pName ? allTrips.filter(t => t.party.toLowerCase() === pName.toLowerCase()) : allTrips;
-        const wb = XLSX.utils.book_new(); let rawRows = [];
-        rawRows.push(["Trip ID", "Booking Type", "Date", "Party Name", "Vehicle No.", "Route", "Total Receivable", "Invoice No.", "Client Pay Status", "Total Payable", "Advance", "Vendor Pay Status", "KTPL Margin"]);
-        
-        tripsToExport.forEach(t => {
-            let ledger = { income: [], expense: [] }; try { ledger = JSON.parse(t.financialLedger); } catch(e){}
-            let baseRev = parseFloat(t.cFreight || 0); let extraRev = ledger.income ? ledger.income.reduce((s, r) => s + r.amt, 0) : 0; let totalReceivable = baseRev + extraRev;
-            let baseCost = parseFloat(t.vFreight || 0); let extraCost = ledger.expense ? ledger.expense.reduce((s, r) => s + r.amt, 0) : 0; let totalPayable = baseCost + extraCost;
-            let margin = totalReceivable - totalPayable;
-            rawRows.push([t.id, t.bookingType, (t.date || '').split(',')[0], t.party, t.vNum, `${t.from} to ${t.to}`, totalReceivable, t.invoiceNo || "-", t.receivableStatus, totalPayable, t.advancePaid || "0", t.payableStatus, margin]);
-        });
-
-        const ws = XLSX.utils.aoa_to_sheet(rawRows); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, "Reconciliation Master"); XLSX.writeFile(wb, `KTPL_Payments_Ledger.xlsx`);
-    }
-
-    // --- ADMIN SYSTEM ---
-    function renderAdminUsers() {
-        const tbody = document.getElementById('admin-user-list'); if(!tbody) return;
-        tbody.innerHTML = users.map(u => `<tr><td style="padding: 10px; border-bottom: 1px solid #f1f3f4; font-weight: 500;">${u.Name || u.name || 'Unknown'}</td><td style="padding: 10px; border-bottom: 1px solid #f1f3f4;">${u.Role || u.role || 'Unassigned'}</td><td style="padding: 10px; border-bottom: 1px solid #f1f3f4; font-family: monospace;">${u.PIN || u.pin || 'None'}</td><td style="padding: 10px; border-bottom: 1px solid #f1f3f4;"><button class="admin-action-btn" onclick="openEditUserModal('${u.Name || u.name}', '${u.PIN || u.pin}', '${u.Role || u.role}')">Edit</button><button class="admin-action-btn" style="color: #b3261e;" onclick="deleteUser('${u.Name || u.name}')">Del</button></td></tr>`).join('');
-    }
-    function openAddUserModal() { document.getElementById('user-modal-title').innerText = "Add New User"; document.getElementById('manage-user-old-name').value = ""; document.getElementById('manage-user-name').value = ""; document.getElementById('manage-user-pin').value = ""; document.getElementById('manage-user-role').value = "ReadOnly"; document.getElementById('userManageModal').style.display = 'flex'; }
-    function openEditUserModal(name, pin, role) { document.getElementById('user-modal-title').innerText = "Edit User"; document.getElementById('manage-user-old-name').value = name; document.getElementById('manage-user-name').value = name; document.getElementById('manage-user-pin').value = pin; document.getElementById('manage-user-role').value = role; document.getElementById('userManageModal').style.display = 'flex'; }
-    function closeUserModal() { document.getElementById('userManageModal').style.display = 'none'; }
-    
-    function saveUserManage() {
-        const oldName = document.getElementById('manage-user-old-name').value; const newName = document.getElementById('manage-user-name').value.trim(); const pin = document.getElementById('manage-user-pin').value.trim(); const role = document.getElementById('manage-user-role').value;
-        if (!newName || !pin) return alert("Name and PIN are required.");
-        if (oldName) { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateUser', oldName: oldName, newName: newName, pin: pin, role: role }) }); let u = users.find(x => (x.Name || x.name) === oldName); if(u) { u.Name = newName; u.name = newName; u.PIN = pin; u.pin = pin; u.Role = role; u.role = role; } } 
-        else { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addUser', name: newName, pin: pin, role: role }) }); users.push({ Name: newName, name: newName, PIN: pin, pin: pin, Role: role, role: role }); }
-        renderAdminUsers(); closeUserModal();
-    }
-    function deleteUser(name) {
-        if (!confirm(`Are you sure you want to delete access for ${name}?`)) return;
-        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', name: name }) });
-        users = users.filter(u => (u.Name || u.name) !== name); renderAdminUsers();
-    }
-    async function forceAdminSync() {
-        document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Forcing Databank Sync...";
-        try { await performDatabaseSync(); alert("Databank successfully synchronized with Google Sheets!"); } catch(e) { alert("Sync failed. Check connection."); }
-        document.getElementById('loading-overlay').style.display = 'none';
+        if(trip.remarks) header += `*Remarks:* ${trip.remarks}`;
+        openWhatsAppChoice(header);
     }
 </script>
 </body>
