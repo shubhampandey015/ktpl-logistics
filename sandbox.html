@@ -78,7 +78,6 @@
         /* TRIP CARDS & LEDGER */
         .list-container { padding: 0 10px; }
         .trip-card { background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); font-size: 12px; color: #444746;}
-        .trip-card strong { color: #1f1f1f; }
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;}
         .status-transit { background: #fef7e0; color: #b06000; }
         .status-delivered { background: #e6f4ea; color: #137333; }
@@ -90,7 +89,8 @@
         /* MASTER SEARCH FILTER BAR */
         #unified-filter-bar { background: #ffffff; border-radius: 12px; padding: 15px; margin: 0 10px 15px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
         .filter-header { font-size: 12px; font-weight: 600; color: #1f1f1f; margin-bottom: 12px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
-        .filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .filter-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .filter-grid > * { flex: 1 1 calc(50% - 8px); min-width: 120px; }
 
         /* PAYMENTS LEDGER STYLES */
         details { background: #f8f9fa; border-radius: 6px; padding: 6px 10px; margin: 6px 0; border: 1px solid #dadce0;}
@@ -235,7 +235,7 @@
         <div id="placement-form-container" style="display:none;" class="form-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f3f4; padding-bottom:10px;">
                 <span id="placement-form-title" style="font-weight:600; color:#0b57d0;">Form</span>
-                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600;" onclick="showPlacementSelection()">Cancel</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600;" onclick="showSelectionScreen('placement')">Cancel</span>
             </div>
 
             <div id="form-own-booking">
@@ -278,7 +278,10 @@
 
             <div id="form-rev-logistics" style="display:none;">
                 <div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="rl-date"></div>
-                <div class="form-group autocomplete"><label>Broking Agent <span class="required-star">*</span></label><input type="text" id="rl-agent" placeholder="Agent Name" onchange="formatCase(this, 'title')"><div id="rl-agent-list" class="autocomplete-items"></div></div>
+                <div class="grid-2 form-group">
+                    <div class="autocomplete"><label>Party Name</label><input type="text" id="rl-party" placeholder="Type..." onchange="formatCase(this, 'title')"><div id="rl-party-list" class="autocomplete-items"></div></div>
+                    <div><label>Type of Co.</label><input type="text" id="rl-typeco" placeholder="e.g. FMCG, Pharma, Auto" onchange="formatCase(this, 'title')"></div>
+                </div>
                 <div class="grid-2 form-group">
                     <div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="rl-from" placeholder="Origin" onchange="formatCase(this, 'title')"><div id="rl-from-list" class="autocomplete-items"></div></div>
                     <div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="rl-to" placeholder="Destination" onchange="formatCase(this, 'title')"><div id="rl-to-list" class="autocomplete-items"></div></div>
@@ -288,6 +291,12 @@
                 <div class="grid-2 form-group">
                     <div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="rl-vtype" placeholder="32FT" onchange="formatCase(this, 'upper')"></div>
                     <div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="rl-weight" placeholder="18MT" onchange="formatCase(this, 'upper')"></div>
+                </div>
+                <div class="section-divider"></div>
+                <div class="form-group"><label>Broking Agency <span class="required-star">*</span></label><input type="text" id="rl-agency" placeholder="Agency Name" onchange="formatCase(this, 'title')"></div>
+                <div class="grid-2 form-group">
+                    <div><label>Agent Name</label><input type="text" id="rl-agent" placeholder="Name" onchange="formatCase(this, 'title')"></div>
+                    <div><label>Contact No. <span class="required-star">*</span></label><input type="text" id="rl-contact" placeholder="9876543210" onchange="formatPhoneInput(this)"></div>
                 </div>
                 <div class="section-divider"></div>
                 <div class="form-group"><label>Charged Freight</label><input type="number" id="rl-cfreight" placeholder="Receivable Amount"></div>
@@ -405,6 +414,10 @@
                 <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600; background:#fce8e6; padding:4px 8px; border-radius:12px;" onclick="showSelectionScreen('report')">Change Category</span>
             </div>
             <div class="form-card" style="padding:15px; margin-bottom:15px;">
+                <div class="form-group autocomplete" style="margin-top:0; margin-bottom:15px;">
+                    <label>Filter by Party Name <span class="required-star">*</span> (Required for MIS)</label>
+                    <input type="text" id="rf-party" class="compact-input" placeholder="Type Client Profile..." onchange="formatCase(this, 'title')"><div id="rf-party-list" class="autocomplete-items"></div>
+                </div>
                 <div class="grid-2">
                     <div>
                         <label>Trip Status:</label>
@@ -743,7 +756,6 @@
         setupCustomDropdown('rl-vnum', 'rl-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'rl'));
         setupCustomDropdown('rl-from', 'rl-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
         setupCustomDropdown('rl-to', 'rl-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
-        setupCustomDropdown('rl-agent', 'rl-agent-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
 
         setupCustomDropdown('rf-party', 'rf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
 
@@ -902,12 +914,15 @@
         const vNum = document.getElementById('rl-vnum').value.toUpperCase();
         if (!vehicles[vNum]) { return alert("Error: Reverse Logistics strictly requires a valid KTPL fleet vehicle asset."); }
         
-        let party = document.getElementById('rl-agent').value; 
+        let party = document.getElementById('rl-party').value; 
+        let typeCo = document.getElementById('rl-typeco').value; 
+        if(typeCo && party) party = party + " (" + typeCo + ")";
+        
         const payload = {
-            action: 'saveTrip', id: "TRP-" + Date.now(), date: getFormattedDateVal(document.getElementById('rl-date').value), party: party, 
+            action: 'saveTrip', id: "TRP-" + Date.now(), date: getFormattedDateVal(document.getElementById('rl-date').value), party: party || "", 
             from: document.getElementById('rl-from').value, to: document.getElementById('rl-to').value, vNum: vNum, vType: document.getElementById('rl-vtype').value, weight: document.getElementById('rl-weight').value,
             createdBy: currentUser.Name || currentUser.name || "Unknown", vFreight: "", cFreight: document.getElementById('rl-cfreight').value || "", dName: "", dContact: "", tName: "", 
-            tPerson: "", tContact: "", remarks: document.getElementById('rl-remarks').value, bookingType: 'Reverse Logistics', brokingAgent: party
+            tPerson: document.getElementById('rl-agent').value, tContact: formatPhoneString(document.getElementById('rl-contact').value), remarks: document.getElementById('rl-remarks').value, bookingType: 'Reverse Logistics', brokingAgent: document.getElementById('rl-agent').value
         };
         finalizePlacementSave(payload);
     }
@@ -940,8 +955,10 @@
     function generatePlacementMessageRev(type) {
         if (!validatePlacementRev()) return; 
         const date = getFormattedDateVal(document.getElementById('rl-date').value); const vNum = document.getElementById('rl-vnum').value.toUpperCase();
-        let party = document.getElementById('rl-agent').value;
-        let header = `*Placement Details (Rev Log) - ${vNum} - ${document.getElementById('rl-from').value} to ${document.getElementById('rl-to').value} - ${document.getElementById('rl-vtype').value} - ${document.getElementById('rl-weight').value}*\n\n*Booking Date:* ${date}\n\n*Broking Agent:* ${party}\n\n*From:* ${document.getElementById('rl-from').value}\n*To:* ${document.getElementById('rl-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('rl-vtype').value}\n*Charged Weight:* ${document.getElementById('rl-weight').value}\n\n`;
+        let party = document.getElementById('rl-party').value; let typeCo = document.getElementById('rl-typeco').value; if(typeCo) party += " (" + typeCo + ")";
+        let header = `*Placement Details (Rev Log) - ${vNum} - ${document.getElementById('rl-from').value} to ${document.getElementById('rl-to').value} - ${document.getElementById('rl-vtype').value} - ${document.getElementById('rl-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${document.getElementById('rl-from').value}\n*To:* ${document.getElementById('rl-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('rl-vtype').value}\n*Charged Weight:* ${document.getElementById('rl-weight').value}\n\n*Broking Agency:* ${document.getElementById('rl-agent').value}\n`;
+        if(document.getElementById('rl-agent').value) header += `*Agent Name:* ${document.getElementById('rl-agent').value}\n`;
+        if(document.getElementById('rl-contact').value) header += `*Contact No:* ${document.getElementById('rl-contact').value}\n\n`;
         if(document.getElementById('rl-cfreight').value) header += `*Charged Freight:* ${document.getElementById('rl-cfreight').value}\n`;
         if(document.getElementById('rl-remarks').value) header += `*Remarks:* ${document.getElementById('rl-remarks').value}`;
         openWhatsAppChoice(header);
@@ -1109,6 +1126,7 @@
 
         const jsonStr = JSON.stringify(ledger); t.financialLedger = jsonStr;
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: id, ledgerJson: jsonStr }) });
+
         alert("Ledger updated. Moving to relevant status board."); renderReconciliation();
     }
 
@@ -1121,10 +1139,12 @@
     }
 
     function generateCustomReport() {
-        const pName = document.getElementById('rf-party').value;
+        const rfPartyEl = document.getElementById('rf-party');
+        const pName = rfPartyEl ? rfPartyEl.value : "";
+        
         let finalTrips = getFilteredTrips(allTrips);
         finalTrips = finalTrips.filter(t => (t.bookingType || 'Own Booking') === currentReportType);
-        if(pName) finalTrips = finalTrips.filter(t => (t.party || '').toLowerCase() === pName.toLowerCase());
+        if(pName) finalTrips = finalTrips.filter(t => (t.party || '').toLowerCase().includes(pName.toLowerCase()));
 
         const tripStat = document.getElementById('report-trip-status').value; const podStat = document.getElementById('report-pod-status').value;
         if (tripStat !== 'All') finalTrips = finalTrips.filter(t => (t.status || '').trim() === tripStat);
@@ -1145,15 +1165,15 @@
         let screenHtml = `<table class="report-table"><thead><tr><th>Sr No</th><th>Type</th><th>Party Name</th><th>Date</th><th>Route</th><th>Vehicle</th><th>Status</th><th>C-Note</th><th>POD Date</th><th>Remarks</th></tr></thead><tbody>`;
         finalTrips.forEach((t, i) => {
             let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
-            screenHtml += `<tr><td>${i+1}</td><td>${t.bookingType || 'Own'}</td><td><strong>${t.party}</strong></td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum}</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
+            screenHtml += `<tr><td>${i+1}</td><td>${t.bookingType || 'Own'}</td><td><strong>${t.party || ''}</strong></td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum}</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
         });
         screenHtml += `</tbody></table>`; screenContainer.innerHTML = screenHtml;
 
         // 2. PRINT PDF GENERATION
-        const uniqueParties = [...new Set(finalTrips.map(t => t.party))];
+        const uniqueParties = [...new Set(finalTrips.map(t => t.party || 'Unknown'))];
         let printHtml = `<div class="print-header"><h2>Data Report as on ${dateStr}, ${dayStr} - ${currentReportType}</h2></div><div class="party-table-wrapper"><table class="print-table"><thead><tr><th style="width:15%;">Party Name</th><th style="width:5%; text-align:center;">Sr</th><th style="width:10%;">Date</th><th style="width:15%;">Route</th><th style="width:15%;">Vehicle</th><th style="width:10%;">Status</th><th style="width:10%;">C-Note</th><th style="width:10%;">POD Date</th><th style="width:10%;">Remarks</th></tr></thead><tbody>`;
         uniqueParties.forEach(party => {
-            const pTrips = finalTrips.filter(t => t.party === party); if (pTrips.length === 0) return;
+            const pTrips = finalTrips.filter(t => (t.party || 'Unknown') === party); if (pTrips.length === 0) return;
             pTrips.forEach((t, i) => {
                 let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
                 printHtml += `<tr>`; if (i === 0) printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
@@ -1168,11 +1188,11 @@
         if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
         const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
         let message = `*Vehicle Status Update - ${dateStr}*\n\n`;
-        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party))];
+        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party || 'Unknown'))];
         uniqueParties.forEach(p => {
             message += `*Client:* ${p}\n`; let counter = 1;
             currentReportTrips.forEach(t => {
-                if (t.party === p) {
+                if ((t.party || 'Unknown') === p) {
                     let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
                     message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight}\n*Status:* *${stat}*\n`;
                     if (t.statusNote) message += `*Current Location:* ${t.statusNote}\n`;
@@ -1184,7 +1204,8 @@
     }
 
     function triggerMISGeneration(misType) {
-        let pName = document.getElementById('rf-party').value;
+        const rfPartyEl = document.getElementById('rf-party');
+        let pName = rfPartyEl ? rfPartyEl.value : "";
         if(!pName) return alert("MIS Generation requires a Party Name. Please select a client from the filter.");
         let tripsToExport = allTrips.filter(t => (t.party || '').toLowerCase() === pName.toLowerCase() && (t.bookingType || 'Own Booking') === currentReportType);
         if(tripsToExport.length === 0) return alert("No records found for this party under the current booking type.");
@@ -1211,7 +1232,8 @@
     }
 
     function triggerRecoExcelDownload() {
-        let pName = document.getElementById('rf-party').value; 
+        const rfPartyEl = document.getElementById('rf-party');
+        let pName = rfPartyEl ? rfPartyEl.value : "";
         let tripsToExport = allTrips.filter(t => (t.bookingType || 'Own Booking') === currentReportType);
         if(pName) tripsToExport = tripsToExport.filter(t => (t.party || '').toLowerCase() === pName.toLowerCase());
 
@@ -1224,7 +1246,7 @@
             let baseRev = parseFloat(t.cFreight || 0); let extraRev = ledger.income ? ledger.income.reduce((s, r) => s + r.amt, 0) : 0; let totalReceivable = baseRev + extraRev;
             let baseCost = parseFloat(t.vFreight || 0); let extraCost = ledger.expense ? ledger.expense.reduce((s, r) => s + r.amt, 0) : 0; let totalPayable = baseCost + extraCost;
             let margin = totalReceivable - totalPayable;
-            rawRows.push([t.id, t.bookingType, (t.date || '').split(',')[0], t.party, t.vNum, `${t.from} to ${t.to}`, totalReceivable, ledger.reco.status || "Pending", totalPayable, margin]);
+            rawRows.push([t.id, t.bookingType, (t.date || '').split(',')[0], t.party || 'Unknown', t.vNum, `${t.from} to ${t.to}`, totalReceivable, ledger.reco.status || "Pending", totalPayable, margin]);
         });
 
         const ws = XLSX.utils.aoa_to_sheet(rawRows); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, "Reconciliation Master"); XLSX.writeFile(wb, `KTPL_Payments_Ledger.xlsx`);
@@ -1249,7 +1271,7 @@
                 </div>
                 <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
                 <div style="margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
-                    <span><strong>Party:</strong> ${trip.party}</span>
+                    <span><strong>Party:</strong> ${trip.party || 'N/A'}</span>
         `;
         
         if (isMasterAdmin && (trip.status || '').trim() === 'In-Transit') {
@@ -1472,7 +1494,7 @@
 
     function executeDeployedShare(type) {
         const tripId = document.getElementById('share-modal-trip-id').value; const trip = allTrips.find(t => t.id === tripId); if (!trip) return;
-        let header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n*Booking Date:* ${(trip.date||'').split(',')[0]}\n\n*Party Name:* ${trip.party}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n`;
+        let header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n*Booking Date:* ${(trip.date||'').split(',')[0]}\n\n*Party Name:* ${trip.party || 'N/A'}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n`;
         if(trip.bookingType === 'Reverse Logistics') { header += `*Broking Agency:* ${trip.brokingAgent}\n`; if(trip.tPerson) header += `*Agent Name:* ${trip.tPerson}\n`; if(trip.tContact) header += `*Contact No:* ${trip.tContact}\n\n`; }
         else { if(trip.dName) header += `*Driver Name:* ${trip.dName}\n`; if(trip.dContact) header += `*Driver Contact No:* ${trip.dContact}\n\n`; }
         
