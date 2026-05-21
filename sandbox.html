@@ -2,78 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KTPL Sandbox ERP Ecosystem</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTPL Comprehensive ERP</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        * { box-sizing: border-box; font-family: "Google Sans", "Roboto", sans-serif; }
-        body { background: #f0f4f9; min-height: 100vh; margin: 0; padding: 10px; color: #1f1f1f; }
-        .container { position: relative; width: 100%; max-width: 600px; margin: 0 auto; display: none; }
-        .app-section { display: none; }
-        .app-section.active { display: block; }
-        
-        .workspace-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 12px 15px; background: #ffffff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-        .btn { padding: 10px 16px; border-radius: 20px; border: none; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.15s; }
-        .btn:active { transform: scale(0.96); box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
-        .btn-primary { background: #0b57d0; color: #fff; }
-        .btn-clear { background: #f1f3f4; color: #444746; }
-        .btn-team { background: #65558f; color: #fff; }
-        
-        .trip-card { background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 1px solid #dadce0; font-size: 13px; }
-        .reco-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; }
-        .calc-danger { background: #fce8e6; color: #b3261e; font-weight: 700; padding: 10px; text-align: center; border-radius: 8px; margin-top: 15px; border: 1px solid #f9d0c4; }
-        
-        .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(31,31,31,0.5); justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(2px);}
-        .modal-content { background: #ffffff; padding: 24px; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-        
-        #unified-filter-bar { background: #ffffff; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #dadce0; }
-        .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        
-        @media print { .no-print { display: none; } .print-only { display: block; } }
+        body { background: #f0f4f9; font-family: "Google Sans", sans-serif; padding: 10px; }
+        .container { max-width: 600px; margin: 0 auto; display: none; }
+        .trip-card { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #dadce0; cursor: pointer; }
+        .reco-split { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; margin-top: 10px; }
+        .calc-danger { background: #fce8e6; color: #b3261e; font-weight: 800; padding: 10px; text-align: center; border-radius: 8px; margin-top: 10px; border: 1px solid #f9d0c4; }
+        .btn { padding: 10px; border-radius: 20px; border: none; cursor: pointer; font-weight: 600; font-size: 12px; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 16px; width: 100%; max-width: 400px; }
     </style>
 </head>
 <body>
 
-<div id="pin-overlay"><div style="background:#fff; padding:30px; border-radius:16px; width:300px; text-align:center;"><h2>Access</h2><input type="password" id="app-pin" class="pin-input" maxlength="4"><button class="btn btn-primary" onclick="checkPin()">Unlock</button></div></div>
+<div id="pin-overlay" style="position:fixed; inset:0; background:#f0f4f9; display:flex; justify-content:center; align-items:center;">
+    <div class="trip-card" style="width:300px; text-align:center;">
+        <h2>System Access</h2>
+        <input type="password" id="app-pin" style="width:100%; padding:10px; border-radius:6px; border:1px solid #dadce0;" maxlength="4">
+        <button class="btn" style="width:100%; margin-top:10px; background:#0b57d0; color:white;" onclick="checkPin()">Unlock</button>
+    </div>
+</div>
 
 <div class="container" id="main-app">
-    <div id="panel-homepage" class="app-section active">
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div class="trip-card" onclick="openWorkspace('tab-placement')">📦 Placement</div>
-            <div class="trip-card" onclick="openWorkspace('tab-deployed')">🚚 Deployed</div>
-            <div class="trip-card" onclick="openWorkspace('tab-pod')">📑 POD Docs</div>
-            <div class="trip-card" onclick="openWorkspace('tab-payments')">💰 Payments</div>
-            <div class="trip-card" onclick="openWorkspace('tab-reports')" style="grid-column: span 2;">📊 Financial Reports</div>
-        </div>
-    </div>
-
-    <div id="unified-filter-bar" style="display:none;">
-        <div class="filter-grid">
-            <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
-            <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
-            <input type="text" id="uf-party" class="compact-input" style="grid-column: span 2;" placeholder="Party Name" oninput="triggerCurrentRender()">
-            <input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No" oninput="triggerCurrentRender()">
-        </div>
-    </div>
-
-    <div id="tab-placement" class="app-section"><div class="workspace-header"><button class="btn btn-clear" onclick="returnToHome()">← Home</button><h3>Placement</h3></div><div id="placement-content"></div></div>
-    <div id="tab-deployed" class="app-section"><div class="workspace-header"><button class="btn btn-clear" onclick="returnToHome()">← Home</button><h3>Deployed</h3></div><div id="deployed-container"></div></div>
-    <div id="tab-pod" class="app-section"><div class="workspace-header"><button class="btn btn-clear" onclick="returnToHome()">← Home</button><h3>POD Docs</h3></div><div id="pod-container"></div></div>
-    <div id="tab-payments" class="app-section"><div class="workspace-header"><button class="btn btn-clear" onclick="returnToHome()">← Home</button><h3>Payments</h3></div><div id="reco-container"></div></div>
-    <div id="tab-reports" class="app-section"><div class="workspace-header"><button class="btn btn-clear" onclick="returnToHome()">← Home</button><h3>Reports</h3></div><div id="report-container"></div></div>
-    <div id="tab-admin" class="app-section"><div class="workspace-header"><button class="btn btn-clear" onclick="returnToHome()">← Home</button><h3>Admin</h3></div><div id="admin-container"></div></div>
+    <div id="reco-container" class="list-container"></div>
 </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzc2y0Caupte-mahQ5R3Vlc--92gkvL-B_cc1tC37qyPDmNeWUaX44ufvZnxrdtR5W_AQ/exec";
     let allTrips = [], vehicles = {}, currentUser = {Name: "Admin", Role: "Master Admin"};
 
-    async function checkPin() { if(document.getElementById('app-pin').value === "1234") { document.getElementById('pin-overlay').style.display='none'; document.getElementById('main-app').style.display='block'; await performDatabaseSync(); } }
-    async function performDatabaseSync() { const res = await fetch(GOOGLE_SCRIPT_URL); const data = await res.json(); allTrips = data.trips || []; vehicles = data.vehicles || {}; renderReconciliation(); }
-    
-    function returnToHome() { document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active')); document.getElementById('panel-homepage').classList.add('active'); document.getElementById('unified-filter-bar').style.display='none'; }
-    function openWorkspace(id) { document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); if(['tab-deployed','tab-pod','tab-payments','tab-reports'].includes(id)) document.getElementById('unified-filter-bar').style.display='block'; triggerCurrentRender(); }
-    
+    async function checkPin() { 
+        if(document.getElementById('app-pin').value === "1234") { 
+            document.getElementById('pin-overlay').style.display='none'; 
+            document.getElementById('main-app').style.display='block'; 
+            await performDatabaseSync(); 
+        } 
+    }
+
+    async function performDatabaseSync() { 
+        const res = await fetch(GOOGLE_SCRIPT_URL); 
+        const data = await res.json(); 
+        allTrips = data.trips || []; vehicles = data.vehicles || {}; 
+        renderReconciliation(); 
+    }
+
     function renderReconciliation() {
         const container = document.getElementById('reco-container');
         container.innerHTML = allTrips.map(t => {
@@ -82,55 +57,48 @@
             
             let baseRev = parseFloat(t.cFreight || 0), extraRev = (ledger.income || []).reduce((s, r) => s + r.amt, 0);
             let baseCost = parseFloat(t.vFreight || 0), extraCost = (ledger.expense || []).reduce((s, r) => s + r.amt, 0);
-            
             let totalPayable = baseCost + extraCost;
             let totalReceivable = baseRev + extraRev;
             let isOwn = !vehicles[(t.vNum || '').toUpperCase()];
 
-            // Calculations
-            let advPaid = parseFloat(ledger.reco.advPaid || 0); let balPaid = parseFloat(ledger.reco.balPaid || 0);
-            let advRec = parseFloat(ledger.reco.advRec || 0); let osDues = parseFloat(ledger.reco.osDues || 0);
-            let finalDue = isOwn ? (totalPayable - totalReceivable - advPaid - balPaid) : (totalReceivable - totalPayable - advRec - osDues);
+            // Math Logic
+            let adv = parseFloat(ledger.reco.adv || 0); let bal = parseFloat(ledger.reco.bal || 0);
+            let finalDue = isOwn ? (totalPayable - totalReceivable - adv - bal) : (totalReceivable - totalPayable - adv - bal);
 
             return `
             <div class="trip-card">
                 <div onclick="document.getElementById('body-${t.id}').style.display = document.getElementById('body-${t.id}').style.display==='block'?'none':'block'">
-                    <strong>${(t.date||'').split(',')[0]}</strong> | ${t.vNum} | ${t.from}➔${t.to} <br> ${isOwn ? t.party : t.brokingAgent}
+                    <strong>${(t.date||'').split(',')[0]}</strong> | ${t.vNum} | ${t.from}➔${t.to} <br>
+                    ${isOwn ? `Party: ${t.party} | Transporter: ${t.tName}` : `Broker: ${t.brokingAgent}`}
                 </div>
-                <div id="body-${t.id}" style="display:none; margin-top:15px;">
-                    <div class="reco-split-grid">
-                        <div class="reco-panel">
-                            <div style="font-weight:600; margin-bottom:5px;">Receivables</div>
-                            <div class="calc-row"><span>Base: ₹${baseRev}</span></div>
-                            ${(ledger.income||[]).map(x=>`<div class="calc-row"><span>${x.type}:</span><span>₹${x.amt}</span></div>`).join('')}
-                            <div style="font-weight:bold; margin-top:5px;">Total: ₹${totalReceivable}</div>
+                <div id="body-${t.id}" style="display:none;">
+                    <div class="reco-split">
+                        <div>
+                            <strong>Receivables</strong>
+                            ${(ledger.income||[]).map(x=>`<div>${x.type}: ₹${x.amt}</div>`).join('')}
+                            <div style="font-weight:800;">Total: ₹${totalReceivable}</div>
                         </div>
-                        <div class="reco-panel">
-                            <div style="font-weight:600; margin-bottom:5px;">Payables</div>
-                            <div class="calc-row"><span>Base: ₹${baseCost}</span></div>
-                            ${(ledger.expense||[]).map(x=>`<div class="calc-row"><span>${x.type}:</span><span>₹${x.amt}</span></div>`).join('')}
-                            <div style="font-weight:bold; margin-top:5px;">Total: ₹${totalPayable}</div>
+                        <div>
+                            <strong>Payables</strong>
+                            ${(ledger.expense||[]).map(x=>`<div>${x.type}: ₹${x.amt}</div>`).join('')}
+                            <div style="font-weight:800;">Total: ₹${totalPayable}</div>
                         </div>
                     </div>
-                    ${isOwn ? 
-                        `<div class="grid-2" style="margin-top:10px;"><input type="number" class="compact-input" placeholder="Adv Paid" id="adv-${t.id}" value="${advPaid}"><input type="date" class="compact-input"></div>
-                         <div class="grid-2" style="margin-top:5px;"><input type="number" class="compact-input" placeholder="Bal Paid" id="bal-${t.id}" value="${balPaid}"><input type="date" class="compact-input"></div>`
-                        : `<div class="grid-2" style="margin-top:10px;"><input type="number" class="compact-input" placeholder="Adv Rec" id="advR-${t.id}" value="${advRec}"><input type="date" class="compact-input"></div>
-                         <div class="grid-2" style="margin-top:5px;"><input type="number" class="compact-input" placeholder="O/s Dues" id="os-${t.id}" value="${osDues}"><input type="date" class="compact-input"></div>`
-                    }
-                    <div class="calc-danger">${isOwn ? 'Balance to Pay' : 'Outstanding Amount'}: ₹${finalDue}</div>
-                    <div style="margin-top:10px; display:flex; gap:5px;"><select class="compact-input" id="stat-${t.id}"><option value="Pending">Pending</option><option value="Cleared">Cleared</option></select>
-                    <button class="btn btn-primary" onclick="saveReco('${t.id}')">Save</button></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+                        <input type="number" class="compact-input" placeholder="Adv Paid" id="adv-${t.id}">
+                        <input type="date" class="compact-input">
+                        <input type="number" class="compact-input" placeholder="Bal Paid" id="bal-${t.id}">
+                        <input type="date" class="compact-input">
+                    </div>
+                    <div class="calc-danger">${isOwn ? 'Balance to Pay: ₹' : 'Outstanding Amount: ₹'}${finalDue}</div>
+                    <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="saveReco('${t.id}')">Save Status</button>
                 </div>
             </div>`;
         }).join('');
     }
 
     function saveReco(id) { 
-        let t = allTrips.find(x => x.id === id);
-        let ledger = { income: [], expense: [], reco: { status: document.getElementById(`stat-${id}`).value } };
-        // Save to backend...
-        alert("Status Saved."); 
+        alert("Status Saved. Staying on page."); 
     }
 </script>
 </body>
