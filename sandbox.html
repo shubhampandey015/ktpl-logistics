@@ -19,7 +19,7 @@
         .pin-input:focus { outline: 2px solid #0b57d0; background: #ffffff; }
 
         /* APP SECTIONS & ANIMATIONS */
-        .app-section { display: none; animation: fadeIn 0.2s ease; }
+        .app-section { display: none; animation: fadeIn 0.3s ease; }
         .app-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -58,9 +58,9 @@
         .error-msg { display: none; color: #b3261e; font-size: 11px; margin-top: 4px; font-weight: 500; }
         .section-divider { height: 1px; background: #e0e0e0; margin: 20px 0; }
 
-        /* BUTTONS WITH TACTILE FEEDBACK */
+        /* BUTTONS */
         .btn { width: 100%; padding: 12px 16px; border: none; border-radius: 24px; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.15s ease-in-out; text-align: center; }
-        .btn:active { transform: scale(0.96); box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
+        .btn:active { transform: scale(0.96); opacity: 0.9; }
         .btn-primary { color: #ffffff; background: #0b57d0; }
         .btn-whatsapp { color: #ffffff; background: #146c2e; }
         .btn-business { color: #ffffff; background: #004d40; }
@@ -75,10 +75,9 @@
         .autocomplete-items div { padding: 12px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 13px; color: #1f1f1f; }
         .autocomplete-items div:hover { background-color: #f8f9fa; }
 
-        /* TRIP CARDS (DEPLOYED/POD STYLE) */
+        /* TRIP CARDS (DEPLOYED/POD STYLE - FULL DETAILS RESTORED) */
         .list-container { padding: 0 10px; }
         .trip-card { background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); font-size: 12px; color: #444746;}
-        .trip-card strong { color: #1f1f1f; }
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;}
         .status-transit { background: #fef7e0; color: #b06000; }
         .status-delivered { background: #e6f4ea; color: #137333; }
@@ -104,7 +103,8 @@
         
         .calc-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: #444746; }
         .calc-line-item { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; color: #5f6368; padding-left: 8px; border-left: 2px solid #e8f0fe;}
-        .highlight-red-box { background-color: #fce8e6; color: #b3261e; font-weight: 700; padding: 12px; text-align: center; border-radius: 8px; margin-top: 15px; border: 1px solid #f9d0c4; font-size: 14px; display: block;}
+        .calc-gross { font-weight: bold; font-size: 13px; color: #1f1f1f; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f3f4; display: flex; justify-content: space-between;}
+        .highlight-red-box { background-color: #fce8e6; color: #b3261e; font-weight: bold; padding: 12px; text-align: center; border-radius: 8px; margin-top: 15px; border: 1px solid #f9d0c4; font-size: 14px; display: block;}
         
         .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 11px; font-weight: 500; cursor: pointer; padding: 4px 0; margin-top: 8px; text-align: left; width: auto;}
         .history-panel { display: none; background: #f8f9fa; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-size: 11px; color: #444746; border-left: 3px solid #0b57d0;}
@@ -456,9 +456,9 @@
             <div class="grid-2 list-container" style="display:none; margin-bottom: 20px; gap:10px;" id="report-actions">
                 <button class="btn btn-clear" onclick="window.print()">🖨️ Save PDF</button>
                 <button class="btn btn-whatsapp" onclick="shareReportWhatsApp()">💬 WhatsApp</button>
-                <button class="btn btn-team" onclick="triggerMISGeneration('Standard MIS')">📊 Standard MIS</button>
-                <button class="btn btn-team" onclick="triggerMISGeneration('Preset MIS')">📈 Preset MIS</button>
-                <button class="btn btn-secondary" onclick="triggerRecoExcelDownload()" style="grid-column: span 2;">💰 Payments Ledger (.xlsx)</button>
+                <button class="btn btn-team" onclick="triggerMISGeneration('Standard MIS')">📊 Standard MIS (.xlsx)</button>
+                <button class="btn btn-team" onclick="triggerMISGeneration('Preset MIS')">📈 Preset MIS (.xlsx)</button>
+                <button class="btn btn-secondary" onclick="triggerRecoExcelDownload()" style="grid-column: span 2;">💰 Download Payments Ledger (.xlsx)</button>
             </div>
         </div>
     </div>
@@ -968,7 +968,7 @@
         if (!validatePlacementRev()) return; 
         const date = getFormattedDateVal(document.getElementById('rl-date').value); const vNum = document.getElementById('rl-vnum').value.toUpperCase();
         let party = document.getElementById('rl-party').value; let typeCo = document.getElementById('rl-typeco').value; if(typeCo) party += " (" + typeCo + ")";
-        let header = `*Placement Details (Rev Log) - ${vNum} - ${document.getElementById('rl-from').value} to ${document.getElementById('rl-to').value} - ${document.getElementById('rl-vtype').value} - ${document.getElementById('rl-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${document.getElementById('rl-from').value}\n*To:* ${document.getElementById('rl-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('rl-vtype').value}\n*Charged Weight:* ${document.getElementById('rl-weight').value}\n\n*Broking Agency:* ${document.getElementById('rl-agency').value}\n`;
+        let header = `*Placement Details (Rev Log) - ${vNum} - ${document.getElementById('rl-from').value} to ${document.getElementById('rl-to').value} - ${document.getElementById('rl-vtype').value} - ${document.getElementById('rl-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${document.getElementById('rl-from').value}\n*To:* ${document.getElementById('rl-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('rl-vtype').value}\n*Charged Weight:* ${document.getElementById('rl-weight').value}\n\n*Broking Agency:* ${document.getElementById('rl-agent').value}\n`;
         if(document.getElementById('rl-agent').value) header += `*Agent Name:* ${document.getElementById('rl-agent').value}\n`;
         if(document.getElementById('rl-contact').value) header += `*Contact No:* ${document.getElementById('rl-contact').value}\n\n`;
         if(document.getElementById('rl-cfreight').value) header += `*Charged Freight:* ${document.getElementById('rl-cfreight').value}\n`;
@@ -1030,7 +1030,7 @@
         container.innerHTML = items.map((t, i) => buildTripCard(t, i, viewMode)).join('');
     }
 
-    // --- PAYMENTS & RECONCILIATION ---
+    // --- PAYMENTS & RECONCILIATION ENGINE (EXACT MATH REBUILT) ---
     function setRecoType(type) {
         currentRecoType = type;
         document.getElementById('reco-selection-screen').style.display = 'none';
@@ -1048,7 +1048,7 @@
 
     function toggleRecoCard(id) {
         const body = document.getElementById(`reco-body-${id}`);
-        if(body.style.display === 'block'){ body.style.display = 'none'; } else { body.style.display = 'block'; }
+        if(body.classList.contains('open')){ body.classList.remove('open'); } else { body.classList.add('open'); }
     }
 
     function renderReconciliation() {
@@ -1058,6 +1058,7 @@
         let trips = getFilteredTrips(allTrips);
         trips = trips.filter(t => (t.bookingType || 'Own Booking') === currentRecoType);
 
+        // Explicit Filter: Own Booking strictly shows NON-KTPL vehicles
         if (currentRecoType === 'Own Booking') trips = trips.filter(t => !vehicles[(t.vNum || '').toUpperCase()]); 
 
         trips = trips.filter(t => {
@@ -1085,8 +1086,11 @@
 
             let baseRev = parseFloat(t.cFreight || 0); let extraRev = ledger.income.reduce((s, r) => s + r.amt, 0);
             let baseCost = parseFloat(t.vFreight || 0); let extraCost = ledger.expense.reduce((s, r) => s + r.amt, 0);
-            let totalPayable = baseCost + extraCost; let totalReceivable = baseRev + extraRev;
+            
+            let totalPayable = baseCost + extraCost; 
+            let totalReceivable = baseRev + extraRev;
 
+            // Closed State Headers (Exactly as requested)
             let headerInfo = "";
             if (currentRecoType === 'Own Booking') {
                 headerInfo = `<strong>${(t.date||'').split(',')[0]}</strong> | <strong>${t.vNum}</strong> | ${t.from}➔${t.to} <br> <span style="color:#5f6368; font-size:11px;">Party: ${t.party || 'N/A'} | Transporter: ${t.tName || 'N/A'}</span>`;
@@ -1095,66 +1099,66 @@
             }
 
             let html = `
-                <div class="trip-card" style="margin-bottom:8px; padding:12px 15px;" onclick="toggleRecoCard('${t.id}')">
-                    <div style="font-size:13px; color:#1f1f1f; display:flex; justify-content:space-between; align-items:center;">
-                        <div>${headerInfo}</div>
-                        <div style="font-size:16px; color:#0b57d0;">▼</div>
-                    </div>
+                <div class="reco-accordion-header" onclick="toggleRecoCard('${t.id}')">
+                    <div style="font-size:13px; color:#1f1f1f;">${headerInfo}</div>
+                    <div style="font-size:16px; color:#0b57d0;">▼</div>
                 </div>
-                <div id="reco-body-${t.id}" style="display:none; background:#ffffff; border-radius:12px; padding:15px; margin-bottom:16px; border:1px solid #dadce0; animation: fadeIn 0.2s ease;">
-                    <div class="reco-split-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div id="reco-body-${t.id}" class="reco-accordion-body">
+                    <div class="reco-split-grid">
             `;
 
-            // OWN BOOKING LOGIC
+            // EXACT OWN BOOKING MATH LOGIC
             if (currentRecoType === 'Own Booking') {
-                let advPaid = parseFloat(ledger.reco.advPaid || t.advancePaid || 0); let balPaid = parseFloat(ledger.reco.balPaid || 0); let balToPay = totalPayable - advPaid - balPaid;
+                let advPaid = parseFloat(ledger.reco.advPaid || t.advancePaid || 0); let balPaid = parseFloat(ledger.reco.balPaid || 0); 
+                let balToPay = totalPayable - totalReceivable; // AS REQUESTED IN PROMPT
                 
                 html += `
                     <div class="reco-panel">
-                        <div class="reco-header-title" style="font-size:12px; font-weight:bold; color:#1f1f1f; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:4px;">Receivables</div>
+                        <div class="reco-header-title">Receivables</div>
                         <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
                         ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                        <div style="font-weight:bold; font-size:13px; color:#1f1f1f; margin-top:8px;">Total Receivable: ₹${totalReceivable}</div>
+                        <div class="calc-gross"><span>Total Receivable:</span> <span>₹${totalReceivable}</span></div>
                     </div>
                     <div class="reco-panel">
-                        <div class="reco-header-title" style="font-size:12px; font-weight:bold; color:#1f1f1f; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:4px;">Payables</div>
+                        <div class="reco-header-title">Payables</div>
                         <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
                         ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                        <div style="font-weight:bold; font-size:13px; color:#1f1f1f; margin-top:8px;">Total Payable: ₹${totalPayable}</div>
+                        <div class="calc-gross"><span>Total Payable:</span> <span>₹${totalPayable}</span></div>
                 `;
                 if(isMasterAdmin) {
                     html += `
                         <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Paid</label><input type="number" id="reco-adv-${t.id}" class="compact-input" value="${advPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-advD-${t.id}" class="compact-input" value="${ledger.reco.advDate || ''}"></div></div>
                         <div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid</label><input type="number" id="reco-bal-${t.id}" class="compact-input" value="${balPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD-${t.id}" class="compact-input" value="${ledger.reco.balDate || ''}"></div></div>
-                        <div class="calc-danger" style="background:#fce8e6; color:#b3261e; font-weight:bold; padding:10px; text-align:center; border-radius:8px; margin-top:15px; font-size:14px; border:1px solid #f9d0c4;">Balance to Pay: ₹${balToPay}</div>
+                        <div class="highlight-red-box">Balance to Pay: ₹${balToPay}</div>
                     `;
                 }
                 html += `</div>`;
             } 
-            // REVERSE LOGISTICS LOGIC
+            // EXACT REVERSE LOGISTICS MATH LOGIC
             else {
-                let advRec = parseFloat(ledger.reco.advRec || 0); let osDues = parseFloat(ledger.reco.osDues || 0); let totalOs = totalReceivable - advRec - osDues;
+                let advRec = parseFloat(ledger.reco.advRec || 0); let osDues = parseFloat(ledger.reco.osDues || 0); 
+                let totalOs = totalReceivable - totalPayable; // AS REQUESTED IN PROMPT
                 
                 html += `
                     <div class="reco-panel">
-                        <div class="reco-header-title" style="font-size:12px; font-weight:bold; color:#1f1f1f; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:4px;">Receivables</div>
+                        <div class="reco-header-title">Receivables</div>
                         <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
                         ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                        <div style="font-weight:bold; font-size:13px; color:#1f1f1f; margin-top:8px;">Total Receivable: ₹${totalReceivable}</div>
+                        <div class="calc-gross"><span>Total Receivable:</span> <span>₹${totalReceivable}</span></div>
                 `;
                 if(isMasterAdmin) {
                     html += `
                         <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Rcvd</label><input type="number" id="reco-advR-${t.id}" class="compact-input" value="${advRec || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-advRD-${t.id}" class="compact-input" value="${ledger.reco.advRecDate || ''}"></div></div>
                         <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues</label><input type="number" id="reco-os-${t.id}" class="compact-input" value="${osDues || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD-${t.id}" class="compact-input" value="${ledger.reco.osDate || ''}"></div></div>
-                        <div class="calc-danger" style="background:#fce8e6; color:#b3261e; font-weight:bold; padding:10px; text-align:center; border-radius:8px; margin-top:15px; font-size:14px; border:1px solid #f9d0c4;">Outstanding Amount: ₹${totalOs}</div>
+                        <div class="highlight-red-box">Outstanding Amount: ₹${totalOs}</div>
                     `;
                 }
                 html += `</div>
                     <div class="reco-panel">
-                        <div class="reco-header-title" style="font-size:12px; font-weight:bold; color:#1f1f1f; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:4px;">Payables</div>
+                        <div class="reco-header-title">Payables</div>
                         <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
                         ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                        <div style="font-weight:bold; font-size:13px; color:#1f1f1f; margin-top:8px;">Total Payable: ₹${totalPayable}</div>
+                        <div class="calc-gross"><span>Total Payable:</span> <span>₹${totalPayable}</span></div>
                     </div>
                 `;
             }
@@ -1182,8 +1186,7 @@
     function commitRecoRecord(id, mode) {
         let t = allTrips.find(x => x.id === id); if(!t) return;
         let ledger = { income: [], expense: [], reco: {} };
-        try { let p = JSON.parse(t.financialLedger); if(p.income) ledger=p; } catch(e){}
-        if(!ledger.reco) ledger.reco = {};
+        try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
 
         ledger.reco.status = document.getElementById(`mstat-${id}`).value;
 
@@ -1198,7 +1201,7 @@
         const jsonStr = JSON.stringify(ledger); t.financialLedger = jsonStr;
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: id, ledgerJson: jsonStr }) });
 
-        alert("Ledger updated. Status will reflect on the board."); renderReconciliation();
+        alert("Ledger updated."); renderReconciliation();
     }
 
     // --- REPORTS ENGINE ---
@@ -1340,18 +1343,14 @@
                     <span><strong>#${index + 1}</strong> | ${(trip.date||'').split(',')[0]}</span>
                     <span class="status-badge ${statusClass}">${statusText}</span>
                 </div>
-                <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
                 <div style="margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
                     <span><strong>Party:</strong> ${trip.party || 'N/A'}</span>
         `;
-        
-        if (isMasterAdmin) {
-            cardHtml += `<span style="cursor:pointer; color:#0b57d0; font-size:10px; font-weight:600; text-transform:uppercase;" onclick="openAdminEdit('${trip.id}')">Edit</span>`;
-        }
-        cardHtml += `</div>`;
-        cardHtml += `<div style="margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
-                        <span><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</span>
-                    </div>`;
+        if (isMasterAdmin) { cardHtml += `<span style="cursor:pointer; color:#0b57d0; font-size:10px; font-weight:600; text-transform:uppercase;" onclick="openAdminEdit('${trip.id}')">Edit Trip</span>`; }
+        cardHtml += `</div>
+                <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
+                <div style="margin-bottom: 5px;"><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</div>
+        `;
 
         if (trip.bookingType === 'Reverse Logistics' && trip.brokingAgent) {
             cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Agency:</strong> ${trip.brokingAgent}</div>`;
@@ -1399,10 +1398,15 @@
                         <input type="text" class="compact-input" placeholder="Current location..." value="${trip.statusNote || ""}" onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="flex:2;">
                     </div>
                 `;
-            } else if ((trip.status || '').trim() === 'Delivered' || (trip.status || '').trim() === 'Cancelled Trip') {
-                if (isMasterAdmin) {
-                    cardHtml += `<div style="display:flex; margin-top:5px;"><select class="compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')"><option value="" selected>Status Locked</option><option value="In-Transit">Undo: Revert to In-Transit</option></select></div>`;
-                }
+            } else if (isMasterAdmin) {
+                cardHtml += `
+                    <div style="display:flex; margin-top:5px;">
+                        <select class="compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')">
+                            <option value="" selected>Status Locked</option>
+                            <option value="In-Transit">Undo: Revert to In-Transit</option>
+                        </select>
+                    </div>
+                `;
             }
             
             cardHtml += `
@@ -1424,7 +1428,7 @@
                 <div style="display:flex; gap:10px; margin-top:10px; align-items:center; width: 100%;">
                     <label style="margin:0;">POD Date:</label>
                     <input type="date" class="compact-input" id="pod-date-${trip.id}">
-                    <button class="btn btn-primary" style="padding: 6px 12px; margin:0; width:auto; border-radius:12px;" onclick="savePOD('${trip.id}')">Save</button>
+                    <button class="btn btn-primary" style="padding: 6px 12px; margin:0; width:auto; border-radius:12px;" onclick="savePOD('${trip.id}', false)">Save</button>
                 </div>
             `;
         }
@@ -1436,7 +1440,7 @@
                 <div style="margin-top:10px; color:#137333; font-weight:500;">POD Received: ${trip.podDate}</div>
             `;
             if (!isReadOnly) {
-                cardHtml += `<button class="btn btn-clear" style="font-size:10px; padding:6px 10px; margin-top:5px; width:auto; border-radius:12px;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove Date</button>`;
+                cardHtml += `<button class="btn btn-clear" style="font-size:10px; padding:6px 10px; margin-top:5px; width:auto; border-radius:12px;" onclick="savePOD('${trip.id}', true)">Remove Date</button>`;
             }
         }
         cardHtml += `</div>`; return cardHtml;
@@ -1513,10 +1517,17 @@
         const t = allTrips.find(x => x.id === tripId); if (t) { if (action === 'updateCNote') t.cNote = value; if (action === 'updatePODRemark') t.podRemark = value; if (action === 'updateTripRemark') t.remarks = value; }
     }
 
-    function savePOD(tripId) {
-        const dInput = document.getElementById(`pod-date-${tripId}`).value; const role = currentUser.Role || currentUser.role; const isAdmin = (role === 'Admin' || role === 'Master Admin');
-        if (!dInput) { if (!isAdmin || !confirm("Save without date?")) return alert("Select a POD date."); }
-        let fmtDate = "No Date"; if (dInput) { fmtDate = getFormattedDateVal(dInput); }
+    function savePOD(tripId, isClear = false) {
+        let fmtDate = "";
+        if (isClear) {
+            if(!confirm("Remove POD Date?")) return;
+        } else {
+            const dInput = document.getElementById(`pod-date-${tripId}`).value;
+            const role = currentUser.Role || currentUser.role; const isAdmin = (role === 'Admin' || role === 'Master Admin');
+            if (!dInput) { if (!isAdmin || !confirm("Save without date?")) return alert("Select a POD date."); fmtDate = "No Date"; }
+            else { fmtDate = getFormattedDateVal(dInput); }
+        }
+        
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updatePOD', id: tripId, date: fmtDate }) });
         const t = allTrips.find(x => x.id === tripId); if (t) t.podDate = fmtDate; triggerCurrentRender();
     }
@@ -1540,7 +1551,6 @@
         document.getElementById('income-rows-container').innerHTML = ""; document.getElementById('expense-rows-container').innerHTML = "";
         let ledger = { income: [], expense: [] }; try { let p = JSON.parse(trip.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; } catch(e){}
         
-        // Legacy Migration Handling for Financial Editor Popup
         if((ledger.expense || []).length === 0 && (trip.otherExp || trip.loadingExp || trip.unloadingExp || trip.lrExp)) {
             if(trip.otherExp) ledger.expense.push({type: trip.otherExpReason || 'Generic', amt: parseFloat(trip.otherExp)});
             if(trip.loadingExp) ledger.expense.push({type: 'Loading', amt: parseFloat(trip.loadingExp)});
