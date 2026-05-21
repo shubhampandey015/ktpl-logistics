@@ -26,20 +26,22 @@
         /* HOMEPAGE GRID */
         .homepage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 10px; }
         .menu-card { background: #ffffff; border-radius: 16px; padding: 20px 15px; cursor: pointer; transition: 0.15s ease-in-out; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; border: 1px solid transparent; }
-        .menu-card:active { transform: scale(0.94); background: #f8f9fa; border: 1px solid #d3e3fd; }
+        .menu-card:active { transform: scale(0.95); background: #f8f9fa; border: 1px solid #d3e3fd; }
         .menu-icon { font-size: 24px; margin-bottom: 12px; background: #e8f0fe; width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
         .menu-card h3 { margin: 0; font-size: 14px; font-weight: 500; color: #1f1f1f; }
         .menu-card p { margin: 4px 0 0 0; font-size: 11px; color: #5f6368; line-height: 1.3;}
 
         /* HEADERS */
         .workspace-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 12px 15px; background: #ffffff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-left: 10px; margin-right: 10px; }
+        .btn-back-home { background: #f1f3f4; border: none; color: #444746; font-size: 13px; font-weight: 500; cursor: pointer; padding: 6px 12px; border-radius: 20px; transition: 0.2s;}
+        .btn-back-home:active { transform: scale(0.95); background: #e3e3e3;}
         .workspace-title { font-size: 15px; font-weight: 500; color: #1f1f1f; margin: 0; }
 
         /* TABS (SUB & FLOW) */
         .sub-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 10px; }
         .sub-tabs::-webkit-scrollbar { display: none; }
-        .sub-tab { flex: 1 0 auto; text-align: center; padding: 10px 12px; cursor: pointer; font-size: 13px; font-weight: 500; border-radius: 20px; background: #ffffff; color: #444746; border: 1px solid #dadce0; transition: 0.1s ease-in-out; }
-        .sub-tab:active { transform: scale(0.92); }
+        .sub-tab { flex: 1 0 auto; text-align: center; padding: 10px 12px; cursor: pointer; font-size: 13px; font-weight: 500; border-radius: 20px; background: #ffffff; color: #444746; border: 1px solid #dadce0; transition: 0.15s ease-in-out; }
+        .sub-tab:active { transform: scale(0.95); }
         .sub-tab.active { background: #0b57d0; color: #ffffff; border-color: #0b57d0; }
 
         /* FORMS & INPUTS */
@@ -57,8 +59,8 @@
         .section-divider { height: 1px; background: #e0e0e0; margin: 20px 0; }
 
         /* BUTTONS WITH TACTILE FEEDBACK */
-        .btn { width: 100%; padding: 12px 16px; border: none; border-radius: 24px; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.1s ease-in-out; text-align: center; }
-        .btn:active { transform: scale(0.92); opacity: 0.9; }
+        .btn { width: 100%; padding: 12px 16px; border: none; border-radius: 24px; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.15s ease-in-out; text-align: center; }
+        .btn:active { transform: scale(0.96); box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
         .btn-primary { color: #ffffff; background: #0b57d0; }
         .btn-whatsapp { color: #ffffff; background: #146c2e; }
         .btn-business { color: #ffffff; background: #004d40; }
@@ -66,8 +68,6 @@
         .btn-clear { background: #f1f3f4; color: #444746; }
         .btn-danger { color: #ffffff; background: #b3261e; }
         .btn-secondary { background: #e8f0fe; color: #0b57d0; }
-        .btn-back-home { background: #f1f3f4; border: none; color: #444746; font-size: 13px; font-weight: 500; cursor: pointer; padding: 6px 12px; border-radius: 20px; transition: 0.1s;}
-        .btn-back-home:active { transform: scale(0.92); background: #e3e3e3;}
 
         /* AUTOCOMPLETE */
         .autocomplete { position: relative; display: block; text-align: left; width: 100%; }
@@ -75,7 +75,7 @@
         .autocomplete-items div { padding: 12px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 13px; color: #1f1f1f; }
         .autocomplete-items div:hover { background-color: #f8f9fa; }
 
-        /* TRIP CARDS */
+        /* TRIP CARDS (DEPLOYED/POD STYLE) */
         .list-container { padding: 0 10px; }
         .trip-card { background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); font-size: 12px; color: #444746;}
         .trip-card strong { color: #1f1f1f; }
@@ -104,7 +104,7 @@
         
         .calc-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: #444746; }
         .calc-line-item { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; color: #5f6368; padding-left: 8px; border-left: 2px solid #e8f0fe;}
-        .highlight-red-box { background-color: #fce8e6; color: #b3261e; font-weight: 600; padding: 12px; text-align: center; border-radius: 8px; margin-top: 15px; border: 1px solid #f9d0c4; font-size: 14px; }
+        .highlight-red-box { background-color: #fce8e6; color: #b3261e; font-weight: 700; padding: 12px; text-align: center; border-radius: 8px; margin-top: 15px; border: 1px solid #f9d0c4; font-size: 14px; display: block;}
         
         .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 11px; font-weight: 500; cursor: pointer; padding: 4px 0; margin-top: 8px; text-align: left; width: auto;}
         .history-panel { display: none; background: #f8f9fa; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-size: 11px; color: #444746; border-left: 3px solid #0b57d0;}
@@ -113,6 +113,7 @@
         /* MODALS */
         .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(31,31,31,0.5); justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(2px);}
         .modal-content { background: #ffffff; padding: 24px; border-radius: 16px; width: 100%; max-width: 380px; max-height: 90vh; overflow-y: auto; text-align: left; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+        .financial-row { display: grid; grid-template-columns: 2fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
 
         /* REPORTS TABLE */
         .screen-report-container { overflow-x: auto; background: #ffffff; border-radius: 12px; margin: 0 10px 15px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); -webkit-overflow-scrolling: touch;}
@@ -204,20 +205,22 @@
         </div>
     </div>
 
-    <div id="unified-filter-bar">
-        <div class="filter-header">
-            Global Search Filter 
-            <span style="color:#0b57d0; cursor:pointer; font-size:10px; background:#e8f0fe; padding:4px 8px; border-radius:12px;" onclick="clearFilters()">Reset Filters</span>
-        </div>
-        <div class="filter-grid">
-            <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
-            <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
-            <div class="autocomplete" style="grid-column: span 2;"><input type="text" id="uf-party" class="compact-input" placeholder="Search Party / Client Name..." oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerCurrentRender()"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerCurrentRender()"><div id="uf-origin-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerCurrentRender()"><div id="uf-dest-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete" style="grid-column: span 2;"><input type="text" id="uf-vcap" class="compact-input" placeholder="Capacity Weight" oninput="triggerCurrentRender()"><div id="uf-vcap-list" class="autocomplete-items"></div></div>
+    <div id="unified-filter-bar" style="display:none; padding: 0 10px; margin-bottom:15px;">
+        <div class="form-card" style="margin:0; padding:15px;">
+            <div style="font-size: 11px; font-weight: 600; color: #1f1f1f; margin-bottom: 10px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;">
+                Global Search Filter 
+                <span style="color:#0b57d0; cursor:pointer; font-size:10px; background:#e8f0fe; padding:4px 8px; border-radius:12px;" onclick="clearFilters()">Reset Filters</span>
+            </div>
+            <div class="filter-grid">
+                <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
+                <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
+                <div class="autocomplete" style="grid-column: span 2;"><input type="text" id="uf-party" class="compact-input" placeholder="Search Party / Client Name..." oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerCurrentRender()"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerCurrentRender()"><div id="uf-origin-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerCurrentRender()"><div id="uf-dest-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete" style="grid-column: span 2;"><input type="text" id="uf-vcap" class="compact-input" placeholder="Capacity Weight" oninput="triggerCurrentRender()"><div id="uf-vcap-list" class="autocomplete-items"></div></div>
+            </div>
         </div>
     </div>
 
@@ -273,9 +276,9 @@
                 
                 <div class="grid-2" style="margin-top:20px; gap:10px;">
                     <button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button>
-                    <button class="btn btn-primary" onclick="savePlacementOwn()">Save Entry</button>
-                    <button class="btn btn-team" onclick="generatePlacementMessageOwn('team')">Share For Team</button>
-                    <button class="btn btn-whatsapp" onclick="generatePlacementMessageOwn('client')">Share For Client</button>
+                    <button class="btn btn-primary" onclick="savePlacementOwn()">Save Details</button>
+                    <button class="btn btn-team" onclick="generatePlacementMessageOwn('team')">For Team</button>
+                    <button class="btn btn-whatsapp" onclick="generatePlacementMessageOwn('client')">For Client</button>
                 </div>
             </div>
 
@@ -312,7 +315,7 @@
                 
                 <div class="grid-2" style="margin-top:20px; gap:10px;">
                     <button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button>
-                    <button class="btn btn-primary" onclick="savePlacementRev()">Save Entry</button>
+                    <button class="btn btn-primary" onclick="savePlacementRev()">Save Details</button>
                     <button class="btn btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">Share For Team</button>
                 </div>
             </div>
@@ -422,6 +425,10 @@
                 <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600; background:#fce8e6; padding:4px 8px; border-radius:12px;" onclick="showSelectionScreen('report')">Change Category</span>
             </div>
             <div class="form-card" style="padding:15px; margin-bottom:15px;">
+                <div class="form-group autocomplete" style="margin-top:0; margin-bottom:15px;">
+                    <label>Filter by Party Name <span class="required-star">*</span> (Required for MIS)</label>
+                    <input type="text" id="rf-party" class="compact-input" placeholder="Type Client Profile..." onchange="formatCase(this, 'title')"><div id="rf-party-list" class="autocomplete-items"></div>
+                </div>
                 <div class="grid-2">
                     <div>
                         <label>Trip Status:</label>
@@ -449,9 +456,9 @@
             <div class="grid-2 list-container" style="display:none; margin-bottom: 20px; gap:10px;" id="report-actions">
                 <button class="btn btn-clear" onclick="window.print()">🖨️ Save PDF</button>
                 <button class="btn btn-whatsapp" onclick="shareReportWhatsApp()">💬 WhatsApp</button>
-                <button class="btn btn-team" onclick="triggerMISGeneration('Standard MIS')">📊 Standard MIS (.xlsx)</button>
-                <button class="btn btn-team" onclick="triggerMISGeneration('Preset MIS')">📈 Preset MIS (.xlsx)</button>
-                <button class="btn btn-secondary" onclick="triggerRecoExcelDownload()" style="grid-column: span 2;">💰 Download Payments Ledger (.xlsx)</button>
+                <button class="btn btn-team" onclick="triggerMISGeneration('Standard MIS')">📊 Standard MIS</button>
+                <button class="btn btn-team" onclick="triggerMISGeneration('Preset MIS')">📈 Preset MIS</button>
+                <button class="btn btn-secondary" onclick="triggerRecoExcelDownload()" style="grid-column: span 2;">💰 Payments Ledger (.xlsx)</button>
             </div>
         </div>
     </div>
@@ -612,7 +619,7 @@
     let pendingWhatsAppMsg = ""; 
     let currentReportTrips = [];
 
-    // --- UTILITIES ---
+    // --- UTILITIES (WITH OPTIONAL CHAINING SAFEGUARDS) ---
     function getSafeTel(num) {
         if (!num) return ''; let c = String(num).replace(/[\s-]/g, '').trim();
         if (c.startsWith('+')) return c; if (c.startsWith('91') && c.length > 10) return '+' + c; return '+91' + c;
@@ -654,6 +661,7 @@
             url = `whatsapp://send?text=${encodedMsg}`;
             window.location.href = url;
         } else {
+            // DESKTOP MAC/PC DIRECT NATIVE APP
             url = `whatsapp://send?text=${encodedMsg}`;
             window.open(url, '_self');
         }
@@ -826,6 +834,7 @@
         triggerCurrentRender();
     }
 
+    // --- BULLETPROOF FILTERING (NO SILENT CRASHES) ---
     function getFilteredTrips(baseTrips) {
         let result = [...baseTrips];
         const role = currentUser.Role || currentUser.role;
@@ -893,7 +902,7 @@
     }
 
     function validatePlacementRev() {
-        let isValid = true; let req = ['rl-date', 'rl-from', 'rl-to', 'rl-vnum', 'rl-vtype', 'rl-weight', 'rl-agency'];
+        let isValid = true; let req = ['rl-date', 'rl-agent', 'rl-from', 'rl-to', 'rl-vnum', 'rl-vtype', 'rl-weight'];
         document.querySelectorAll('input').forEach(input => input.style.borderColor = 'transparent');
         req.forEach(id => { const el = document.getElementById(id); if (el && !el.value.trim()) { el.style.borderColor = '#b3261e'; isValid = false; }});
         if (!isValid) alert("Please fill in all mandatory fields (*)."); return isValid;
@@ -925,7 +934,7 @@
             action: 'saveTrip', id: "TRP-" + Date.now(), date: getFormattedDateVal(document.getElementById('rl-date').value), party: party || "", 
             from: document.getElementById('rl-from').value, to: document.getElementById('rl-to').value, vNum: vNum, vType: document.getElementById('rl-vtype').value, weight: document.getElementById('rl-weight').value,
             createdBy: currentUser.Name || currentUser.name || "Unknown", vFreight: "", cFreight: document.getElementById('rl-cfreight').value || "", dName: "", dContact: "", tName: "", 
-            tPerson: document.getElementById('rl-agent').value, tContact: formatPhoneString(document.getElementById('rl-contact').value), remarks: document.getElementById('rl-remarks').value, bookingType: 'Reverse Logistics', brokingAgent: document.getElementById('rl-agency').value
+            tPerson: document.getElementById('rl-agent').value, tContact: formatPhoneString(document.getElementById('rl-contact').value), remarks: document.getElementById('rl-remarks').value, bookingType: 'Reverse Logistics', brokingAgent: document.getElementById('rl-agent').value
         };
         finalizePlacementSave(payload);
     }
@@ -1039,7 +1048,7 @@
 
     function toggleRecoCard(id) {
         const body = document.getElementById(`reco-body-${id}`);
-        if(body.classList.contains('open')){ body.classList.remove('open'); } else { body.classList.add('open'); }
+        if(body.style.display === 'block'){ body.style.display = 'none'; } else { body.style.display = 'block'; }
     }
 
     function renderReconciliation() {
@@ -1086,12 +1095,14 @@
             }
 
             let html = `
-                <div class="reco-accordion-header" onclick="toggleRecoCard('${t.id}')">
-                    <div style="font-size:13px; color:#1f1f1f;">${headerInfo}</div>
-                    <div style="font-size:16px; color:#0b57d0;">▼</div>
+                <div class="trip-card" style="margin-bottom:8px; padding:12px 15px;" onclick="toggleRecoCard('${t.id}')">
+                    <div style="font-size:13px; color:#1f1f1f; display:flex; justify-content:space-between; align-items:center;">
+                        <div>${headerInfo}</div>
+                        <div style="font-size:16px; color:#0b57d0;">▼</div>
+                    </div>
                 </div>
-                <div id="reco-body-${t.id}" class="reco-accordion-body">
-                    <div class="reco-split-grid">
+                <div id="reco-body-${t.id}" style="display:none; background:#ffffff; border-radius:12px; padding:15px; margin-bottom:16px; border:1px solid #dadce0; animation: fadeIn 0.2s ease;">
+                    <div class="reco-split-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
             `;
 
             // OWN BOOKING LOGIC
@@ -1100,20 +1111,22 @@
                 
                 html += `
                     <div class="reco-panel">
-                        <div class="reco-header-title">Receivables</div>
-                        <div style="font-size:11px; color:#5f6368; margin-bottom:10px;">Base: ₹${baseRev} | Add.: ₹${extraRev}</div>
+                        <div class="reco-header-title" style="font-size:12px; font-weight:bold; color:#1f1f1f; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:4px;">Receivables</div>
+                        <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
                         ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                        <div style="font-weight:bold; font-size:13px; color:#1f1f1f; margin-top:8px;">Total Receivable: ₹${totalReceivable}</div>
                     </div>
                     <div class="reco-panel">
-                        <div class="reco-header-title">Payables <span style="color:#1f1f1f;">₹${totalPayable}</span></div>
-                        <div style="font-size:11px; color:#5f6368; margin-bottom:10px;">Base: ₹${baseCost} | Add.: ₹${extraCost}</div>
+                        <div class="reco-header-title" style="font-size:12px; font-weight:bold; color:#1f1f1f; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:4px;">Payables</div>
+                        <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
                         ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                        <div style="font-weight:bold; font-size:13px; color:#1f1f1f; margin-top:8px;">Total Payable: ₹${totalPayable}</div>
                 `;
                 if(isMasterAdmin) {
                     html += `
                         <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Paid</label><input type="number" id="reco-adv-${t.id}" class="compact-input" value="${advPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-advD-${t.id}" class="compact-input" value="${ledger.reco.advDate || ''}"></div></div>
                         <div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid</label><input type="number" id="reco-bal-${t.id}" class="compact-input" value="${balPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD-${t.id}" class="compact-input" value="${ledger.reco.balDate || ''}"></div></div>
-                        <div class="calc-danger">Balance to Pay: ₹${balToPay}</div>
+                        <div class="calc-danger" style="background:#fce8e6; color:#b3261e; font-weight:bold; padding:10px; text-align:center; border-radius:8px; margin-top:15px; font-size:14px; border:1px solid #f9d0c4;">Balance to Pay: ₹${balToPay}</div>
                     `;
                 }
                 html += `</div>`;
@@ -1121,48 +1134,42 @@
             // REVERSE LOGISTICS LOGIC
             else {
                 let advRec = parseFloat(ledger.reco.advRec || 0); let osDues = parseFloat(ledger.reco.osDues || 0); let totalOs = totalReceivable - advRec - osDues;
-                let advPaid = parseFloat(ledger.reco.advPaid || t.advancePaid || 0); let balPaid = parseFloat(ledger.reco.balPaid || 0); let balToPay = totalPayable - advPaid - balPaid;
-
+                
                 html += `
                     <div class="reco-panel">
-                        <div class="reco-header-title">Receivables <span style="color:#1f1f1f;">₹${totalReceivable}</span></div>
-                        <div style="font-size:11px; color:#5f6368; margin-bottom:10px;">Base: ₹${baseRev} | Add.: ₹${extraRev}</div>
+                        <div class="reco-header-title" style="font-size:12px; font-weight:bold; color:#1f1f1f; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:4px;">Receivables</div>
+                        <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
                         ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                        <div style="font-weight:bold; font-size:13px; color:#1f1f1f; margin-top:8px;">Total Receivable: ₹${totalReceivable}</div>
                 `;
                 if(isMasterAdmin) {
                     html += `
                         <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Rcvd</label><input type="number" id="reco-advR-${t.id}" class="compact-input" value="${advRec || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-advRD-${t.id}" class="compact-input" value="${ledger.reco.advRecDate || ''}"></div></div>
                         <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues</label><input type="number" id="reco-os-${t.id}" class="compact-input" value="${osDues || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD-${t.id}" class="compact-input" value="${ledger.reco.osDate || ''}"></div></div>
-                        <div class="calc-danger">Outstanding Amount: ₹${totalOs}</div>
+                        <div class="calc-danger" style="background:#fce8e6; color:#b3261e; font-weight:bold; padding:10px; text-align:center; border-radius:8px; margin-top:15px; font-size:14px; border:1px solid #f9d0c4;">Outstanding Amount: ₹${totalOs}</div>
                     `;
                 }
                 html += `</div>
                     <div class="reco-panel">
-                        <div class="reco-header-title">Payables <span style="color:#1f1f1f;">₹${totalPayable}</span></div>
-                        <div style="font-size:11px; color:#5f6368; margin-bottom:10px;">Base: ₹${baseCost} | Add.: ₹${extraCost}</div>
+                        <div class="reco-header-title" style="font-size:12px; font-weight:bold; color:#1f1f1f; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:4px;">Payables</div>
+                        <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
                         ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                        <div style="font-weight:bold; font-size:13px; color:#1f1f1f; margin-top:8px;">Total Payable: ₹${totalPayable}</div>
+                    </div>
                 `;
-                if(isMasterAdmin) {
-                    html += `
-                        <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Paid</label><input type="number" id="reco-adv-${t.id}" class="compact-input" value="${advPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-advD-${t.id}" class="compact-input" value="${ledger.reco.advDate || ''}"></div></div>
-                        <div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid</label><input type="number" id="reco-bal-${t.id}" class="compact-input" value="${balPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD-${t.id}" class="compact-input" value="${ledger.reco.balDate || ''}"></div></div>
-                        <div class="calc-danger">Balance to Pay: ₹${balToPay}</div>
-                    `;
-                }
-                html += `</div>`;
             }
 
             html += `</div>`; 
             if(isMasterAdmin) {
                 html += `
                     <div style="border-top: 1px solid #f1f3f4; margin-top:15px; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
-                        <button class="btn btn-clear" style="padding:8px 12px; font-size:11px; width:auto; border-radius:12px; font-weight:600;" onclick="openFinancialAllocation('${t.id}')">💰 Edit Extra Financials</button>
-                        <div style="display:flex; gap:8px; align-items:center;">
-                            <select id="mstat-${t.id}" class="compact-input" style="width:110px; margin:0;">
+                        <button class="btn btn-clear" style="padding:8px 12px; font-size:11px; width:auto; border-radius:12px;" onclick="openFinancialAllocation('${t.id}')">💰 Edit Extra Financials</button>
+                        <div style="display:flex; gap:8px;">
+                            <select id="mstat-${t.id}" class="compact-input" style="width:110px;">
                                 <option value="Pending" ${ledger.reco.status!=='Cleared'?'selected':''}>Pending</option>
                                 <option value="Cleared" ${ledger.reco.status==='Cleared'?'selected':''}>Cleared</option>
                             </select>
-                            <button class="btn btn-primary" style="padding:8px 16px; font-size:11px; width:auto; border-radius:12px; margin:0;" onclick="commitRecoRecord('${t.id}', '${currentRecoType}')">Save Status</button>
+                            <button class="btn btn-primary" style="padding:8px 16px; font-size:11px; width:auto; border-radius:12px;" onclick="commitRecoRecord('${t.id}', '${currentRecoType}')">Save</button>
                         </div>
                     </div>
                 `;
@@ -1175,8 +1182,9 @@
     function commitRecoRecord(id, mode) {
         let t = allTrips.find(x => x.id === id); if(!t) return;
         let ledger = { income: [], expense: [], reco: {} };
-        try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
-        
+        try { let p = JSON.parse(t.financialLedger); if(p.income) ledger=p; } catch(e){}
+        if(!ledger.reco) ledger.reco = {};
+
         ledger.reco.status = document.getElementById(`mstat-${id}`).value;
 
         if (mode === 'Own Booking') {
@@ -1185,8 +1193,6 @@
         } else {
             ledger.reco.advRec = document.getElementById(`reco-advR-${id}`).value; ledger.reco.advRecDate = document.getElementById(`reco-advRD-${id}`).value;
             ledger.reco.osDues = document.getElementById(`reco-os-${id}`).value; ledger.reco.osDate = document.getElementById(`reco-osD-${id}`).value;
-            ledger.reco.advPaid = document.getElementById(`reco-adv-${id}`).value; ledger.reco.advDate = document.getElementById(`reco-advD-${id}`).value;
-            ledger.reco.balPaid = document.getElementById(`reco-bal-${id}`).value; ledger.reco.balDate = document.getElementById(`reco-balD-${id}`).value;
         }
 
         const jsonStr = JSON.stringify(ledger); t.financialLedger = jsonStr;
@@ -1226,6 +1232,7 @@
         const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']; const dayStr = days[today.getDay()];
 
+        // 1. SCREEN UI GENERATION
         let screenHtml = `<table class="report-table"><thead><tr><th>Sr No</th><th>Type</th><th>Party Name</th><th>Date</th><th>Route</th><th>Vehicle</th><th>Status</th><th>C-Note</th><th>POD Date</th><th>Remarks</th></tr></thead><tbody>`;
         finalTrips.forEach((t, i) => {
             let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
@@ -1233,6 +1240,7 @@
         });
         screenHtml += `</tbody></table>`; screenContainer.innerHTML = screenHtml;
 
+        // 2. PRINT PDF GENERATION
         const uniqueParties = [...new Set(finalTrips.map(t => t.party || 'Unknown'))];
         let printHtml = `<div class="print-header"><h2>Data Report as on ${dateStr}, ${dayStr} - ${currentReportType}</h2></div><div class="party-table-wrapper"><table class="print-table"><thead><tr><th style="width:15%;">Party Name</th><th style="width:5%; text-align:center;">Sr</th><th style="width:10%;">Date</th><th style="width:15%;">Route</th><th style="width:15%;">Vehicle</th><th style="width:10%;">Status</th><th style="width:10%;">C-Note</th><th style="width:10%;">POD Date</th><th style="width:10%;">Remarks</th></tr></thead><tbody>`;
         uniqueParties.forEach(party => {
@@ -1329,7 +1337,7 @@
         let cardHtml = `
             <div class="trip-card">
                 <div style="border-bottom: 1px solid #f1f3f4; padding-bottom: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;">
-                    <span><strong>#${index + 1}</strong> | ${trip.vNum} <span style="color:#5f6368; font-weight:normal; font-size:11px;">(${(trip.date||'').split(',')[0]})</span></span>
+                    <span><strong>#${index + 1}</strong> | ${(trip.date||'').split(',')[0]}</span>
                     <span class="status-badge ${statusClass}">${statusText}</span>
                 </div>
                 <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
@@ -1341,6 +1349,9 @@
             cardHtml += `<span style="cursor:pointer; color:#0b57d0; font-size:10px; font-weight:600; text-transform:uppercase;" onclick="openAdminEdit('${trip.id}')">Edit</span>`;
         }
         cardHtml += `</div>`;
+        cardHtml += `<div style="margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
+                        <span><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</span>
+                    </div>`;
 
         if (trip.bookingType === 'Reverse Logistics' && trip.brokingAgent) {
             cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Agency:</strong> ${trip.brokingAgent}</div>`;
@@ -1529,6 +1540,7 @@
         document.getElementById('income-rows-container').innerHTML = ""; document.getElementById('expense-rows-container').innerHTML = "";
         let ledger = { income: [], expense: [] }; try { let p = JSON.parse(trip.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; } catch(e){}
         
+        // Legacy Migration Handling for Financial Editor Popup
         if((ledger.expense || []).length === 0 && (trip.otherExp || trip.loadingExp || trip.unloadingExp || trip.lrExp)) {
             if(trip.otherExp) ledger.expense.push({type: trip.otherExpReason || 'Generic', amt: parseFloat(trip.otherExp)});
             if(trip.loadingExp) ledger.expense.push({type: 'Loading', amt: parseFloat(trip.loadingExp)});
