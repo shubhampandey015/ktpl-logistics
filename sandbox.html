@@ -75,15 +75,16 @@
         .autocomplete-items div { padding: 12px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 13px; color: #1f1f1f; }
         .autocomplete-items div:hover { background-color: #f8f9fa; }
 
-        /* TRIP CARDS (DEPLOYED/POD STYLE) */
+        /* TRIP CARDS & LEDGER */
         .list-container { padding: 0 10px; }
-        .trip-card { background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); font-size: 13px; color: #1f1f1f;}
-        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap; letter-spacing: 0.5px;}
+        .trip-card { background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); font-size: 12px; color: #444746;}
+        .trip-card strong { color: #1f1f1f; }
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;}
         .status-transit { background: #fef7e0; color: #b06000; }
         .status-delivered { background: #e6f4ea; color: #137333; }
         .status-cancelled { background: #fce8e6; color: #b3261e; }
         
-        .compact-input { padding: 8px 10px; font-size: 13px; border-radius: 6px; background: #f8f9fa; border: 1px solid #dadce0; outline: none; transition: 0.2s;}
+        .compact-input { padding: 8px 10px; font-size: 12px; border-radius: 6px; background: #f8f9fa; border: 1px solid #dadce0; outline: none; transition: 0.2s;}
         .compact-input:focus { background: #ffffff; border-color: #0b57d0;}
 
         /* MASTER SEARCH FILTER BAR */
@@ -91,21 +92,14 @@
         .filter-header { font-size: 12px; font-weight: 600; color: #1f1f1f; margin-bottom: 12px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
         .filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
-        /* PAYMENTS RECO ACCORDION & GRID */
-        .reco-accordion-header { background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; transition: 0.2s;}
-        .reco-accordion-header:hover { border-color: #d3e3fd; background: #f8f9fa;}
-        .reco-accordion-body { display: none; background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 16px; border: 1px solid #dadce0; animation: fadeIn 0.2s ease;}
-        .reco-accordion-body.open { display: block; }
-        
-        .reco-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; border-top: 1px solid #f1f3f4; padding-top: 15px;}
-        .reco-panel { border-radius: 8px; padding: 0; background: transparent; }
-        .reco-header-title { font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #eaeaea; padding-bottom: 6px; color: #1f1f1f; display: flex; justify-content: space-between;}
-        
-        .calc-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: #444746; }
+        /* PAYMENTS LEDGER STYLES */
+        .reco-panel { border-radius: 8px; padding: 10px; background: #ffffff; border: 1px solid #dadce0; margin-bottom: 10px;}
+        .reco-title { font-size: 12px; font-weight: 600; color: #1f1f1f; margin-bottom: 8px; display: flex; justify-content: space-between;}
+        .calc-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; }
         .calc-line-item { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; color: #5f6368; padding-left: 8px; border-left: 2px solid #e8f0fe;}
-        .highlight-red-box { background-color: #fce8e6; color: #b3261e; font-weight: 600; padding: 12px; text-align: center; border-radius: 8px; margin-top: 15px; border: 1px solid #f9d0c4; font-size: 14px; }
+        .calc-danger { font-weight: 600; font-size: 13px; color: #b3261e; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f3f4; text-align: right;}
         
-        .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 12px; font-weight: 500; cursor: pointer; padding: 4px 0; margin-top: 8px; text-align: left; width: auto;}
+        .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 11px; font-weight: 500; cursor: pointer; padding: 4px 0; margin-top: 8px; text-align: left; width: auto;}
         .history-panel { display: none; background: #f8f9fa; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-size: 11px; color: #444746; border-left: 3px solid #0b57d0;}
         .history-item { margin-bottom: 8px; border-bottom: 1px solid #dadce0; padding-bottom: 4px; }
 
@@ -204,27 +198,29 @@
         </div>
     </div>
 
-    <div id="unified-filter-bar">
-        <div class="filter-header">
-            Global Search Filter 
-            <span style="color:#0b57d0; cursor:pointer; font-size:10px; background:#e8f0fe; padding:4px 8px; border-radius:12px;" onclick="clearFilters()">Reset Filters</span>
-        </div>
-        <div class="filter-grid">
-            <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
-            <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
-            <div class="autocomplete" style="grid-column: span 2;"><input type="text" id="uf-party" class="compact-input" placeholder="Search Party / Client Name..." oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerCurrentRender()"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerCurrentRender()"><div id="uf-origin-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerCurrentRender()"><div id="uf-dest-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete" style="grid-column: span 2;"><input type="text" id="uf-vcap" class="compact-input" placeholder="Capacity Weight" oninput="triggerCurrentRender()"><div id="uf-vcap-list" class="autocomplete-items"></div></div>
+    <div id="unified-filter-bar" style="display:none; padding: 0 10px; margin-bottom:15px;">
+        <div class="form-card" style="margin:0; padding:15px;">
+            <div style="font-size: 11px; font-weight: 600; color: #5f6368; margin-bottom: 10px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;">
+                Global Search Filter 
+                <span style="color:#0b57d0; cursor:pointer;" onclick="clearFilters()">Reset</span>
+            </div>
+            <div class="filter-grid">
+                <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
+                <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
+                <div class="autocomplete" style="grid-column: span 2;"><input type="text" id="uf-party" class="compact-input" placeholder="Search Party / Client Name..." oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerCurrentRender()"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerCurrentRender()"><div id="uf-origin-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerCurrentRender()"><div id="uf-dest-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete" style="grid-column: span 2;"><input type="text" id="uf-vcap" class="compact-input" placeholder="Capacity Weight" oninput="triggerCurrentRender()"><div id="uf-vcap-list" class="autocomplete-items"></div></div>
+            </div>
         </div>
     </div>
 
     <div id="tab-placement" class="app-section">
         <div class="workspace-header">
             <button class="btn-back-home" onclick="returnToHome()">← Home</button>
-            <h3 class="workspace-title">Placement</h3>
+            <h3 class="workspace-title">Placement Workspace</h3>
         </div>
 
         <div id="placement-selection-screen" style="padding: 0 10px;">
@@ -313,7 +309,7 @@
                 <div class="grid-2" style="margin-top:20px; gap:10px;">
                     <button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button>
                     <button class="btn btn-primary" onclick="savePlacementRev()">Save Details</button>
-                    <button class="btn btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">For Team</button>
+                    <button class="btn btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">Share For Team</button>
                 </div>
             </div>
         </div>
@@ -599,6 +595,7 @@
     let driverData = {}; 
     let currentUser = null; 
     
+    // STATES
     let currentActiveMainTab = 'panel-homepage';
     let currentPlacementType = "";
     let currentDeployedType = "";
@@ -611,7 +608,7 @@
     let pendingWhatsAppMsg = ""; 
     let currentReportTrips = [];
 
-    // --- UTILITIES ---
+    // --- UTILITIES (WITH OPTIONAL CHAINING SAFEGUARDS) ---
     function getSafeTel(num) {
         if (!num) return ''; let c = String(num).replace(/[\s-]/g, '').trim();
         if (c.startsWith('+')) return c; if (c.startsWith('91') && c.length > 10) return '+' + c; return '+91' + c;
@@ -759,6 +756,7 @@
         setupCustomDropdown('rl-vnum', 'rl-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'rl'));
         setupCustomDropdown('rl-from', 'rl-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
         setupCustomDropdown('rl-to', 'rl-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
+        setupCustomDropdown('rl-agent', 'rl-agent-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
 
         setupCustomDropdown('rf-party', 'rf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
 
@@ -820,12 +818,12 @@
     }
 
     function clearFilters() {
-        const filterIds = ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-origin', 'uf-dest'];
+        const filterIds = ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-origin', 'uf-dest', 'rf-party'];
         filterIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
         triggerCurrentRender();
     }
 
-    // --- BULLETPROOF FILTERING ---
+    // --- BULLETPROOF FILTERING (NO SILENT CRASHES) ---
     function getFilteredTrips(baseTrips) {
         let result = [...baseTrips];
         const role = currentUser.Role || currentUser.role;
@@ -893,7 +891,7 @@
     }
 
     function validatePlacementRev() {
-        let isValid = true; let req = ['rl-date', 'rl-from', 'rl-to', 'rl-vnum', 'rl-vtype', 'rl-weight', 'rl-agency', 'rl-contact'];
+        let isValid = true; let req = ['rl-date', 'rl-agent', 'rl-from', 'rl-to', 'rl-vnum', 'rl-vtype', 'rl-weight'];
         document.querySelectorAll('input').forEach(input => input.style.borderColor = 'transparent');
         req.forEach(id => { const el = document.getElementById(id); if (el && !el.value.trim()) { el.style.borderColor = '#b3261e'; isValid = false; }});
         if (!isValid) alert("Please fill in all mandatory fields (*)."); return isValid;
@@ -925,7 +923,7 @@
             action: 'saveTrip', id: "TRP-" + Date.now(), date: getFormattedDateVal(document.getElementById('rl-date').value), party: party || "", 
             from: document.getElementById('rl-from').value, to: document.getElementById('rl-to').value, vNum: vNum, vType: document.getElementById('rl-vtype').value, weight: document.getElementById('rl-weight').value,
             createdBy: currentUser.Name || currentUser.name || "Unknown", vFreight: "", cFreight: document.getElementById('rl-cfreight').value || "", dName: "", dContact: "", tName: "", 
-            tPerson: document.getElementById('rl-agent').value, tContact: formatPhoneString(document.getElementById('rl-contact').value), remarks: document.getElementById('rl-remarks').value, bookingType: 'Reverse Logistics', brokingAgent: document.getElementById('rl-agency').value
+            tPerson: document.getElementById('rl-agent').value, tContact: formatPhoneString(document.getElementById('rl-contact').value), remarks: document.getElementById('rl-remarks').value, bookingType: 'Reverse Logistics', brokingAgent: document.getElementById('rl-agent').value
         };
         finalizePlacementSave(payload);
     }
@@ -959,7 +957,7 @@
         if (!validatePlacementRev()) return; 
         const date = getFormattedDateVal(document.getElementById('rl-date').value); const vNum = document.getElementById('rl-vnum').value.toUpperCase();
         let party = document.getElementById('rl-party').value; let typeCo = document.getElementById('rl-typeco').value; if(typeCo) party += " (" + typeCo + ")";
-        let header = `*Placement Details (Rev Log) - ${vNum} - ${document.getElementById('rl-from').value} to ${document.getElementById('rl-to').value} - ${document.getElementById('rl-vtype').value} - ${document.getElementById('rl-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${document.getElementById('rl-from').value}\n*To:* ${document.getElementById('rl-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('rl-vtype').value}\n*Charged Weight:* ${document.getElementById('rl-weight').value}\n\n*Broking Agency:* ${document.getElementById('rl-agency').value}\n`;
+        let header = `*Placement Details (Rev Log) - ${vNum} - ${document.getElementById('rl-from').value} to ${document.getElementById('rl-to').value} - ${document.getElementById('rl-vtype').value} - ${document.getElementById('rl-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${document.getElementById('rl-from').value}\n*To:* ${document.getElementById('rl-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('rl-vtype').value}\n*Charged Weight:* ${document.getElementById('rl-weight').value}\n\n*Broking Agency:* ${document.getElementById('rl-agent').value}\n`;
         if(document.getElementById('rl-agent').value) header += `*Agent Name:* ${document.getElementById('rl-agent').value}\n`;
         if(document.getElementById('rl-contact').value) header += `*Contact No:* ${document.getElementById('rl-contact').value}\n\n`;
         if(document.getElementById('rl-cfreight').value) header += `*Charged Freight:* ${document.getElementById('rl-cfreight').value}\n`;
@@ -972,7 +970,7 @@
         currentDeployedType = type;
         document.getElementById('deployed-selection-screen').style.display = 'none';
         document.getElementById('deployed-content-area').style.display = 'block';
-        document.getElementById('deployed-title-text').innerText = type;
+        document.getElementById('deployed-title-text').innerText = type + " Fleet";
         triggerCurrentRender();
     }
     
@@ -998,7 +996,7 @@
         currentPodType = type;
         document.getElementById('pod-selection-screen').style.display = 'none';
         document.getElementById('pod-content-area').style.display = 'block';
-        document.getElementById('pod-title-text').innerText = type;
+        document.getElementById('pod-title-text').innerText = type + " PODs";
         triggerCurrentRender();
     }
     
@@ -1026,7 +1024,7 @@
         currentRecoType = type;
         document.getElementById('reco-selection-screen').style.display = 'none';
         document.getElementById('reco-content-area').style.display = 'block';
-        document.getElementById('reco-title-text').innerText = type;
+        document.getElementById('reco-title-text').innerText = type + " Ledger";
         triggerCurrentRender();
     }
 
@@ -1035,11 +1033,6 @@
         document.getElementById('btn-reco-stat-pen').classList.toggle('active', stat === 'Pending');
         document.getElementById('btn-reco-stat-com').classList.toggle('active', stat === 'Completed');
         triggerCurrentRender();
-    }
-
-    function toggleRecoCard(id) {
-        const body = document.getElementById(`reco-body-${id}`);
-        if(body.classList.contains('open')){ body.classList.remove('open'); } else { body.classList.add('open'); }
     }
 
     function renderReconciliation() {
@@ -1067,103 +1060,46 @@
             try { let p = JSON.parse(t.financialLedger); if(p.income) ledger=p; } catch(e){}
             if(!ledger.reco) ledger.reco = {};
             
+            // Safe JSON mapping variables
+            let safeIncome = ledger.income || [];
+            let safeExpense = ledger.expense || [];
+
             // Legacy Migration Support
-            if(ledger.expense.length === 0 && (t.otherExp || t.loadingExp || t.unloadingExp || t.lrExp)) {
-                if(t.otherExp) ledger.expense.push({type: t.otherExpReason || 'Generic', amt: parseFloat(t.otherExp)});
-                if(t.loadingExp) ledger.expense.push({type: 'Loading', amt: parseFloat(t.loadingExp)});
-                if(t.unloadingExp) ledger.expense.push({type: 'Unloading', amt: parseFloat(t.unloadingExp)});
-                if(t.lrExp) ledger.expense.push({type: 'LR', amt: parseFloat(t.lrExp)});
+            if(safeExpense.length === 0 && (t.otherExp || t.loadingExp || t.unloadingExp || t.lrExp)) {
+                if(t.otherExp) safeExpense.push({type: t.otherExpReason || 'Generic', amt: parseFloat(t.otherExp)});
+                if(t.loadingExp) safeExpense.push({type: 'Loading', amt: parseFloat(t.loadingExp)});
+                if(t.unloadingExp) safeExpense.push({type: 'Unloading', amt: parseFloat(t.unloadingExp)});
+                if(t.lrExp) safeExpense.push({type: 'LR', amt: parseFloat(t.lrExp)});
             }
 
-            let baseRev = parseFloat(t.cFreight || 0); let extraRev = ledger.income ? ledger.income.reduce((s, r) => s + r.amt, 0) : 0;
-            let baseCost = parseFloat(t.vFreight || 0); let extraCost = ledger.expense ? ledger.expense.reduce((s, r) => s + r.amt, 0) : 0;
+            let baseRev = parseFloat(t.cFreight || 0); let extraRev = safeIncome.reduce((s, r) => s + r.amt, 0);
+            let baseCost = parseFloat(t.vFreight || 0); let extraCost = safeExpense.reduce((s, r) => s + r.amt, 0);
             let totalPayable = baseCost + extraCost; let totalReceivable = baseRev + extraRev;
 
-            // Header Collapse Information
-            let headerInfo = "";
-            if (currentRecoType === 'Own Booking') {
-                headerInfo = `<strong>${(t.date||'').split(',')[0]}</strong> | ${t.vNum} | ${t.from}➔${t.to} <br> <span style="color:#5f6368;">Party: ${t.party} | Transporter: ${t.tName || 'N/A'}</span>`;
-            } else {
-                headerInfo = `<strong>${(t.date||'').split(',')[0]}</strong> | ${t.vNum} | ${t.from}➔${t.to} <br> <span style="color:#5f6368;">Broker: ${t.brokingAgent || 'N/A'}</span>`;
-            }
-
-            let html = `
-                <div class="reco-accordion-header" onclick="toggleRecoCard('${t.id}')">
-                    <div style="font-size:12px;">${headerInfo}</div>
-                    <div style="font-size:16px; color:#0b57d0;">▼</div>
-                </div>
-                <div id="reco-body-${t.id}" class="reco-accordion-body">
-                    <div class="reco-split-grid">
-            `;
+            let html = `<div class="trip-card"><div style="font-weight:500; border-bottom:1px solid #f1f3f4; padding-bottom:8px; display:flex; justify-content:space-between;"><span><strong>#${i+1}</strong> | ${t.vNum} <span style="color:#5f6368; font-weight:normal; font-size:11px;">(${(t.date||'').split(',')[0]})</span></span><span class="status-badge ${(t.status||'')==='Delivered'?'status-delivered':'status-transit'}">${t.status}</span></div><div style="margin-top:5px; margin-bottom:10px; font-size:11px; color:#5f6368;">${t.from} ➔ ${t.to} | Party: <strong>${t.party || 'N/A'}</strong></div><div class="reco-split-grid">`;
 
             // OWN BOOKING LOGIC
             if (currentRecoType === 'Own Booking') {
                 let advPaid = parseFloat(ledger.reco.advPaid || t.advancePaid || 0); let balPaid = parseFloat(ledger.reco.balPaid || 0); let balToPay = totalPayable - advPaid - balPaid;
-                
-                html += `
-                    <div class="reco-panel">
-                        <div class="reco-header-title">Receivables</div>
-                        <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
-                        ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                        <div class="calc-total">Total Receivable: ₹${totalReceivable}</div>
-                    </div>
-                    <div class="reco-panel">
-                        <div class="reco-header-title">Payables</div>
-                        <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
-                        ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                        <div class="calc-total">Total Payable: ₹${totalPayable}</div>
-                `;
+                html += `<div class="reco-panel"><div class="reco-title">Receivables</div><div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>${safeIncome.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}<div class="calc-row" style="margin-top:10px; font-weight:bold;"><span>Total Receivable:</span> <span>₹${totalReceivable}</span></div></div><div class="reco-panel"><div class="reco-title">Payables</div><div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>${safeExpense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}<div class="calc-row" style="margin-top:10px; font-weight:bold;"><span>Total Payable:</span> <span>₹${totalPayable}</span></div>`;
                 if(isMasterAdmin) {
-                    html += `
-                        <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Paid</label><input type="number" id="reco-adv-${t.id}" class="compact-input" value="${advPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-advD-${t.id}" class="compact-input" value="${ledger.reco.advDate || ''}"></div></div>
-                        <div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid</label><input type="number" id="reco-bal-${t.id}" class="compact-input" value="${balPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD-${t.id}" class="compact-input" value="${ledger.reco.balDate || ''}"></div></div>
-                        <div class="highlight-red-box">Balance to Pay: ₹${balToPay}</div>
-                    `;
+                    html += `<div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Paid</label><input type="number" id="reco-adv-${t.id}" class="compact-input" value="${advPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-advD-${t.id}" class="compact-input" value="${ledger.reco.advDate || ''}"></div></div><div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid</label><input type="number" id="reco-bal-${t.id}" class="compact-input" value="${balPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD-${t.id}" class="compact-input" value="${ledger.reco.balDate || ''}"></div></div><div class="calc-danger">Balance to Pay: ₹${balToPay}</div>`;
                 }
                 html += `</div>`;
             } 
             // REVERSE LOGISTICS LOGIC
             else {
                 let advRec = parseFloat(ledger.reco.advRec || 0); let osDues = parseFloat(ledger.reco.osDues || 0); let totalOs = totalReceivable - advRec - osDues;
-                
-                html += `
-                    <div class="reco-panel">
-                        <div class="reco-header-title">Receivables</div>
-                        <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
-                        ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                        <div class="calc-total">Total Receivable: ₹${totalReceivable}</div>
-                `;
+                html += `<div class="reco-panel"><div class="reco-title">Receivables</div><div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>${safeIncome.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}<div class="calc-row" style="margin-top:10px; font-weight:bold;"><span>Total Receivable:</span> <span>₹${totalReceivable}</span></div>`;
                 if(isMasterAdmin) {
-                    html += `
-                        <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Rcvd</label><input type="number" id="reco-advR-${t.id}" class="compact-input" value="${advRec || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-advRD-${t.id}" class="compact-input" value="${ledger.reco.advRecDate || ''}"></div></div>
-                        <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues</label><input type="number" id="reco-os-${t.id}" class="compact-input" value="${osDues || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD-${t.id}" class="compact-input" value="${ledger.reco.osDate || ''}"></div></div>
-                        <div class="highlight-red-box">Outstanding Amount: ₹${totalOs}</div>
-                    `;
+                    html += `<div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Rcvd</label><input type="number" id="reco-advR-${t.id}" class="compact-input" value="${advRec || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-advRD-${t.id}" class="compact-input" value="${ledger.reco.advRecDate || ''}"></div></div><div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues</label><input type="number" id="reco-os-${t.id}" class="compact-input" value="${osDues || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD-${t.id}" class="compact-input" value="${ledger.reco.osDate || ''}"></div></div><div class="calc-danger">Total Outstanding Dues: ₹${totalOs}</div>`;
                 }
-                html += `</div>
-                    <div class="reco-panel">
-                        <div class="reco-header-title">Payables</div>
-                        <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
-                        ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                        <div class="calc-total">Total Payable: ₹${totalPayable}</div>
-                    </div>
-                `;
+                html += `</div><div class="reco-panel"><div class="reco-title">Payables</div><div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>${safeExpense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}<div class="calc-row" style="margin-top:10px; font-weight:bold;"><span>Total Payable:</span> <span>₹${totalPayable}</span></div></div>`;
             }
 
             html += `</div>`; 
             if(isMasterAdmin) {
-                html += `
-                    <div style="border-top: 1px solid #f1f3f4; margin-top:15px; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
-                        <button class="btn btn-clear" style="padding:8px 12px; font-size:11px; width:auto; border-radius:12px;" onclick="openFinancialAllocation('${t.id}')">💰 Edit Extra Financials</button>
-                        <div style="display:flex; gap:8px;">
-                            <select id="mstat-${t.id}" class="compact-input" style="width:110px;">
-                                <option value="Pending" ${ledger.reco.status!=='Cleared'?'selected':''}>Pending</option>
-                                <option value="Cleared" ${ledger.reco.status==='Cleared'?'selected':''}>Cleared</option>
-                            </select>
-                            <button class="btn btn-primary" style="padding:8px 12px; font-size:11px; width:auto; border-radius:12px;" onclick="commitRecoRecord('${t.id}', '${currentRecoType}')">Save</button>
-                        </div>
-                    </div>
-                `;
+                html += `<div style="border-top: 1px solid #f1f3f4; margin-top:15px; padding-top:15px; display:flex; justify-content:space-between; align-items:center;"><button class="btn btn-clear" style="padding:8px 12px; font-size:11px; width:auto; border-radius:12px;" onclick="openFinancialAllocation('${t.id}')">💰 Edit Extra Financials</button><div style="display:flex; gap:8px;"><select id="mstat-${t.id}" class="compact-input" style="width:110px;"><option value="Pending" ${ledger.reco.status!=='Cleared'?'selected':''}>Pending</option><option value="Cleared" ${ledger.reco.status==='Cleared'?'selected':''}>Cleared</option></select><button class="btn btn-primary" style="padding:8px 12px; font-size:11px; width:auto; border-radius:12px;" onclick="commitRecoRecord('${t.id}', '${currentRecoType}')">Save</button></div></div>`;
             }
             html += `</div>`;
             return html;
@@ -1189,7 +1125,7 @@
         const jsonStr = JSON.stringify(ledger); t.financialLedger = jsonStr;
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: id, ledgerJson: jsonStr }) });
 
-        alert("Ledger updated."); renderReconciliation();
+        alert("Ledger updated. Status will reflect on the board."); renderReconciliation();
     }
 
     // --- REPORTS ENGINE ---
@@ -1197,15 +1133,18 @@
         currentReportType = type;
         document.getElementById('report-selection-screen').style.display = 'none';
         document.getElementById('report-content-area').style.display = 'block';
-        document.getElementById('report-title-text').innerText = type;
+        document.getElementById('report-title-text').innerText = type + " Reports";
     }
 
     function generateCustomReport() {
-        const tripStat = document.getElementById('report-trip-status').value; const podStat = document.getElementById('report-pod-status').value;
+        const rfPartyEl = document.getElementById('rf-party');
+        const pName = rfPartyEl ? rfPartyEl.value : "";
         
         let finalTrips = getFilteredTrips(allTrips);
         finalTrips = finalTrips.filter(t => (t.bookingType || 'Own Booking') === currentReportType);
+        if(pName) finalTrips = finalTrips.filter(t => (t.party || '').toLowerCase().includes(pName.toLowerCase()));
 
+        const tripStat = document.getElementById('report-trip-status').value; const podStat = document.getElementById('report-pod-status').value;
         if (tripStat !== 'All') finalTrips = finalTrips.filter(t => (t.status || '').trim() === tripStat);
         if (podStat !== 'All') {
             if (podStat === 'Pending') finalTrips = finalTrips.filter(t => !t.podDate || String(t.podDate).trim() === '');
@@ -1263,8 +1202,11 @@
     }
 
     function triggerMISGeneration(misType) {
-        let tripsToExport = getFilteredTrips(allTrips).filter(t => (t.bookingType || 'Own Booking') === currentReportType);
-        if(tripsToExport.length === 0) return alert("No records found under the current filter configuration.");
+        const rfPartyEl = document.getElementById('rf-party');
+        let pName = rfPartyEl ? rfPartyEl.value : "";
+        if(!pName) return alert("MIS Generation requires a Party Name. Please select a client from the filter.");
+        let tripsToExport = allTrips.filter(t => (t.party || '').toLowerCase() === pName.toLowerCase() && (t.bookingType || 'Own Booking') === currentReportType);
+        if(tripsToExport.length === 0) return alert("No records found for this party under the current booking type.");
         const wb = XLSX.utils.book_new(); let grouped = {};
         
         tripsToExport.forEach(t => {
@@ -1284,20 +1226,23 @@
             });
             const ws = XLSX.utils.aoa_to_sheet(rawRows); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, mKey);
         }
-        XLSX.writeFile(wb, `KTPL_${misType}.xlsx`);
+        XLSX.writeFile(wb, `KTPL_${misType}_${pName}.xlsx`);
     }
 
     function triggerRecoExcelDownload() {
-        let tripsToExport = getFilteredTrips(allTrips).filter(t => (t.bookingType || 'Own Booking') === currentReportType);
+        const rfPartyEl = document.getElementById('rf-party');
+        let pName = rfPartyEl ? rfPartyEl.value : "";
+        let tripsToExport = allTrips.filter(t => (t.bookingType || 'Own Booking') === currentReportType);
+        if(pName) tripsToExport = tripsToExport.filter(t => (t.party || '').toLowerCase() === pName.toLowerCase());
 
         const wb = XLSX.utils.book_new(); let rawRows = [];
         rawRows.push(["Trip ID", "Booking Type", "Date", "Party Name", "Vehicle No.", "Route", "Total Receivable", "Ledger Status", "Total Payable", "KTPL Margin"]);
         
         tripsToExport.forEach(t => {
-            let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.income) ledger=p; } catch(e){}
-            if(!ledger.reco) ledger.reco = {};
-            let baseRev = parseFloat(t.cFreight || 0); let extraRev = ledger.income ? ledger.income.reduce((s, r) => s + r.amt, 0) : 0; let totalReceivable = baseRev + extraRev;
-            let baseCost = parseFloat(t.vFreight || 0); let extraCost = ledger.expense ? ledger.expense.reduce((s, r) => s + r.amt, 0) : 0; let totalPayable = baseCost + extraCost;
+            let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
+            let safeIncome = ledger.income || []; let safeExpense = ledger.expense || [];
+            let baseRev = parseFloat(t.cFreight || 0); let extraRev = safeIncome.reduce((s, r) => s + r.amt, 0); let totalReceivable = baseRev + extraRev;
+            let baseCost = parseFloat(t.vFreight || 0); let extraCost = safeExpense.reduce((s, r) => s + r.amt, 0); let totalPayable = baseCost + extraCost;
             let margin = totalReceivable - totalPayable;
             rawRows.push([t.id, t.bookingType, (t.date || '').split(',')[0], t.party || 'Unknown', t.vNum, `${t.from} to ${t.to}`, totalReceivable, ledger.reco.status || "Pending", totalPayable, margin]);
         });
@@ -1307,29 +1252,38 @@
 
     // --- SHARED CARD HELPER ---
     function buildTripCard(trip, index, viewMode) {
-        const role = currentUser.Role || currentUser.role; let isReadOnly = (role === 'ReadOnly'); const isMasterAdmin = (role === 'Master Admin' || role === 'Admin');
-        let statusClass = 'status-transit'; let statusText = (trip.status || '').trim();
+        const role = currentUser.Role || currentUser.role;
+        let isReadOnly = (role === 'ReadOnly');
+        const isMasterAdmin = (role === 'Master Admin' || role === 'Admin');
+
+        let statusClass = 'status-transit';
+        let statusText = (trip.status || '').trim();
         if (statusText === 'Delivered') { statusClass = 'status-delivered'; statusText = `Delivered: ${trip.deliveryDate}`; }
         if (statusText === 'Cancelled Trip') { statusClass = 'status-cancelled'; statusText = `Cancelled`; }
 
         let cardHtml = `
             <div class="trip-card">
                 <div style="border-bottom: 1px solid #f1f3f4; padding-bottom: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;">
-                    <span><strong>#${index + 1}</strong> | ${(trip.date||'').split(',')[0]}</span>
+                    <span><strong>#${index + 1}</strong> | ${trip.vNum} <span style="color:#5f6368; font-weight:normal; font-size:11px;">(${(trip.date||'').split(',')[0]})</span></span>
                     <span class="status-badge ${statusClass}">${statusText}</span>
                 </div>
-                <div style="margin-bottom: 5px;"><strong>Party:</strong> ${trip.party || 'N/A'}</div>
                 <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
                 <div style="margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
-                    <span><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</span>
+                    <span><strong>Party:</strong> ${trip.party || 'N/A'}</span>
         `;
-        if (isMasterAdmin) { cardHtml += `<span style="cursor:pointer; color:#0b57d0; font-size:11px; font-weight:600; text-transform:uppercase;" onclick="openAdminEdit('${trip.id}')">Edit Trip</span>`; }
+        
+        if (isMasterAdmin) {
+            cardHtml += `<span style="cursor:pointer; color:#0b57d0; font-size:10px; font-weight:600; text-transform:uppercase;" onclick="openAdminEdit('${trip.id}')">Edit</span>`;
+        }
         cardHtml += `</div>`;
 
-        if (trip.bookingType === 'Reverse Logistics' && trip.brokingAgent) { cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:12px;"><strong>Agency:</strong> ${trip.brokingAgent}</div>`; } 
-        else if (trip.vFreight && trip.vFreight.trim() !== '') { cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:12px;"><strong>Vehicle Freight:</strong> ${trip.vFreight}</div>`; }
+        if (trip.bookingType === 'Reverse Logistics' && trip.brokingAgent) {
+            cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Agency:</strong> ${trip.brokingAgent}</div>`;
+        } 
         
-        if (isMasterAdmin && trip.cFreight && (trip.cFreight || '').trim() !== '') { cardHtml += `<div style="margin-bottom: 5px; color:#146c2e; font-size:12px; font-weight:500;"><strong>Charged Freight:</strong> ${trip.cFreight}</div>`; }
+        if (isMasterAdmin && trip.cFreight && (trip.cFreight || '').trim() !== '') {
+            cardHtml += `<div style="margin-bottom: 5px; color:#146c2e; font-size:11px; font-weight:500;"><strong>Revenue:</strong> ${trip.cFreight}</div>`;
+        }
 
         const dTel = getSafeTel(trip.dContact); const tTel = getSafeTel(trip.tContact);
 
@@ -1366,15 +1320,17 @@
                     </div>
                 `;
             } else if ((trip.status || '').trim() === 'Delivered' || (trip.status || '').trim() === 'Cancelled Trip') {
-                if (isMasterAdmin) { cardHtml += `<div style="display:flex; margin-top:5px;"><select class="compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')"><option value="" selected>Status Locked</option><option value="In-Transit">Undo: Revert to In-Transit</option></select></div>`; }
+                if (isMasterAdmin) {
+                    cardHtml += `<div style="display:flex; margin-top:5px;"><select class="compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')"><option value="" selected>Status Locked</option><option value="In-Transit">Undo: Revert to In-Transit</option></select></div>`;
+                }
             }
             
             cardHtml += `
                 <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}', '${viewMode}')">▶ History</button>
                     <div style="display:flex; gap: 5px;">
-                        <button class="btn btn-clear" style="font-size:11px; padding:6px 10px; width:auto; border-radius:12px;" onclick="openFinancialAllocation('${trip.id}')">💰 Fin</button>
-                        <button class="btn btn-primary" style="font-size:11px; padding:6px 10px; width:auto; border-radius:12px;" onclick="openShareModal('${trip.id}')">Share</button>
+                        <button class="btn btn-clear" style="font-size:10px; padding:6px 10px; width:auto; border-radius:12px;" onclick="openFinancialAllocation('${trip.id}')">💰 Fin</button>
+                        <button class="btn btn-primary" style="font-size:10px; padding:6px 10px; width:auto; border-radius:12px;" onclick="openShareModal('${trip.id}')">Share</button>
                     </div>
                 </div>
                 <div id="hist-${viewMode}-${trip.id}" class="history-panel"></div>
@@ -1399,7 +1355,9 @@
                 ${trip.podRemark ? `<div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>Remarks:</strong> ${trip.podRemark}</div>` : ''}
                 <div style="margin-top:10px; color:#137333; font-weight:500;">POD Received: ${trip.podDate}</div>
             `;
-            if (!isReadOnly) { cardHtml += `<button class="btn btn-clear" style="font-size:10px; padding:6px 10px; margin-top:5px; width:auto; border-radius:12px;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove Date</button>`; }
+            if (!isReadOnly) {
+                cardHtml += `<button class="btn btn-clear" style="font-size:10px; padding:6px 10px; margin-top:5px; width:auto; border-radius:12px;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove Date</button>`;
+            }
         }
         cardHtml += `</div>`; return cardHtml;
     }
@@ -1500,18 +1458,20 @@
         const trip = allTrips.find(t => t.id === tripId); if(!trip) return;
         document.getElementById('fin-trip-id').value = tripId;
         document.getElementById('income-rows-container').innerHTML = ""; document.getElementById('expense-rows-container').innerHTML = "";
-        let ledger = { income: [], expense: [] }; try { ledger = JSON.parse(trip.financialLedger); } catch(e){}
+        
+        let ledger = { income: [], expense: [] }; 
+        try { let p = JSON.parse(trip.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; } catch(e){}
         
         // Legacy Migration Handling for Financial Editor Popup
-        if(ledger.expense.length === 0 && (trip.otherExp || trip.loadingExp || trip.unloadingExp || trip.lrExp)) {
+        if((ledger.expense || []).length === 0 && (trip.otherExp || trip.loadingExp || trip.unloadingExp || trip.lrExp)) {
             if(trip.otherExp) ledger.expense.push({type: trip.otherExpReason || 'Generic', amt: parseFloat(trip.otherExp)});
             if(trip.loadingExp) ledger.expense.push({type: 'Loading', amt: parseFloat(trip.loadingExp)});
             if(trip.unloadingExp) ledger.expense.push({type: 'Unloading', amt: parseFloat(trip.unloadingExp)});
             if(trip.lrExp) ledger.expense.push({type: 'LR', amt: parseFloat(trip.lrExp)});
         }
 
-        if(ledger.income) ledger.income.forEach(row => addFinancialRow('income', row.type, row.amt));
-        if(ledger.expense) ledger.expense.forEach(row => addFinancialRow('expense', row.type, row.amt));
+        (ledger.income || []).forEach(row => addFinancialRow('income', row.type, row.amt));
+        (ledger.expense || []).forEach(row => addFinancialRow('expense', row.type, row.amt));
         document.getElementById('financialModal').style.display = "flex";
     }
 
