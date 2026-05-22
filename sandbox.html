@@ -882,6 +882,7 @@
     function showSelectionScreen(workspace) {
         document.getElementById(`${workspace}-selection-screen`).style.display = 'block';
         document.getElementById(`${workspace}-content-area`).style.display = 'none';
+        currentOpenRecoId = null; // Fix: Clears open accordion state
     }
 
     function triggerCurrentRender() {
@@ -1115,6 +1116,7 @@
         document.getElementById('reco-selection-screen').style.display = 'none';
         document.getElementById('reco-content-area').style.display = 'block';
         document.getElementById('reco-title-text').innerText = type + " Ledger";
+        currentOpenRecoId = null; // Fix: Clears open accordion state
         triggerCurrentRender();
     }
 
@@ -1122,9 +1124,9 @@
         currentRecoStat = stat; 
         document.getElementById('btn-reco-stat-pen').classList.toggle('active', stat === 'Pending');
         document.getElementById('btn-reco-stat-com').classList.toggle('active', stat === 'Completed');
+        currentOpenRecoId = null; // Fix: Clears open accordion state
         triggerCurrentRender();
     }
-
     function toggleRecoCard(id) {
         const body = document.getElementById(`reco-body-${id}`);
         if(body.classList.contains('open')){ 
