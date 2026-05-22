@@ -9,7 +9,7 @@
         /* CRITICAL MOBILE & RESET FIXES */
         * { box-sizing: border-box; font-family: "Google Sans", "Roboto", -apple-system, sans-serif; }
         body { background: #f0f4f9; min-height: 100vh; margin: 0; padding: 10px; color: #1f1f1f; display: flex; justify-content: center; }
-        .container { position: relative; width: 100%; max-width: 600px; padding: 10px 0; margin-top: 10px; margin-bottom: 40px; display: none; overflow-x: hidden; }
+        .container { position: relative; width: 100%; max-width: 600px; padding: 10px 0; margin-top: 10px; margin-bottom: 40px; display: none; overflow-x: hidden; word-wrap: break-word; }
 
         /* LOADING & OVERLAYS */
         #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f4f9; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
@@ -75,7 +75,7 @@
         .autocomplete-items div { padding: 12px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 13px; color: #1f1f1f; }
         .autocomplete-items div:hover { background-color: #f8f9fa; }
 
-        /* TRIP CARDS */
+        /* TRIP CARDS (DEPLOYED/POD STYLE - FULL DETAILS RESTORED) */
         .list-container { padding: 0 10px; }
         .trip-card { background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); font-size: 12px; color: #444746;}
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -91,14 +91,14 @@
         .filter-header { font-size: 12px; font-weight: 600; color: #1f1f1f; margin-bottom: 12px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
         .filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
-        /* PAYMENTS RECO ACCORDION & SCROLLABLE PANELS */
+        /* PAYMENTS RECO ACCORDION & GRID */
         .reco-accordion-header { background: #ffffff; border-radius: 12px; padding: 12px 15px; margin-bottom: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; transition: 0.15s;}
         .reco-accordion-header:active { transform: scale(0.98); background: #f8f9fa;}
         .reco-accordion-body { display: none; background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 16px; border: 1px solid #dadce0; animation: fadeIn 0.2s ease;}
         .reco-accordion-body.open { display: block; }
         
         .reco-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; border-top: 1px solid #f1f3f4; padding-top: 15px;}
-        .reco-panel { border-radius: 8px; padding: 0; background: transparent; max-height: 350px; overflow-y: auto; padding-right: 5px;}
+        .reco-panel { border-radius: 8px; padding: 0; background: transparent; }
         .reco-header-title { font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #eaeaea; padding-bottom: 6px; color: #1f1f1f; display: flex; justify-content: space-between;}
         
         .calc-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: #444746; }
@@ -122,6 +122,22 @@
         .report-table th { background: #f8f9fa; font-weight: 500; color: #1f1f1f; }
 
         .print-only { display: none; }
+
+        /* STRICT PDF PRINT STYLES */
+        @media print { 
+            @page { margin: 10mm; }
+            body * { visibility: hidden; }
+            body { padding: 0; margin: 0; background: #fff; }
+            #print-report-container, #print-report-container * { visibility: visible; }
+            #print-report-container { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+            .screen-report-container, #main-app, .modal, #unified-filter-bar { display: none !important; }
+            .print-header { text-align: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; display: block; }
+            .print-header h2 { font-size: 18px; color: #000; margin: 0; font-weight: bold; }
+            .print-table { width: 100%; border-collapse: collapse; font-family: Calibri, sans-serif; font-size: 10pt; border: 2px solid #000;}
+            .print-table th, .print-table td { border: 1px solid #000; padding: 6px; color: #000; text-align: left; vertical-align: top;}
+            .print-table th { background-color: #f0f0f0; font-weight: bold; text-align: center;}
+            .party-table-wrapper { margin-bottom: 20px; page-break-inside: avoid; }
+        }
     </style>
 </head>
 <body>
@@ -138,6 +154,9 @@
 
 <div id="loading-overlay">
     <div class="loader-text" id="loader-text">Syncing Google Sheets...</div>
+        <p id="error-box" style="display:none; color:#b3261e; font-size:12px; margin-top:10px; text-align:center;"></p>
+        <button id="bypass-btn" class="btn btn-clear" style="display:none; margin-top:10px;" onclick="bypassLoading()">Retry Login</button>
+    
 </div>
 
 <div class="container" id="main-app">
@@ -485,31 +504,50 @@
 </div>
 
 <div id="financialModal" class="modal">
-    <div class="modal-content" style="max-height: 90vh;">
+    <div class="modal-content">
         <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">💰 Financial Allocation</h3>
+        <p style="font-size:11px; color:#5f6368; margin-top:0; line-height:1.4;">Add extra expenses or income. This directly updates the Payments ledger.</p>
         <input type="hidden" id="fin-trip-id">
         
-        <div style="background:#f8f9fa; border:1px solid #dadce0; border-radius:8px; padding:12px; text-align:left; margin-bottom:12px; max-height: 200px; overflow-y: auto;">
+        <div style="background:#f8f9fa; border:1px solid #dadce0; border-radius:8px; padding:12px; text-align:left; margin-bottom:12px;">
             <label style="font-weight:600; display:block; color:#146c2e; margin-bottom:8px;">+ Receivables (Income)</label>
             <div id="income-rows-container"></div>
             <button class="btn btn-secondary" style="padding:6px; font-size:11px; width:auto; margin-top:4px;" onclick="addFinancialRow('income')">+ Add Item</button>
         </div>
 
-        <div style="background:#f8f9fa; border:1px solid #dadce0; border-radius:8px; padding:12px; text-align:left; margin-bottom:12px; max-height: 200px; overflow-y: auto;">
+        <div style="background:#f8f9fa; border:1px solid #dadce0; border-radius:8px; padding:12px; text-align:left;">
             <label style="font-weight:600; display:block; color:#b3261e; margin-bottom:8px;">- Payables (Expense)</label>
             <div id="expense-rows-container"></div>
             <button class="btn btn-secondary" style="padding:6px; font-size:11px; width:auto; margin-top:4px;" onclick="addFinancialRow('expense')">+ Add Item</button>
         </div>
 
-        <div style="background:#fef7e0; border:1px solid #ffecc9; border-radius:8px; padding:12px; text-align:left; max-height: 150px; overflow-y: auto;">
-            <label style="font-weight:600; display:block; color:#954c00; margin-bottom:8px;">~ O/S Dues & Dates</label>
-            <div id="os-dues-container"></div>
-            <button class="btn btn-secondary" style="padding:6px; font-size:11px; width:auto; margin-top:4px;" onclick="addOsDueRow()">+ Add Due</button>
-        </div>
-
         <div style="display:flex; gap:10px; margin-top:20px;">
             <button class="btn btn-clear" onclick="closeFinancialModal()">Cancel</button>
             <button class="btn btn-primary" onclick="saveFinancialLedger()">Save Ledger</button>
+        </div>
+    </div>
+</div>
+
+<div id="deliveryModal" class="modal">
+    <div class="modal-content" style="max-width: 300px; padding: 20px;">
+        <h3 style="margin-top:0; font-weight:500; font-size:16px;">Confirm Delivery</h3>
+        <input type="date" id="delivery-date-input" class="compact-input" style="margin-top:10px; margin-bottom:20px; width: 100%;">
+        <input type="hidden" id="delivery-trip-id">
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-clear" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmDelivery()">Save Status</button>
+        </div>
+    </div>
+</div>
+
+<div id="shareModal" class="modal">
+    <div class="modal-content" style="max-width: 300px; padding: 20px;">
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">Share Trip Update</h3>
+        <input type="hidden" id="share-modal-trip-id">
+        <div style="display:flex; flex-direction: column; gap:10px; margin-top:15px;">
+            <button class="btn btn-team" onclick="executeDeployedShare('team')">For Team</button>
+            <button class="btn btn-whatsapp" onclick="executeDeployedShare('client')">For Client</button>
+            <button class="btn btn-clear" onclick="closeShareModal()" style="margin-top: 5px;">Cancel</button>
         </div>
     </div>
 </div>
@@ -564,18 +602,6 @@
     </div>
 </div>
 
-<div id="shareModal" class="modal">
-    <div class="modal-content" style="max-width: 300px; padding: 20px;">
-        <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">Share Trip Update</h3>
-        <input type="hidden" id="share-modal-trip-id">
-        <div style="display:flex; flex-direction: column; gap:10px; margin-top:15px;">
-            <button class="btn btn-team" onclick="executeDeployedShare('team')">For Team</button>
-            <button class="btn btn-whatsapp" onclick="executeDeployedShare('client')">For Client</button>
-            <button class="btn btn-clear" onclick="closeShareModal()" style="margin-top: 5px;">Cancel</button>
-        </div>
-    </div>
-</div>
-
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzc2y0Caupte-mahQ5R3Vlc--92gkvL-B_cc1tC37qyPDmNeWUaX44ufvZnxrdtR5W_AQ/exec"; 
     
@@ -596,8 +622,9 @@
     let currentReportType = "";
     let pendingWhatsAppMsg = ""; 
     let currentReportTrips = [];
+    let currentOpenRecoId = null; // Helps maintain open state in Payments Ledger
 
-    // --- UTILITIES ---
+    // --- UTILITIES (WITH OPTIONAL CHAINING SAFEGUARDS) ---
     function getSafeTel(num) {
         if (!num) return ''; let c = String(num).replace(/[\s-]/g, '').trim();
         if (c.startsWith('+')) return c; if (c.startsWith('91') && c.length > 10) return '+' + c; return '+91' + c;
@@ -617,7 +644,7 @@
         return `${dd}/${mm}/${yyyy}, ${days[dObj.getDay()]}`;
     }
 
-    // --- LOGIC ---
+    // --- WHATSAPP SYSTEM ---
     function openWhatsAppChoice(msg) {
         pendingWhatsAppMsg = msg;
         document.getElementById('whatsappChoiceModal').style.display = 'flex';
@@ -630,6 +657,7 @@
         const isAndroid = /android/i.test(userAgent);
         const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
         let url = "";
+
         if (isAndroid) {
             if (appType === 'business') url = `intent://send?text=${encodedMsg}#Intent;package=com.whatsapp.w4b;scheme=whatsapp;end`;
             else url = `intent://send?text=${encodedMsg}#Intent;package=com.whatsapp;scheme=whatsapp;end`;
@@ -638,13 +666,20 @@
             url = `whatsapp://send?text=${encodedMsg}`;
             window.location.href = url;
         } else {
+            // DESKTOP MAC/PC DIRECT NATIVE APP
             url = `whatsapp://send?text=${encodedMsg}`;
             window.open(url, '_self');
         }
         closeWhatsAppChoiceModal();
     }
 
-    // --- SYNC ---
+    // --- INIT ---
+    function setGreeting() {
+        const hour = new Date().getHours();
+        document.getElementById('greeting-text').innerText = `${hour < 12 ? "Good Morning," : hour < 17 ? "Good Afternoon," : "Good Evening,"}`;
+    }
+    setGreeting();
+
     window.onload = async () => {
         const savedUser = sessionStorage.getItem('ktpl_user');
         document.getElementById('ob-date').valueAsDate = new Date(); document.getElementById('rl-date').valueAsDate = new Date(); 
@@ -652,17 +687,18 @@
             currentUser = JSON.parse(savedUser);
             document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex';
             try { await performDatabaseSync(); document.getElementById('loading-overlay').style.display = 'none'; applyUserPermissions(); } 
-            catch (error) { console.error(error); document.getElementById('loader-text').innerText = "Offline Mode: Connection Failed."; }
+            catch (error) { console.error(error); document.getElementById('loader-text').innerText = "Offline Mode: Connection Failed."; if(document.getElementById('error-box')) document.getElementById('error-box').innerText = error.message; if(document.getElementById('error-box')) document.getElementById('error-box').style.display = "block"; if(document.getElementById('bypass-btn')) document.getElementById('bypass-btn').style.display = "inline-block"; }
         } else {
             document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex';
         }
     };
 
+    function bypassLoading() { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; }
     function logoutApp() { sessionStorage.clear(); location.reload(); }
 
     async function checkPin() {
         const pin = document.getElementById('app-pin').value; if (!pin) return;
-        document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex';
+        document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Verifying & Syncing Databank...";
         try {
             await performDatabaseSync();
             const user = users.find(u => String(u.PIN || u.pin) === String(pin)) || (pin === "1234" ? {Name: "Master Admin", Role: "Master Admin"} : null);
@@ -671,9 +707,11 @@
                 document.getElementById('loading-overlay').style.display = 'none'; applyUserPermissions();
             } else {
                 document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex';
-                document.getElementById('pin-error').style.display = 'block';
+                document.getElementById('pin-error').style.display = 'block'; document.getElementById('app-pin').value = '';
             }
-        } catch (error) { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; }
+        } catch (error) {
+            console.error(error); document.getElementById('loader-text').innerText = "Sync Failed. Please check connection."; if(document.getElementById('error-box')) document.getElementById('error-box').innerText = error.message; if(document.getElementById('error-box')) document.getElementById('error-box').style.display = "block"; if(document.getElementById('bypass-btn')) document.getElementById('bypass-btn').style.display = "inline-block";
+        }
     }
 
     function applyUserPermissions() {
@@ -681,8 +719,8 @@
         document.getElementById('user-name-text').innerText = `Hi ${currentUser.Name || currentUser.name}!`; document.getElementById('user-name-text').style.display = 'block';
         const role = currentUser.Role || currentUser.role;
         const cFreightInput = document.getElementById('ob-cfreight');
-        if (role === 'Admin' || role === 'Master Admin') { cFreightInput.disabled = false; document.getElementById('nav-admin').style.display = 'flex'; } 
-        else { cFreightInput.disabled = true; document.getElementById('nav-admin').style.display = 'none'; }
+        if (role === 'Admin' || role === 'Master Admin') { cFreightInput.disabled = false; cFreightInput.placeholder = "Amount"; document.getElementById('nav-admin').style.display = 'flex'; } 
+        else { cFreightInput.value = ""; cFreightInput.disabled = true; cFreightInput.placeholder = "Restricted"; document.getElementById('nav-admin').style.display = 'none'; }
         returnToHome();
     }
 
@@ -718,15 +756,62 @@
     function setupMemoryDropdowns() {
         setupCustomDropdown('uf-party', 'uf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort(), triggerCurrentRender);
         setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), triggerCurrentRender);
-        // ... (truncated helper drops, kept logic simple)
+        setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t.from))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t.to))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t.type))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t.weight))].sort(), triggerCurrentRender);
+
+        setupCustomDropdown('ob-party', 'ob-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+        setupCustomDropdown('ob-vnum', 'ob-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'ob'));
+        setupCustomDropdown('ob-tname', 'ob-tname-list', () => Object.keys(transporters).sort());
+        setupCustomDropdown('ob-tperson', 'ob-tperson-list', () => transporters[document.getElementById('ob-tname').value]?.map(p => p.name).sort() || [], (p) => autoFillContact(p, 'ob'));
+        setupCustomDropdown('ob-from', 'ob-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
+        setupCustomDropdown('ob-to', 'ob-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
+
+        setupCustomDropdown('rl-party', 'rl-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+        setupCustomDropdown('rl-vnum', 'rl-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'rl'));
+        setupCustomDropdown('rl-from', 'rl-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
+        setupCustomDropdown('rl-to', 'rl-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
+        setupCustomDropdown('rl-agent', 'rl-agent-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+
+        setupCustomDropdown('rf-party', 'rf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+
+        allTrips.forEach(t => { if (t.dName && t.dName.trim() !== "" && t.dContact) driverData[t.dName.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())] = t.dContact.trim(); });
+        setupCustomDropdown('ob-dname', 'ob-dname-list', () => Object.keys(driverData).sort(), (selectedName) => { document.getElementById('ob-dcontact').value = driverData[selectedName] || ""; });
+
+        const driverNums = [...new Set(Object.values(driverData))];
+        const dcInput = document.getElementById('ob-dcontact'); const dcList = document.getElementById('ob-dcontact-list');
+        if(dcInput && dcList) {
+            dcInput.addEventListener("input", function() {
+                dcList.innerHTML = "";
+                if (this.value.length > 2) {
+                    let c = this.value.replace(/[\s-]/g, '').trim(); const matches = driverNums.filter(n => n.includes(c));
+                    matches.forEach(m => { let div = document.createElement("div"); div.innerHTML = m; div.onclick = () => { dcInput.value = m; dcList.style.display = "none"; }; dcList.appendChild(div); });
+                    dcList.style.display = matches.length ? "block" : "none";
+                } else { dcList.style.display = "none"; }
+            });
+        }
     }
 
+    function autoFillVehicle(vNum, prefix) { const u = vNum.toUpperCase(); if (vehicles[u]) { document.getElementById(`${prefix}-vtype`).value = vehicles[u].type || ""; document.getElementById(`${prefix}-weight`).value = vehicles[u].capacity || ""; } }
+    function autoFillContact(pName, prefix) { const t = document.getElementById(`${prefix}-tname`).value; if (transporters[t]) { const person = transporters[t].find(x => x.name === pName); if (person) document.getElementById(`${prefix}-tcontact`).value = person.phone; } }
+
+    // --- NAVIGATION ENGINE ---
     function openWorkspace(id) {
         document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         currentActiveMainTab = id;
+
+        if(id === 'tab-placement') showPlacementSelection();
+        if(id === 'tab-deployed') { currentDeployedType = ""; showSelectionScreen('deployed'); }
+        if(id === 'tab-pod') { currentPodType = ""; showSelectionScreen('pod'); }
+        if(id === 'tab-payments') { currentRecoType = ""; showSelectionScreen('reco'); }
+        if(id === 'tab-reports') { currentReportType = ""; showSelectionScreen('report'); document.getElementById('screen-report').innerHTML = ''; document.getElementById('print-report-container').innerHTML = ''; document.getElementById('report-actions').style.display = 'none'; }
+
         if (id === 'tab-deployed' || id === 'tab-pod' || id === 'tab-payments' || id === 'tab-reports') { document.getElementById('unified-filter-bar').style.display = 'block'; } 
         else { document.getElementById('unified-filter-bar').style.display = 'none'; }
+
+        clearFilters(); 
     }
 
     function returnToHome() {
@@ -735,7 +820,7 @@
         document.getElementById('unified-filter-bar').style.display = 'none';
         currentActiveMainTab = 'panel-homepage';
     }
-
+    
     function showSelectionScreen(workspace) {
         document.getElementById(`${workspace}-selection-screen`).style.display = 'block';
         document.getElementById(`${workspace}-content-area`).style.display = 'none';
@@ -754,10 +839,47 @@
         triggerCurrentRender();
     }
 
+    // --- BULLETPROOF FILTERING (NO SILENT CRASHES) ---
     function getFilteredTrips(baseTrips) {
         let result = [...baseTrips];
-        // ... (filtering logic remains the same for performance)
+        const role = currentUser.Role || currentUser.role;
+        if (role === 'SelfOnly') result = result.filter(t => t.createdBy === (currentUser.Name || currentUser.name));
+
+        const startDateStr = document.getElementById('uf-start') ? document.getElementById('uf-start').value : ''; 
+        const endDateStr = document.getElementById('uf-end') ? document.getElementById('uf-end').value : '';
+        const vNumMatch = document.getElementById('uf-vnum') ? document.getElementById('uf-vnum').value.trim().toLowerCase() : ''; 
+        const vTypeMatch = document.getElementById('uf-vtype') ? document.getElementById('uf-vtype').value.trim().toLowerCase() : '';
+        const vCapMatch = document.getElementById('uf-vcap') ? document.getElementById('uf-vcap').value.trim().toLowerCase() : ''; 
+        const partyMatch = document.getElementById('uf-party') ? document.getElementById('uf-party').value.trim().toLowerCase() : '';
+        const originMatch = document.getElementById('uf-origin') ? document.getElementById('uf-origin').value.trim().toLowerCase() : ''; 
+        const destMatch = document.getElementById('uf-dest') ? document.getElementById('uf-dest').value.trim().toLowerCase() : '';
+
+        let sDate = startDateStr ? new Date(startDateStr) : null; if(sDate) sDate.setHours(0,0,0,0);
+        let eDate = endDateStr ? new Date(endDateStr) : null; if(eDate) eDate.setHours(23,59,59,999);
+
+        result = result.filter(t => {
+            let passDate = true;
+            if (sDate || eDate) {
+                const parts = t.date ? (t.date || '').split(',')[0].split('/') : []; 
+                if (parts.length === 3) { const tDate = new Date(parts[2], parts[1] - 1, parts[0]); const tTime = tDate.getTime(); if (sDate && tTime < sDate.getTime()) passDate = false; if (eDate && tTime > eDate.getTime()) passDate = false; }
+            }
+            const passV = !vNumMatch || ((t.vNum || '').toLowerCase().includes(vNumMatch)); 
+            const passVType = !vTypeMatch || ((t.type || '').toLowerCase().includes(vTypeMatch));
+            const passVCap = !vCapMatch || ((t.weight || '').toLowerCase().includes(vCapMatch)); 
+            const passP = !partyMatch || ((t.party || '').toLowerCase().includes(partyMatch));
+            const passO = !originMatch || ((t.from || '').toLowerCase().includes(originMatch)); 
+            const passD = !destMatch || ((t.to || '').toLowerCase().includes(destMatch));
+            return passDate && passV && passVType && passVCap && passP && passO && passD;
+        });
+
+        result.sort((a, b) => new Date((b.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((a.date||'').split(',')[0].split('/').reverse().join('-')));
         return result;
+    }
+
+    // --- PLACEMENT ENGINE ---
+    function showPlacementSelection() {
+        document.getElementById('placement-selection-screen').style.display = 'block';
+        document.getElementById('placement-form-container').style.display = 'none';
     }
 
     function openPlacementForm(mode) {
@@ -765,142 +887,772 @@
         document.getElementById('placement-selection-screen').style.display = 'none';
         document.getElementById('placement-form-container').style.display = 'block';
         document.getElementById('placement-form-title').innerText = mode;
+        
         document.getElementById('form-own-booking').style.display = mode === 'Own Booking' ? 'block' : 'none';
         document.getElementById('form-rev-logistics').style.display = mode === 'Reverse Logistics' ? 'block' : 'none';
+        setupMemoryDropdowns(); 
     }
 
     function clearPlacementForm() {
-        document.querySelectorAll('input').forEach(i => i.value = '');
+        document.querySelectorAll('#form-own-booking input, #form-rev-logistics input').forEach(i => i.value = '');
+        document.getElementById('ob-date').valueAsDate = new Date(); document.getElementById('rl-date').valueAsDate = new Date();
     }
 
-    // UPDATED SAVING LOGIC - STAY ON TAB
+    function validatePlacementOwn() {
+        let isValid = true; let req = ['ob-date', 'ob-party', 'ob-from', 'ob-to', 'ob-vnum', 'ob-vtype', 'ob-weight', 'ob-dcontact', 'ob-tname', 'ob-tcontact'];
+        document.querySelectorAll('.error-msg').forEach(msg => msg.style.display = 'none');
+        document.querySelectorAll('input').forEach(input => input.style.borderColor = 'transparent');
+        req.forEach(id => { const el = document.getElementById(id); if (el && !el.value.trim()) { el.style.borderColor = '#b3261e'; isValid = false; }});
+        if (!isValid) alert("Please fill in all mandatory fields (*)."); return isValid;
+    }
+
+    function validatePlacementRev() {
+        let isValid = true; let req = ['rl-date', 'rl-agent', 'rl-from', 'rl-to', 'rl-vnum', 'rl-vtype', 'rl-weight'];
+        document.querySelectorAll('input').forEach(input => input.style.borderColor = 'transparent');
+        req.forEach(id => { const el = document.getElementById(id); if (el && !el.value.trim()) { el.style.borderColor = '#b3261e'; isValid = false; }});
+        if (!isValid) alert("Please fill in all mandatory fields (*)."); return isValid;
+    }
+
+    function savePlacementOwn() {
+        if (!validatePlacementOwn()) return;
+        const vNum = document.getElementById('ob-vnum').value.toUpperCase();
+        const payload = {
+            action: 'saveTrip', id: "TRP-" + Date.now(), date: getFormattedDateVal(document.getElementById('ob-date').value), party: document.getElementById('ob-party').value, 
+            from: document.getElementById('ob-from').value, to: document.getElementById('ob-to').value, vNum: vNum, vType: document.getElementById('ob-vtype').value, weight: document.getElementById('ob-weight').value,
+            createdBy: currentUser.Name || currentUser.name || "Unknown", vFreight: document.getElementById('ob-vfreight').value || "", cFreight: document.getElementById('ob-cfreight').value || "",
+            dName: document.getElementById('ob-dname').value, dContact: formatPhoneString(document.getElementById('ob-dcontact').value), tName: document.getElementById('ob-tname').value, tPerson: document.getElementById('ob-tperson').value, 
+            tContact: formatPhoneString(document.getElementById('ob-tcontact').value), remarks: document.getElementById('ob-remarks').value, bookingType: 'Own Booking', brokingAgent: ''
+        };
+        finalizePlacementSave(payload);
+    }
+
+    function savePlacementRev() {
+        if (!validatePlacementRev()) return;
+        const vNum = document.getElementById('rl-vnum').value.toUpperCase();
+        if (!vehicles[vNum]) { return alert("Error: Reverse Logistics strictly requires a valid KTPL fleet vehicle asset."); }
+        
+        let party = document.getElementById('rl-party').value; 
+        let typeCo = document.getElementById('rl-typeco').value; 
+        if(typeCo && party) party = party + " (" + typeCo + ")";
+        
+        const payload = {
+            action: 'saveTrip', id: "TRP-" + Date.now(), date: getFormattedDateVal(document.getElementById('rl-date').value), party: party || "", 
+            from: document.getElementById('rl-from').value, to: document.getElementById('rl-to').value, vNum: vNum, vType: document.getElementById('rl-vtype').value, weight: document.getElementById('rl-weight').value,
+            createdBy: currentUser.Name || currentUser.name || "Unknown", vFreight: "", cFreight: document.getElementById('rl-cfreight').value || "", dName: "", dContact: "", tName: "", 
+            tPerson: document.getElementById('rl-agent').value, tContact: formatPhoneString(document.getElementById('rl-contact').value), remarks: document.getElementById('rl-remarks').value, bookingType: 'Reverse Logistics', brokingAgent: document.getElementById('rl-agent').value
+        };
+        finalizePlacementSave(payload);
+    }
+
     function finalizePlacementSave(payload) {
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        allTrips.push({ ...payload, id: payload.id, status: "In-Transit", financialLedger: '{"income":[],"expense":[], " :[], "reco":{}}' });
+        allTrips.push({
+            id: payload.id, date: payload.date, party: payload.party, from: payload.from, to: payload.to, vNum: payload.vNum, type: payload.vType, weight: payload.weight, status: "In-Transit", deliveryDate: "", statusNote: "", createdBy: payload.createdBy,
+            cNote: "", podDate: "", vFreight: payload.vFreight, cFreight: payload.cFreight, bookingType: payload.bookingType, brokingAgent: payload.brokingAgent, financialLedger: '{"income":[],"expense":[]}', invoiceNo: "",
+            receivableStatus: "Pending", amtReceived: "", advancePaid: "", payableStatus: "Pending", remarks: payload.remarks, dName: payload.dName, dContact: payload.dContact, tName: payload.tName, tPerson: payload.tPerson, tContact: payload.tContact
+        });
         alert("Details saved successfully!"); 
         clearPlacementForm(); 
-        // We do NOT call showPlacementSelection() here; we stay in the form mode
     }
 
-    // --- DEPLOYED STATUS LOGIC FIX ---
-    function handleStatusChange(tripId, status, el) {
-        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTripStatus', id: tripId, status: status }) });
-        const t = allTrips.find(x => x.id === tripId);
-        if(t) t.status = status;
+    function generatePlacementMessageOwn(type) {
+        if (!validatePlacementOwn()) return; 
+        const date = getFormattedDateVal(document.getElementById('ob-date').value); const vNum = document.getElementById('ob-vnum').value.toUpperCase();
+        let header = `*Placement Details - ${vNum} - ${document.getElementById('ob-from').value} to ${document.getElementById('ob-to').value} - ${document.getElementById('ob-vtype').value} - ${document.getElementById('ob-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${document.getElementById('ob-party').value}\n\n*From:* ${document.getElementById('ob-from').value}\n*To:* ${document.getElementById('ob-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('ob-vtype').value}\n*Charged Weight:* ${document.getElementById('ob-weight').value}\n\n`;
+        let dName = document.getElementById('ob-dname').value; let dContact = formatPhoneString(document.getElementById('ob-dcontact').value);
+        if (dName) header += `*Driver Name:* ${dName}\n`; if (dContact) header += `*Driver Contact No:* ${dContact}\n\n`;
+        if (type === 'team') {
+            header += `*Transporter:* ${document.getElementById('ob-tname').value}\n`;
+            if (document.getElementById('ob-tperson').value) header += `*Person Name:* ${document.getElementById('ob-tperson').value}\n`;
+            if (document.getElementById('ob-tcontact').value) header += `*Contact Number:* ${document.getElementById('ob-tcontact').value}\n\n`;
+            if (document.getElementById('ob-remarks').value) header += `*Remarks:* ${document.getElementById('ob-remarks').value}`;
+        }
+        openWhatsAppChoice(header);
+    }
+
+    function generatePlacementMessageRev(type) {
+        if (!validatePlacementRev()) return; 
+        const date = getFormattedDateVal(document.getElementById('rl-date').value); const vNum = document.getElementById('rl-vnum').value.toUpperCase();
+        let party = document.getElementById('rl-party').value; let typeCo = document.getElementById('rl-typeco').value; if(typeCo) party += " (" + typeCo + ")";
+        let header = `*Placement Details (Rev Log) - ${vNum} - ${document.getElementById('rl-from').value} to ${document.getElementById('rl-to').value} - ${document.getElementById('rl-vtype').value} - ${document.getElementById('rl-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${document.getElementById('rl-from').value}\n*To:* ${document.getElementById('rl-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('rl-vtype').value}\n*Charged Weight:* ${document.getElementById('rl-weight').value}\n\n*Broking Agency:* ${document.getElementById('rl-agent').value}\n`;
+        if(document.getElementById('rl-agent').value) header += `*Agent Name:* ${document.getElementById('rl-agent').value}\n`;
+        if(document.getElementById('rl-contact').value) header += `*Contact No:* ${document.getElementById('rl-contact').value}\n\n`;
+        if(document.getElementById('rl-cfreight').value) header += `*Charged Freight:* ${document.getElementById('rl-cfreight').value}\n`;
+        if(document.getElementById('rl-remarks').value) header += `*Remarks:* ${document.getElementById('rl-remarks').value}`;
+        openWhatsAppChoice(header);
+    }
+
+    // --- DEPLOYED WORKSPACE ---
+    function setDepType(type) {
+        currentDeployedType = type;
+        document.getElementById('deployed-selection-screen').style.display = 'none';
+        document.getElementById('deployed-content-area').style.display = 'block';
+        document.getElementById('deployed-title-text').innerText = type + " Fleet";
+        triggerCurrentRender();
+    }
+    
+    function setDepStat(stat) {
+        currentDeployedStatus = stat;
+        document.getElementById('btn-dep-stat-ong').classList.toggle('active', stat === 'In-Transit');
+        document.getElementById('btn-dep-stat-com').classList.toggle('active', stat === 'Delivered');
+        document.getElementById('btn-dep-stat-can').classList.toggle('active', stat === 'Cancelled Trip');
         triggerCurrentRender();
     }
 
-    // --- PAYMENTS MATH & UI FIXES ---
+    function renderDeployed() {
+        const container = document.getElementById('deployed-container');
+        if(!currentDeployedType) return; 
+        let items = getFilteredTrips(allTrips);
+        items = items.filter(t => (t.bookingType || 'Own Booking') === currentDeployedType && (t.status || 'In-Transit').trim() === currentDeployedStatus);
+        if(items.length === 0) { container.innerHTML = "<p style='padding:20px; color:#5f6368; text-align:center;'>No trips found.</p>"; return; }
+        container.innerHTML = items.map((t, i) => buildTripCard(t, i, 'deployed')).join('');
+    }
+
+    function handleStatusChange(tripId, newStatus, selectElement) {
+        if (newStatus === 'Delivered') {
+            triggerDeliveryModal(tripId);
+            selectElement.value = 'In-Transit'; // Automatically revert UI until modal is confirmed
+        } else if (newStatus === 'Cancelled Trip') {
+            if (confirm("Are you sure you want to cancel this trip?")) {
+                revertStatus(tripId, 'Cancelled Trip');
+            } else {
+                selectElement.value = 'In-Transit'; // Undo action
+            }
+        } else {
+            revertStatus(tripId, 'In-Transit');
+        }
+    }
+
+    // --- POD WORKSPACE ---
+    function setPodType(type) {
+        currentPodType = type;
+        document.getElementById('pod-selection-screen').style.display = 'none';
+        document.getElementById('pod-content-area').style.display = 'block';
+        document.getElementById('pod-title-text').innerText = type + " PODs";
+        triggerCurrentRender();
+    }
+    
+    function setPodStat(stat) {
+        currentPodStatus = stat;
+        document.getElementById('btn-pod-stat-pen').classList.toggle('active', stat === 'Pending');
+        document.getElementById('btn-pod-stat-rec').classList.toggle('active', stat === 'Received');
+        triggerCurrentRender();
+    }
+
+    function renderPOD() {
+        const container = document.getElementById('pod-container');
+        if(!currentPodType) return;
+        let items = getFilteredTrips(allTrips);
+        items = items.filter(t => (t.bookingType || 'Own Booking') === currentPodType);
+        items = items.filter(t => currentPodStatus === 'Pending' ? !t.podDate : t.podDate);
+        document.getElementById('pod-summary').innerText = `No. of ${currentPodStatus} POD: ${items.length}`;
+        if(items.length === 0) { container.innerHTML = "<p style='padding:20px; color:#5f6368; text-align:center;'>No records found.</p>"; return; }
+        const viewMode = currentPodStatus === 'Pending' ? 'pod-pending' : 'pod-received';
+        container.innerHTML = items.map((t, i) => buildTripCard(t, i, viewMode)).join('');
+    }
+
+    // --- PAYMENTS & RECONCILIATION ENGINE (EXACT MATH REBUILT) ---
+    function setRecoType(type) {
+        currentRecoType = type;
+        document.getElementById('reco-selection-screen').style.display = 'none';
+        document.getElementById('reco-content-area').style.display = 'block';
+        document.getElementById('reco-title-text').innerText = type + " Ledger";
+        triggerCurrentRender();
+    }
+
+    function setRecoStat(stat) {
+        currentRecoStat = stat; 
+        document.getElementById('btn-reco-stat-pen').classList.toggle('active', stat === 'Pending');
+        document.getElementById('btn-reco-stat-com').classList.toggle('active', stat === 'Completed');
+        triggerCurrentRender();
+    }
+
+    function toggleRecoCard(id) {
+        const body = document.getElementById(`reco-body-${id}`);
+        if(body.classList.contains('open')){ 
+            body.classList.remove('open'); 
+            currentOpenRecoId = null;
+        } else { 
+            body.classList.add('open'); 
+            currentOpenRecoId = id;
+        }
+    }
+
     function renderReconciliation() {
         const container = document.getElementById('reco-container');
         if(!currentRecoType) return;
-        let trips = getFilteredTrips(allTrips).filter(t => (t.bookingType || 'Own Booking') === currentRecoType);
-        
+
+        let trips = getFilteredTrips(allTrips);
+        trips = trips.filter(t => (t.bookingType || 'Own Booking') === currentRecoType);
+
+        // Explicit Filter: Own Booking strictly shows NON-KTPL vehicles
+        if (currentRecoType === 'Own Booking') trips = trips.filter(t => !vehicles[(t.vNum || '').toUpperCase()]); 
+
+        trips = trips.filter(t => {
+            let ledger = { reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.reco) ledger.reco=p.reco; } catch(e){}
+            let s = ledger.reco.status || "Pending";
+            if (currentRecoStat === "Completed") return s === "Cleared";
+            return s !== "Cleared";
+        });
+
+        if(trips.length === 0) { container.innerHTML = "<p style='padding:20px; color:#5f6368; text-align:center;'>No ledger records matching parameters.</p>"; return; }
+
+        const role = currentUser.Role || currentUser.role; const isMasterAdmin = (role === 'Master Admin' || role === 'Admin');
+
         container.innerHTML = trips.map((t, i) => {
-            let ledger = { income: [], expense: [], reco: { osDues: [] } };
+            let ledger = { income: [], expense: [], reco: {} };
             try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
             
-            let baseRev = parseFloat(t.cFreight || 0); let extraRev = ledger.income.reduce((s, r) => s + r.amt, 0);
-            let baseCost = parseFloat(t.vFreight || 0); let extraCost = ledger.expense.reduce((s, r) => s + r.amt, 0);
-            let totalReceivable = baseRev + extraRev;
-            let totalPayable = baseCost + extraCost;
-
-            // Dues logic
-            let totalOsDues = (ledger.reco.osDues || []).reduce((s, d) => s + (parseFloat(d.amt)||0), 0);
-            let advRcvd = parseFloat(ledger.reco.advRcvd || 0);
-            
-            let balanceToPay = 0;
-            let displayResult = "";
-
-            if (currentRecoType === 'Own Booking') {
-                // (Base + Additional) - (Total Payable + Adv + Dues)
-                balanceToPay = (baseRev + extraRev) - (totalPayable + advRcvd + totalOsDues);
-                displayResult = `<div class="highlight-red-box">Balance to Pay: ₹${balanceToPay.toFixed(2)}</div>`;
-            } else {
-                // (Base + Extra + Adv + Dues) - Total Payable
-                let outstanding = (baseRev + extraRev + advRcvd + totalOsDues) - totalPayable;
-                displayResult = `<div class="highlight-red-box">Outstanding Amount: ₹${outstanding.toFixed(2)}</div>`;
+            // Legacy Migration Support
+            if(ledger.expense.length === 0 && (t.otherExp || t.loadingExp || t.unloadingExp || t.lrExp)) {
+                if(t.otherExp) ledger.expense.push({type: t.otherExpReason || 'Generic', amt: parseFloat(t.otherExp)});
+                if(t.loadingExp) ledger.expense.push({type: 'Loading', amt: parseFloat(t.loadingExp)});
+                if(t.unloadingExp) ledger.expense.push({type: 'Unloading', amt: parseFloat(t.unloadingExp)});
+                if(t.lrExp) ledger.expense.push({type: 'LR', amt: parseFloat(t.lrExp)});
             }
 
-            return `
+            let baseRev = parseFloat(t.cFreight || 0); let extraRev = ledger.income.reduce((s, r) => s + r.amt, 0);
+            let baseCost = parseFloat(t.vFreight || 0); let extraCost = ledger.expense.reduce((s, r) => s + r.amt, 0);
+            
+            let totalPayable = baseCost + extraCost; 
+            let totalReceivable = baseRev + extraRev;
+
+            let headerInfo = "";
+            if (currentRecoType === 'Own Booking') {
+                headerInfo = `<strong>${(t.date||'').split(',')[0]}</strong> | <strong>${t.vNum}</strong> | ${t.from}➔${t.to} <br> <span style="color:#5f6368; font-size:11px;">Party: ${t.party || 'N/A'} | Transporter: ${t.tName || 'N/A'}</span>`;
+            } else {
+                headerInfo = `<strong>${(t.date||'').split(',')[0]}</strong> | <strong>${t.vNum}</strong> | ${t.from}➔${t.to} <br> <span style="color:#5f6368; font-size:11px;">Broker: ${t.brokingAgent || 'N/A'}</span>`;
+            }
+
+            let isOpenClass = (currentOpenRecoId === t.id) ? 'open' : '';
+
+            let html = `
                 <div class="reco-accordion-header" onclick="toggleRecoCard('${t.id}')">
-                    <div>${t.vNum} | ${t.party || 'N/A'}</div>
-                    <div>▼</div>
+                    <div style="font-size:13px; color:#1f1f1f;">${headerInfo}</div>
+                    <div style="font-size:16px; color:#0b57d0;">▼</div>
                 </div>
-                <div id="reco-body-${t.id}" class="reco-accordion-body">
+                <div id="reco-body-${t.id}" class="reco-accordion-body ${isOpenClass}">
                     <div class="reco-split-grid">
-                        <div class="reco-panel">
-                            <div class="reco-header-title">Receivables</div>
-                            <div class="calc-row"><span>Freight:</span> <span>₹${totalReceivable}</span></div>
-                             ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+            `;
+
+            // EXACT OWN BOOKING MATH LOGIC
+            if (currentRecoType === 'Own Booking') {
+                let advPaid = parseFloat(ledger.reco.advPaid || t.advancePaid || 0); 
+                let balPaid1 = parseFloat(ledger.reco.balPaid1 || ledger.reco.balPaid || 0); 
+                let balPaid2 = parseFloat(ledger.reco.balPaid2 || 0);
+                let balPaid3 = parseFloat(ledger.reco.balPaid3 || 0);
+                let balToPay = totalPayable - advPaid - balPaid1 - balPaid2 - balPaid3;
+                
+                html += `
+                    <div class="reco-panel">
+                        <div class="reco-header-title">Receivables</div>
+                        <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
+                        <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
+                            ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
                         </div>
-                        <div class="reco-panel">
-                            <div class="reco-header-title">Payables</div>
-                            <div class="calc-row"><span>Cost:</span> <span>₹${totalPayable}</span></div>
+                        <div class="calc-gross"><span>Total Receivable:</span> <span>₹${totalReceivable}</span></div>
+                    </div>
+                    <div class="reco-panel">
+                        <div class="reco-header-title">Payables</div>
+                        <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
+                        <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
                             ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
                         </div>
+                        <div class="calc-gross"><span>Total Payable:</span> <span>₹${totalPayable}</span></div>
+                `;
+                if(isMasterAdmin) {
+                    html += `
+                        <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Paid</label><input type="number" id="reco-adv-${t.id}" class="compact-input" value="${advPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-advD-${t.id}" class="compact-input" value="${ledger.reco.advDate || ''}"></div></div>
+                        <div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid 1</label><input type="number" id="reco-bal1-${t.id}" class="compact-input" value="${balPaid1 || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD1-${t.id}" class="compact-input" value="${ledger.reco.balDate1 || ledger.reco.balDate || ''}"></div></div>
+                        <div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid 2</label><input type="number" id="reco-bal2-${t.id}" class="compact-input" value="${balPaid2 || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD2-${t.id}" class="compact-input" value="${ledger.reco.balDate2 || ''}"></div></div>
+                        <div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid 3</label><input type="number" id="reco-bal3-${t.id}" class="compact-input" value="${balPaid3 || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD3-${t.id}" class="compact-input" value="${ledger.reco.balDate3 || ''}"></div></div>
+                        <div class="highlight-red-box">Balance to Pay: ₹${balToPay}</div>
+                    `;
+                }
+                html += `</div>`;
+            } 
+            // EXACT REVERSE LOGISTICS MATH LOGIC
+            else {
+                let advRec = parseFloat(ledger.reco.advRec || 0); 
+                let osDues1 = parseFloat(ledger.reco.osDues1 || ledger.reco.osDues || 0); 
+                let osDues2 = parseFloat(ledger.reco.osDues2 || 0);
+                let osDues3 = parseFloat(ledger.reco.osDues3 || 0);
+                let totalOs = totalReceivable - totalPayable - advRec - osDues1 - osDues2 - osDues3;
+                
+                html += `
+                    <div class="reco-panel">
+                        <div class="reco-header-title">Receivables</div>
+                        <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
+                        <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
+                            ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                        </div>
+                        <div class="calc-gross"><span>Total Receivable:</span> <span>₹${totalReceivable}</span></div>
+                `;
+                if(isMasterAdmin) {
+                    html += `
+                        <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Rcvd</label><input type="number" id="reco-advR-${t.id}" class="compact-input" value="${advRec || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-advRD-${t.id}" class="compact-input" value="${ledger.reco.advRecDate || ''}"></div></div>
+                        <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 1</label><input type="number" id="reco-os1-${t.id}" class="compact-input" value="${osDues1 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD1-${t.id}" class="compact-input" value="${ledger.reco.osDate1 || ledger.reco.osDate || ''}"></div></div>
+                        <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 2</label><input type="number" id="reco-os2-${t.id}" class="compact-input" value="${osDues2 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD2-${t.id}" class="compact-input" value="${ledger.reco.osDate2 || ''}"></div></div>
+                        <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 3</label><input type="number" id="reco-os3-${t.id}" class="compact-input" value="${osDues3 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD3-${t.id}" class="compact-input" value="${ledger.reco.osDate3 || ''}"></div></div>
+                        <div class="highlight-red-box">Outstanding Amount: ₹${totalOs}</div>
+                    `;
+                }
+                html += `</div>
+                    <div class="reco-panel">
+                        <div class="reco-header-title">Payables</div>
+                        <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
+                        <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
+                            ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                        </div>
+                        <div class="calc-gross"><span>Total Payable:</span> <span>₹${totalPayable}</span></div>
                     </div>
-                    ${displayResult}
-                    <button class="btn btn-clear" onclick="openFinancialAllocation('${t.id}')">Edit Ledger</button>
-                </div>
-            `;
+                `;
+            }
+
+            html += `</div>`; 
+            if(isMasterAdmin) {
+                html += `
+                    <div style="border-top: 1px solid #f1f3f4; margin-top:15px; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
+                        <button class="btn btn-clear" style="padding:8px 12px; font-size:11px; width:auto; border-radius:12px;" onclick="openFinancialAllocation('${t.id}')">💰 Edit Extra Financials</button>
+                        <div style="display:flex; gap:8px;">
+                            <select id="mstat-${t.id}" class="compact-input" style="width:110px;">
+                                <option value="Pending" ${ledger.reco.status!=='Cleared'?'selected':''}>Pending</option>
+                                <option value="Cleared" ${ledger.reco.status==='Cleared'?'selected':''}>Cleared</option>
+                            </select>
+                            <button class="btn btn-primary" style="padding:8px 16px; font-size:11px; width:auto; border-radius:12px;" onclick="commitRecoRecord('${t.id}', '${currentRecoType}')">Save</button>
+                        </div>
+                    </div>
+                `;
+            }
+            html += `</div>`;
+            return html;
         }).join('');
     }
 
-    function openFinancialAllocation(tripId) {
-        const trip = allTrips.find(t => t.id === tripId);
-        document.getElementById('fin-trip-id').value = tripId;
-        let ledger = { income: [], expense: [], reco: { osDues: [] } };
-        try { ledger = JSON.parse(trip.financialLedger); } catch(e){}
+    function commitRecoRecord(id, mode) {
+        let t = allTrips.find(x => x.id === id); if(!t) return;
+        let ledger = { income: [], expense: [], reco: {} };
+        try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
+
+        ledger.reco.status = document.getElementById(`mstat-${id}`).value;
+
+        if (mode === 'Own Booking') {
+            ledger.reco.advPaid = document.getElementById(`reco-adv-${id}`).value; ledger.reco.advDate = document.getElementById(`reco-advD-${id}`).value;
+            ledger.reco.balPaid1 = document.getElementById(`reco-bal1-${id}`).value; ledger.reco.balDate1 = document.getElementById(`reco-balD1-${id}`).value;
+            ledger.reco.balPaid2 = document.getElementById(`reco-bal2-${id}`).value; ledger.reco.balDate2 = document.getElementById(`reco-balD2-${id}`).value;
+            ledger.reco.balPaid3 = document.getElementById(`reco-bal3-${id}`).value; ledger.reco.balDate3 = document.getElementById(`reco-balD3-${id}`).value;
+        } else {
+            ledger.reco.advRec = document.getElementById(`reco-advR-${id}`).value; ledger.reco.advRecDate = document.getElementById(`reco-advRD-${id}`).value;
+            ledger.reco.osDues1 = document.getElementById(`reco-os1-${id}`).value; ledger.reco.osDate1 = document.getElementById(`reco-osD1-${id}`).value;
+            ledger.reco.osDues2 = document.getElementById(`reco-os2-${id}`).value; ledger.reco.osDate2 = document.getElementById(`reco-osD2-${id}`).value;
+            ledger.reco.osDues3 = document.getElementById(`reco-os3-${id}`).value; ledger.reco.osDate3 = document.getElementById(`reco-osD3-${id}`).value;
+        }
+
+        const jsonStr = JSON.stringify(ledger); t.financialLedger = jsonStr;
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: id, ledgerJson: jsonStr }) });
+
+        alert("Ledger updated."); 
+        renderReconciliation(); // Will retain open accordion due to currentOpenRecoId tracking
+    }
+
+    // --- REPORTS ENGINE ---
+    function setReportType(type) {
+        currentReportType = type;
+        document.getElementById('report-selection-screen').style.display = 'none';
+        document.getElementById('report-content-area').style.display = 'block';
+        document.getElementById('report-title-text').innerText = type + " Reports";
+    }
+
+    function generateCustomReport() {
+        const rfPartyEl = document.getElementById('rf-party');
+        const pName = rfPartyEl ? rfPartyEl.value : "";
         
-        const container = document.getElementById('os-dues-container');
-        container.innerHTML = "";
-        (ledger.reco.osDues || []).forEach(due => addOsDueRow(due.amt, due.date));
-        // ... (render income/expense rows similarly)
-        document.getElementById('financialModal').style.display = "flex";
-    }
+        let finalTrips = getFilteredTrips(allTrips);
+        finalTrips = finalTrips.filter(t => (t.bookingType || 'Own Booking') === currentReportType);
+        if(pName) finalTrips = finalTrips.filter(t => (t.party || '').toLowerCase().includes(pName.toLowerCase()));
 
-    function addOsDueRow(amt = "", date = "") {
-        const row = document.createElement('div'); row.className = "financial-row";
-        row.innerHTML = `<input type="number" placeholder="Amt" class="compact-input os-amt" value="${amt}"><input type="date" class="compact-input os-date" value="${date}"><button class="btn" onclick="this.parentElement.remove()">X</button>`;
-        document.getElementById('os-dues-container').appendChild(row);
-    }
+        const tripStat = document.getElementById('report-trip-status').value; const podStat = document.getElementById('report-pod-status').value;
+        if (tripStat !== 'All') finalTrips = finalTrips.filter(t => (t.status || '').trim() === tripStat);
+        if (podStat !== 'All') {
+            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => !t.podDate || String(t.podDate).trim() === '');
+            if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && String(t.podDate).trim() !== '');
+        }
 
-    function saveFinancialLedger() {
-        const tripId = document.getElementById('fin-trip-id').value;
-        const trip = allTrips.find(t => t.id === tripId);
-        let ledger = { income: [], expense: [], reco: { osDues: [] } };
-        // ... (read inputs, populate ledger)
-        document.querySelectorAll('#os-dues-container .financial-row').forEach(r => {
-            ledger.reco.osDues.push({ amt: r.querySelector('.os-amt').value, date: r.querySelector('.os-date').value });
+        const screenContainer = document.getElementById('screen-report'); const printContainer = document.getElementById('print-report-container');
+        document.getElementById('report-actions').style.display = 'grid';
+
+        if (finalTrips.length === 0) { screenContainer.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No data matches these filters.</div>`; printContainer.innerHTML = ``; return; }
+
+        const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']; const dayStr = days[today.getDay()];
+
+        // 1. SCREEN UI GENERATION
+        let screenHtml = `<table class="report-table"><thead><tr><th>Sr No</th><th>Type</th><th>Party Name</th><th>Date</th><th>Route</th><th>Vehicle</th><th>Status</th><th>C-Note</th><th>POD Date</th><th>Remarks</th></tr></thead><tbody>`;
+        finalTrips.forEach((t, i) => {
+            let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
+            screenHtml += `<tr><td>${i+1}</td><td>${t.bookingType || 'Own'}</td><td><strong>${t.party || ''}</strong></td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum}</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
         });
-        
-        const jsonStr = JSON.stringify(ledger);
-        trip.financialLedger = jsonStr;
-        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: tripId, ledgerJson: jsonStr }) });
-        closeFinancialModal();
-        renderReconciliation(); // This refreshes just the payments UI
+        screenHtml += `</tbody></table>`; screenContainer.innerHTML = screenHtml;
+
+        // 2. PRINT PDF GENERATION
+        const uniqueParties = [...new Set(finalTrips.map(t => t.party || 'Unknown'))];
+        let printHtml = `<div class="print-header"><h2>Data Report as on ${dateStr}, ${dayStr} - ${currentReportType}</h2></div><div class="party-table-wrapper"><table class="print-table"><thead><tr><th style="width:15%;">Party Name</th><th style="width:5%; text-align:center;">Sr</th><th style="width:10%;">Date</th><th style="width:15%;">Route</th><th style="width:15%;">Vehicle</th><th style="width:10%;">Status</th><th style="width:10%;">C-Note</th><th style="width:10%;">POD Date</th><th style="width:10%;">Remarks</th></tr></thead><tbody>`;
+        uniqueParties.forEach(party => {
+            const pTrips = finalTrips.filter(t => (t.party || 'Unknown') === party); if (pTrips.length === 0) return;
+            pTrips.forEach((t, i) => {
+                let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
+                printHtml += `<tr>`; if (i === 0) printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
+                printHtml += `<td style="text-align:center;">${i+1}</td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum} (${t.weight})</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
+            });
+            printHtml += `<tr><td colspan="9" style="border-bottom:2px solid #000; padding:0; height:0;"></td></tr>`;
+        });
+        printHtml += `</tbody></table></div>`; printContainer.innerHTML = printHtml; currentReportTrips = finalTrips; 
     }
 
-    // ADMIN MODAL ADDITION
+    function shareReportWhatsApp() {
+        if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
+        const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        let message = `*Vehicle Status Update - ${dateStr}*\n\n`;
+        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party || 'Unknown'))];
+        uniqueParties.forEach(p => {
+            message += `*Client:* ${p}\n`; let counter = 1;
+            currentReportTrips.forEach(t => {
+                if ((t.party || 'Unknown') === p) {
+                    let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
+                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight}\n*Status:* *${stat}*\n`;
+                    if (t.statusNote) message += `*Current Location:* ${t.statusNote}\n`;
+                    message += `\n`; counter++;
+                }
+            });
+        });
+        openWhatsAppChoice(message);
+    }
+
+    function triggerMISGeneration(misType) {
+        const rfPartyEl = document.getElementById('rf-party');
+        let pName = rfPartyEl ? rfPartyEl.value : "";
+        if(!pName) return alert("MIS Generation requires a Party Name. Please select a client from the filter.");
+        let tripsToExport = allTrips.filter(t => (t.party || '').toLowerCase() === pName.toLowerCase() && (t.bookingType || 'Own Booking') === currentReportType);
+        if(tripsToExport.length === 0) return alert("No records found for this party under the current booking type.");
+        const wb = XLSX.utils.book_new(); let grouped = {};
+        
+        tripsToExport.forEach(t => {
+            let mName = "Master";
+            if(t.date && t.date.includes('/')) { let parts = t.date.split('/'); if(parts[1]) { const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]; let idx = parseInt(parts[1]) - 1; if(months[idx]) mName = months[idx] + " " + parts[2]; } }
+            if(!grouped[mName]) grouped[mName] = []; grouped[mName].push(t);
+        });
+
+        for (let mKey in grouped) {
+            let rawRows = []; rawRows.push(["Sr. No.", "C-Note No.", "Booking Date", "Delivery Date", "TAT", "From", "To", "Qty", "Pkg Type", "Vehicle No.", "Vehicle Type", "Vehicle Capacity", "Remarks"]);
+            grouped[mKey].forEach((t, i) => {
+                let tat = "";
+                if(t.deliveryDate && t.date) {
+                    try { let p1 = t.date.split(',')[0].split('/'); let p2 = t.deliveryDate.split('/'); let d1 = new Date(p1[2], p1[1]-1, p1[0]); let d2 = new Date(p2[2], p2[1]-1, p2[0]); let diff = d2 - d1; if(diff >= 0) tat = Math.round(diff / (1000 * 60 * 60 * 24)) + " Days"; } catch(err){}
+                }
+                rawRows.push([i+1, t.cNote || "-", (t.date || '').split(',')[0], t.deliveryDate || "-", tat, t.from, t.to, t.weight, t.type, t.vNum, t.type, t.weight, t.remarks || ""]);
+            });
+            const ws = XLSX.utils.aoa_to_sheet(rawRows); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, mKey);
+        }
+        XLSX.writeFile(wb, `KTPL_${misType}_${pName}.xlsx`);
+    }
+
+    function triggerRecoExcelDownload() {
+        const rfPartyEl = document.getElementById('rf-party');
+        let pName = rfPartyEl ? rfPartyEl.value : "";
+        let tripsToExport = allTrips.filter(t => (t.bookingType || 'Own Booking') === currentReportType);
+        if(pName) tripsToExport = tripsToExport.filter(t => (t.party || '').toLowerCase() === pName.toLowerCase());
+
+        const wb = XLSX.utils.book_new(); let rawRows = [];
+        rawRows.push(["Trip ID", "Booking Type", "Date", "Party Name", "Vehicle No.", "Route", "Total Receivable", "Ledger Status", "Total Payable", "KTPL Margin"]);
+        
+        tripsToExport.forEach(t => {
+            let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
+            let safeIncome = ledger.income || []; let safeExpense = ledger.expense || [];
+            let baseRev = parseFloat(t.cFreight || 0); let extraRev = safeIncome.reduce((s, r) => s + r.amt, 0); let totalReceivable = baseRev + extraRev;
+            let baseCost = parseFloat(t.vFreight || 0); let extraCost = safeExpense.reduce((s, r) => s + r.amt, 0); let totalPayable = baseCost + extraCost;
+            let margin = totalReceivable - totalPayable;
+            rawRows.push([t.id, t.bookingType, (t.date || '').split(',')[0], t.party || 'Unknown', t.vNum, `${t.from} to ${t.to}`, totalReceivable, ledger.reco.status || "Pending", totalPayable, margin]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(rawRows); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, "Reconciliation Master"); XLSX.writeFile(wb, `KTPL_Payments_Ledger.xlsx`);
+    }
+
+    // --- SHARED CARD HELPER (DEPLOYED & POD) ---
+    function buildTripCard(trip, index, viewMode) {
+        const role = currentUser.Role || currentUser.role;
+        let isReadOnly = (role === 'ReadOnly');
+        const isMasterAdmin = (role === 'Master Admin' || role === 'Admin');
+
+        let statusClass = 'status-transit';
+        let statusText = (trip.status || '').trim();
+        if (statusText === 'Delivered') { statusClass = 'status-delivered'; statusText = `Delivered: ${trip.deliveryDate}`; }
+        if (statusText === 'Cancelled Trip') { statusClass = 'status-cancelled'; statusText = `Cancelled`; }
+
+        let cardHtml = `
+            <div class="trip-card">
+                <div style="border-bottom: 1px solid #f1f3f4; padding-bottom: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;">
+                    <span><strong>#${index + 1}</strong> | ${(trip.date||'').split(',')[0]}</span>
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                </div>
+                <div style="margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
+                    <span><strong>Party:</strong> ${trip.party || 'N/A'}</span>
+        `;
+        if (isMasterAdmin) { cardHtml += `<span style="cursor:pointer; color:#0b57d0; font-size:10px; font-weight:600; text-transform:uppercase;" onclick="openAdminEdit('${trip.id}')">Edit Trip</span>`; }
+        cardHtml += `</div>
+                <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
+                <div style="margin-bottom: 5px;"><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</div>
+        `;
+
+        if (trip.bookingType === 'Reverse Logistics' && trip.brokingAgent) {
+            cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Agency:</strong> ${trip.brokingAgent}</div>`;
+        } 
+        
+        if (isMasterAdmin && trip.vFreight && (trip.vFreight || '').trim() !== '') {
+            cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Vehicle Freight:</strong> ${trip.vFreight}</div>`;
+        }
+
+        if (isMasterAdmin && trip.cFreight && (trip.cFreight || '').trim() !== '') {
+            cardHtml += `<div style="margin-bottom: 5px; color:#146c2e; font-size:11px; font-weight:500;"><strong>Charged Freight:</strong> ${trip.cFreight}</div>`;
+        }
+
+        const dTel = getSafeTel(trip.dContact); const tTel = getSafeTel(trip.tContact);
+
+        cardHtml += `
+            <div style="font-size: 11px; margin-bottom: 10px;">
+                <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#0b57d0; font-weight:500; cursor:pointer;" onclick="document.getElementById('contact-${viewMode}-${trip.id}').style.display = document.getElementById('contact-${viewMode}-${trip.id}').style.display === 'block' ? 'none' : 'block';">View Contacts ▼</span>
+                <div id="contact-${viewMode}-${trip.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:6px; margin-top:5px; border:1px solid #dadce0; color:#444746;">
+        `;
+        
+        if (trip.bookingType === 'Own Booking') {
+            cardHtml += `<div style="margin-bottom:6px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} <br> <a href="tel:${dTel}" style="color:#0b57d0; text-decoration:none;">📞 ${trip.dContact || 'N/A'}</a></div>`;
+            cardHtml += `<div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} <br> <a href="tel:${tTel}" style="color:#0b57d0; text-decoration:none;">📞 ${trip.tContact || 'N/A'}</a></div>`;
+        } else {
+            cardHtml += `<div><strong>Broking Agent:</strong> ${trip.tPerson || 'N/A'} <br> <a href="tel:${tTel}" style="color:#0b57d0; text-decoration:none;">📞 ${trip.tContact || 'N/A'}</a></div>`;
+        }
+        cardHtml += `</div></div>`;
+
+        if (viewMode === 'deployed' && !isReadOnly) {
+            cardHtml += `
+                <div class="grid-2" style="margin-bottom: 5px;">
+                    <input type="text" class="compact-input" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
+                    <input type="text" class="compact-input" placeholder="Remarks" value="${trip.remarks || ''}" onchange="updateBackendData('${trip.id}', 'updateTripRemark', this.value)">
+                </div>
+            `;
+            if ((trip.status || '').trim() === 'In-Transit') {
+                cardHtml += `
+                    <div style="display:flex; margin-top:5px; gap: 8px; width: 100%;">
+                        <select class="compact-input" onchange="handleStatusChange('${trip.id}', this.value, this)" style="flex:1;">
+                            <option value="In-Transit" selected>In-Transit</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled Trip">Cancelled Trip</option>
+                        </select>
+                        <input type="text" class="compact-input" placeholder="Current location..." value="${trip.statusNote || ""}" onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="flex:2;">
+                    </div>
+                `;
+            } else if (isMasterAdmin) {
+                cardHtml += `
+                    <div style="display:flex; margin-top:5px;">
+                        <select class="compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')">
+                            <option value="" selected>Status Locked</option>
+                            <option value="In-Transit">Undo: Revert to In-Transit</option>
+                        </select>
+                    </div>
+                `;
+            }
+            
+            cardHtml += `
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}', '${viewMode}')">▶ History</button>
+                    <div style="display:flex; gap: 5px;">
+                        <button class="btn btn-clear" style="font-size:10px; padding:6px 10px; width:auto; border-radius:12px;" onclick="openFinancialAllocation('${trip.id}')">💰 Fin</button>
+                        <button class="btn btn-primary" style="font-size:10px; padding:6px 10px; width:auto; border-radius:12px;" onclick="openShareModal('${trip.id}')">Share</button>
+                    </div>
+                </div>
+                <div id="hist-${viewMode}-${trip.id}" class="history-panel"></div>
+            `;
+        }
+
+        if (viewMode === 'pod-pending' && !isReadOnly) {
+            cardHtml += `
+                <div style="margin-bottom: 5px;"><input type="text" class="compact-input" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)"></div>
+                <div style="margin-bottom: 5px;"><input type="text" class="compact-input" placeholder="Add POD Remarks..." value="${trip.podRemark || ''}" onchange="updateBackendData('${trip.id}', 'updatePODRemark', this.value)"></div>
+                <div style="display:flex; gap:10px; margin-top:10px; align-items:center; width: 100%;">
+                    <label style="margin:0;">POD Date:</label>
+                    <input type="date" class="compact-input" id="pod-date-${trip.id}">
+                    <button class="btn btn-primary" style="padding: 6px 12px; margin:0; width:auto; border-radius:12px;" onclick="savePOD('${trip.id}', false)">Save</button>
+                </div>
+            `;
+        }
+
+        if (viewMode === 'pod-received') {
+            cardHtml += `
+                <div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>C-Note:</strong> ${trip.cNote || "Not Entered"}</div>
+                ${trip.podRemark ? `<div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>Remarks:</strong> ${trip.podRemark}</div>` : ''}
+                <div style="margin-top:10px; color:#137333; font-weight:500;">POD Received: ${trip.podDate}</div>
+            `;
+            if (!isReadOnly) {
+                cardHtml += `<button class="btn btn-clear" style="font-size:10px; padding:6px 10px; margin-top:5px; width:auto; border-radius:12px;" onclick="savePOD('${trip.id}', true)">Remove Date</button>`;
+            }
+        }
+        cardHtml += `</div>`; return cardHtml;
+    }
+
+    // --- ADMIN SYSTEM ---
+    function renderAdminUsers() {
+        const tbody = document.getElementById('admin-user-list'); if(!tbody) return;
+        tbody.innerHTML = users.map(u => `<tr><td>${u.Name || u.name || 'Unknown'}</td><td>${u.Role || u.role || 'Unassigned'}</td><td style="font-family: monospace;">${u.PIN || u.pin || 'None'}</td><td><button class="admin-action-btn" onclick="openEditUserModal('${u.Name || u.name}', '${u.PIN || u.pin}', '${u.Role || u.role}')">Edit</button><button class="admin-action-btn" style="color: #b3261e;" onclick="deleteUser('${u.Name || u.name}')">Del</button></td></tr>`).join('');
+    }
+    function openAddUserModal() { document.getElementById('user-modal-title').innerText = "Add New User"; document.getElementById('manage-user-old-name').value = ""; document.getElementById('manage-user-name').value = ""; document.getElementById('manage-user-pin').value = ""; document.getElementById('manage-user-role').value = "ReadOnly"; document.getElementById('userManageModal').style.display = 'flex'; }
+    function openEditUserModal(name, pin, role) { document.getElementById('user-modal-title').innerText = "Edit User"; document.getElementById('manage-user-old-name').value = name; document.getElementById('manage-user-name').value = name; document.getElementById('manage-user-pin').value = pin; document.getElementById('manage-user-role').value = role; document.getElementById('userManageModal').style.display = 'flex'; }
+    function closeUserModal() { document.getElementById('userManageModal').style.display = 'none'; }
+    
+    function saveUserManage() {
+        const oldName = document.getElementById('manage-user-old-name').value; const newName = document.getElementById('manage-user-name').value.trim(); const pin = document.getElementById('manage-user-pin').value.trim(); const role = document.getElementById('manage-user-role').value;
+        if (!newName || !pin) return alert("Name and PIN are required.");
+        if (oldName) { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateUser', oldName: oldName, newName: newName, pin: pin, role: role }) }); let u = users.find(x => (x.Name || x.name) === oldName); if(u) { u.Name = newName; u.name = newName; u.PIN = pin; u.pin = pin; u.Role = role; u.role = role; } } 
+        else { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addUser', name: newName, pin: pin, role: role }) }); users.push({ Name: newName, name: newName, PIN: pin, pin: pin, Role: role, role: role }); }
+        renderAdminUsers(); closeUserModal();
+    }
+    function deleteUser(name) {
+        if (!confirm(`Are you sure you want to delete access for ${name}?`)) return;
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', name: name }) });
+        users = users.filter(u => (u.Name || u.name) !== name); renderAdminUsers();
+    }
+    async function forceAdminSync() {
+        document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Forcing Databank Sync...";
+        try { await performDatabaseSync(); alert("Databank successfully synchronized with Google Sheets!"); } catch(e) { alert("Sync failed. Check connection."); }
+        document.getElementById('loading-overlay').style.display = 'none';
+    }
+
+    // --- STATUS MODALS & BACKEND UPDATES ---
     function openAdminEdit(tripId) {
-        const trip = allTrips.find(t => t.id === tripId);
+        const trip = allTrips.find(t => t.id === tripId); if(!trip) return;
         document.getElementById('edit-trip-id').value = tripId;
-        document.getElementById('edit-party').value = trip.party || ""; // Added Party Name
-        document.getElementById('edit-vnum').value = trip.vNum || "";
+        document.getElementById('edit-party').value = trip.party || "";
+        document.getElementById('edit-vnum').value = trip.vNum || ""; document.getElementById('edit-vtype').value = trip.type || "";
+        document.getElementById('edit-vcap').value = trip.weight || ""; document.getElementById('edit-from').value = trip.from || ""; document.getElementById('edit-to').value = trip.to || "";
+        document.getElementById('edit-vfreight').value = trip.vFreight || ""; document.getElementById('edit-cfreight').value = trip.cFreight || "";
+        document.getElementById('edit-dname').value = trip.dName || ""; document.getElementById('edit-dcontact').value = trip.dContact || "";
         document.getElementById('adminEditModal').style.display = "flex";
     }
+    function closeAdminEditModal() { document.getElementById('adminEditModal').style.display = "none"; }
     
     function saveAdminEdit() {
-        const id = document.getElementById('edit-trip-id').value;
-        const party = document.getElementById('edit-party').value;
-        const payload = { action: 'adminEditTrip', id: id, party: party, /* other fields */ };
+        const tripId = document.getElementById('edit-trip-id').value; const vNum = document.getElementById('edit-vnum').value.toUpperCase();
+        const payload = { action: 'adminEditTrip', id: tripId, party: document.getElementById('edit-party').value, vNum: vNum, vType: document.getElementById('edit-vtype').value.toUpperCase(), weight: document.getElementById('edit-vcap').value.toUpperCase(), from: document.getElementById('edit-from').value, to: document.getElementById('edit-to').value, vFreight: document.getElementById('edit-vfreight').value, cFreight: document.getElementById('edit-cfreight').value, dName: document.getElementById('edit-dname').value, dContact: formatPhoneString(document.getElementById('edit-dcontact').value) };
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        // ... (update local trip)
-        closeAdminEditModal();
+        const t = allTrips.find(x => x.id === tripId); if(t){ t.party = payload.party; t.vNum = payload.vNum; t.type = payload.vType; t.weight = payload.weight; t.from = payload.from; t.to = payload.to; t.vFreight = payload.vFreight; t.cFreight = payload.cFreight; t.dName = payload.dName; t.dContact = payload.dContact; }
+        closeAdminEditModal(); triggerCurrentRender();
+    }
+
+    function triggerDeliveryModal(tripId) { document.getElementById('delivery-trip-id').value = tripId; document.getElementById('deliveryModal').style.display = "flex"; }
+    function closeModal() { document.getElementById('deliveryModal').style.display = "none"; triggerCurrentRender(); }
+    
+    function confirmDelivery() {
+        const dInput = document.getElementById('delivery-date-input').value; if (!dInput) return alert("Select a date.");
+        const tripId = document.getElementById('delivery-trip-id').value; const fmtDate = getFormattedDateVal(dInput);
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTripStatus', id: tripId, status: 'Delivered', deliveryDate: fmtDate }) });
+        const t = allTrips.find(x => x.id === tripId); if(t){ t.status = 'Delivered'; t.deliveryDate = fmtDate; }
+        closeModal();
+    }
+
+    function revertStatus(tripId, newStatus) {
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTripStatus', id: tripId, status: newStatus, deliveryDate: '' }) });
+        const t = allTrips.find(x => x.id === tripId); if(t){ t.status = newStatus; t.deliveryDate = ''; t.podDate = '';}
         triggerCurrentRender();
     }
 
+    function updateBackendData(tripId, action, value) {
+        const payload = { action: action, id: tripId };
+        if (action === 'updateCNote') payload.value = value; if (action === 'updatePODRemark') payload.value = value; if (action === 'updateTripRemark') payload.value = value;
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const t = allTrips.find(x => x.id === tripId); if (t) { if (action === 'updateCNote') t.cNote = value; if (action === 'updatePODRemark') t.podRemark = value; if (action === 'updateTripRemark') t.remarks = value; }
+    }
+
+    function savePOD(tripId, isClear = false) {
+        let fmtDate = "";
+        if (isClear) {
+            if(!confirm("Remove POD Date?")) return;
+        } else {
+            const dInput = document.getElementById(`pod-date-${tripId}`).value;
+            const role = currentUser.Role || currentUser.role; const isAdmin = (role === 'Admin' || role === 'Master Admin');
+            if (!dInput) { if (!isAdmin || !confirm("Save without date?")) return alert("Select a POD date."); fmtDate = "No Date"; }
+            else { fmtDate = getFormattedDateVal(dInput); }
+        }
+        
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updatePOD', id: tripId, date: fmtDate }) });
+        const t = allTrips.find(x => x.id === tripId); if (t) t.podDate = fmtDate; triggerCurrentRender();
+    }
+
+    function updateStatusLog(tripId, noteValue) {
+        const timeNow = new Date().toISOString(); fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addStatusLog', id: tripId, note: noteValue, timestamp: timeNow }) });
+        const t = allTrips.find(x => x.id === tripId); if (t) t.statusNote = noteValue; statusLogs.push({tripId: tripId, note: noteValue, time: timeNow});
+    }
+
+    function toggleHistory(tripId, viewMode) {
+        document.querySelectorAll('.history-panel').forEach(p => { if (p.id !== `hist-${viewMode}-${tripId}`) p.style.display = 'none'; });
+        const p = document.getElementById(`hist-${viewMode}-${tripId}`); const logs = statusLogs.filter(l => String(l.tripId) === String(tripId));
+        if (logs.length === 0) { p.innerHTML = "<div class='history-item'>No history found.</div>"; }
+        else { p.innerHTML = logs.map(l => { const d = new Date(l.time); return `<div class="history-item"><strong>${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes() < 10 ? '0':''}${d.getMinutes()}</strong> - ${l.note}</div>`; }).join(''); }
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function openFinancialAllocation(tripId) {
+        const trip = allTrips.find(t => t.id === tripId); if(!trip) return;
+        document.getElementById('fin-trip-id').value = tripId;
+        document.getElementById('income-rows-container').innerHTML = ""; document.getElementById('expense-rows-container').innerHTML = "";
+        let ledger = { income: [], expense: [] }; try { let p = JSON.parse(trip.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; } catch(e){}
+        
+        if((ledger.expense || []).length === 0 && (trip.otherExp || trip.loadingExp || trip.unloadingExp || trip.lrExp)) {
+            if(trip.otherExp) ledger.expense.push({type: trip.otherExpReason || 'Generic', amt: parseFloat(trip.otherExp)});
+            if(trip.loadingExp) ledger.expense.push({type: 'Loading', amt: parseFloat(trip.loadingExp)});
+            if(trip.unloadingExp) ledger.expense.push({type: 'Unloading', amt: parseFloat(trip.unloadingExp)});
+            if(trip.lrExp) ledger.expense.push({type: 'LR', amt: parseFloat(trip.lrExp)});
+        }
+
+        (ledger.income || []).forEach(row => addFinancialRow('income', row.type, row.amt));
+        (ledger.expense || []).forEach(row => addFinancialRow('expense', row.type, row.amt));
+        document.getElementById('financialModal').style.display = "flex";
+    }
+
+    function addFinancialRow(category, type = "", amt = "") {
+        const container = document.getElementById(`${category}-rows-container`); const row = document.createElement('div'); row.className = "financial-row";
+        row.innerHTML = `<input type="text" placeholder="Description/Type" class="compact-input fin-desc" value="${type}"><input type="number" placeholder="Amount" class="compact-input fin-amt" value="${amt}"><button class="btn btn-clear" onclick="this.parentElement.remove()" style="padding:8px; font-weight:bold; color:#b3261e; width:auto;">X</button>`;
+        container.appendChild(row);
+    }
+
+    function closeFinancialModal() { document.getElementById('financialModal').style.display = "none"; }
+
+    function saveFinancialLedger() {
+        const tripId = document.getElementById('fin-trip-id').value; const trip = allTrips.find(t => t.id === tripId);
+        let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(trip.financialLedger); if(p.reco) ledger.reco = p.reco; } catch(e){}
+        
+        document.querySelectorAll('#income-rows-container .financial-row').forEach(r => { let desc = r.querySelector('.fin-desc').value; let amt = r.querySelector('.fin-amt').value; if(desc && amt) ledger.income.push({ type: desc, amt: parseFloat(amt) }); });
+        document.querySelectorAll('#expense-rows-container .financial-row').forEach(r => { let desc = r.querySelector('.fin-desc').value; let amt = r.querySelector('.fin-amt').value; if(desc && amt) ledger.expense.push({ type: desc, amt: parseFloat(amt) }); });
+
+        const jsonStr = JSON.stringify(ledger); trip.financialLedger = jsonStr;
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: tripId, ledgerJson: jsonStr }) });
+        closeFinancialModal(); triggerCurrentRender();
+    }
+
+    function openShareModal(tripId) {
+        const trip = allTrips.find(t => t.id === tripId); if (!trip) return;
+        document.getElementById('share-modal-trip-id').value = tripId; document.getElementById('shareModal').style.display = "flex";
+    }
+    function closeShareModal() { document.getElementById('shareModal').style.display = "none"; }
+
+    function executeDeployedShare(type) {
+        const tripId = document.getElementById('share-modal-trip-id').value; const trip = allTrips.find(t => t.id === tripId); if (!trip) return;
+        let header = `*Placement Details - ${trip.vNum} - ${trip.from} to ${trip.to} - ${trip.type} - ${trip.weight}*\n\n*Booking Date:* ${(trip.date||'').split(',')[0]}\n\n*Party Name:* ${trip.party || 'N/A'}\n\n*From:* ${trip.from}\n*To:* ${trip.to}\n\n*Vehicle No.:* ${trip.vNum}\n\n*Vehicle Type:* ${trip.type}\n*Charged Weight:* ${trip.weight}\n\n`;
+        if(trip.bookingType === 'Reverse Logistics') { header += `*Broking Agency:* ${trip.brokingAgent}\n`; if(trip.tPerson) header += `*Agent Name:* ${trip.tPerson}\n`; if(trip.tContact) header += `*Contact No:* ${trip.tContact}\n\n`; }
+        else { if(trip.dName) header += `*Driver Name:* ${trip.dName}\n`; if(trip.dContact) header += `*Driver Contact No:* ${trip.dContact}\n\n`; }
+        
+        if (type === 'team' && trip.bookingType === 'Own Booking') {
+            if(trip.tName) header += `*Transporter:* ${trip.tName}\n`; if(trip.tPerson) header += `*Person Name:* ${trip.tPerson}\n`; if(trip.tContact) header += `*Contact Number:* ${trip.tContact}\n\n`;
+        }
+        if(trip.remarks) header += `*Remarks:* ${trip.remarks}`;
+        openWhatsAppChoice(header);
+    }
 </script>
 </body>
 </html>
