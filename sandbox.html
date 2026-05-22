@@ -75,7 +75,7 @@
         .autocomplete-items div { padding: 12px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 13px; color: #1f1f1f; }
         .autocomplete-items div:hover { background-color: #f8f9fa; }
 
-        /* TRIP CARDS (DEPLOYED/POD STYLE) */
+        /* TRIP CARDS */
         .list-container { padding: 0 10px; }
         .trip-card { background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); font-size: 12px; color: #444746;}
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -92,19 +92,22 @@
         .filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
         /* PAYMENTS RECO ACCORDION & GRID */
-        .reco-accordion-header { background: #ffffff; border-radius: 12px; padding: 12px 15px; margin-bottom: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; transition: 0.15s;}
+        .reco-accordion-header { background: #ffffff; border-radius: 12px; padding: 12px 15px; margin-bottom: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; border: 1px solid transparent; transition: 0.15s;}
         .reco-accordion-header:active { transform: scale(0.98); background: #f8f9fa;}
+        .reco-info-col { flex: 1; padding-right: 10px; word-wrap: break-word; }
+        .reco-amt-col { display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-start; gap: 4px; flex-shrink: 0; text-align: right; }
+        
         .reco-accordion-body { display: none; background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 16px; border: 1px solid #dadce0; animation: fadeIn 0.2s ease;}
         .reco-accordion-body.open { display: block; }
         
         .reco-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; border-top: 1px solid #f1f3f4; padding-top: 15px;}
-        .reco-panel { border-radius: 8px; padding: 0; background: transparent; }
+        .reco-panel { border-radius: 8px; padding: 0; background: transparent; max-height: 250px; overflow-y: auto; padding-right: 5px; }
         .reco-header-title { font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #eaeaea; padding-bottom: 6px; color: #1f1f1f; display: flex; justify-content: space-between;}
         
         .calc-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: #444746; }
         .calc-line-item { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; color: #5f6368; padding-left: 8px; border-left: 2px solid #e8f0fe;}
         .calc-gross { font-weight: bold; font-size: 13px; color: #1f1f1f; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f3f4; display: flex; justify-content: space-between;}
-        .highlight-red-box { background-color: #fce8e6; color: #b3261e; font-weight: bold; padding: 12px; text-align: center; border-radius: 8px; margin-top: 15px; border: 1px solid #f9d0c4; font-size: 14px; display: block;}
+        .highlight-red-box { background-color: #fce8e6; color: #1f1f1f; font-weight: 500; padding: 12px; text-align: center; border-radius: 8px; margin-top: 15px; border: 1px solid #f9d0c4; font-size: 13px; display: block;}
         
         .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 11px; font-weight: 500; cursor: pointer; padding: 4px 0; margin-top: 8px; text-align: left; width: auto;}
         .history-panel { display: none; background: #f8f9fa; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-size: 11px; color: #444746; border-left: 3px solid #0b57d0;}
@@ -153,7 +156,7 @@
 </div>
 
 <div id="loading-overlay">
-    <div class="loader-text" id="loader-text">Syncing Google Sheets...</div>
+    <div class="loader-text" id="loader-text">Syncing Databank</div>
         <p id="error-box" style="display:none; color:#b3261e; font-size:12px; margin-top:10px; text-align:center;"></p>
         <button id="bypass-btn" class="btn btn-clear" style="display:none; margin-top:10px;" onclick="bypassLoading()">Retry Login</button>
 </div>
@@ -410,30 +413,57 @@
     <div id="tab-reports" class="app-section">
         <div class="workspace-header">
             <button class="btn-back-home" onclick="returnToHome()">← Home</button>
-            <h3 class="workspace-title">Financial Reports</h3>
+            <h3 class="workspace-title">Financial Reports & MIS</h3>
         </div>
         
-        <div id="report-main-screen" style="padding: 0 10px;">
-            <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select report module.</p>
+        <div id="report-selection-screen" style="padding: 0 10px;">
+            <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select report category to generate data.</p>
             <div style="display:flex; flex-direction:column; gap:15px;">
-                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="openMISModal()">📊 Generate MIS (Excel)</button>
-                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="openLedgerModal()">💰 Payment Ledger Export</button>
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setReportType('Own Booking')">Own Booking Reports</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setReportType('Reverse Logistics')">Reverse Logistics Reports</button>
             </div>
         </div>
 
-        <div id="ledger-workspace-screen" style="display:none;">
+        <div id="report-content-area" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
-                <span id="ledger-workspace-title" style="font-weight:600; color:#0b57d0; font-size:14px; text-transform:uppercase;">Workspace</span>
-                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600; background:#fce8e6; padding:4px 8px; border-radius:12px;" onclick="closeLedgerWorkspace()">Change Category</span>
+                <span id="report-title-text" style="font-weight:600; color:#0b57d0; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600; background:#fce8e6; padding:4px 8px; border-radius:12px;" onclick="showSelectionScreen('report')">Change Category</span>
             </div>
-            
-            <div class="grid-2 list-container" style="margin-bottom: 20px; gap:10px;">
-                <button class="btn btn-clear" onclick="generateLedgerPreview()">🔄 Refresh View</button>
-                <button class="btn btn-primary" onclick="window.print()">🖨️ Save PDF</button>
-                <button class="btn btn-secondary" style="grid-column: span 2;" onclick="triggerRecoExcelDownload()">💰 Download .xlsx</button>
+            <div class="form-card" style="padding:15px; margin-bottom:15px;">
+                <div class="form-group autocomplete" style="margin-top:0; margin-bottom:15px;">
+                    <label>Filter by Party Name</label>
+                    <input type="text" id="rf-party" class="compact-input" placeholder="Type Client Profile..." onchange="formatCase(this, 'title')"><div id="rf-party-list" class="autocomplete-items"></div>
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <label>Trip Status:</label>
+                        <select id="report-trip-status" class="compact-input">
+                            <option value="All">All</option>
+                            <option value="In-Transit">In-Transit</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled Trip">Cancelled Trip</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>POD Status:</label>
+                        <select id="report-pod-status" class="compact-input">
+                            <option value="All">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Received">Received</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="generateCustomReport()" style="margin-top: 15px;">Generate Base View</button>
             </div>
             
             <div id="screen-report" class="screen-report-container"></div>
+            
+            <div class="grid-2 list-container" style="display:none; margin-bottom: 20px; gap:10px;" id="report-actions">
+                <button class="btn btn-clear" onclick="window.print()">🖨️ Save PDF</button>
+                <button class="btn btn-whatsapp" onclick="shareReportWhatsApp()">💬 WhatsApp</button>
+                <button class="btn btn-team" onclick="openMISModal()">📊 Generate MIS (Excel)</button>
+                <button class="btn btn-secondary" onclick="openLedgerModal()">💰 Payment Ledger Export</button>
+            </div>
         </div>
     </div>
 
@@ -457,6 +487,13 @@
             </div>
             <button class="btn btn-clear" onclick="forceAdminSync()" style="margin-top: 20px;">Force Databank Sync</button>
         </div>
+
+        <div class="form-card" style="margin-top: 20px;">
+            <h3 style="color:#1f1f1f; margin:0 0 15px 0; font-weight:500; font-size:15px;">Module Access Control</h3>
+            <p style="font-size:11px; color:#5f6368; margin-bottom:10px;">Click a module head to assign or revoke access for specific users.</p>
+            <div id="module-access-container"></div>
+            <button class="btn btn-primary" onclick="savePermissions()" style="margin-top: 15px;">Save Permissions</button>
+        </div>
     </div>
 </div>
 
@@ -477,6 +514,7 @@
 <div id="misModal" class="modal">
     <div class="modal-content">
         <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">📊 Generate MIS</h3>
+        <p style="font-size:12px; color:#5f6368; margin-bottom:15px;">A Party Name is strictly required.</p>
         <div class="form-group autocomplete">
             <label>Party Name <span class="required-star">*</span></label>
             <input type="text" id="mis-party" class="compact-input" placeholder="Select Party..." onchange="formatCase(this, 'title')">
@@ -502,8 +540,8 @@
         <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">💰 Payment Ledger Export</h3>
         <p style="font-size:12px; color:#5f6368; margin-bottom:15px;">Select ledger category to filter and export.</p>
         <div style="display:flex; flex-direction:column; gap:10px;">
-            <button class="btn btn-primary" onclick="openLedgerWorkspace('Own Booking')">Own Booking Ledger</button>
-            <button class="btn btn-team" onclick="openLedgerWorkspace('Reverse Logistics')">Reverse Logistics Ledger</button>
+            <button class="btn btn-primary" onclick="triggerRecoExcelDownload('Own Booking')">Own Booking Ledger (.xlsx)</button>
+            <button class="btn btn-team" onclick="triggerRecoExcelDownload('Reverse Logistics')">Reverse Logistics Ledger (.xlsx)</button>
             <button class="btn btn-clear" onclick="closeLedgerModal()">Cancel</button>
         </div>
     </div>
@@ -780,6 +818,7 @@
         setupCustomDropdown('rl-agent', 'rl-agent-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
 
         setupCustomDropdown('mis-party', 'mis-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+        setupCustomDropdown('rf-party', 'rf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
 
         allTrips.forEach(t => { if (t.dName && t.dName.trim() !== "" && t.dContact) driverData[t.dName.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())] = t.dContact.trim(); });
         setupCustomDropdown('ob-dname', 'ob-dname-list', () => Object.keys(driverData).sort(), (selectedName) => { document.getElementById('ob-dcontact').value = driverData[selectedName] || ""; });
@@ -802,30 +841,33 @@
     function autoFillContact(pName, prefix) { const t = document.getElementById(`${prefix}-tname`).value; if (transporters[t]) { const person = transporters[t].find(x => x.name === pName); if (person) document.getElementById(`${prefix}-tcontact`).value = person.phone; } }
 
     // --- NAVIGATION ENGINE ---
+    function checkPermissions(modName) {
+        const role = currentUser.Role || currentUser.role;
+        if (role === 'Master Admin' || role === 'Admin') return true;
+        if (currentUser.permissions && currentUser.permissions[modName] === false) return false;
+        return true; 
+    }
+
     function openWorkspace(id) {
+        let modMap = {'tab-placement':'Placement', 'tab-deployed':'Deployed', 'tab-pod':'POD', 'tab-payments':'Payments', 'tab-reports':'Reports'};
+        if (modMap[id] && !checkPermissions(modMap[id])) return alert("Access to this module is restricted by the Administrator.");
+
         document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         currentActiveMainTab = id;
+
+        // Close any open Payments accordions when navigating away
+        document.querySelectorAll('.reco-accordion-body').forEach(el => el.classList.remove('open'));
+        currentOpenRecoId = null;
 
         if(id === 'tab-placement') showPlacementSelection();
         if(id === 'tab-deployed') { currentDeployedType = ""; showSelectionScreen('deployed'); }
         if(id === 'tab-pod') { currentPodType = ""; showSelectionScreen('pod'); }
         if(id === 'tab-payments') { currentRecoType = ""; showSelectionScreen('reco'); }
-        
-        if(id === 'tab-reports') { 
-            document.getElementById('report-main-screen').style.display = 'block';
-            document.getElementById('ledger-workspace-screen').style.display = 'none';
-            document.getElementById('unified-filter-bar').style.display = 'none';
-            currentReportType = ""; 
-            document.getElementById('screen-report').innerHTML = ''; 
-            document.getElementById('print-report-container').innerHTML = ''; 
-        }
+        if(id === 'tab-reports') { currentReportType = ""; showSelectionScreen('report'); document.getElementById('screen-report').innerHTML = ''; document.getElementById('print-report-container').innerHTML = ''; document.getElementById('report-actions').style.display = 'none'; }
 
-        if (id === 'tab-deployed' || id === 'tab-pod' || id === 'tab-payments') { 
-            document.getElementById('unified-filter-bar').style.display = 'block'; 
-        } else if (id !== 'tab-reports') { 
-            document.getElementById('unified-filter-bar').style.display = 'none'; 
-        }
+        if (id === 'tab-deployed' || id === 'tab-pod' || id === 'tab-payments' || id === 'tab-reports') { document.getElementById('unified-filter-bar').style.display = 'block'; } 
+        else { document.getElementById('unified-filter-bar').style.display = 'none'; }
 
         clearFilters(); 
     }
@@ -846,16 +888,16 @@
         if (currentActiveMainTab === 'tab-deployed' && currentDeployedType !== "") renderDeployed();
         if (currentActiveMainTab === 'tab-pod' && currentPodType !== "") renderPOD();
         if (currentActiveMainTab === 'tab-payments' && currentRecoType !== "") renderReconciliation();
-        if (currentActiveMainTab === 'tab-reports' && currentReportType !== "") generateLedgerPreview();
+        if (currentActiveMainTab === 'tab-reports' && currentReportType !== "") generateCustomReport();
     }
 
     function clearFilters() {
-        const filterIds = ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-origin', 'uf-dest'];
+        const filterIds = ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-origin', 'uf-dest', 'rf-party'];
         filterIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
         triggerCurrentRender();
     }
 
-    // --- BULLETPROOF FILTERING (NO SILENT CRASHES) ---
+    // --- BULLETPROOF FILTERING ---
     function getFilteredTrips(baseTrips) {
         let result = [...baseTrips];
         const role = currentUser.Role || currentUser.role;
@@ -1099,9 +1141,8 @@
         if(!currentRecoType) return;
 
         let trips = getFilteredTrips(allTrips);
+        // Ensure non-KTPL vehicles also show up in Own Booking. Removing the old filter restriction.
         trips = trips.filter(t => (t.bookingType || 'Own Booking') === currentRecoType);
-
-        if (currentRecoType === 'Own Booking') trips = trips.filter(t => !vehicles[(t.vNum || '').toUpperCase()]); 
 
         trips = trips.filter(t => {
             let ledger = { reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.reco) ledger.reco=p.reco; } catch(e){}
@@ -1139,22 +1180,32 @@
             }
 
             let isOpenClass = (currentOpenRecoId === t.id) ? 'open' : '';
+            let isCleared = (ledger.reco.status === "Cleared");
             let html = "";
-            let displayAmt = 0;
 
             if (currentRecoType === 'Own Booking') {
                 let advPaid = parseFloat(ledger.reco.advPaid || t.advancePaid || 0); 
                 let balPaid1 = parseFloat(ledger.reco.balPaid1 || ledger.reco.balPaid || 0); 
                 let balPaid2 = parseFloat(ledger.reco.balPaid2 || 0);
                 let balPaid3 = parseFloat(ledger.reco.balPaid3 || 0);
+                
                 let balToPay = totalPayable - (advPaid + balPaid1 + balPaid2 + balPaid3);
-                displayAmt = balToPay;
+                let savedDeduction = 0;
+                let displayAmtHtml = "";
+
+                if (isCleared && balToPay > 0) {
+                    savedDeduction = balToPay;
+                    balToPay = 0;
+                    displayAmtHtml = `<del style="color:#8e8e8e; margin-right:4px;">₹${savedDeduction}</del> ₹0`;
+                } else {
+                    displayAmtHtml = `₹${balToPay}`;
+                }
 
                 html += `
                     <div class="reco-accordion-header" onclick="toggleRecoCard('${t.id}')">
-                        <div style="font-size:13px; color:#1f1f1f; display:flex; flex-direction:column; width:70%;">${headerInfo}</div>
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <div style="font-weight:bold; color:#b3261e; font-size:14px;">₹${displayAmt}</div>
+                        <div class="reco-info-col">${headerInfo}</div>
+                        <div class="reco-amt-col">
+                            <div style="font-weight:bold; color:#b3261e; font-size:14px;">${displayAmtHtml}</div>
                             <div style="font-size:16px; color:#0b57d0;">▼</div>
                         </div>
                     </div>
@@ -1163,17 +1214,13 @@
                             <div class="reco-panel">
                                 <div class="reco-header-title">Receivables</div>
                                 <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
-                                <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
-                                    ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                                </div>
+                                ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
                                 <div class="calc-gross"><span>Total Receivable:</span> <span>₹${totalReceivable}</span></div>
                             </div>
                             <div class="reco-panel">
                                 <div class="reco-header-title">Payables</div>
                                 <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
-                                <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
-                                    ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                                </div>
+                                ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
                                 <div class="calc-gross"><span>Total Payable:</span> <span>₹${totalPayable}</span></div>
                 `;
                 if(isMasterAdmin) {
@@ -1182,7 +1229,9 @@
                                 <div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid 1</label><input type="number" id="reco-bal1-${t.id}" class="compact-input" value="${balPaid1 || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD1-${t.id}" class="compact-input" value="${ledger.reco.balDate1 || ledger.reco.balDate || ''}"></div></div>
                                 <div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid 2</label><input type="number" id="reco-bal2-${t.id}" class="compact-input" value="${balPaid2 || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD2-${t.id}" class="compact-input" value="${ledger.reco.balDate2 || ''}"></div></div>
                                 <div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid 3</label><input type="number" id="reco-bal3-${t.id}" class="compact-input" value="${balPaid3 || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD3-${t.id}" class="compact-input" value="${ledger.reco.balDate3 || ''}"></div></div>
-                                <div class="highlight-red-box">Balance to Pay: ₹${balToPay}</div>
+                                <div class="highlight-red-box">
+                                    ${isCleared && savedDeduction > 0 ? `<div style="color:#5f6368;"><del>Original Balance: ₹${savedDeduction}</del></div><div style="color:#146c2e; margin:6px 0;">Saved on add. deduction: ₹${savedDeduction}</div><div>Final Balance to Pay: ₹0</div>` : `Balance to Pay: ₹${balToPay}`}
+                                </div>
                     `;
                 }
                 html += `       </div>`;
@@ -1191,14 +1240,24 @@
                 let osDues1 = parseFloat(ledger.reco.osDues1 || ledger.reco.osDues || 0); 
                 let osDues2 = parseFloat(ledger.reco.osDues2 || 0);
                 let osDues3 = parseFloat(ledger.reco.osDues3 || 0);
+                
                 let totalOs = totalReceivable - totalPayable - (advRec + osDues1 + osDues2 + osDues3);
-                displayAmt = totalOs;
+                let badDebts = 0;
+                let displayAmtHtml = "";
+
+                if (isCleared && totalOs > 0) {
+                    badDebts = totalOs;
+                    totalOs = 0;
+                    displayAmtHtml = `<del style="color:#8e8e8e; margin-right:4px;">₹${badDebts}</del> ₹0`;
+                } else {
+                    displayAmtHtml = `₹${totalOs}`;
+                }
 
                 html += `
                     <div class="reco-accordion-header" onclick="toggleRecoCard('${t.id}')">
-                        <div style="font-size:13px; color:#1f1f1f; display:flex; flex-direction:column; width:70%;">${headerInfo}</div>
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <div style="font-weight:bold; color:#b3261e; font-size:14px;">₹${displayAmt}</div>
+                        <div class="reco-info-col">${headerInfo}</div>
+                        <div class="reco-amt-col">
+                            <div style="font-weight:bold; color:#b3261e; font-size:14px;">${displayAmtHtml}</div>
                             <div style="font-size:16px; color:#0b57d0;">▼</div>
                         </div>
                     </div>
@@ -1207,9 +1266,7 @@
                             <div class="reco-panel">
                                 <div class="reco-header-title">Receivables</div>
                                 <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
-                                <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
-                                    ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                                </div>
+                                ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
                                 <div class="calc-gross"><span>Total Receivable:</span> <span>₹${totalReceivable}</span></div>
                 `;
                 if(isMasterAdmin) {
@@ -1218,16 +1275,16 @@
                                 <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 1</label><input type="number" id="reco-os1-${t.id}" class="compact-input" value="${osDues1 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD1-${t.id}" class="compact-input" value="${ledger.reco.osDate1 || ledger.reco.osDate || ''}"></div></div>
                                 <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 2</label><input type="number" id="reco-os2-${t.id}" class="compact-input" value="${osDues2 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD2-${t.id}" class="compact-input" value="${ledger.reco.osDate2 || ''}"></div></div>
                                 <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 3</label><input type="number" id="reco-os3-${t.id}" class="compact-input" value="${osDues3 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD3-${t.id}" class="compact-input" value="${ledger.reco.osDate3 || ''}"></div></div>
-                                <div class="highlight-red-box">Outstanding Amount: ₹${totalOs}</div>
+                                <div class="highlight-red-box">
+                                    ${isCleared && badDebts > 0 ? `<div style="color:#5f6368;"><del>Original O/S: ₹${badDebts}</del></div><div style="color:#b3261e; margin:6px 0;">Bad Debts: ₹${badDebts}</div><div>Final Outstanding: ₹0</div>` : `Outstanding Amount: ₹${totalOs}`}
+                                </div>
                     `;
                 }
                 html += `       </div>
                             <div class="reco-panel">
                                 <div class="reco-header-title">Payables</div>
                                 <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
-                                <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
-                                    ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                                </div>
+                                ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
                                 <div class="calc-gross"><span>Total Payable:</span> <span>₹${totalPayable}</span></div>
                             </div>
                 `;
@@ -1280,91 +1337,89 @@
     }
 
     // --- REPORTS ENGINE ---
-    function openMISModal() {
-        document.getElementById('misModal').style.display = 'flex';
-    }
-    
-    function closeMISModal() {
-        document.getElementById('misModal').style.display = 'none';
-    }
-
-    function openLedgerModal() {
-        const role = currentUser.Role || currentUser.role;
-        if (role !== 'Admin' && role !== 'Master Admin') {
-            return alert("Access Denied: Payment Ledger export is strictly restricted to Administrator roles.");
-        }
-        document.getElementById('ledgerModal').style.display = 'flex';
-    }
-    
-    function closeLedgerModal() {
-        document.getElementById('ledgerModal').style.display = 'none';
-    }
-
-    function openLedgerWorkspace(type) {
-        currentReportType = type;
-        closeLedgerModal();
-        document.getElementById('report-main-screen').style.display = 'none';
-        document.getElementById('ledger-workspace-screen').style.display = 'block';
-        document.getElementById('ledger-workspace-title').innerText = type + " Ledger";
-        document.getElementById('unified-filter-bar').style.display = 'block';
-        generateLedgerPreview();
-    }
-
-    function closeLedgerWorkspace() {
-        document.getElementById('ledger-workspace-screen').style.display = 'none';
-        document.getElementById('report-main-screen').style.display = 'block';
-        document.getElementById('unified-filter-bar').style.display = 'none';
-        document.getElementById('screen-report').innerHTML = '';
-        document.getElementById('print-report-container').innerHTML = '';
-    }
-
-    function generateLedgerPreview() {
+    function generateCustomReport() {
+        const rfPartyEl = document.getElementById('rf-party');
+        const pName = rfPartyEl ? rfPartyEl.value : "";
+        
         let finalTrips = getFilteredTrips(allTrips);
         finalTrips = finalTrips.filter(t => (t.bookingType || 'Own Booking') === currentReportType);
+        if(pName) finalTrips = finalTrips.filter(t => (t.party || '').toLowerCase().includes(pName.toLowerCase()));
 
-        const screenContainer = document.getElementById('screen-report'); 
-        const printContainer = document.getElementById('print-report-container');
-
-        if (finalTrips.length === 0) { 
-            screenContainer.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No data matches these filters.</div>`; 
-            printContainer.innerHTML = ``; 
-            return; 
+        const tripStat = document.getElementById('report-trip-status').value; const podStat = document.getElementById('report-pod-status').value;
+        if (tripStat !== 'All') finalTrips = finalTrips.filter(t => (t.status || '').trim() === tripStat);
+        if (podStat !== 'All') {
+            if (podStat === 'Pending') finalTrips = finalTrips.filter(t => !t.podDate || String(t.podDate).trim() === '');
+            if (podStat === 'Received') finalTrips = finalTrips.filter(t => t.podDate && String(t.podDate).trim() !== '');
         }
+
+        const screenContainer = document.getElementById('screen-report'); const printContainer = document.getElementById('print-report-container');
+        document.getElementById('report-actions').style.display = 'grid';
+
+        if (finalTrips.length === 0) { screenContainer.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No data matches these filters.</div>`; printContainer.innerHTML = ``; return; }
 
         const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']; const dayStr = days[today.getDay()];
 
-        // SCREEN UI GENERATION 
-        let screenHtml = `<table class="report-table"><thead><tr><th>Trip ID</th><th>Date</th><th>Party Name</th><th>Vehicle No.</th><th>Route</th><th>Ledger Status</th></tr></thead><tbody>`;
+        // 1. SCREEN UI GENERATION
+        let screenHtml = `<table class="report-table"><thead><tr><th>Sr No</th><th>Type</th><th>Party Name</th><th>Date</th><th>Route</th><th>Vehicle</th><th>Status</th><th>C-Note</th><th>POD Date</th><th>Remarks</th></tr></thead><tbody>`;
         finalTrips.forEach((t, i) => {
-            let ledger = { reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.reco) ledger.reco = p.reco; } catch(e){}
-            screenHtml += `<tr><td>${t.id}</td><td>${(t.date || '').split(',')[0]}</td><td><strong>${t.party || 'Unknown'}</strong></td><td>${t.vNum}</td><td>${t.from} to ${t.to}</td><td>${ledger.reco.status || "Pending"}</td></tr>`;
+            let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
+            screenHtml += `<tr><td>${i+1}</td><td>${t.bookingType || 'Own'}</td><td><strong>${t.party || ''}</strong></td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum}</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
         });
         screenHtml += `</tbody></table>`; screenContainer.innerHTML = screenHtml;
 
-        // PRINT PDF GENERATION
-        let printHtml = `<div class="print-header"><h2>Payment Ledger Report as on ${dateStr}, ${dayStr} - ${currentReportType}</h2></div><div class="party-table-wrapper"><table class="print-table"><thead><tr><th>Trip ID</th><th>Date</th><th>Party Name</th><th>Vehicle No.</th><th>Route</th><th>Ledger Status</th></tr></thead><tbody>`;
-        finalTrips.forEach((t, i) => {
-            let ledger = { reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.reco) ledger.reco = p.reco; } catch(e){}
-            printHtml += `<tr><td>${t.id}</td><td>${(t.date || '').split(',')[0]}</td><td><strong>${t.party || 'Unknown'}</strong></td><td>${t.vNum}</td><td>${t.from} to ${t.to}</td><td>${ledger.reco.status || "Pending"}</td></tr>`;
+        // 2. PRINT PDF GENERATION
+        const uniqueParties = [...new Set(finalTrips.map(t => t.party || 'Unknown'))];
+        let printHtml = `<div class="print-header"><h2>Data Report as on ${dateStr}, ${dayStr} - ${currentReportType}</h2></div><div class="party-table-wrapper"><table class="print-table"><thead><tr><th style="width:15%;">Party Name</th><th style="width:5%; text-align:center;">Sr</th><th style="width:10%;">Date</th><th style="width:15%;">Route</th><th style="width:15%;">Vehicle</th><th style="width:10%;">Status</th><th style="width:10%;">C-Note</th><th style="width:10%;">POD Date</th><th style="width:10%;">Remarks</th></tr></thead><tbody>`;
+        uniqueParties.forEach(party => {
+            const pTrips = finalTrips.filter(t => (t.party || 'Unknown') === party); if (pTrips.length === 0) return;
+            pTrips.forEach((t, i) => {
+                let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
+                printHtml += `<tr>`; if (i === 0) printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
+                printHtml += `<td style="text-align:center;">${i+1}</td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum} (${t.weight})</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
+            });
+            printHtml += `<tr><td colspan="9" style="border-bottom:2px solid #000; padding:0; height:0;"></td></tr>`;
         });
-        printHtml += `</tbody></table></div>`; printContainer.innerHTML = printHtml;
-        
-        currentReportTrips = finalTrips; 
+        printHtml += `</tbody></table></div>`; printContainer.innerHTML = printHtml; currentReportTrips = finalTrips; 
     }
+
+    function shareReportWhatsApp() {
+        if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
+        const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        let message = `*Vehicle Status Update - ${dateStr}*\n\n`;
+        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party || 'Unknown'))];
+        uniqueParties.forEach(p => {
+            message += `*Client:* ${p}\n`; let counter = 1;
+            currentReportTrips.forEach(t => {
+                if ((t.party || 'Unknown') === p) {
+                    let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`;
+                    message += `${counter}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight}\n*Status:* *${stat}*\n`;
+                    if (t.statusNote) message += `*Current Location:* ${t.statusNote}\n`;
+                    message += `\n`; counter++;
+                }
+            });
+        });
+        openWhatsAppChoice(message);
+    }
+
+    function openMISModal() { document.getElementById('misModal').style.display = 'flex'; }
+    function closeMISModal() { document.getElementById('misModal').style.display = 'none'; }
+    function openLedgerModal() {
+        const role = currentUser.Role || currentUser.role;
+        if (role !== 'Admin' && role !== 'Master Admin') return alert("Access Denied: Payment Ledger export is restricted to Administrators.");
+        document.getElementById('ledgerModal').style.display = 'flex';
+    }
+    function closeLedgerModal() { document.getElementById('ledgerModal').style.display = 'none'; }
 
     function triggerMISGeneration(misType) {
         const pName = document.getElementById('mis-party').value.trim();
         const bType = document.getElementById('mis-booking-type').value;
-        
         if(!pName) return alert("Error: Party Name is mandatory to generate an MIS. Please select a client.");
         
         let tripsToExport = allTrips.filter(t => (t.party || '').toLowerCase() === pName.toLowerCase() && (t.bookingType || 'Own Booking') === bType);
-        
         if(tripsToExport.length === 0) return alert("No records found for this party under the selected booking type.");
         
         const wb = XLSX.utils.book_new(); let grouped = {};
-        
         tripsToExport.forEach(t => {
             let mName = "Master";
             if(t.date && t.date.includes('/')) { let parts = t.date.split('/'); if(parts[1]) { const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]; let idx = parseInt(parts[1]) - 1; if(months[idx]) mName = months[idx] + " " + parts[2]; } }
@@ -1386,25 +1441,69 @@
         closeMISModal();
     }
 
-    function triggerRecoExcelDownload() {
+    function triggerRecoExcelDownload(ledgerType) {
         let tripsToExport = getFilteredTrips(allTrips);
-        tripsToExport = tripsToExport.filter(t => (t.bookingType || 'Own Booking') === currentReportType);
+        tripsToExport = tripsToExport.filter(t => (t.bookingType || 'Own Booking') === ledgerType);
 
-        if(tripsToExport.length === 0) return alert("No data available to export.");
+        if(tripsToExport.length === 0) return alert("No data available to export based on current filters.");
 
         const wb = XLSX.utils.book_new(); let rawRows = [];
-        rawRows.push(["Trip ID", "Booking Type", "Date", "Party Name", "Vehicle No.", "Route", "Total Receivable", "Ledger Status", "Total Payable", "KTPL Margin"]);
         
-        tripsToExport.forEach(t => {
-            let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
-            let safeIncome = ledger.income || []; let safeExpense = ledger.expense || [];
-            let baseRev = parseFloat(t.cFreight || 0); let extraRev = safeIncome.reduce((s, r) => s + r.amt, 0); let totalReceivable = baseRev + extraRev;
-            let baseCost = parseFloat(t.vFreight || 0); let extraCost = safeExpense.reduce((s, r) => s + r.amt, 0); let totalPayable = baseCost + extraCost;
-            let margin = totalReceivable - totalPayable;
-            rawRows.push([t.id, t.bookingType, (t.date || '').split(',')[0], t.party || 'Unknown', t.vNum, `${t.from} to ${t.to}`, totalReceivable, ledger.reco.status || "Pending", totalPayable, margin]);
-        });
+        if (ledgerType === 'Own Booking') {
+            rawRows.push([
+                "Trip No.", "Booking Date", "CNote No", "Consignor", "Origin", "Consignee", "Destination", "Pkg Nos.", "Pkg Type", "Veh Type", "Veh. Cap.", "Vehicle No.", "Transporter", "Transporter A/c. No.", "IFSC Code", "POD Status", "Vehicle Freight", "Loading Exp", "Unloading Exp", "Other Exp", "", "Advance Paid", "Adv Date", "Balance Paid 1", "Date 1", "Balance Paid 2", "Date 2", "Balance Paid 3", "Date 3", "Balance to Pay", "Saved on add. deduction"
+            ]);
+            tripsToExport.forEach(t => {
+                let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
+                let baseCost = parseFloat(t.vFreight || 0);
+                let loading = ledger.expense.find(e=>e.type==='Loading')?.amt || 0;
+                let unloading = ledger.expense.find(e=>e.type==='Unloading')?.amt || 0;
+                let otherExp = ledger.expense.filter(e=>e.type!=='Loading' && e.type!=='Unloading').reduce((s,x)=>s+x.amt,0);
+                
+                let advPaid = parseFloat(ledger.reco.advPaid || t.advancePaid || 0);
+                let advDate = ledger.reco.advDate || '';
+                let bal1 = parseFloat(ledger.reco.balPaid1 || ledger.reco.balPaid || 0);
+                let date1 = ledger.reco.balDate1 || ledger.reco.balDate || '';
+                let bal2 = parseFloat(ledger.reco.balPaid2 || 0);
+                let date2 = ledger.reco.balDate2 || '';
+                let bal3 = parseFloat(ledger.reco.balPaid3 || 0);
+                let date3 = ledger.reco.balDate3 || '';
+                
+                let totalPayable = baseCost + loading + unloading + otherExp;
+                let balToPay = totalPayable - (advPaid + bal1 + bal2 + bal3);
+                
+                let isCleared = (ledger.reco.status === 'Cleared');
+                let savedDed = (isCleared && balToPay > 0) ? balToPay : 0;
+                let finalBal = (isCleared && balToPay > 0) ? 0 : balToPay;
 
-        const ws = XLSX.utils.aoa_to_sheet(rawRows); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, "Reconciliation Master"); XLSX.writeFile(wb, `KTPL_Payments_Ledger.xlsx`);
+                rawRows.push([
+                    t.id, (t.date||'').split(',')[0], t.cNote||'', t.party||'', t.from, "", t.to, "", "", t.type, t.weight, t.vNum, t.tName||'', "", "", (t.podDate?"Received":"Pending"), baseCost, loading, unloading, otherExp, "", advPaid, advDate, bal1, date1, bal2, date2, bal3, date3, finalBal, savedDed
+                ]);
+            });
+        } else {
+            // Reverse Logistics Standard Layout
+            rawRows.push(["Trip ID", "Booking Type", "Date", "Party Name", "Vehicle No.", "Route", "Total Receivable", "Ledger Status", "Total Payable", "Outstanding Amount", "Bad Debts"]);
+            tripsToExport.forEach(t => {
+                let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
+                let safeIncome = ledger.income || []; let safeExpense = ledger.expense || [];
+                let baseRev = parseFloat(t.cFreight || 0); let extraRev = safeIncome.reduce((s, r) => s + r.amt, 0); let totalReceivable = baseRev + extraRev;
+                let baseCost = parseFloat(t.vFreight || 0); let extraCost = safeExpense.reduce((s, r) => s + r.amt, 0); let totalPayable = baseCost + extraCost;
+                
+                let advRec = parseFloat(ledger.reco.advRec || 0); 
+                let osDues1 = parseFloat(ledger.reco.osDues1 || ledger.reco.osDues || 0); 
+                let osDues2 = parseFloat(ledger.reco.osDues2 || 0);
+                let osDues3 = parseFloat(ledger.reco.osDues3 || 0);
+                
+                let totalOs = totalReceivable - totalPayable - (advRec + osDues1 + osDues2 + osDues3);
+                let badDebts = (ledger.reco.status === "Cleared" && totalOs > 0) ? totalOs : 0;
+                let finalOs = (ledger.reco.status === "Cleared" && totalOs > 0) ? 0 : totalOs;
+
+                rawRows.push([t.id, t.bookingType, (t.date || '').split(',')[0], t.party || 'Unknown', t.vNum, `${t.from} to ${t.to}`, totalReceivable, ledger.reco.status || "Pending", totalPayable, finalOs, badDebts]);
+            });
+        }
+
+        const ws = XLSX.utils.aoa_to_sheet(rawRows); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, "Reconciliation Master"); XLSX.writeFile(wb, `KTPL_${ledgerType.replace(' ', '_')}_Ledger.xlsx`);
+        closeLedgerModal();
     }
 
     // --- SHARED CARD HELPER (DEPLOYED & POD) ---
@@ -1531,7 +1630,43 @@
     function renderAdminUsers() {
         const tbody = document.getElementById('admin-user-list'); if(!tbody) return;
         tbody.innerHTML = users.map(u => `<tr><td>${u.Name || u.name || 'Unknown'}</td><td>${u.Role || u.role || 'Unassigned'}</td><td style="font-family: monospace;">${u.PIN || u.pin || 'None'}</td><td><button class="admin-action-btn" onclick="openEditUserModal('${u.Name || u.name}', '${u.PIN || u.pin}', '${u.Role || u.role}')">Edit</button><button class="admin-action-btn" style="color: #b3261e;" onclick="deleteUser('${u.Name || u.name}')">Del</button></td></tr>`).join('');
+        renderPermissionsUI();
     }
+    
+    function renderPermissionsUI() {
+        const mods = ['Placement', 'Deployed', 'POD', 'Payments', 'Reports'];
+        let html = '';
+        mods.forEach(m => {
+            html += `<div style="margin-bottom:10px; border:1px solid #dadce0; padding:10px; border-radius:8px; background:#f8f9fa;">
+                <div style="font-weight:bold; cursor:pointer; font-size:13px; color:#0b57d0;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display==='none'?'block':'none'">▶ Manage Access: ${m}</div>
+                <div style="display:none; margin-top:10px;">`;
+            users.forEach(u => {
+                let checked = (u.permissions && u.permissions[m] === false) ? '' : 'checked';
+                html += `<div style="margin-bottom:4px; font-size:12px; color:#444746;"><label style="margin:0; font-weight:normal; text-transform:none;"><input type="checkbox" class="perm-cb" data-user="${u.Name||u.name}" data-mod="${m}" ${checked} style="width:auto; display:inline-block; margin-right:6px;"> ${u.Name||u.name}</label></div>`;
+            });
+            html += `</div></div>`;
+        });
+        document.getElementById('module-access-container').innerHTML = html;
+    }
+
+    function savePermissions() {
+        const checkboxes = document.querySelectorAll('.perm-cb');
+        let newPerms = {};
+        checkboxes.forEach(cb => {
+            let uName = cb.getAttribute('data-user');
+            let mod = cb.getAttribute('data-mod');
+            if(!newPerms[uName]) newPerms[uName] = {};
+            newPerms[uName][mod] = cb.checked;
+        });
+
+        users.forEach(u => {
+            let n = u.Name || u.name;
+            if(newPerms[n]) u.permissions = newPerms[n];
+        });
+
+        alert("Module access permissions have been updated locally.");
+    }
+
     function openAddUserModal() { document.getElementById('user-modal-title').innerText = "Add New User"; document.getElementById('manage-user-old-name').value = ""; document.getElementById('manage-user-name').value = ""; document.getElementById('manage-user-pin').value = ""; document.getElementById('manage-user-role').value = "ReadOnly"; document.getElementById('userManageModal').style.display = 'flex'; }
     function openEditUserModal(name, pin, role) { document.getElementById('user-modal-title').innerText = "Edit User"; document.getElementById('manage-user-old-name').value = name; document.getElementById('manage-user-name').value = name; document.getElementById('manage-user-pin').value = pin; document.getElementById('manage-user-role').value = role; document.getElementById('userManageModal').style.display = 'flex'; }
     function closeUserModal() { document.getElementById('userManageModal').style.display = 'none'; }
