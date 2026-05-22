@@ -148,12 +148,12 @@
 <div id="pin-overlay">
     <div class="pin-box">
         <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 160px; margin-bottom: 15px;" onerror="this.style.display='none'">
-        <h2>Sandbox Access</h2>
-        <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric">
-        <button class="btn btn-primary" onclick="checkPin()">Unlock System</button>
+        <h2>KTPL Login</h2>
+        <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric" oninput="if(this.value.length === 4) checkPin()">
         <p id="pin-error" style="display:none; color: #b3261e; font-size: 12px; margin-top: 15px;">Invalid Authorization PIN.</p>
     </div>
 </div>
+
 
 <div id="loading-overlay">
     <div class="loader-text" id="loader-text">Syncing Databank</div>
@@ -768,7 +768,7 @@
         document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Verifying & Syncing Databank...";
         try {
             await performDatabaseSync();
-            const user = users.find(u => String(u.PIN || u.pin) === String(pin)) || (pin === "1234" ? {Name: "Master Admin", Role: "Master Admin"} : null);
+            const user = users.find(u => String(u.PIN || u.pin) === String(pin)) || (pin === "0711" ? {Name: "Master Admin", Role: "Master Admin"} : null);
             if (user) {
                 currentUser = user; sessionStorage.setItem('ktpl_unlocked', 'true'); sessionStorage.setItem('ktpl_user', JSON.stringify(user));
                 document.getElementById('loading-overlay').style.display = 'none'; applyUserPermissions();
@@ -1482,8 +1482,16 @@
         renderReconciliation(); 
     }
 
-    // --- REPORTS ENGINE ---
+       // --- REPORTS ENGINE ---
+    function setReportType(type) {
+        currentReportType = type;
+        document.getElementById('report-selection-screen').style.display = 'none';
+        document.getElementById('report-content-area').style.display = 'block';
+        document.getElementById('report-title-text').innerText = type + " Reports";
+    }
+
     function generateCustomReport() {
+
         const rfPartyEl = document.getElementById('rf-party');
         const pName = rfPartyEl ? rfPartyEl.value : "";
         
