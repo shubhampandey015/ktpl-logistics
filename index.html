@@ -3,228 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KTPL Logistics Tracker</title>
-    <link rel="manifest" href="manifest.json">
+    <title>KTPL ERP Ecosystem</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        /* CRITICAL MOBILE FIXES */
-        * { box-sizing: border-box; }
+        /* MODERN SANDBOX DESIGN & RESET FIXES */
+        * { box-sizing: border-box; font-family: "Google Sans", "Roboto", -apple-system, sans-serif; }
+        body { background: #f0f4f9; min-height: 100vh; margin: 0; padding: 10px; color: #1f1f1f; display: flex; justify-content: center; }
+        .container { position: relative; width: 100%; max-width: 600px; padding: 10px 0; margin-top: 10px; margin-bottom: 40px; display: none; overflow-x: hidden; word-wrap: break-word; }
 
-        /* GOOGLE MATERIAL DESIGN */
-        body { font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #f8f9fa; min-height: 100vh; margin: 0; padding: 10px; color: #202124; display: flex; justify-content: center; }
-        
-        .container { position: relative; width: 100%; max-width: 600px; background: #ffffff; padding: 20px 15px; border-radius: 8px; border: 1px solid #dadce0; margin-top: 10px; margin-bottom: 40px; display: none; }
+        /* LOADING & OVERLAYS */
+        #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f4f9; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
+        #loading-overlay { display: none; }
+        .pin-box { background: #ffffff; padding: 35px 25px; border-radius: 16px; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 20px; padding: 10px; width: 100%; border: none; background: #f1f3f4; border-radius: 8px; }
+        .pin-input:focus { outline: 2px solid #0b57d0; background: #ffffff; }
 
-        /* PIN & LOADING SCREEN STYLING */
-        #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8f9fa; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
-        #loading-overlay { background: #ffffff; display: none; }
-        .loader-text { color: #1a73e8; font-size: 18px; font-weight: 500; margin-top: 20px; }
-
-        .pin-box { background: #ffffff; padding: 35px 25px; border-radius: 8px; border: 1px solid #dadce0; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
-        .pin-box h2 { margin: 0 0 10px 0; color: #202124; font-size: 22px; font-weight: 500; }
-        .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 20px; padding: 10px; width: 100%; border: 1px solid #dadce0; border-radius: 4px; }
-        .pin-input:focus { border-color: #1a73e8; outline: none; border-width: 2px; padding: 9px; }
-        .sync-text { font-size: 13px; font-weight: 500; margin-top: 15px; color: #5f6368; }
-
-        /* UI ELEMENTS */
-        .greeting { text-align: center; margin-bottom: 20px; padding-top: 10px; }
-        .greeting h1 { font-size: 24px; font-weight: 400; margin: 0; color: #202124; }
-        
-        .main-tabs { display: flex; border-bottom: 1px solid #dadce0; margin-bottom: 20px; width: 100%; justify-content: space-between; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-        .main-tabs::-webkit-scrollbar { display: none; }
-        .main-tab { flex: 1 0 auto; text-align: center; padding: 12px 10px; cursor: pointer; font-size: 13px; font-weight: 500; color: #5f6368; transition: 0.2s; border-bottom: 3px solid transparent; }
-        .main-tab.active { color: #1a73e8; border-bottom: 3px solid #1a73e8; }
-        
+        /* APP SECTIONS & ANIMATIONS */
         .app-section { display: none; animation: fadeIn 0.3s ease; }
         .app-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* FORM ELEMENTS */
-        .form-group { margin-top: 16px; width: 100%; }
-        label { display: block; font-size: 12px; font-weight: 500; color: #5f6368; margin-bottom: 4px; text-align: left; }
-        .required-star { color: #d93025; } 
-        input, select { width: 100%; padding: 10px 12px; border: 1px solid #dadce0; border-radius: 4px; font-size: 14px; color: #202124; background-color: #ffffff; transition: 0.2s; box-sizing: border-box; }
-        input:focus, select:focus { outline: none; border: 2px solid #1a73e8; padding: 9px 11px; }
-        input:disabled { background-color: #f1f3f4; color: #9aa0a6; cursor: not-allowed; border-color: #f1f3f4; }
+        /* HOMEPAGE GRID */
+        .homepage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 10px; }
+        .menu-card { background: #ffffff; border-radius: 16px; padding: 20px 15px; cursor: pointer; transition: 0.15s ease-in-out; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; border: 1px solid transparent; }
+        .menu-card:active { transform: scale(0.95); background: #f8f9fa; border: 1px solid #d3e3fd; }
+        .menu-icon { font-size: 24px; margin-bottom: 12px; background: #e8f0fe; width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        .menu-card h3 { margin: 0; font-size: 14px; font-weight: 500; color: #1f1f1f; }
+        .menu-card p { margin: 4px 0 0 0; font-size: 11px; color: #5f6368; line-height: 1.3;}
+
+        /* HEADERS */
+        .workspace-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 12px 15px; background: #ffffff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-left: 10px; margin-right: 10px; }
+        .btn-back-home { background: #f1f3f4; border: none; color: #444746; font-size: 13px; font-weight: 500; cursor: pointer; padding: 6px 12px; border-radius: 20px; transition: 0.2s;}
+        .btn-back-home:active { transform: scale(0.95); background: #e3e3e3;}
+        .workspace-title { font-size: 15px; font-weight: 500; color: #1f1f1f; margin: 0; }
+
+        /* TABS (SUB & FLOW) */
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 10px; }
+        .sub-tabs::-webkit-scrollbar { display: none; }
+        .sub-tab { flex: 1 0 auto; text-align: center; padding: 10px 12px; cursor: pointer; font-size: 13px; font-weight: 500; border-radius: 20px; background: #ffffff; color: #444746; border: 1px solid #dadce0; transition: 0.15s ease-in-out; }
+        .sub-tab:active { transform: scale(0.95); }
+        .sub-tab.active { background: #0b57d0; color: #ffffff; border-color: #0b57d0; }
+
+        /* FORMS & INPUTS */
+        .form-card { background: #ffffff; border-radius: 16px; padding: 20px; margin: 0 10px 15px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        .form-group { margin-top: 14px; width: 100%; }
+        label { display: block; font-size: 11px; font-weight: 500; color: #444746; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .required-star { color: #b3261e; } 
+        input, select { width: 100%; padding: 12px 14px; border: none; border-radius: 8px; font-size: 14px; color: #1f1f1f; background-color: #f1f3f4; transition: 0.2s; box-sizing: border-box; }
+        input:focus, select:focus { outline: 2px solid #0b57d0; background-color: #ffffff; }
+        input:disabled { background-color: #e3e3e3; color: #8e8e8e; }
         
-        /* STRICT GRID FIXES FOR MOBILE: NO MEDIA QUERIES ALLOWED TO STACK THESE */
-        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: 100%; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; }
-        
-        .error-msg { display: none; color: #d93025; font-size: 12px; margin-top: 4px; font-weight: 500; text-align: left; }
-        .section-divider { height: 1px; background: #dadce0; margin: 24px 0; }
+        .error-msg { display: none; color: #b3261e; font-size: 11px; margin-top: 4px; font-weight: 500; }
+        .section-divider { height: 1px; background: #e0e0e0; margin: 20px 0; }
 
-        /* MULTI-COLORED DISTINCT BUTTONS */
-        .btn-primary, .btn-whatsapp, .btn-secondary, .btn-business, .btn-danger, .btn-team, .btn-clear { width: 100%; padding: 10px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s, box-shadow 0.2s; }
-        
-        .btn-primary { color: #ffffff; background: #1a73e8; }
-        .btn-primary:hover { background: #1b66c9; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
-        
-        .btn-whatsapp { color: #ffffff; background: #188c38; }
-        .btn-whatsapp:hover { background: #14792f; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
-        
-        .btn-business { color: #ffffff; background: #005f73; }
-        .btn-business:hover { background: #004654; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
-        
-        .btn-team { color: #ffffff; background: #673ab7; } 
-        .btn-team:hover { background: #512da8; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
-        
-        .btn-clear { border: 1px solid #dadce0; background: #ffffff; color: #5f6368; } 
-        .btn-clear:hover { background: #f1f3f4; color: #202124; }
-
-        .btn-danger { color: #ffffff; background: #d93025; }
-        
-        .btn-secondary { border: 1px solid #dadce0; background: #ffffff; color: #1a73e8; }
-        .btn-secondary:hover { background: #f8f9fa; }
+        /* BUTTONS */
+        .btn { width: 100%; padding: 12px 16px; border: none; border-radius: 24px; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.15s ease-in-out; text-align: center; }
+        .btn:active { transform: scale(0.96); opacity: 0.9; }
+        .btn-primary { color: #ffffff; background: #0b57d0; }
+        .btn-whatsapp { color: #ffffff; background: #146c2e; }
+        .btn-business { color: #ffffff; background: #004d40; }
+        .btn-team { color: #ffffff; background: #65558f; } 
+        .btn-clear { background: #f1f3f4; color: #444746; }
+        .btn-danger { color: #ffffff; background: #b3261e; }
+        .btn-secondary { background: #e8f0fe; color: #0b57d0; }
 
         /* AUTOCOMPLETE */
         .autocomplete { position: relative; display: block; text-align: left; width: 100%; }
-        .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border: 1px solid #dadce0; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; display: none; margin-top: 2px; }
-        .autocomplete-items div { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 14px; color: #202124; }
-        .autocomplete-items div:hover { background-color: #f1f3f4; }
+        .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; display: none; margin-top: 4px; border: 1px solid #dadce0;}
+        .autocomplete-items div { padding: 12px 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 13px; color: #1f1f1f; }
+        .autocomplete-items div:hover { background-color: #f8f9fa; }
 
-        /* CARDS & COMPONENTS */
-        .sub-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; scrollbar-width: none;}
-        .sub-tab { flex: 1 0 auto; text-align: center; padding: 8px 12px; cursor: pointer; font-size: 13px; font-weight: 500; border-radius: 16px; border: 1px solid #dadce0; background: #ffffff; color: #5f6368; }
-        .sub-tab.active { background: #e8f0fe; color: #1a73e8; border-color: #e8f0fe; }
-        .trip-card { background: #ffffff; border-radius: 8px; padding: 16px; margin-bottom: 12px; border: 1px solid #dadce0; font-size: 13px; text-align: left; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.1); word-wrap: break-word;}
-        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; white-space: nowrap;}
+        /* TRIP CARDS */
+        .list-container { padding: 0 10px; }
+        .trip-card { background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); font-size: 12px; color: #444746;}
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;}
         .status-transit { background: #fef7e0; color: #b06000; }
         .status-delivered { background: #e6f4ea; color: #137333; }
-        .status-cancelled { background: #fce8e6; color: #d93025; }
+        .status-cancelled { background: #fce8e6; color: #b3261e; }
+        
+        .compact-input { padding: 8px 10px; font-size: 12px; border-radius: 6px; background: #f8f9fa; border: 1px solid #dadce0; outline: none; transition: 0.2s;}
+        .compact-input:focus { background: #ffffff; border-color: #0b57d0;}
 
-        #unified-filter-bar { background: #ffffff; padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #dadce0; display: none; animation: fadeIn 0.3s; text-align: left; }
-        .filter-header { font-size: 12px; font-weight: 500; color: #5f6368; margin-bottom: 12px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
-        .history-btn { background: transparent; border: none; color: #1a73e8; font-size: 12px; font-weight: 500; cursor: pointer; padding: 4px 0; margin-top: 8px; text-align: left; width: auto; box-shadow: none;}
-        .history-panel { display: none; background: #f8f9fa; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-size: 12px; color: #3c4043; border-left: 3px solid #1a73e8; max-height: 150px; overflow-y: auto;}
-        .history-item { margin-bottom: 8px; border-bottom: 1px solid #dadce0; padding-bottom: 4px; }
-        .pod-badge { background: #e8f0fe; color: #1a73e8; padding: 6px 12px; border-radius: 4px; font-weight: 500; margin-bottom: 16px; display: inline-block; font-size: 12px;}
-        .compact-input { padding: 8px 5px; font-size: 12px; width: 100%; }
+        /* MASTER SEARCH FILTER BAR */
+        #unified-filter-bar { background: #ffffff; border-radius: 12px; padding: 15px; margin: 0 10px 15px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+        .filter-header { font-size: 12px; font-weight: 600; color: #1f1f1f; margin-bottom: 12px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
+        .filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
-        /* PAYMENTS ACCORDION */
-        .reco-accordion-header { background: #ffffff; border-radius: 8px; padding: 12px 15px; margin-bottom: 8px; border: 1px solid #dadce0; cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; transition: 0.15s;}
-        .reco-accordion-header:active { background: #f8f9fa;}
-        .reco-info-col { flex: 1; padding-right: 10px; word-wrap: break-word; font-size: 13px; color: #202124; }
+        /* PAYMENTS RECO ACCORDION & GRID */
+        .reco-accordion-header { background: #ffffff; border-radius: 12px; padding: 12px 15px; margin-bottom: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; border: 1px solid transparent; transition: 0.15s;}
+        .reco-accordion-header:active { transform: scale(0.98); background: #f8f9fa;}
+        .reco-info-col { flex: 1; padding-right: 10px; word-wrap: break-word; }
         .reco-amt-col { display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-start; gap: 4px; flex-shrink: 0; text-align: right; }
         
-        .reco-accordion-body { display: none; background: #ffffff; border-radius: 8px; padding: 15px; margin-bottom: 16px; border: 1px solid #dadce0; animation: fadeIn 0.2s ease;}
+        .reco-accordion-body { display: none; background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 16px; border: 1px solid #dadce0; animation: fadeIn 0.2s ease;}
         .reco-accordion-body.open { display: block; }
         
-        .reco-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; border-top: 1px solid #f1f3f4; padding-top: 10px;}
-        .reco-panel { border-radius: 8px; padding: 0; background: transparent; max-height: 250px; overflow-y: auto; padding-right: 5px; }
-        .reco-header-title { font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #eaeaea; padding-bottom: 6px; color: #5f6368; display: flex; justify-content: space-between;}
+        .reco-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; border-top: 1px solid #f1f3f4; padding-top: 15px;}
+        .reco-panel { border-radius: 8px; padding: 0; background: transparent; max-height: 250px; overflow-y: auto; padding-right: 5px;}
+        .reco-header-title { font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #eaeaea; padding-bottom: 6px; color: #1f1f1f; display: flex; justify-content: space-between;}
         
-        .calc-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: #5f6368; }
+        .calc-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: #444746; }
         .calc-line-item { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; color: #5f6368; padding-left: 8px; border-left: 2px solid #e8f0fe;}
-        .calc-gross { font-weight: bold; font-size: 13px; color: #202124; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f3f4; display: flex; justify-content: space-between;}
-        .highlight-red-box { background-color: #fce8e6; color: #202124; font-weight: 500; padding: 12px; text-align: center; border-radius: 8px; margin-top: 15px; border: 1px solid #f9d0c4; font-size: 13px; display: block;}
+        .calc-gross { font-weight: bold; font-size: 13px; color: #1f1f1f; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f3f4; display: flex; justify-content: space-between;}
+        .highlight-red-box { background-color: #fce8e6; color: #1f1f1f; font-weight: 500; padding: 12px; text-align: center; border-radius: 8px; margin-top: 15px; border: 1px solid #f9d0c4; font-size: 13px; display: block;}
+        
+        .history-btn { background: transparent; border: none; color: #0b57d0; font-size: 11px; font-weight: 500; cursor: pointer; padding: 4px 0; margin-top: 8px; text-align: left; width: auto;}
+        .history-panel { display: none; background: #f8f9fa; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-size: 11px; color: #444746; border-left: 3px solid #0b57d0;}
+        .history-item { margin-bottom: 8px; border-bottom: 1px solid #dadce0; padding-bottom: 4px; }
 
         /* MODALS */
-        .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(32,33,36,0.6); justify-content: center; align-items: center; padding: 15px;}
-        .modal-content { background: #ffffff; padding: 20px; border-radius: 8px; width: 100%; max-width: 340px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(31,31,31,0.5); justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(2px);}
+        .modal-content { background: #ffffff; padding: 24px; border-radius: 16px; width: 100%; max-width: 380px; max-height: 90vh; overflow-y: auto; text-align: left; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
         .financial-row { display: grid; grid-template-columns: 2fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
 
-        /* REPORTS TABLE - SCREEN UI */
-        .screen-report-container { overflow-x: auto; background: #ffffff; border-radius: 8px; border: 1px solid #dadce0; margin-top: 16px; -webkit-overflow-scrolling: touch;}
-        .report-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
-        .report-table th, .report-table td { padding: 10px 12px; border-bottom: 1px solid #dadce0; text-align: left; color: #202124; }
-        .report-table th { background: #f8f9fa; font-weight: 500; color: #5f6368; }
+        /* REPORTS TABLE */
+        .screen-report-container { overflow-x: auto; background: #ffffff; border-radius: 12px; margin: 0 10px 15px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); -webkit-overflow-scrolling: touch;}
+        .report-table { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
+        .report-table th, .report-table td { padding: 10px 12px; border-bottom: 1px solid #f1f3f4; text-align: left; color: #444746; }
+        .report-table th { background: #f8f9fa; font-weight: 500; color: #1f1f1f; }
 
         .print-only { display: none; }
-        .admin-action-btn { background: transparent; border: 1px solid #dadce0; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; color: #1a73e8; margin-right: 5px; font-weight: 500;}
-        .admin-action-btn:hover { background: #f8f9fa; }
 
         /* STRICT PDF PRINT STYLES */
         @media print { 
-            @page { margin: 0; }
+            @page { margin: 10mm; }
             body * { visibility: hidden; }
             body { padding: 0; margin: 0; background: #fff; }
             #print-report-container, #print-report-container * { visibility: visible; }
-            #print-report-container { position: absolute; left: 0; top: 0; width: 100%; padding: 10mm; box-sizing: border-box; display: block !important; }
-            .screen-report-container { display: none !important; }
-            #report-actions, .main-tabs, .greeting, #unified-filter-bar, #btn-logout { display: none !important; }
+            #print-report-container { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+            .screen-report-container, #main-app, .modal, #unified-filter-bar { display: none !important; }
             .print-header { text-align: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; display: block; }
             .print-header h2 { font-size: 18px; color: #000; margin: 0; font-weight: bold; }
-            .print-table { border: 2px solid #000; box-shadow: none; border-radius: 0; border-collapse: collapse; width: 100%; font-size: 10px;}
-            .print-table th, .print-table td { border: 1px solid #000; color: #000; padding: 4px 6px; text-align: left;}
-            .print-table th { border-bottom: 2px solid #000; font-weight: bold; }
-            .party-group-table { margin-bottom: 20px; page-break-inside: avoid; }
+            .print-table { width: 100%; border-collapse: collapse; font-family: Calibri, sans-serif; font-size: 10pt; border: 2px solid #000;}
+            .print-table th, .print-table td { border: 1px solid #000; padding: 6px; color: #000; text-align: left; vertical-align: top;}
+            .print-table th { background-color: #f0f0f0; font-weight: bold; text-align: center;}
+            .party-table-wrapper { margin-bottom: 20px; page-break-inside: avoid; }
         }
     </style>
 </head>
 <body>
 
-<div id="pin-overlay" style="display: none;">
+<div id="pin-overlay">
     <div class="pin-box">
-        <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 180px; margin-bottom: 15px;" onerror="this.style.display='none'">
-        <h2>KTPL Secure Login</h2>
+        <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 160px; margin-bottom: 15px;" onerror="this.style.display='none'">
+        <h2>Sandbox Access</h2>
         <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric">
-        <button class="btn-primary" onclick="checkPin()" style="margin-top: 0;">Unlock App</button>
-        <p id="pin-error" style="display:none; color: #d93025; font-size: 13px; margin-top: 15px;">Invalid PIN.</p>
+        <button class="btn btn-primary" onclick="checkPin()">Unlock System</button>
+        <p id="pin-error" style="display:none; color: #b3261e; font-size: 12px; margin-top: 15px;">Invalid Authorization PIN.</p>
     </div>
 </div>
 
 <div id="loading-overlay">
     <div class="loader-text" id="loader-text">Syncing Databank</div>
-    <div id="error-box" style="display:none; color: #d93025; font-size: 12px; margin-top: 10px; max-width: 300px; word-wrap: break-word;"></div>
-    <button id="bypass-btn" class="btn-primary" style="display:none; width:auto; padding:8px 20px; border-radius: 4px; margin-top: 15px;" onclick="bypassLoading()">Continue Offline</button>
+        <p id="error-box" style="display:none; color:#b3261e; font-size:12px; margin-top:10px; text-align:center;"></p>
+        <button id="bypass-btn" class="btn btn-clear" style="display:none; margin-top:10px;" onclick="bypassLoading()">Retry Login</button>
 </div>
 
 <div class="container" id="main-app">
-    <button id="btn-logout" onclick="logoutApp()" style="position: absolute; top: 15px; right: 15px; background: #ffffff; border: 1px solid #dadce0; color: #5f6368; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; box-shadow: 0 1px 2px rgba(60,64,67,0.1); z-index: 100;">Logout</button>
     
-    <div class="greeting">
-        <h2 id="user-name-text" style="font-size: 20px; font-weight: 500; color: #5f6368; margin: 0 0 5px 0; display: none;"></h2>
-        <h1 id="greeting-text">Good Morning,</h1>
+    <div id="panel-homepage" class="app-section active">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 15px 0 15px;">
+            <div class="greeting" style="padding:0; margin:0;">
+                <h2 id="user-name-text" style="font-size: 14px; font-weight: 500; color: #5f6368; margin: 0 0 2px 0; display: none;"></h2>
+                <h1 id="greeting-text" style="font-size:24px;">Welcome,</h1>
+            </div>
+            <button class="btn btn-clear" style="width:auto; font-size:11px; padding:6px 12px;" onclick="logoutApp()">Logout</button>
+        </div>
+
+        <div class="homepage-grid" style="margin-top: 25px;">
+            <div class="menu-card" id="card-placement" onclick="openWorkspace('tab-placement')">
+                <div class="menu-icon" style="color: #0b57d0;">📦</div>
+                <h3>Placement</h3>
+                <p>Log Fleet Bookings</p>
+            </div>
+            <div class="menu-card" id="card-deployed" onclick="openWorkspace('tab-deployed')">
+                <div class="menu-icon" style="color: #146c2e;">🚚</div>
+                <h3>Deployed</h3>
+                <p>Track & Expenses</p>
+            </div>
+            <div class="menu-card" id="card-pod" onclick="openWorkspace('tab-pod')">
+                <div class="menu-icon" style="color: #b3261e;">📑</div>
+                <h3>POD Docs</h3>
+                <p>C-Notes & Dates</p>
+            </div>
+            <div class="menu-card" id="card-payments" onclick="openWorkspace('tab-payments')">
+                <div class="menu-icon" style="color: #65558f;">💰</div>
+                <h3>Payments</h3>
+                <p>Reco & Margins</p>
+            </div>
+            <div class="menu-card" id="card-reports" onclick="openWorkspace('tab-reports')" style="grid-column: span 2; align-items: center; text-align: center; flex-direction: row; justify-content: flex-start; gap: 15px;">
+                <div class="menu-icon" style="color: #004d40; margin:0;">📊</div>
+                <div>
+                    <h3>Financial Reports & MIS</h3>
+                    <p>Excel / PDF Export Matrix</p>
+                </div>
+            </div>
+            <div class="menu-card" id="card-admin" onclick="openWorkspace('tab-admin')" style="display:none; grid-column: span 2; align-items: center; text-align: center; flex-direction: row; justify-content: flex-start; gap: 15px; border: 1px solid #fce8e6;">
+                <div class="menu-icon" style="color: #d93025; background: #fce8e6; margin:0;">⚙️</div>
+                <div>
+                    <h3>Admin Control</h3>
+                    <p>User Role Management</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="main-tabs" id="main-navigation">
-        <div class="main-tab active" id="nav-placement" onclick="switchMainTab('tab-placement')">Placement</div>
-        <div class="main-tab" id="nav-deployed" onclick="switchMainTab('tab-deployed')">Deployed</div>
-        <div class="main-tab" id="nav-pod" onclick="switchMainTab('tab-pod')">POD</div>
-        <div class="main-tab" id="nav-payments" onclick="switchMainTab('tab-payments')">Payments</div>
-        <div class="main-tab" id="nav-reports" onclick="switchMainTab('tab-reports')">Reports</div>
-        <div class="main-tab" id="nav-admin" onclick="switchMainTab('tab-admin')" style="display:none; color:#d93025;">Admin</div>
-    </div>
-
-    <div id="unified-filter-bar">
-        <div class="filter-header">
-            Search Filter
-            <span style="color:#1a73e8; font-size:11px; cursor:pointer; padding: 4px;" onclick="clearFilters()">Reset</span>
-        </div>
-        <div class="grid-2">
-            <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
-            <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
-        </div>
-        <div class="grid-3" style="margin-top: 8px;">
-            <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerCurrentRender()"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><input type="text" id="uf-vcap" class="compact-input" placeholder="Capacity" oninput="triggerCurrentRender()"><div id="uf-vcap-list" class="autocomplete-items"></div></div>
-        </div>
-        <div class="grid-3" style="margin-top: 8px;">
-            <div class="autocomplete"><input type="text" id="uf-party" class="compact-input" placeholder="Party Name" oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerCurrentRender()"><div id="uf-origin-list" class="autocomplete-items"></div></div>
-            <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerCurrentRender()"><div id="uf-dest-list" class="autocomplete-items"></div></div>
+    <div id="unified-filter-bar" style="display:none; padding: 0 10px; margin-bottom:15px;">
+        <div class="form-card" style="margin:0; padding:15px;">
+            <div style="font-size: 11px; font-weight: 600; color: #1f1f1f; margin-bottom: 10px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;">
+                Search Filter 
+                <span style="color:#0b57d0; cursor:pointer; font-size:10px; background:#e8f0fe; padding:4px 8px; border-radius:12px;" onclick="clearFilters()">Reset Filters</span>
+            </div>
+            <div class="filter-grid">
+                <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
+                <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
+                <div class="autocomplete" style="grid-column: span 2;"><input type="text" id="uf-party" class="compact-input" placeholder="Search Party / Client Name..." oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerCurrentRender()"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerCurrentRender()"><div id="uf-origin-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerCurrentRender()"><div id="uf-dest-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete" style="grid-column: span 2;"><input type="text" id="uf-vcap" class="compact-input" placeholder="Capacity Weight" oninput="triggerCurrentRender()"><div id="uf-vcap-list" class="autocomplete-items"></div></div>
+            </div>
         </div>
     </div>
 
-    <!-- PLACEMENT TAB -->
-    <div id="tab-placement" class="app-section active">
-        <div id="placement-selection-screen">
+    <div id="tab-placement" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">Placement Workspace</h3>
+        </div>
+
+        <div id="placement-selection-screen" style="padding: 0 10px;">
             <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select the operational flow to log a new entry.</p>
             <div style="display:flex; flex-direction:column; gap:15px;">
-                <button class="btn-primary" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Own Booking')">Own Booking Flow</button>
-                <button class="btn-team" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Reverse Logistics')">Reverse Logistics Flow</button>
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Own Booking')">Own Booking Flow</button>
+                <button class="btn btn-team" id="btn-rl-flow" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Reverse Logistics')">Reverse Logistics Flow</button>
             </div>
         </div>
 
-        <div id="placement-form-container" style="display:none;">
+        <div id="placement-form-container" style="display:none;" class="form-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f3f4; padding-bottom:10px;">
-                <span id="placement-form-title" style="font-weight:600; color:#1a73e8; font-size: 15px;">Form</span>
-                <span style="font-size:12px; color:#d93025; cursor:pointer; font-weight:600;" onclick="showSelectionScreen('placement')">Cancel</span>
+                <span id="placement-form-title" style="font-weight:600; color:#0b57d0; font-size: 15px;">Form</span>
+                <span style="font-size:12px; color:#b3261e; cursor:pointer; font-weight:600;" onclick="showSelectionScreen('placement')">Cancel</span>
             </div>
 
-            <!-- OWN BOOKING FORM -->
             <div id="form-own-booking">
                 <div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="ob-date"></div>
                 <div class="form-group autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="ob-party" placeholder="Type or Select..." onchange="formatCase(this, 'title')"><div id="ob-party-list" class="autocomplete-items"></div></div>
@@ -256,195 +280,239 @@
                 <div class="form-group"><label>Remarks</label><input type="text" id="ob-remarks" placeholder="..."></div>
                 
                 <div class="grid-2" style="margin-top:20px; gap:10px;">
-                    <button class="btn-clear" onclick="clearPlacementForm()">Clear</button>
-                    <button class="btn-primary" onclick="savePlacementOwn()">Save Details</button>
-                    <button class="btn-team" onclick="generatePlacementMessageOwn('team')">For Team</button>
-                    <button class="btn-whatsapp" onclick="generatePlacementMessageOwn('client')">For Client</button>
+                    <button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button>
+                    <button class="btn btn-primary" onclick="savePlacementOwn()">Save Details</button>
+                    <button class="btn btn-team" onclick="generatePlacementMessageOwn('team')">For Team</button>
+                    <button class="btn btn-whatsapp" onclick="generatePlacementMessageOwn('client')">For Client</button>
                 </div>
             </div>
 
-            <!-- REVERSE LOGISTICS FORM -->
             <div id="form-rev-logistics" style="display:none;">
                 <div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="rl-date"></div>
+                
                 <div class="grid-2 form-group">
                     <div class="autocomplete"><label>Party Name</label><input type="text" id="rl-party" placeholder="Type..." onchange="formatCase(this, 'title')"><div id="rl-party-list" class="autocomplete-items"></div></div>
                     <div><label>Type of Co.</label><input type="text" id="rl-typeco" placeholder="FMCG, Pharma, Auto" onchange="formatCase(this, 'title')"></div>
                 </div>
+                
                 <div class="grid-2 form-group">
                     <div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="rl-from" placeholder="Origin" onchange="formatCase(this, 'title')"><div id="rl-from-list" class="autocomplete-items"></div></div>
                     <div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="rl-to" placeholder="Destination" onchange="formatCase(this, 'title')"><div id="rl-to-list" class="autocomplete-items"></div></div>
                 </div>
+                
                 <div class="section-divider"></div>
                 <div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="rl-vnum" placeholder="Strictly KTPL Fleet..." onchange="formatVehicleNumber(this)"><div id="rl-vnum-list" class="autocomplete-items"></div></div>
                 <div class="grid-2 form-group">
                     <div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="rl-vtype" placeholder="32FT" onchange="formatCase(this, 'upper')"></div>
                     <div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="rl-weight" placeholder="18MT" onchange="formatCase(this, 'upper')"></div>
                 </div>
+                
                 <div class="section-divider"></div>
                 <div class="form-group"><label>Broking Agency <span class="required-star">*</span></label><input type="text" id="rl-agency" placeholder="Agency Name" onchange="formatCase(this, 'title')"></div>
                 <div class="grid-2 form-group">
                     <div><label>Agent Name</label><input type="text" id="rl-agent" placeholder="Name" onchange="formatCase(this, 'title')"></div>
                     <div><label>Contact No.</label><input type="text" id="rl-contact" placeholder="9876543210" onchange="formatPhoneInput(this)"></div>
                 </div>
+                
                 <div class="section-divider"></div>
                 <div class="form-group"><label>Charged Freight</label><input type="number" id="rl-cfreight" placeholder="Receivable Amount"></div>
                 <div class="form-group"><label>Remarks</label><input type="text" id="rl-remarks" placeholder="..."></div>
                 
                 <div class="grid-2" style="margin-top:20px; gap:10px;">
-                    <button class="btn-clear" onclick="clearPlacementForm()">Clear</button>
-                    <button class="btn-primary" onclick="savePlacementRev()">Save Details</button>
-                    <button class="btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">Share For Team</button>
+                    <button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button>
+                    <button class="btn btn-primary" onclick="savePlacementRev()">Save Details</button>
+                    <button class="btn btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">Share For Team</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- DEPLOYED TAB -->
     <div id="tab-deployed" class="app-section">
-        <div id="deployed-selection-screen">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">Deployed Fleet</h3>
+        </div>
+        
+        <div id="deployed-selection-screen" style="padding: 0 10px;">
             <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select fleet category to monitor.</p>
             <div style="display:flex; flex-direction:column; gap:15px;">
-                <button class="btn-primary" style="padding: 16px; font-size: 15px;" onclick="setDepType('Own Booking')">Own Booking Fleet</button>
-                <button class="btn-team" style="padding: 16px; font-size: 15px;" onclick="setDepType('Reverse Logistics')">Reverse Logistics Fleet</button>
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setDepType('Own Booking')">Own Booking Fleet</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setDepType('Reverse Logistics')">Reverse Logistics Fleet</button>
             </div>
         </div>
+
         <div id="deployed-content-area" style="display:none;">
-            <div class="sub-tabs">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
+                <span id="deployed-title-text" style="font-weight:600; color:#0b57d0; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600; background:#fce8e6; padding:4px 8px; border-radius:12px;" onclick="showSelectionScreen('deployed')">Change Category</span>
+            </div>
+            <div class="sub-tabs" style="margin-bottom:15px;">
                 <div class="sub-tab active" id="btn-dep-stat-ong" onclick="setDepStat('In-Transit')">On-Going</div>
                 <div class="sub-tab" id="btn-dep-stat-com" onclick="setDepStat('Delivered')">Completed</div>
                 <div class="sub-tab" id="btn-dep-stat-can" onclick="setDepStat('Cancelled Trip')">Cancelled</div>
             </div>
-            <div id="deployed-container"></div>
+            <div id="deployed-container" class="list-container"></div>
         </div>
     </div>
 
-    <!-- POD TAB -->
     <div id="tab-pod" class="app-section">
-        <div id="pod-selection-screen">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">POD Documents</h3>
+        </div>
+        
+        <div id="pod-selection-screen" style="padding: 0 10px;">
             <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select category to manage PODs.</p>
             <div style="display:flex; flex-direction:column; gap:15px;">
-                <button class="btn-primary" style="padding: 16px; font-size: 15px;" onclick="setPodType('Own Booking')">Own Booking PODs</button>
-                <button class="btn-team" style="padding: 16px; font-size: 15px;" onclick="setPodType('Reverse Logistics')">Reverse Logistics PODs</button>
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setPodType('Own Booking')">Own Booking PODs</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setPodType('Reverse Logistics')">Reverse Logistics PODs</button>
             </div>
         </div>
+
         <div id="pod-content-area" style="display:none;">
-            <div class="sub-tabs">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
+                <span id="pod-title-text" style="font-weight:600; color:#0b57d0; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600; background:#fce8e6; padding:4px 8px; border-radius:12px;" onclick="showSelectionScreen('pod')">Change Category</span>
+            </div>
+            <div class="sub-tabs" style="margin-bottom:15px;">
                 <div class="sub-tab active" id="btn-pod-stat-pen" onclick="setPodStat('Pending')">Pending</div>
                 <div class="sub-tab" id="btn-pod-stat-rec" onclick="setPodStat('Received')">Received</div>
             </div>
-            <div id="pod-summary" class="pod-badge" style="margin-left: 10px;"></div>
-            <div id="pod-container"></div>
+            <div style="padding:0 10px;"><div id="pod-summary" style="font-size:11px; font-weight:600; color:#0b57d0; margin-bottom:10px;"></div></div>
+            <div id="pod-container" class="list-container"></div>
         </div>
     </div>
 
-    <!-- PAYMENTS TAB -->
     <div id="tab-payments" class="app-section">
-        <div id="reco-selection-screen">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">Payments Ledger</h3>
+        </div>
+
+        <div id="reco-selection-screen" style="padding: 0 10px;">
             <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select ledger category to reconcile.</p>
             <div style="display:flex; flex-direction:column; gap:15px;">
-                <button class="btn-primary" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Own Booking')">Own Booking Ledger</button>
-                <button class="btn-team" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Reverse Logistics')">Reverse Logistics Ledger</button>
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Own Booking')">Own Booking Ledger</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Reverse Logistics')">Reverse Logistics Ledger</button>
             </div>
         </div>
+
         <div id="reco-content-area" style="display:none;">
-            <div class="sub-tabs">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
+                <span id="reco-title-text" style="font-weight:600; color:#0b57d0; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600; background:#fce8e6; padding:4px 8px; border-radius:12px;" onclick="showSelectionScreen('reco')">Change Category</span>
+            </div>
+            <div class="sub-tabs" style="margin-bottom:15px;">
                 <div class="sub-tab active" id="btn-reco-stat-pen" onclick="setRecoStat('Pending')">Pending</div>
                 <div class="sub-tab" id="btn-reco-stat-com" onclick="setRecoStat('Completed')">Completed</div>
             </div>
-            <div id="reco-container"></div>
+            <div id="reco-container" class="list-container"></div>
         </div>
     </div>
 
-    <!-- REPORTS TAB -->
     <div id="tab-reports" class="app-section">
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #dadce0;">
-            <div class="form-group autocomplete" style="margin-top:0; margin-bottom:15px;">
-                <label>Filter by Party Name</label>
-                <input type="text" id="rf-party" class="compact-input" placeholder="Type Client Profile..." onchange="formatCase(this, 'title')"><div id="rf-party-list" class="autocomplete-items"></div>
-            </div>
-            <div class="grid-2">
-                <div>
-                    <label>Trip Status:</label>
-                    <select id="report-trip-status" class="compact-input">
-                        <option value="All">All</option>
-                        <option value="In-Transit">In-Transit</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled Trip">Cancelled Trip</option>
-                    </select>
-                </div>
-                <div>
-                    <label>POD Status:</label>
-                    <select id="report-pod-status" class="compact-input">
-                        <option value="All">All</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Received">Received</option>
-                    </select>
-                </div>
-            </div>
-            <button class="btn-primary" onclick="generateCustomReport()" style="margin-top: 15px;">Generate Base View</button>
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">Financial Reports & MIS</h3>
         </div>
         
-        <div id="screen-report" class="screen-report-container"></div>
-        
-        <div class="grid-2" style="display:none; margin-top: 15px; gap:10px;" id="report-actions">
-            <button class="btn-secondary" onclick="window.print()" style="margin-top:0;">Save PDF</button>
-            <button class="btn-whatsapp" onclick="shareReportWhatsApp()" style="margin-top:0;">WhatsApp</button>
-            <button class="btn-primary" onclick="openMISModal()">📊 Generate MIS</button>
-            <button class="btn-team" onclick="openLedgerModal()">💰 Payment Ledger</button>
+        <div id="report-selection-screen" style="padding: 0 10px;">
+            <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select report category to generate data.</p>
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setReportType('Own Booking')">Own Booking Reports</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setReportType('Reverse Logistics')">Reverse Logistics Reports</button>
+            </div>
+        </div>
+
+        <div id="report-content-area" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
+                <span id="report-title-text" style="font-weight:600; color:#0b57d0; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:600; background:#fce8e6; padding:4px 8px; border-radius:12px;" onclick="showSelectionScreen('report')">Change Category</span>
+            </div>
+            <div class="form-card" style="padding:15px; margin-bottom:15px;">
+                <div class="form-group autocomplete" style="margin-top:0; margin-bottom:15px;">
+                    <label>Filter by Party Name</label>
+                    <input type="text" id="rf-party" class="compact-input" placeholder="Type Client Profile..." onchange="formatCase(this, 'title')"><div id="rf-party-list" class="autocomplete-items"></div>
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <label>Trip Status:</label>
+                        <select id="report-trip-status" class="compact-input">
+                            <option value="All">All</option>
+                            <option value="In-Transit">In-Transit</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled Trip">Cancelled Trip</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>POD Status:</label>
+                        <select id="report-pod-status" class="compact-input">
+                            <option value="All">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Received">Received</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="generateCustomReport()" style="margin-top: 15px;">Generate Base View</button>
+            </div>
+            
+            <div id="screen-report" class="screen-report-container"></div>
+            
+            <div class="grid-2 list-container" style="display:none; margin-bottom: 20px; gap:10px;" id="report-actions">
+                <button class="btn btn-clear" onclick="window.print()">🖨️ Save PDF</button>
+                <button class="btn btn-whatsapp" onclick="shareReportWhatsApp()">💬 WhatsApp</button>
+                <button class="btn btn-team" onclick="openMISModal()">📊 Generate MIS</button>
+                <button class="btn btn-secondary" onclick="openLedgerModal()">💰 Payment Ledger</button>
+            </div>
         </div>
     </div>
 
-    <!-- ADMIN TAB -->
     <div id="tab-admin" class="app-section">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="color:#202124; margin:0; font-weight:500;">User Access Control</h3>
-            <button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0; border-radius: 4px;" onclick="openAddUserModal()">+ Add User</button>
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">Admin Control</h3>
         </div>
-        <p style="font-size:13px; color:#5f6368; margin-top: 5px;">Manage roles and PINs for the application.</p>
         
-        <div style="background: #fff; border: 1px solid #dadce0; border-radius: 8px; overflow-x: auto; margin-top: 15px;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
-                <thead>
-                    <tr style="background: #f8f9fa;">
-                        <th style="padding: 10px; border-bottom: 1px solid #dadce0;">Name</th>
-                        <th style="padding: 10px; border-bottom: 1px solid #dadce0;">Role</th>
-                        <th style="padding: 10px; border-bottom: 1px solid #dadce0;">PIN</th>
-                        <th style="padding: 10px; border-bottom: 1px solid #dadce0;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-user-list">
-                </tbody>
-            </table>
+        <div class="form-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color:#1f1f1f; margin:0; font-weight:500; font-size:15px;">User Access</h3>
+                <button class="btn btn-primary" style="width: auto; padding: 6px 12px; font-size: 11px;" onclick="openAddUserModal()">+ Add</button>
+            </div>
+            <div style="border: 1px solid #dadce0; border-radius: 8px; overflow-x: auto; margin-top: 15px;">
+                <table class="report-table">
+                    <thead><tr><th>Name</th><th>Role</th><th>PIN</th><th>Actions</th></tr></thead>
+                    <tbody id="admin-user-list"></tbody>
+                </table>
+            </div>
+            <button class="btn btn-clear" onclick="forceAdminSync()" style="margin-top: 20px;">Force Databank Sync</button>
         </div>
-        <button class="btn-secondary" onclick="forceAdminSync()" style="margin-top: 20px;">Force Sync Databank</button>
 
-        <div style="background: #fff; border: 1px solid #dadce0; border-radius: 8px; margin-top: 20px; padding: 15px;">
-            <h3 style="color:#202124; margin:0 0 10px 0; font-weight:500; font-size:15px;">Module Access Control</h3>
+        <div class="form-card" style="margin-top: 20px;">
+            <h3 style="color:#1f1f1f; margin:0 0 15px 0; font-weight:500; font-size:15px;">Module Access Control</h3>
             <p style="font-size:11px; color:#5f6368; margin-bottom:10px;">Click a module head to assign or revoke access for specific users.</p>
             <div id="module-access-container"></div>
-            <button class="btn-primary" onclick="savePermissions()" style="margin-top: 15px;">Save Permissions</button>
+            <button class="btn btn-primary" onclick="savePermissions()" style="margin-top: 15px;">Save Permissions</button>
         </div>
     </div>
 </div>
 
 <div id="print-report-container" class="print-only"></div>
 
-<!-- MODALS -->
 <div id="whatsappChoiceModal" class="modal">
-    <div class="modal-content">
-        <h3 style="margin-top:0; color:#202124; font-weight:500;">Choose WhatsApp App</h3>
-        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Which app would you like to use to send this message?</p>
+    <div class="modal-content" style="max-width: 300px; padding: 20px;">
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">Share Details</h3>
+        <p style="font-size: 12px; color: #5f6368; margin-bottom: 20px;">Which app would you like to use?</p>
         <div style="display:flex; flex-direction: column; gap:10px;">
-            <button class="btn-whatsapp" onclick="executeWhatsAppShare('regular')" style="margin-top:0;">Regular WhatsApp</button>
-            <button class="btn-business" onclick="executeWhatsAppShare('business')" style="margin-top:0;">WhatsApp Business</button>
-            <button class="btn-clear" onclick="closeWhatsAppChoiceModal()" style="margin-top: 5px;">Cancel</button>
+            <button class="btn btn-whatsapp" onclick="executeWhatsAppShare('regular')">Regular WhatsApp</button>
+            <button class="btn btn-business" onclick="executeWhatsAppShare('business')">WhatsApp Business</button>
+            <button class="btn btn-clear" onclick="closeWhatsAppChoiceModal()" style="margin-top: 5px;">Cancel</button>
         </div>
     </div>
 </div>
 
 <div id="misModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0; color:#202124; font-weight:500;">📊 Generate MIS</h3>
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">📊 Generate MIS</h3>
         <p style="font-size:12px; color:#d93025; margin-bottom:15px;">Party Name is strictly required.</p>
         <div class="form-group autocomplete" style="text-align: left;">
             <label>Party Name <span class="required-star">*</span></label>
@@ -459,28 +527,28 @@
             </select>
         </div>
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
-            <button class="btn-primary" onclick="triggerMISGeneration('Standard MIS')">Standard MIS (.xlsx)</button>
-            <button class="btn-team" onclick="triggerMISGeneration('Preset MIS')">Preset MIS (.xlsx)</button>
-            <button class="btn-clear" onclick="closeMISModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="triggerMISGeneration('Standard MIS')">Standard MIS (.xlsx)</button>
+            <button class="btn btn-team" onclick="triggerMISGeneration('Preset MIS')">Preset MIS (.xlsx)</button>
+            <button class="btn btn-clear" onclick="closeMISModal()">Cancel</button>
         </div>
     </div>
 </div>
 
 <div id="ledgerModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0; color:#202124; font-weight:500;">💰 Payment Ledger Export</h3>
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">💰 Payment Ledger Export</h3>
         <p style="font-size:12px; color:#5f6368; margin-bottom:15px;">Select ledger category to export.</p>
         <div style="display:flex; flex-direction:column; gap:10px;">
-            <button class="btn-primary" onclick="triggerRecoExcelDownload('Own Booking')">Own Booking Ledger (.xlsx)</button>
-            <button class="btn-team" onclick="triggerRecoExcelDownload('Reverse Logistics')">Reverse Logistics Ledger (.xlsx)</button>
-            <button class="btn-clear" onclick="closeLedgerModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="triggerRecoExcelDownload('Own Booking')">Own Booking Ledger (.xlsx)</button>
+            <button class="btn btn-team" onclick="triggerRecoExcelDownload('Reverse Logistics')">Reverse Logistics Ledger (.xlsx)</button>
+            <button class="btn btn-clear" onclick="closeLedgerModal()">Cancel</button>
         </div>
     </div>
 </div>
 
 <div id="expenseModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0; color:#202124; font-weight:500;">Additional Expenses</h3>
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">Additional Expenses</h3>
         <input type="hidden" id="expense-trip-id">
         <div class="grid-2">
             <div class="form-group"><label style="text-align:left;">Loading</label><input type="number" id="exp-loading" class="compact-input" placeholder="Amount"></div>
@@ -494,66 +562,64 @@
             <div id="exp-other-reason-list" class="autocomplete-items"></div>
         </div>
         <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-clear" onclick="closeExpenseModal()" style="margin-top:0;">Cancel</button>
-            <button class="btn-primary" onclick="saveExpenses()" style="margin-top:0;">Save</button>
+            <button class="btn btn-clear" onclick="closeExpenseModal()" style="margin-top:0;">Cancel</button>
+            <button class="btn btn-primary" onclick="saveExpenses()" style="margin-top:0;">Save</button>
         </div>
     </div>
 </div>
 
 <div id="financialModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0; color:#202124; font-weight:500;">💰 Financial Allocation</h3>
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">💰 Financial Allocation</h3>
         <p style="font-size:11px; color:#5f6368; margin-top:0; line-height:1.4;">Add extra expenses or income. This directly updates the Payments ledger.</p>
         <input type="hidden" id="fin-trip-id">
         
         <div style="background:#f8f9fa; border:1px solid #dadce0; border-radius:8px; padding:12px; text-align:left; margin-bottom:12px;">
-            <label style="font-weight:600; display:block; color:#137333; margin-bottom:8px;">+ Receivables (Income)</label>
+            <label style="font-weight:600; display:block; color:#146c2e; margin-bottom:8px;">+ Receivables (Income)</label>
             <div id="income-rows-container"></div>
-            <button class="btn-secondary" style="padding:6px; font-size:11px; width:auto; margin-top:4px;" onclick="addFinancialRow('income')">+ Add Item</button>
+            <button class="btn btn-secondary" style="padding:6px; font-size:11px; width:auto; margin-top:4px;" onclick="addFinancialRow('income')">+ Add Item</button>
         </div>
 
         <div style="background:#f8f9fa; border:1px solid #dadce0; border-radius:8px; padding:12px; text-align:left;">
-            <label style="font-weight:600; display:block; color:#d93025; margin-bottom:8px;">- Payables (Expense)</label>
+            <label style="font-weight:600; display:block; color:#b3261e; margin-bottom:8px;">- Payables (Expense)</label>
             <div id="expense-rows-container"></div>
-            <button class="btn-secondary" style="padding:6px; font-size:11px; width:auto; margin-top:4px;" onclick="addFinancialRow('expense')">+ Add Item</button>
+            <button class="btn btn-secondary" style="padding:6px; font-size:11px; width:auto; margin-top:4px;" onclick="addFinancialRow('expense')">+ Add Item</button>
         </div>
 
         <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-clear" onclick="closeFinancialModal()">Cancel</button>
-            <button class="btn-primary" onclick="saveFinancialLedger()">Save Ledger</button>
+            <button class="btn btn-clear" onclick="closeFinancialModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveFinancialLedger()">Save Ledger</button>
         </div>
     </div>
 </div>
 
 <div id="deliveryModal" class="modal">
-    <div class="modal-content">
-        <h3 style="margin-top:0; font-weight:500;">Confirm Delivery</h3>
-        <label style="text-align:left;">Delivery Date:</label>
-        <input type="date" id="delivery-date-input" style="margin-bottom:15px; width: 100%;" class="compact-input">
+    <div class="modal-content" style="max-width: 300px; padding: 20px;">
+        <h3 style="margin-top:0; font-weight:500; font-size:16px;">Confirm Delivery</h3>
+        <input type="date" id="delivery-date-input" class="compact-input" style="margin-top:10px; margin-bottom:20px; width: 100%;">
         <input type="hidden" id="delivery-trip-id">
         <div style="display:flex; gap:10px;">
-            <button class="btn-clear" onclick="closeModal()" style="margin-top:0;">Cancel</button>
-            <button class="btn-whatsapp" onclick="confirmDelivery()" style="margin-top:0;">Save</button>
+            <button class="btn btn-clear" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmDelivery()">Save Status</button>
         </div>
     </div>
 </div>
 
 <div id="shareModal" class="modal">
-    <div class="modal-content">
-        <h3 style="margin-top:0; color:#202124; font-weight:500;">Share Trip Update</h3>
-        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Choose who you want to share these details with.</p>
+    <div class="modal-content" style="max-width: 300px; padding: 20px;">
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">Share Trip Update</h3>
         <input type="hidden" id="share-modal-trip-id">
-        <div style="display:flex; flex-direction: column; gap:10px;">
-            <button class="btn-team" onclick="executeDeployedShare('team')" style="margin-top:0;">For Team</button>
-            <button class="btn-whatsapp" onclick="executeDeployedShare('client')" style="margin-top:0;">For Client</button>
-            <button class="btn-clear" onclick="closeShareModal()" style="margin-top: 5px;">Cancel</button>
+        <div style="display:flex; flex-direction: column; gap:10px; margin-top:15px;">
+            <button class="btn btn-team" onclick="executeDeployedShare('team')">For Team</button>
+            <button class="btn btn-whatsapp" onclick="executeDeployedShare('client')">For Client</button>
+            <button class="btn btn-clear" onclick="closeShareModal()" style="margin-top: 5px;">Cancel</button>
         </div>
     </div>
 </div>
 
 <div id="adminEditModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0; font-weight:500;">Edit Trip (Admin)</h3>
+        <h3 style="margin-top:0; font-weight:500; font-size:16px; text-align:center;">Edit Trip</h3>
         <input type="hidden" id="edit-trip-id">
         <div class="form-group"><label style="text-align:left;">Party Name</label><input type="text" id="edit-party" class="compact-input" onchange="formatCase(this, 'title')"></div>
         <div class="form-group"><label style="text-align:left;">Vehicle No.</label><input type="text" id="edit-vnum" class="compact-input" onchange="formatVehicleNumber(this)"></div>
@@ -574,20 +640,20 @@
         </div>
         
         <div style="display:flex; gap:10px; margin-top:15px;">
-            <button class="btn-clear" onclick="closeAdminEditModal()" style="margin-top:0;">Cancel</button>
-            <button class="btn-primary" onclick="saveAdminEdit()" style="margin-top:0;">Update</button>
+            <button class="btn btn-clear" onclick="closeAdminEditModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveAdminEdit()">Update</button>
         </div>
     </div>
 </div>
 
 <div id="userManageModal" class="modal">
-    <div class="modal-content">
-        <h3 id="user-modal-title" style="margin-top:0; font-weight:500;">Add / Edit User</h3>
+    <div class="modal-content" style="padding: 20px;">
+        <h3 id="user-modal-title" style="margin-top:0; font-weight:500; font-size:16px; text-align:center;">User Action</h3>
         <input type="hidden" id="manage-user-old-name">
         <div class="form-group"><label style="text-align:left;">User Name</label><input type="text" id="manage-user-name" class="compact-input" placeholder="Name"></div>
         <div class="form-group"><label style="text-align:left;">4-Digit PIN</label><input type="number" id="manage-user-pin" class="compact-input" placeholder="0711"></div>
         <div class="form-group">
-            <label style="text-align:left;">Role Assignment</label>
+            <label style="text-align:left;">Role</label>
             <select id="manage-user-role" class="compact-input">
                 <option value="Admin">Admin</option>
                 <option value="Manager">Manager</option>
@@ -597,8 +663,8 @@
             </select>
         </div>
         <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn-clear" onclick="closeUserModal()" style="margin-top:0;">Cancel</button>
-            <button class="btn-primary" onclick="saveUserManage()" style="margin-top:0;">Save User</button>
+            <button class="btn btn-clear" onclick="closeUserModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveUserManage()">Save User</button>
         </div>
     </div>
 </div>
@@ -611,12 +677,12 @@
     let driverData = {}; 
     let currentUser = null; 
     
-    let currentActiveMainTab = 'tab-placement';
+    let currentActiveMainTab = 'panel-homepage';
     let currentPlacementType = "";
     let currentDeployedType = "";
-    let activeDeployedTab = "In-Transit";
+    let currentDeployedStatus = "In-Transit";
     let currentPodType = "";
-    let activePodTab = "Pending";
+    let currentPodStatus = "Pending";
     let currentRecoType = "";
     let currentRecoStat = "Pending";
     let currentReportType = "";
@@ -683,7 +749,6 @@
         const savedUser = sessionStorage.getItem('ktpl_user');
         if(document.getElementById('ob-date')) document.getElementById('ob-date').valueAsDate = new Date(); 
         if(document.getElementById('rl-date')) document.getElementById('rl-date').valueAsDate = new Date(); 
-        if(document.getElementById('b-date')) document.getElementById('b-date').valueAsDate = new Date(); 
         
         if (sessionStorage.getItem('ktpl_unlocked') === 'true' && savedUser) {
             currentUser = JSON.parse(savedUser);
@@ -739,6 +804,7 @@
 
         if (r === 'Admin') {
             p.adminTab = false;
+            p.changeDelCanStatus = false;
         } else if (n === 'Pramod Nayak') {
             p.adminTab = false; p.paymentsTab = false; p.editChargedFreightOB = false; 
         } else if (n === 'Parveen Sharma') {
@@ -753,16 +819,21 @@
             p.adminTab = false; p.editTrips = false; p.changeDelCanStatus = false;
             p.viewChargedFreightOB = false; p.viewChargedFreightRL = false;
             p.editChargedFreightOB = false; p.editChargedFreightRL = false;
+            p.generateMIS = false; p.exportLedger = false;
         } else if (['Anita Fagare', 'Amruta Chavare'].includes(n)) {
             p.adminTab = false; p.editTrips = false; p.changeDelCanStatus = false;
             p.editChargedFreightOB = false; p.editChargedFreightRL = false;
+            p.generateMIS = false; p.exportLedger = false;
         } else if (n === 'Ashok Dubey') {
             p.adminTab = false; p.editTrips = false; p.changeDelCanStatus = false;
             p.viewChargedFreightOB = false; p.editChargedFreightOB = false;
             p.generateMIS = false; p.exportLedger = false;
+        } else if (r === 'ReadOnly') {
+            p.adminTab = false; p.paymentsTab = false; p.reportsTab = false;
+            p.editTrips = false; p.changeDelCanStatus = false;
+            p.editChargedFreightOB = false; p.editChargedFreightRL = false;
         }
         
-        // Check dynamic permissions set in Admin control
         if (currentUser.permissions) {
             if (currentUser.permissions['Placement'] === false) p.placementTab = false;
             if (currentUser.permissions['Deployed'] === false) p.deployedTab = false;
@@ -780,27 +851,19 @@
         
         const p = getUserPerms();
         
-        document.getElementById('nav-admin').style.display = p.adminTab ? 'flex' : 'none';
-        document.getElementById('nav-payments').style.display = p.paymentsTab ? 'flex' : 'none';
-        document.getElementById('nav-reports').style.display = p.reportsTab ? 'flex' : 'none';
+        document.getElementById('card-admin').style.display = p.adminTab ? 'flex' : 'none';
+        document.getElementById('card-payments').style.display = p.paymentsTab ? 'flex' : 'none';
+        document.getElementById('card-reports').style.display = p.reportsTab ? 'flex' : 'none';
 
         const cFreightOB = document.getElementById('ob-cfreight');
         if (cFreightOB) { cFreightOB.disabled = !p.editChargedFreightOB; cFreightOB.placeholder = p.editChargedFreightOB ? "Receivable" : "Restricted"; }
         const cFreightRL = document.getElementById('rl-cfreight');
         if (cFreightRL) { cFreightRL.disabled = !p.editChargedFreightRL; cFreightRL.placeholder = p.editChargedFreightRL ? "Receivable Amount" : "Restricted"; }
         
-        document.querySelectorAll('button').forEach(btn => {
-            if (btn.innerText.includes('Reverse Logistics') && !p.revLogistics) btn.style.display = 'none';
-        });
+        const btnRLFlow = document.getElementById('btn-rl-flow');
+        if (btnRLFlow) { btnRLFlow.style.display = p.revLogistics ? 'block' : 'none'; }
 
-        // Hide main screen cards based on perms
-        document.querySelectorAll('.menu-card').forEach(card => {
-            const txt = card.innerText;
-            if (txt.includes('Payments') && !p.paymentsTab) card.style.display = 'none';
-            if (txt.includes('Financial Reports') && !p.reportsTab) card.style.display = 'none';
-        });
-
-        switchMainTab('tab-placement');
+        returnToHome();
     }
 
     function setupCustomDropdown(inputId, listId, dataFetchFn, onSelectFn = null) {
@@ -868,32 +931,28 @@
     function autoFillContact(pName, prefix) { const t = document.getElementById(`${prefix}-tname`).value; if (transporters[t]) { const person = transporters[t].find(x => x.name === pName); if (person) document.getElementById(`${prefix}-tcontact`).value = person.phone; } }
 
     // --- NAVIGATION ENGINE ---
-    function switchMainTab(tabId) {
+    function openWorkspace(id) {
         const p = getUserPerms();
-        if (tabId === 'tab-admin' && !p.adminTab) return alert("Module restricted by Administrator.");
-        if (tabId === 'tab-payments' && !p.paymentsTab) return alert("Module restricted by Administrator.");
-        if (tabId === 'tab-reports' && !p.reportsTab) return alert("Module restricted by Administrator.");
+        if (id === 'tab-admin' && !p.adminTab) return alert("Module restricted by Administrator.");
+        if (id === 'tab-payments' && !p.paymentsTab) return alert("Module restricted by Administrator.");
+        if (id === 'tab-reports' && !p.reportsTab) return alert("Module restricted by Administrator.");
 
-        currentActiveMainTab = tabId;
         document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.main-tab').forEach(el => el.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        
-        const navId = tabId.replace('tab-', 'nav-');
-        if(document.getElementById(navId)) document.getElementById(navId).classList.add('active');
+        document.getElementById(id).classList.add('active');
+        currentActiveMainTab = id;
 
-        // Close any open Payments accordions when navigating away
         document.querySelectorAll('.reco-accordion-body').forEach(el => el.classList.remove('open'));
-        currentOpenRecoId = null;
+        currentOpenRecoId = null; 
 
-        document.getElementById('unified-filter-bar').style.display = (tabId === 'tab-placement' || tabId === 'tab-admin') ? 'none' : 'block';
-        
-        if (tabId === 'tab-reports') {
-            document.getElementById('screen-report').innerHTML = '';
-            document.getElementById('print-report-container').innerHTML = '';
-            document.getElementById('report-actions').style.display = 'none';
-        }
-        
+        if(id === 'tab-placement') showPlacementSelection();
+        if(id === 'tab-deployed') { currentDeployedType = ""; showSelectionScreen('deployed'); }
+        if(id === 'tab-pod') { currentPodType = ""; showSelectionScreen('pod'); }
+        if(id === 'tab-payments') { currentRecoType = ""; showSelectionScreen('reco'); }
+        if(id === 'tab-reports') { currentReportType = ""; showSelectionScreen('report'); document.getElementById('screen-report').innerHTML = ''; document.getElementById('print-report-container').innerHTML = ''; document.getElementById('report-actions').style.display = 'none'; }
+
+        if (id === 'tab-deployed' || id === 'tab-pod' || id === 'tab-payments' || id === 'tab-reports') { document.getElementById('unified-filter-bar').style.display = 'block'; } 
+        else { document.getElementById('unified-filter-bar').style.display = 'none'; }
+
         clearFilters(); 
     }
 
@@ -911,8 +970,8 @@
     }
 
     function triggerCurrentRender() {
-        if (currentActiveMainTab === 'tab-deployed') renderDeployed();
-        if (currentActiveMainTab === 'tab-pod') renderPOD();
+        if (currentActiveMainTab === 'tab-deployed' && currentDeployedType !== "") renderDeployed();
+        if (currentActiveMainTab === 'tab-pod' && currentPodType !== "") renderPOD();
         if (currentActiveMainTab === 'tab-payments' && currentRecoType !== "") renderReconciliation();
         if (currentActiveMainTab === 'tab-reports' && currentReportType !== "") generateCustomReport();
     }
@@ -1001,7 +1060,7 @@
     function savePlacementOwn() {
         if (!validatePlacementOwn()) return;
         const vNum = document.getElementById('ob-vnum').value.toUpperCase();
-        // PAYLOAD MAPPED EXACTLY TO HEADERS
+        
         const payload = {
             action: 'saveTrip', 
             id: "TRP-" + Date.now(), 
@@ -1126,6 +1185,9 @@
     }
 
     function handleStatusChange(tripId, newStatus, selectElement) {
+        const p = getUserPerms();
+        if (!p.changeDelCanStatus) return alert("You do not have permission to modify this status.");
+
         if (newStatus === 'Delivered') {
             triggerDeliveryModal(tripId);
             selectElement.value = 'In-Transit'; 
@@ -1202,7 +1264,6 @@
         if(!currentRecoType) return;
 
         let trips = getFilteredTrips(allTrips);
-        // Removed non-KTPL restriction; all Own Bookings show up now.
         trips = trips.filter(t => (t.bookingType || 'Own Booking') === currentRecoType);
 
         trips = trips.filter(t => {
@@ -1214,7 +1275,9 @@
 
         if(trips.length === 0) { container.innerHTML = "<p style='padding:20px; color:#5f6368; text-align:center;'>No ledger records matching parameters.</p>"; return; }
 
-        const role = currentUser.Role || currentUser.role; const isMasterAdmin = (role === 'Master Admin' || role === 'Admin');
+        const role = currentUser.Role || currentUser.role; 
+        const isMasterAdmin = (role === 'Master Admin');
+        const isAdmin = (role === 'Master Admin' || role === 'Admin');
 
         container.innerHTML = trips.map((t, i) => {
             let ledger = { income: [], expense: [], reco: {} };
@@ -1234,7 +1297,7 @@
             let totalReceivable = baseRev + extraRev;
 
             let headerInfo = "";
-            let vDetails = `${t.vNum} (${t.type || '-'}, ${t.weight || '-'})`; // Added Vehicle Type and Capacity
+            let vDetails = `${t.vNum} (${t.type || '-'}, ${t.weight || '-'})`;
             
             if (currentRecoType === 'Own Booking') {
                 headerInfo = `<strong>${(t.date||'').split(',')[0]}</strong> | <strong>${vDetails}</strong> | ${t.from}➔${t.to} <br> <span style="color:#5f6368; font-size:11px; margin-top:2px; display:inline-block;">Party: ${t.party || 'N/A'} | Transporter: ${t.tName || 'N/A'}</span>`;
@@ -1291,7 +1354,7 @@
                                 </div>
                                 <div class="calc-gross"><span>Total Payable:</span> <span>₹${totalPayable}</span></div>
                 `;
-                if(isMasterAdmin) {
+                if(isAdmin) {
                     html += `
                                 <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Paid</label><input type="number" id="reco-adv-${t.id}" class="compact-input" value="${advPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-advD-${t.id}" class="compact-input" value="${ledger.reco.advDate || ''}"></div></div>
                                 <div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid 1</label><input type="number" id="reco-bal1-${t.id}" class="compact-input" value="${balPaid1 || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD1-${t.id}" class="compact-input" value="${ledger.reco.balDate1 || ledger.reco.balDate || ''}"></div></div>
@@ -1339,7 +1402,7 @@
                                 </div>
                                 <div class="calc-gross"><span>Total Receivable:</span> <span>₹${totalReceivable}</span></div>
                 `;
-                if(isMasterAdmin) {
+                if(isAdmin) {
                     html += `
                                 <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Rcvd</label><input type="number" id="reco-advR-${t.id}" class="compact-input" value="${advRec || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-advRD-${t.id}" class="compact-input" value="${ledger.reco.advRecDate || ''}"></div></div>
                                 <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 1</label><input type="number" id="reco-os1-${t.id}" class="compact-input" value="${osDues1 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD1-${t.id}" class="compact-input" value="${ledger.reco.osDate1 || ledger.reco.osDate || ''}"></div></div>
@@ -1363,7 +1426,7 @@
             }
 
             html += `</div>`; 
-            if(isMasterAdmin) {
+            if(isAdmin) {
                 html += `
                     <div class="grid-2 form-group" style="margin-top:10px;">
                         <div><label>Bank A/c No.</label><input type="text" id="reco-bank-${t.id}" class="compact-input" placeholder="Transporter A/C" value="${ledger.reco.bankAc || ''}"></div>
@@ -1374,13 +1437,13 @@
                         <input type="text" id="reco-remarks-${t.id}" class="compact-input" placeholder="Note any payment remarks..." value="${ledger.reco.remarks || ''}">
                     </div>
                     <div style="border-top: 1px solid #dadce0; margin-top:15px; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
-                        <button class="btn-clear" style="padding:8px 12px; font-size:11px; width:auto;" onclick="openFinancialAllocation('${t.id}')">💰 Extra Fin</button>
+                        <button class="btn-clear" style="padding:8px 12px; font-size:11px; width:auto; border-radius:4px;" onclick="openFinancialAllocation('${t.id}')">💰 Extra Fin</button>
                         <div style="display:flex; gap:8px;">
                             <select id="mstat-${t.id}" class="compact-input" style="width:105px;">
                                 <option value="Pending" ${ledger.reco.status!=='Cleared'?'selected':''}>Pending</option>
                                 <option value="Cleared" ${ledger.reco.status==='Cleared'?'selected':''}>Cleared</option>
                             </select>
-                            <button class="btn-primary" style="padding:8px 16px; font-size:11px; width:auto;" onclick="commitRecoRecord('${t.id}', '${currentRecoType}')">Save</button>
+                            <button class="btn-primary" style="padding:8px 16px; font-size:11px; width:auto; border-radius:4px;" onclick="commitRecoRecord('${t.id}', '${currentRecoType}')">Save</button>
                         </div>
                     </div>
                 `;
@@ -1443,7 +1506,7 @@
         const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']; const dayStr = days[today.getDay()];
 
-        // 1. SCREEN UI GENERATION (Freight removed)
+        // 1. SCREEN UI GENERATION
         let screenHtml = "";
         if (currentReportType === 'Own Booking') {
             screenHtml = `<table class="report-table"><thead><tr><th>Sr. No.</th><th>Booking Date</th><th>Delivery Date</th><th>Party Name</th><th>Vehicle No.</th><th>Route</th></tr></thead><tbody>`;
@@ -1459,7 +1522,7 @@
         }
         screenHtml += `</tbody></table>`; screenContainer.innerHTML = screenHtml;
 
-        // 2. PRINT PDF GENERATION (Freight removed)
+        // 2. PRINT PDF GENERATION
         const uniqueParties = [...new Set(finalTrips.map(t => t.party || 'Unknown'))];
         let printHtml = `<div class="print-header"><h2>Data Report as on ${dateStr}, ${dayStr} - ${currentReportType}</h2></div><div class="party-table-wrapper"><table class="print-table"><thead>`;
         
@@ -1507,128 +1570,6 @@
         openWhatsAppChoice(message);
     }
 
-    // --- SHARED CARD HELPER (DEPLOYED & POD) ---
-    function buildTripCard(trip, index, viewMode) {
-        const r = currentUser.Role || currentUser.role;
-        const p = getUserPerms();
-        let isReadOnly = (r === 'ReadOnly');
-        const isMasterAdmin = (r === 'Master Admin');
-        const isAdmin = (r === 'Master Admin' || r === 'Admin');
-
-        let statusClass = 'status-transit';
-        let statusText = (trip.status || '').trim();
-        if (statusText === 'Delivered') { statusClass = 'status-delivered'; statusText = `Delivered: ${trip.deliveryDate}`; }
-        if (statusText === 'Cancelled Trip') { statusClass = 'status-cancelled'; statusText = `Cancelled`; }
-
-        let canEdit = p.editTrips;
-        if (isAdmin && !isMasterAdmin && (statusText.includes('Delivered') || statusText.includes('Cancelled'))) canEdit = false;
-
-        let cardHtml = `
-            <div class="trip-card">
-                <div style="border-bottom: 1px solid #f1f3f4; padding-bottom: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;">
-                    <span><strong>#${index + 1}</strong> | ${(trip.date||'').split(',')[0]}</span>
-                    <span class="status-badge ${statusClass}">${statusText}</span>
-                </div>
-                <div style="margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
-                    <span><strong>Party:</strong> ${trip.party || 'N/A'}</span>
-        `;
-        if (canEdit) { cardHtml += `<span style="cursor:pointer; color:#1a73e8; font-size:10px; font-weight:600; text-transform:uppercase;" onclick="openAdminEdit('${trip.id}')">Edit Trip</span>`; }
-        cardHtml += `</div>
-                <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
-                <div style="margin-bottom: 5px;"><strong>Vehicle:</strong> ${trip.vNum} (${trip.type}, ${trip.weight})</div>
-        `;
-
-        if (trip.bookingType === 'Reverse Logistics' && trip.brokingAgent) cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Agency:</strong> ${trip.brokingAgent}</div>`;
-        if (isAdmin && trip.vFreight && (trip.vFreight || '').trim() !== '') cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Vehicle Freight:</strong> ${trip.vFreight}</div>`;
-
-        let showCFreight = (trip.bookingType === 'Own Booking') ? p.viewChargedFreightOB : p.viewChargedFreightRL;
-        if (showCFreight && trip.cFreight && (trip.cFreight || '').trim() !== '') {
-            cardHtml += `<div style="margin-bottom: 5px; color:#137333; font-size:11px; font-weight:500;"><strong>Charged Freight:</strong> ${trip.cFreight}</div>`;
-        }
-
-        const dTel = getSafeTel(trip.dContact); const tTel = getSafeTel(trip.tContact);
-
-        cardHtml += `
-            <div style="font-size: 11px; margin-bottom: 10px;">
-                <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#1a73e8; font-weight:500; cursor:pointer;" onclick="document.getElementById('contact-${viewMode}-${trip.id}').style.display = document.getElementById('contact-${viewMode}-${trip.id}').style.display === 'block' ? 'none' : 'block';">View Contacts ▼</span>
-                <div id="contact-${viewMode}-${trip.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:6px; margin-top:5px; border:1px solid #dadce0; color:#444746;">
-        `;
-        
-        if (trip.bookingType === 'Own Booking') {
-            cardHtml += `<div style="margin-bottom:6px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} <br> <a href="tel:${dTel}" style="color:#1a73e8; text-decoration:none;">📞 ${trip.dContact || 'N/A'}</a></div>`;
-            cardHtml += `<div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none;">📞 ${trip.tContact || 'N/A'}</a></div>`;
-        } else {
-            cardHtml += `<div><strong>Broking Agent:</strong> ${trip.tPerson || 'N/A'} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none;">📞 ${trip.tContact || 'N/A'}</a></div>`;
-        }
-        cardHtml += `</div></div>`;
-
-        if (viewMode === 'deployed' && !isReadOnly) {
-            cardHtml += `
-                <div class="grid-2" style="margin-bottom: 5px;">
-                    <input type="text" class="compact-input" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
-                    <input type="text" class="compact-input" placeholder="Remarks" value="${trip.remarks || ''}" onchange="updateBackendData('${trip.id}', 'updateTripRemark', this.value)">
-                </div>
-            `;
-            if ((trip.status || '').trim() === 'In-Transit' && p.changeDelCanStatus) {
-                cardHtml += `
-                    <div style="display:flex; margin-top:5px; gap: 8px; width: 100%;">
-                        <select class="compact-input" onchange="handleStatusChange('${trip.id}', this.value, this)" style="flex:1;">
-                            <option value="In-Transit" selected>In-Transit</option>
-                            <option value="Delivered">Delivered</option>
-                            <option value="Cancelled Trip">Cancelled Trip</option>
-                        </select>
-                        <input type="text" class="compact-input" placeholder="Current location..." value="${trip.statusNote || ""}" onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="flex:2;">
-                    </div>
-                `;
-            } else if (isAdmin && p.changeDelCanStatus) {
-                cardHtml += `
-                    <div style="display:flex; margin-top:5px;">
-                        <select class="compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')">
-                            <option value="" selected>Status Locked</option>
-                            <option value="In-Transit">Undo: Revert to In-Transit</option>
-                        </select>
-                    </div>
-                `;
-            }
-            
-            cardHtml += `
-                <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                    <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}', '${viewMode}')">▶ History</button>
-                    <div style="display:flex; gap: 5px;">
-                        <button class="btn-clear" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="openExpenseModal('${trip.id}')">₹ Expenses</button>
-                        <button class="btn-primary" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="openShareModal('${trip.id}')">Share</button>
-                    </div>
-                </div>
-                <div id="hist-${viewMode}-${trip.id}" class="history-panel"></div>
-            `;
-        }
-
-        if (viewMode === 'pod-pending' && !isReadOnly) {
-            cardHtml += `
-                <div style="margin-bottom: 5px;"><input type="text" class="compact-input" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)"></div>
-                <div style="margin-bottom: 5px;"><input type="text" class="compact-input" placeholder="Add POD Remarks..." value="${trip.podRemark || ''}" onchange="updateBackendData('${trip.id}', 'updatePODRemark', this.value)"></div>
-                <div style="display:flex; gap:10px; margin-top:10px; align-items:center; width: 100%;">
-                    <label style="margin:0;">POD Date:</label>
-                    <input type="date" class="compact-input" id="pod-date-${trip.id}">
-                    <button class="btn-primary" style="padding: 6px 12px; margin:0; width:auto; border-radius:4px;" onclick="savePOD('${trip.id}')">Save</button>
-                </div>
-            `;
-        }
-
-        if (viewMode === 'pod-received') {
-            cardHtml += `
-                <div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>C-Note:</strong> ${trip.cNote || "Not Entered"}</div>
-                ${trip.podRemark ? `<div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>Remarks:</strong> ${trip.podRemark}</div>` : ''}
-                <div style="margin-top:10px; color:#137333; font-weight:500;">POD Received: ${trip.podDate}</div>
-            `;
-            if (!isReadOnly) {
-                cardHtml += `<button class="btn-clear" style="font-size:10px; padding:6px 10px; margin-top:5px; width:auto; border-radius:4px;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove Date</button>`;
-            }
-        }
-        cardHtml += `</div>`; return cardHtml;
-    }
-
-    // --- MIS & LEDGER REPORTS ---
     function openMISModal() { document.getElementById('misModal').style.display = 'flex'; }
     function closeMISModal() { document.getElementById('misModal').style.display = 'none'; }
     function openLedgerModal() {
@@ -1668,6 +1609,59 @@
         closeMISModal();
     }
 
+    function triggerRecoExcelDownload(ledgerType) {
+        let tripsToExport = getFilteredTrips(allTrips);
+        tripsToExport = tripsToExport.filter(t => (t.bookingType || 'Own Booking') === ledgerType);
+
+        if(tripsToExport.length === 0) return alert("No data available to export based on current filters.");
+
+        const wb = XLSX.utils.book_new(); let rawRows = [];
+        
+        if (ledgerType === 'Own Booking') {
+            rawRows.push([
+                "Trip ID", "Date", "Party Name", "From", "To", "Vehicle No", "Type", "Weight", "Status", "Delivery Date", "Custom Note", "CNote_LR", "POD_Date", "Created By", "Vehicle Freight", "Charged Freight", "Driver Name", "Driver Contact", "Transporter", "Transporter Person", "Transporter Contact", "Remarks", "POD Remark", "Loading", "Unloading", "LR", "Others", "Other Reason", "Balance to Pay", "Saved on add. deduction"
+            ]);
+            tripsToExport.forEach(t => {
+                let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
+                let baseCost = parseFloat(t.vFreight || 0);
+                let loading = ledger.expense.find(e=>e.type==='Loading')?.amt || 0;
+                let unloading = ledger.expense.find(e=>e.type==='Unloading')?.amt || 0;
+                let otherExp = ledger.expense.filter(e=>e.type!=='Loading' && e.type!=='Unloading').reduce((s,x)=>s+x.amt,0);
+                
+                let advPaid = parseFloat(ledger.reco.advPaid || t.advancePaid || 0);
+                let bal1 = parseFloat(ledger.reco.balPaid1 || ledger.reco.balPaid || 0);
+                let bal2 = parseFloat(ledger.reco.balPaid2 || 0);
+                let bal3 = parseFloat(ledger.reco.balPaid3 || 0);
+                
+                let totalPayable = baseCost + loading + unloading + otherExp;
+                let balToPay = totalPayable - (advPaid + bal1 + bal2 + bal3);
+                
+                let isCleared = (ledger.reco.status === 'Cleared');
+                let savedDed = (isCleared && balToPay > 0) ? balToPay : 0;
+                let finalBal = (isCleared && balToPay > 0) ? 0 : balToPay;
+
+                rawRows.push([
+                    t.id, t.date, t.party, t.from, t.to, t.vNum, t.type, t.weight, t.status, t.deliveryDate, t.cNote, t.cNote, t.podDate, t.createdBy, t.vFreight, t.cFreight, t.dName, t.dContact, t.tName, t.tPerson, t.tContact, t.remarks, t.podRemark, loading, unloading, ledger.expense.find(e=>e.type==='LR')?.amt||0, otherExp, t.otherExpReason||"", finalBal, savedDed
+                ]);
+            });
+        } else {
+            rawRows.push(["Trip ID", "Date", "Party Name", "From", "To", "Vehicle No", "Type", "Weight", "Status", "Delivery Date", "Custom Note", "CNote_LR", "POD_Date", "Created By", "Vehicle Freight", "Charged Freight", "Driver Name", "Driver Contact", "Transporter", "Transporter Person", "Transporter Contact", "Remarks", "POD Remark", "Loading", "Unloading", "LR", "Others", "Other Reason", "Outstanding Amount", "Bad Debts"]);
+            tripsToExport.forEach(t => {
+                let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.reco) ledger.reco = p.reco; } catch(e){}
+                
+                let baseCost = parseFloat(t.vFreight || 0);
+                let totalOs = parseFloat(t.cFreight || 0) - (baseCost + ledger.expense.reduce((s,x)=>s+x.amt,0) + parseFloat(ledger.reco.advRec || 0) + parseFloat(ledger.reco.osDues1 || ledger.reco.osDues || 0));
+                let badDebts = (ledger.reco.status === "Cleared" && totalOs > 0) ? totalOs : 0;
+                let finalOs = (ledger.reco.status === "Cleared" && totalOs > 0) ? 0 : totalOs;
+
+                rawRows.push([t.id, t.date, t.party, t.from, t.to, t.vNum, t.type, t.weight, t.status, t.deliveryDate, t.cNote, t.cNote, t.podDate, t.createdBy, "", t.cFreight, "", "", "", "", "", t.remarks, t.podRemark, "", "", "", "", "", finalOs, badDebts]);
+            });
+        }
+
+        const ws = XLSX.utils.aoa_to_sheet(rawRows); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, "Reconciliation Master"); XLSX.writeFile(wb, `KTPL_${ledgerType.replace(' ', '_')}_Ledger.xlsx`);
+        closeLedgerModal();
+    }
+
     // --- SHARED CARD HELPER (DEPLOYED & POD) ---
     function buildTripCard(trip, index, viewMode) {
         const r = currentUser.Role || currentUser.role;
@@ -1698,7 +1692,6 @@
                 <div style="margin-bottom: 5px;"><strong>Route:</strong> ${trip.from} ➔ ${trip.to}</div>
                 <div style="margin-bottom: 5px;"><strong>Vehicle:</strong> ${trip.vNum} (${trip.type || '-'}, ${trip.weight || '-'})</div>
         `;
-
         if (trip.bookingType === 'Reverse Logistics' && trip.brokingAgent) cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Agency:</strong> ${trip.brokingAgent}</div>`;
         if (isAdmin && trip.vFreight && (trip.vFreight || '').trim() !== '') cardHtml += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Vehicle Freight:</strong> ${trip.vFreight}</div>`;
 
@@ -1706,22 +1699,16 @@
         if (showCFreight && trip.cFreight && (trip.cFreight || '').trim() !== '') {
             cardHtml += `<div style="margin-bottom: 5px; color:#137333; font-size:11px; font-weight:500;"><strong>Charged Freight:</strong> ${trip.cFreight}</div>`;
         }
-
         const dTel = getSafeTel(trip.dContact); const tTel = getSafeTel(trip.tContact);
 
         cardHtml += `
             <div style="font-size: 11px; margin-bottom: 10px;">
                 <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#1a73e8; font-weight:500; cursor:pointer;" onclick="document.getElementById('contact-${viewMode}-${trip.id}').style.display = document.getElementById('contact-${viewMode}-${trip.id}').style.display === 'block' ? 'none' : 'block';">View Contacts ▼</span>
                 <div id="contact-${viewMode}-${trip.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:6px; margin-top:5px; border:1px solid #dadce0; color:#444746;">
-        `;
-        
-        if (trip.bookingType === 'Own Booking') {
-            cardHtml += `<div style="margin-bottom:6px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} <br> <a href="tel:${dTel}" style="color:#1a73e8; text-decoration:none;">📞 ${trip.dContact || 'N/A'}</a></div>`;
-            cardHtml += `<div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none;">📞 ${trip.tContact || 'N/A'}</a></div>`;
-        } else {
-            cardHtml += `<div><strong>Broking Agent:</strong> ${trip.tPerson || 'N/A'} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none;">📞 ${trip.tContact || 'N/A'}</a></div>`;
-        }
-        cardHtml += `</div></div>`;
+                    <div style="margin-bottom:6px;"><strong>Driver:</strong> ${trip.dName || 'N/A'} <br> <a href="tel:${dTel}" style="color:#1a73e8; text-decoration:none; font-size:13px; font-weight:500;">📞 ${trip.dContact || 'N/A'}</a></div>
+                    <div><strong>Transporter:</strong> ${trip.tName || 'N/A'} ${trip.tPerson ? '('+trip.tPerson+')' : ''} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none; font-size:13px; font-weight:500;">📞 ${trip.tContact || 'N/A'}</a></div>
+                </div>
+            </div>`;
 
         if (viewMode === 'deployed' && !isReadOnly) {
             cardHtml += `
@@ -1729,9 +1716,7 @@
                     <input type="text" class="compact-input" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
                     <input type="text" class="compact-input" placeholder="Remarks" value="${trip.remarks || ''}" onchange="updateBackendData('${trip.id}', 'updateTripRemark', this.value)">
                 </div>
-            `;
-            if ((trip.status || '').trim() === 'In-Transit' && p.changeDelCanStatus) {
-                cardHtml += `
+                ${(trip.status || '').trim() === 'In-Transit' && p.changeDelCanStatus ? `
                     <div style="display:flex; margin-top:5px; gap: 8px; width: 100%;">
                         <select class="compact-input" onchange="handleStatusChange('${trip.id}', this.value, this)" style="flex:1;">
                             <option value="In-Transit" selected>In-Transit</option>
@@ -1739,20 +1724,14 @@
                             <option value="Cancelled Trip">Cancelled Trip</option>
                         </select>
                         <input type="text" class="compact-input" placeholder="Current location..." value="${trip.statusNote || ""}" onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="flex:2;">
-                    </div>
-                `;
-            } else if (isAdmin && p.changeDelCanStatus) {
-                cardHtml += `
+                    </div>` : ''}
+                ${isAdmin && p.changeDelCanStatus && (trip.status.trim() === 'Delivered' || trip.status.trim() === 'Cancelled Trip') ? `
                     <div style="display:flex; margin-top:5px;">
                         <select class="compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')">
                             <option value="" selected>Status Locked</option>
                             <option value="In-Transit">Undo: Revert to In-Transit</option>
                         </select>
-                    </div>
-                `;
-            }
-            
-            cardHtml += `
+                    </div>` : ''}
                 <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}', '${viewMode}')">▶ History</button>
                     <div style="display:flex; gap: 5px;">
@@ -1771,7 +1750,7 @@
                 <div style="display:flex; gap:10px; margin-top:10px; align-items:center; width: 100%;">
                     <label style="margin:0;">POD Date:</label>
                     <input type="date" class="compact-input" id="pod-date-${trip.id}">
-                    <button class="btn-primary" style="padding: 6px 12px; margin:0; width:auto; border-radius:4px;" onclick="savePOD('${trip.id}')">Save</button>
+                    <button class="btn-primary" style="padding: 6px 12px; margin:0; width:auto; border-radius:4px;" onclick="savePOD('${trip.id}', false)">Save</button>
                 </div>
             `;
         }
@@ -1783,16 +1762,15 @@
                 <div style="margin-top:10px; color:#137333; font-weight:500;">POD Received: ${trip.podDate}</div>
             `;
             if (!isReadOnly) {
-                cardHtml += `<button class="btn-clear" style="font-size:10px; padding:6px 10px; margin-top:5px; width:auto; border-radius:4px;" onclick="updateBackendData('${trip.id}', 'updatePOD', '')">Remove Date</button>`;
+                cardHtml += `<button class="btn-clear" style="font-size:10px; padding:6px 10px; margin-top:5px; width:auto; border-radius:4px;" onclick="savePOD('${trip.id}', true)">Remove Date</button>`;
             }
         }
         cardHtml += `</div>`; return cardHtml;
     }
 
-    // --- ADMIN SYSTEM ---
     function renderAdminUsers() {
         const tbody = document.getElementById('admin-user-list'); if(!tbody) return;
-        tbody.innerHTML = users.map(u => `<tr><td>${u.Name || u.name || 'Unknown'}</td><td>${u.Role || u.role || 'Unassigned'}</td><td style="font-family: monospace;">${u.PIN || u.pin || 'None'}</td><td><button class="admin-action-btn" onclick="openEditUserModal('${u.Name || u.name}', '${u.PIN || u.pin}', '${u.Role || u.role}')">Edit</button><button class="admin-action-btn" style="color: #b3261e;" onclick="deleteUser('${u.Name || u.name}')">Del</button></td></tr>`).join('');
+        tbody.innerHTML = users.map(u => `<tr><td>${u.Name || u.name || 'Unknown'}</td><td>${u.Role || u.role || 'Unassigned'}</td><td style="font-family: monospace;">${u.PIN || u.pin || 'None'}</td><td><button class="admin-action-btn" onclick="openEditUserModal('${u.Name || u.name}', '${u.PIN || u.pin}', '${u.Role || u.role}')">Edit</button><button class="admin-action-btn" style="color: #d93025;" onclick="deleteUser('${u.Name || u.name}')">Del</button></td></tr>`).join('');
         if (document.getElementById('module-access-container')) renderPermissionsUI();
     }
     
