@@ -1143,7 +1143,6 @@
         if(!currentRecoType) return;
 
         let trips = getFilteredTrips(allTrips);
-        // Ensure non-KTPL vehicles also show up in Own Booking. Removing the old filter restriction.
         trips = trips.filter(t => (t.bookingType || 'Own Booking') === currentRecoType);
 
         trips = trips.filter(t => {
@@ -1175,15 +1174,18 @@
             let totalReceivable = baseRev + extraRev;
 
             let headerInfo = "";
+            let vDetails = `${t.vNum} (${t.type || '-'}, ${t.weight || '-'})`; // Added Vehicle Type and Capacity
+            
             if (currentRecoType === 'Own Booking') {
-                headerInfo = `<strong>${(t.date||'').split(',')[0]}</strong> | <strong>${t.vNum}</strong> | ${t.from}➔${t.to} <br> <span style="color:#5f6368; font-size:11px; margin-top:2px; display:inline-block;">Party: ${t.party || 'N/A'} | Transporter: ${t.tName || 'N/A'}</span>`;
+                headerInfo = `<strong>${(t.date||'').split(',')[0]}</strong> | <strong>${vDetails}</strong> | ${t.from}➔${t.to} <br> <span style="color:#5f6368; font-size:11px; margin-top:2px; display:inline-block;">Party: ${t.party || 'N/A'} | Transporter: ${t.tName || 'N/A'}</span>`;
             } else {
-                headerInfo = `<strong>${(t.date||'').split(',')[0]}</strong> | <strong>${t.vNum}</strong> | ${t.from}➔${t.to} <br> <span style="color:#5f6368; font-size:11px; margin-top:2px; display:inline-block;">Broker: ${t.brokingAgent || 'N/A'}</span>`;
+                headerInfo = `<strong>${(t.date||'').split(',')[0]}</strong> | <strong>${vDetails}</strong> | ${t.from}➔${t.to} <br> <span style="color:#5f6368; font-size:11px; margin-top:2px; display:inline-block;">Broker: ${t.brokingAgent || 'N/A'}</span>`;
             }
 
             let isOpenClass = (currentOpenRecoId === t.id) ? 'open' : '';
             let isCleared = (ledger.reco.status === "Cleared");
             let html = "";
+            let displayAmt = 0;
 
             if (currentRecoType === 'Own Booking') {
                 let advPaid = parseFloat(ledger.reco.advPaid || t.advancePaid || 0); 
@@ -1216,13 +1218,17 @@
                             <div class="reco-panel">
                                 <div class="reco-header-title">Receivables</div>
                                 <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
-                                ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                                <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
+                                    ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                                </div>
                                 <div class="calc-gross"><span>Total Receivable:</span> <span>₹${totalReceivable}</span></div>
                             </div>
                             <div class="reco-panel">
                                 <div class="reco-header-title">Payables</div>
                                 <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
-                                ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                                <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
+                                    ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                                </div>
                                 <div class="calc-gross"><span>Total Payable:</span> <span>₹${totalPayable}</span></div>
                 `;
                 if(isMasterAdmin) {
@@ -1268,7 +1274,9 @@
                             <div class="reco-panel">
                                 <div class="reco-header-title">Receivables</div>
                                 <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
-                                ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                                <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
+                                    ${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                                </div>
                                 <div class="calc-gross"><span>Total Receivable:</span> <span>₹${totalReceivable}</span></div>
                 `;
                 if(isMasterAdmin) {
@@ -1286,7 +1294,9 @@
                             <div class="reco-panel">
                                 <div class="reco-header-title">Payables</div>
                                 <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
-                                ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                                <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
+                                    ${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                                </div>
                                 <div class="calc-gross"><span>Total Payable:</span> <span>₹${totalPayable}</span></div>
                             </div>
                 `;
@@ -1295,6 +1305,10 @@
             html += `</div>`; 
             if(isMasterAdmin) {
                 html += `
+                    <div class="form-group" style="margin-top:10px;">
+                        <label>Payment Remarks</label>
+                        <input type="text" id="reco-remarks-${t.id}" class="compact-input" placeholder="Note any payment remarks..." value="${ledger.reco.remarks || ''}">
+                    </div>
                     <div style="border-top: 1px solid #f1f3f4; margin-top:15px; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
                         <button class="btn btn-clear" style="padding:8px 12px; font-size:11px; width:auto; border-radius:12px;" onclick="openFinancialAllocation('${t.id}')">💰 Edit Extra Financials</button>
                         <div style="display:flex; gap:8px;">
@@ -1311,13 +1325,13 @@
             return html;
         }).join('');
     }
-
     function commitRecoRecord(id, mode) {
         let t = allTrips.find(x => x.id === id); if(!t) return;
         let ledger = { income: [], expense: [], reco: {} };
         try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
 
         ledger.reco.status = document.getElementById(`mstat-${id}`).value;
+        ledger.reco.remarks = document.getElementById(`reco-remarks-${id}`).value; // Saves the newly added Remarks
 
         if (mode === 'Own Booking') {
             ledger.reco.advPaid = document.getElementById(`reco-adv-${id}`).value; ledger.reco.advDate = document.getElementById(`reco-advD-${id}`).value;
