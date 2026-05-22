@@ -1339,6 +1339,13 @@
     }
 
     // --- REPORTS ENGINE ---
+    function setReportType(type) {
+        currentReportType = type;
+        document.getElementById('report-selection-screen').style.display = 'none';
+        document.getElementById('report-content-area').style.display = 'block';
+        document.getElementById('report-title-text').innerText = type + " Reports";
+    }
+
     function generateCustomReport() {
         const rfPartyEl = document.getElementById('rf-party');
         const pName = rfPartyEl ? rfPartyEl.value : "";
@@ -1362,29 +1369,50 @@
         const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']; const dayStr = days[today.getDay()];
 
-        // 1. SCREEN UI GENERATION
-        let screenHtml = `<table class="report-table"><thead><tr><th>Sr No</th><th>Type</th><th>Party Name</th><th>Date</th><th>Route</th><th>Vehicle</th><th>Status</th><th>C-Note</th><th>POD Date</th><th>Remarks</th></tr></thead><tbody>`;
-        finalTrips.forEach((t, i) => {
-            let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
-            screenHtml += `<tr><td>${i+1}</td><td>${t.bookingType || 'Own'}</td><td><strong>${t.party || ''}</strong></td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum}</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
-        });
+        // 1. SCREEN UI GENERATION (Adjusted for Own Booking vs Reverse Logistics)
+        let screenHtml = "";
+        if (currentReportType === 'Own Booking') {
+            screenHtml = `<table class="report-table"><thead><tr><th>Sr. No.</th><th>Booking Date</th><th>Delivery Date</th><th>Party Name</th><th>Vehicle No.</th><th>Route</th><th>Gross Vehicle Freight</th></tr></thead><tbody>`;
+            finalTrips.forEach((t, i) => {
+                screenHtml += `<tr><td>${i+1}</td><td>${(t.date || '').split(',')[0]}</td><td>${t.deliveryDate || 'Pending'}</td><td><strong>${t.party || ''}</strong></td><td>${t.vNum}</td><td>${t.from} to ${t.to}</td><td>₹${t.vFreight || '0'}</td></tr>`;
+            });
+        } else {
+            screenHtml = `<table class="report-table"><thead><tr><th>Sr No</th><th>Type</th><th>Party Name</th><th>Date</th><th>Route</th><th>Vehicle</th><th>Status</th><th>C-Note</th><th>POD Date</th><th>Remarks</th></tr></thead><tbody>`;
+            finalTrips.forEach((t, i) => {
+                let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
+                screenHtml += `<tr><td>${i+1}</td><td>${t.bookingType || 'Own'}</td><td><strong>${t.party || ''}</strong></td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum}</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
+            });
+        }
         screenHtml += `</tbody></table>`; screenContainer.innerHTML = screenHtml;
 
         // 2. PRINT PDF GENERATION
         const uniqueParties = [...new Set(finalTrips.map(t => t.party || 'Unknown'))];
-        let printHtml = `<div class="print-header"><h2>Data Report as on ${dateStr}, ${dayStr} - ${currentReportType}</h2></div><div class="party-table-wrapper"><table class="print-table"><thead><tr><th style="width:15%;">Party Name</th><th style="width:5%; text-align:center;">Sr</th><th style="width:10%;">Date</th><th style="width:15%;">Route</th><th style="width:15%;">Vehicle</th><th style="width:10%;">Status</th><th style="width:10%;">C-Note</th><th style="width:10%;">POD Date</th><th style="width:10%;">Remarks</th></tr></thead><tbody>`;
-        uniqueParties.forEach(party => {
-            const pTrips = finalTrips.filter(t => (t.party || 'Unknown') === party); if (pTrips.length === 0) return;
-            pTrips.forEach((t, i) => {
-                let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
-                printHtml += `<tr>`; if (i === 0) printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
-                printHtml += `<td style="text-align:center;">${i+1}</td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum} (${t.weight})</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
+        let printHtml = `<div class="print-header"><h2>Data Report as on ${dateStr}, ${dayStr} - ${currentReportType}</h2></div><div class="party-table-wrapper"><table class="print-table"><thead>`;
+        
+        if (currentReportType === 'Own Booking') {
+            printHtml += `<tr><th style="width:15%;">Party Name</th><th style="width:5%; text-align:center;">Sr</th><th style="width:15%;">Booking Date</th><th style="width:15%;">Delivery Date</th><th style="width:15%;">Vehicle No.</th><th style="width:20%;">Route</th><th style="width:15%;">Gross Vehicle Freight</th></tr></thead><tbody>`;
+            uniqueParties.forEach(party => {
+                const pTrips = finalTrips.filter(t => (t.party || 'Unknown') === party); if (pTrips.length === 0) return;
+                pTrips.forEach((t, i) => {
+                    printHtml += `<tr>`; if (i === 0) printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
+                    printHtml += `<td style="text-align:center;">${i+1}</td><td>${(t.date || '').split(',')[0]}</td><td>${t.deliveryDate || 'Pending'}</td><td>${t.vNum}</td><td>${t.from} to ${t.to}</td><td>₹${t.vFreight || '0'}</td></tr>`;
+                });
+                printHtml += `<tr><td colspan="7" style="border-bottom:2px solid #000; padding:0; height:0;"></td></tr>`;
             });
-            printHtml += `<tr><td colspan="9" style="border-bottom:2px solid #000; padding:0; height:0;"></td></tr>`;
-        });
+        } else {
+            printHtml += `<tr><th style="width:15%;">Party Name</th><th style="width:5%; text-align:center;">Sr</th><th style="width:10%;">Date</th><th style="width:15%;">Route</th><th style="width:15%;">Vehicle</th><th style="width:10%;">Status</th><th style="width:10%;">C-Note</th><th style="width:10%;">POD Date</th><th style="width:10%;">Remarks</th></tr></thead><tbody>`;
+            uniqueParties.forEach(party => {
+                const pTrips = finalTrips.filter(t => (t.party || 'Unknown') === party); if (pTrips.length === 0) return;
+                pTrips.forEach((t, i) => {
+                    let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
+                    printHtml += `<tr>`; if (i === 0) printHtml += `<td rowspan="${pTrips.length}" style="vertical-align: top;"><strong>${party}</strong></td>`;
+                    printHtml += `<td style="text-align:center;">${i+1}</td><td>${(t.date || '').split(',')[0]}</td><td>${t.from} to ${t.to}</td><td>${t.vNum} (${t.weight})</td><td>${stat}</td><td>${t.cNote || '-'}</td><td>${t.podDate || 'Pending'}</td><td>${t.remarks || ''}</td></tr>`;
+                });
+                printHtml += `<tr><td colspan="9" style="border-bottom:2px solid #000; padding:0; height:0;"></td></tr>`;
+            });
+        }
         printHtml += `</tbody></table></div>`; printContainer.innerHTML = printHtml; currentReportTrips = finalTrips; 
     }
-
     function shareReportWhatsApp() {
         if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share.");
         const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
