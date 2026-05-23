@@ -213,8 +213,8 @@
             <div class="filter-grid">
                 <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
                 <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
-                <div class="autocomplete"><input type="text" id="uf-party" class="compact-input" placeholder="Search Party..." oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
-                <div class="autocomplete"><input type="text" id="uf-transporter" class="compact-input" placeholder="Transporter/Broker..." oninput="triggerCurrentRender()"><div id="uf-transporter-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-party" class="compact-input" placeholder="Search Party..." onchange="formatPartyName(this); triggerCurrentRender()" oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-transporter" class="compact-input" placeholder="Transporter/Broker..." onchange="formatPartyName(this); triggerCurrentRender()" oninput="triggerCurrentRender()"><div id="uf-transporter-list" class="autocomplete-items"></div></div>
                 <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
                 <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerCurrentRender()"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
                 <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerCurrentRender()"><div id="uf-origin-list" class="autocomplete-items"></div></div>
@@ -243,7 +243,7 @@
             
             <div id="form-own-booking">
                 <div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="ob-date"></div>
-                <div class="form-group autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="ob-party" placeholder="Type or Select..." onchange="formatCase(this, 'title')"><div id="ob-party-list" class="autocomplete-items"></div></div>
+                <div class="form-group autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="ob-party" placeholder="Type or Select..." onchange="formatPartyName(this)"><div id="ob-party-list" class="autocomplete-items"></div></div>
                 <div class="grid-2 form-group">
                     <div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="ob-from" placeholder="Origin" onchange="formatCase(this, 'title')"><div id="ob-from-list" class="autocomplete-items"></div></div>
                     <div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="ob-to" placeholder="Destination" onchange="formatCase(this, 'title')"><div id="ob-to-list" class="autocomplete-items"></div></div>
@@ -263,7 +263,7 @@
                     <div class="autocomplete"><label>Driver Contact <span class="required-star">*</span></label><input type="text" id="ob-dcontact" placeholder="9876543210" onchange="formatPhoneInput(this)"><div id="ob-dcontact-list" class="autocomplete-items"></div></div>
                 </div>
                 <div class="section-divider"></div>
-                <div class="form-group autocomplete"><label>Transporter <span class="required-star">*</span></label><input type="text" id="ob-tname" placeholder="Transporter Name" onchange="formatCase(this, 'title')"><div id="ob-tname-list" class="autocomplete-items"></div></div>
+                <div class="form-group autocomplete"><label>Transporter <span class="required-star">*</span></label><input type="text" id="ob-tname" placeholder="Transporter Name" onchange="formatPartyName(this)"><div id="ob-tname-list" class="autocomplete-items"></div></div>
                 <div class="grid-2 form-group">
                     <div class="autocomplete"><label>Person Name</label><input type="text" id="ob-tperson" placeholder="Name" onchange="formatCase(this, 'title')"><div id="ob-tperson-list" class="autocomplete-items"></div></div>
                     <div><label>Contact No.</label><input type="text" id="ob-tcontact" placeholder="9876543210" onchange="formatPhoneInput(this)"></div>
@@ -281,7 +281,7 @@
             <div id="form-rev-logistics" style="display:none;">
                 <div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="rl-date"></div>
                 <div class="grid-2 form-group">
-                    <div class="autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="rl-party" placeholder="Type..." onchange="formatCase(this, 'title')"><div id="rl-party-list" class="autocomplete-items"></div></div>
+                    <div class="autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="rl-party" placeholder="Type..." onchange="formatPartyName(this)"><div id="rl-party-list" class="autocomplete-items"></div></div>
                     <div><label>Type of Co.</label><input type="text" id="rl-typeco" placeholder="FMCG, Pharma, Auto" onchange="formatCase(this, 'title')"></div>
                 </div>
                 <div class="grid-2 form-group">
@@ -295,7 +295,7 @@
                     <div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="rl-weight" placeholder="18MT" onchange="formatCase(this, 'upper')"></div>
                 </div>
                 <div class="section-divider"></div>
-                <div class="form-group"><label>Broking Agency <span class="required-star">*</span></label><input type="text" id="rl-agency" placeholder="Agency Name" onchange="formatCase(this, 'title')"></div>
+                <div class="form-group"><label>Broking Agency <span class="required-star">*</span></label><input type="text" id="rl-agency" placeholder="Agency Name" onchange="formatPartyName(this)"></div>
                 <div class="grid-2 form-group">
                     <div><label>Agent Name</label><input type="text" id="rl-agent" placeholder="Name" onchange="formatCase(this, 'title')"></div>
                     <div><label>Contact No.</label><input type="text" id="rl-contact" placeholder="9876543210" onchange="formatPhoneInput(this)"></div>
@@ -409,12 +409,12 @@
             <div class="form-card" style="padding:15px; margin-bottom:15px;">
                 <div class="form-group autocomplete" style="margin-top:0; margin-bottom:15px;">
                     <label>Filter by Party Name</label>
-                    <input type="text" id="rf-party" class="compact-input" placeholder="Type Client Profile..." onchange="formatCase(this, 'title')"><div id="rf-party-list" class="autocomplete-items"></div>
+                    <input type="text" id="rf-party" class="compact-input" placeholder="Type Client Profile..." onchange="formatPartyName(this); triggerCurrentRender();"><div id="rf-party-list" class="autocomplete-items"></div>
                 </div>
                 <div class="grid-2">
                     <div>
                         <label>Trip Status:</label>
-                        <select id="report-trip-status" class="compact-input">
+                        <select id="report-trip-status" class="compact-input" onchange="triggerCurrentRender()">
                             <option value="All">All</option>
                             <option value="In-Transit">In-Transit</option>
                             <option value="Delivered">Delivered</option>
@@ -423,7 +423,7 @@
                     </div>
                     <div>
                         <label>POD Status:</label>
-                        <select id="report-pod-status" class="compact-input">
+                        <select id="report-pod-status" class="compact-input" onchange="triggerCurrentRender()">
                             <option value="All">All</option>
                             <option value="Pending">Pending</option>
                             <option value="Received">Received</option>
@@ -491,7 +491,7 @@
         <p style="font-size:12px; color:#d93025; margin-bottom:15px;">Party Name is strictly required.</p>
         <div class="form-group autocomplete" style="text-align: left;">
             <label>Party Name <span class="required-star">*</span></label>
-            <input type="text" id="mis-party" class="compact-input" placeholder="Select Party..." onchange="formatCase(this, 'title')">
+            <input type="text" id="mis-party" class="compact-input" placeholder="Select Party..." onchange="formatPartyName(this)">
             <div id="mis-party-list" class="autocomplete-items"></div>
         </div>
         <div class="form-group" style="text-align: left;">
@@ -596,7 +596,7 @@
     <div class="modal-content">
         <h3 style="margin-top:0; font-weight:500; font-size:16px; text-align:center;">Edit Trip</h3>
         <input type="hidden" id="edit-trip-id">
-        <div class="form-group"><label style="text-align:left;">Party Name</label><input type="text" id="edit-party" class="compact-input" onchange="formatCase(this, 'title')"></div>
+        <div class="form-group"><label style="text-align:left;">Party Name</label><input type="text" id="edit-party" class="compact-input" onchange="formatPartyName(this)"></div>
         <div class="form-group"><label style="text-align:left;">Vehicle No.</label><input type="text" id="edit-vnum" class="compact-input" onchange="formatVehicleNumber(this)"></div>
         <div class="grid-2">
             <div class="form-group"><label style="text-align:left;">Veh Type</label><input type="text" id="edit-vtype" class="compact-input" onchange="formatCase(this, 'upper')"></div>
@@ -668,7 +668,12 @@
         if (!num) return ''; let c = String(num).replace(/[\s-]/g, '').trim();
         if (c.startsWith('+')) return c; if (c.startsWith('91') && c.length > 10) return '+' + c; return '+91' + c;
     }
-    function formatCase(el, style) { if(!el.value) return; el.value = style==='upper' ? el.value.trim().toUpperCase() : el.value.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()); }
+    
+    function formatCaseStr(str) {
+        if(!str) return "";
+        return str.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+    }
+    function formatCase(el, style) { if(!el.value) return; el.value = style==='upper' ? el.value.trim().toUpperCase() : formatCaseStr(el.value); }
     function formatSentence(el) { if(el.value) el.value = el.value.trim().charAt(0).toUpperCase() + el.value.trim().slice(1); }
     function formatVehicleNumber(el) { if(!el.value) return; el.value = el.value.toUpperCase().replace(/[\s-]/g, ''); }
     function formatPhoneString(numberStr) {
@@ -681,6 +686,61 @@
         const dd = String(dObj.getDate()).padStart(2, '0'); const mm = String(dObj.getMonth() + 1).padStart(2, '0'); const yyyy = dObj.getFullYear();
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         return `${dd}/${mm}/${yyyy}, ${days[dObj.getDay()]}`;
+    }
+
+    function isVehicleNumber(str) {
+        if (!str) return false;
+        const cleanStr = str.replace(/[\s-_]/g, '').toUpperCase();
+        const regex = /^[A-Z]{2}\d{1,2}[A-Z]{0,3}\d{4}$/;
+        return regex.test(cleanStr);
+    }
+
+    function normalizePartyName(name) {
+        if (!name) return "";
+        let originalText = name.trim();
+        let lower = originalText.toLowerCase();
+        
+        if (/(^|\s)usv(\s|$)/.test(lower) || lower.startsWith('usv')) return 'USV';
+        if (/(^|\s)nrb(\s|$)/.test(lower) || lower.startsWith('nrb')) return 'NRB';
+        if (/(^|\s)j\.?b\.?\s*chemical/.test(lower) || lower.startsWith('jb ')) return 'JB Chemicals';
+        if (/(^|\s)r\.?k\.?\s*foodland/.test(lower) || lower.startsWith('rk ')) return 'RK Foodland';
+        if (/(^|\s)tech\s*nova/.test(lower) || lower.startsWith('technova')) return 'Tech Nova';
+        if (/(^|\s)vns(\s|$)/.test(lower) || lower.startsWith('vns')) return 'VNS';
+        if (/(^|\s)jnpt(\s|$)/.test(lower) || lower.startsWith('jnpt')) return 'JNPT';
+        
+        if (lower.startsWith('fr8') || lower.startsWith('fr 8')) {
+            let rest = originalText.replace(/^fr[\s-]*8/i, '').trim();
+            return rest ? 'FR8 ' + formatCaseStr(rest) : 'FR8';
+        }
+        if (lower.startsWith('lobb')) {
+            let rest = originalText.replace(/^lobb/i, '').trim();
+            return rest ? 'Lobb ' + formatCaseStr(rest) : 'Lobb';
+        }
+
+        return formatCaseStr(name);
+    }
+
+    function formatPartyName(el) {
+        if(el && el.value) {
+            el.value = normalizePartyName(el.value);
+        }
+    }
+
+    function blockVehicleInPartyFields(mode) {
+        let fields = [];
+        if (mode === 'Own Booking') fields = ['ob-party', 'ob-tname'];
+        if (mode === 'Reverse Logistics') fields = ['rl-party', 'rl-agency'];
+        
+        let hasError = false;
+        fields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && isVehicleNumber(el.value)) {
+                alert(`Error: You entered a Vehicle Number (${el.value}) in a Party/Agency Name field.\n\nPlease correct this to proceed.`);
+                el.style.borderColor = '#b3261e';
+                hasError = true;
+            }
+        });
+        return hasError;
     }
 
     function openWhatsAppChoice(msg) {
@@ -886,26 +946,6 @@
         returnToHome();
     }
 
-    function isVehicleNumber(str) {
-        const regex = /^[A-Za-z]{2}[-\s]?[0-9]{1,2}[-\s]?[A-Za-z]{0,3}[-\s]?[0-9]{4}$/;
-        return regex.test(str.trim());
-    }
-
-    function normalizePartyName(name) {
-        if (!name) return "";
-        let lower = name.trim().toLowerCase();
-        if (lower.startsWith('usv')) return 'USV';
-        if (lower.startsWith('nrb')) return 'NRB';
-        if (lower.startsWith('jb chemical')) return 'JB Chemicals';
-        if (lower.startsWith('rk foodland')) return 'RK Foodland';
-        if (lower.startsWith('tech nova') || lower.startsWith('technova')) return 'Tech Nova';
-        if (lower.startsWith('vns')) return 'VNS';
-        if (lower.startsWith('jnpt')) return 'JNPT';
-        if (lower.startsWith('fr8')) return 'FR8';
-        if (lower.startsWith('lobb')) return 'Lobb';
-        return name.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-    }
-
     function setupCustomDropdown(inputId, listId, dataFetchFn, onSelectFn = null) {
         const inputElement = document.getElementById(inputId); const listContainer = document.getElementById(listId);
         if (!inputElement || !listContainer) return;
@@ -915,7 +955,15 @@
                 if (!item) return; 
                 if (!filterText || String(item).toLowerCase().includes(filterText.toLowerCase())) {
                     hasMatches = true; let optionDiv = document.createElement("div"); optionDiv.innerHTML = item; 
-                    optionDiv.addEventListener("click", function() { inputElement.value = item; listContainer.style.display = "none"; if (onSelectFn) onSelectFn(item); });
+                    optionDiv.addEventListener("click", function() { 
+                        inputElement.value = item; 
+                        listContainer.style.display = "none"; 
+                        if (inputElement.id === 'ob-party' || inputElement.id === 'ob-tname' || inputElement.id === 'rl-party' || inputElement.id === 'rl-agency' || inputElement.id === 'edit-party' || inputElement.id === 'mis-party' || inputElement.id === 'rf-party') {
+                            formatPartyName(inputElement);
+                        }
+                        if (onSelectFn) onSelectFn(item); 
+                        if (inputElement.id === 'rf-party' || inputElement.id.startsWith('uf-')) triggerCurrentRender();
+                    });
                     listContainer.appendChild(optionDiv);
                 }
             });
@@ -934,7 +982,7 @@
         };
 
         setupCustomDropdown('uf-party', 'uf-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-transporter', 'uf-transporter-list', () => [...new Set([...Object.keys(transporters), ...allTrips.map(t=>t?t.brokingAgent:'').filter(Boolean)])].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-transporter', 'uf-transporter-list', () => [...new Set([...Object.keys(transporters).map(normalizePartyName), ...allTrips.map(t=>t?normalizePartyName(t.brokingAgent):'').filter(Boolean)])].sort(), triggerCurrentRender);
         setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), triggerCurrentRender);
         setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort(), triggerCurrentRender);
         setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort(), triggerCurrentRender);
@@ -943,10 +991,12 @@
 
         setupCustomDropdown('ob-party', 'ob-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort());
         setupCustomDropdown('ob-vnum', 'ob-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'ob'));
-        setupCustomDropdown('ob-tname', 'ob-tname-list', () => Object.keys(transporters).sort());
+        setupCustomDropdown('ob-tname', 'ob-tname-list', () => Object.keys(transporters).map(normalizePartyName).sort());
         
         setupCustomDropdown('ob-tperson', 'ob-tperson-list', () => {
-            let trList = transporters[document.getElementById('ob-tname').value];
+            let rawKeys = Object.keys(transporters);
+            let matchKey = rawKeys.find(k => normalizePartyName(k) === document.getElementById('ob-tname').value);
+            let trList = transporters[matchKey || document.getElementById('ob-tname').value];
             return trList ? trList.map(p => p.name).sort() : [];
         }, (p) => autoFillContact(p, 'ob'));
         
@@ -984,7 +1034,12 @@
     }
 
     function autoFillVehicle(vNum, prefix) { const u = vNum.toUpperCase(); if (vehicles[u]) { document.getElementById(`${prefix}-vtype`).value = vehicles[u].type || ""; document.getElementById(`${prefix}-weight`).value = vehicles[u].capacity || ""; } }
-    function autoFillContact(pName, prefix) { const t = document.getElementById(`${prefix}-tname`).value; if (transporters[t]) { const person = transporters[t].find(x => x.name === pName); if (person) document.getElementById(`${prefix}-tcontact`).value = person.phone; } }
+    function autoFillContact(pName, prefix) { 
+        let rawKeys = Object.keys(transporters);
+        let matchKey = rawKeys.find(k => normalizePartyName(k) === document.getElementById(`${prefix}-tname`).value);
+        const t = matchKey || document.getElementById(`${prefix}-tname`).value; 
+        if (transporters[t]) { const person = transporters[t].find(x => x.name === pName); if (person) document.getElementById(`${prefix}-tcontact`).value = person.phone; } 
+    }
 
     function openWorkspace(id) {
         const p = getUserPerms();
@@ -1022,6 +1077,18 @@
         document.getElementById(`${workspace}-selection-screen`).style.display = 'block';
         document.getElementById(`${workspace}-content-area`).style.display = 'none';
         currentOpenRecoId = null; 
+    }
+
+    // REPORTS TAB FIX: This vital function was missing from the original code!
+    function setReportType(type) {
+        currentReportType = type;
+        document.getElementById('report-selection-screen').style.display = 'none';
+        document.getElementById('report-content-area').style.display = 'block';
+        document.getElementById('report-title-text').innerText = type + " Reports";
+        document.getElementById('screen-report').innerHTML = ''; 
+        document.getElementById('print-report-container').innerHTML = ''; 
+        document.getElementById('report-actions').style.display = 'none';
+        triggerCurrentRender();
     }
 
     function triggerCurrentRender() {
@@ -1097,32 +1164,22 @@
     }
 
     function validatePlacementOwn() {
-        let isValid = true; let req = ['ob-date', 'ob-party', 'ob-from', 'ob-to', 'ob-vnum', 'ob-vtype', 'ob-weight', 'ob-dcontact', 'ob-tname', 'ob-tcontact'];
         document.querySelectorAll('.error-msg').forEach(msg => msg.style.display = 'none');
         document.querySelectorAll('input').forEach(input => input.style.borderColor = 'transparent');
         
-        const partyField = document.getElementById('ob-party');
-        if (isVehicleNumber(partyField.value)) {
-            alert("Error: You have entered a Vehicle Number in the 'Party Name' field. Please correct this to save.");
-            partyField.style.borderColor = '#b3261e';
-            return false;
-        }
+        if (blockVehicleInPartyFields('Own Booking')) return false;
 
+        let isValid = true; let req = ['ob-date', 'ob-party', 'ob-from', 'ob-to', 'ob-vnum', 'ob-vtype', 'ob-weight', 'ob-dcontact', 'ob-tname', 'ob-tcontact'];
         req.forEach(id => { const el = document.getElementById(id); if (el && !el.value.trim()) { el.style.borderColor = '#b3261e'; isValid = false; }});
         if (!isValid) alert("Please fill in all mandatory fields (*)."); return isValid;
     }
 
     function validatePlacementRev() {
-        let isValid = true; let req = ['rl-date', 'rl-agent', 'rl-from', 'rl-to', 'rl-vnum', 'rl-vtype', 'rl-weight'];
         document.querySelectorAll('input').forEach(input => input.style.borderColor = 'transparent');
 
-        const partyField = document.getElementById('rl-party');
-        if (isVehicleNumber(partyField.value)) {
-            alert("Error: You have entered a Vehicle Number in the 'Party Name' field. Please correct this to save.");
-            partyField.style.borderColor = '#b3261e';
-            return false;
-        }
+        if (blockVehicleInPartyFields('Reverse Logistics')) return false;
 
+        let isValid = true; let req = ['rl-date', 'rl-party', 'rl-agency', 'rl-from', 'rl-to', 'rl-vnum', 'rl-vtype', 'rl-weight'];
         req.forEach(id => { const el = document.getElementById(id); if (el && !el.value.trim()) { el.style.borderColor = '#b3261e'; isValid = false; }});
         if (!isValid) alert("Please fill in all mandatory fields (*)."); return isValid;
     }
@@ -1174,7 +1231,7 @@
             dName: "", dContact: "", tName: "", tPerson: document.getElementById('rl-agent').value, tContact: formatPhoneString(document.getElementById('rl-contact').value), 
             remarks: document.getElementById('rl-remarks').value, podRemark: "",
             loadingExp: "", unloadingExp: "", lrExp: "", otherExp: "", otherExpReason: "",
-            bookingType: 'Reverse Logistics', brokingAgent: normalizePartyName(document.getElementById('rl-agent').value)
+            bookingType: 'Reverse Logistics', brokingAgent: normalizePartyName(document.getElementById('rl-agency').value)
         };
         finalizePlacementSave(payload);
     }
@@ -1196,11 +1253,11 @@
     function generatePlacementMessageOwn(type) {
         if (!validatePlacementOwn()) return; 
         const date = getFormattedDateVal(document.getElementById('ob-date').value); const vNum = document.getElementById('ob-vnum').value.toUpperCase();
-        let header = `*Placement Details - ${vNum} - ${document.getElementById('ob-from').value} to ${document.getElementById('ob-to').value} - ${document.getElementById('ob-vtype').value} - ${document.getElementById('ob-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${document.getElementById('ob-party').value}\n\n*From:* ${document.getElementById('ob-from').value}\n*To:* ${document.getElementById('ob-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('ob-vtype').value}\n*Charged Weight:* ${document.getElementById('ob-weight').value}\n\n`;
+        let header = `*Placement Details - ${vNum} - ${document.getElementById('ob-from').value} to ${document.getElementById('ob-to').value} - ${document.getElementById('ob-vtype').value} - ${document.getElementById('ob-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${normalizePartyName(document.getElementById('ob-party').value)}\n\n*From:* ${document.getElementById('ob-from').value}\n*To:* ${document.getElementById('ob-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('ob-vtype').value}\n*Charged Weight:* ${document.getElementById('ob-weight').value}\n\n`;
         let dName = document.getElementById('ob-dname').value; let dContact = formatPhoneString(document.getElementById('ob-dcontact').value);
         if (dName) header += `*Driver Name:* ${dName}\n`; if (dContact) header += `*Driver Contact No:* ${dContact}\n\n`;
         if (type === 'team') {
-            header += `*Transporter:* ${document.getElementById('ob-tname').value}\n`;
+            header += `*Transporter:* ${normalizePartyName(document.getElementById('ob-tname').value)}\n`;
             if (document.getElementById('ob-tperson').value) header += `*Person Name:* ${document.getElementById('ob-tperson').value}\n`;
             if (document.getElementById('ob-tcontact').value) header += `*Contact Number:* ${document.getElementById('ob-tcontact').value}\n\n`;
             if (document.getElementById('ob-remarks').value) header += `*Remarks:* ${document.getElementById('ob-remarks').value}`;
@@ -1211,8 +1268,8 @@
     function generatePlacementMessageRev(type) {
         if (!validatePlacementRev()) return; 
         const date = getFormattedDateVal(document.getElementById('rl-date').value); const vNum = document.getElementById('rl-vnum').value.toUpperCase();
-        let party = document.getElementById('rl-party').value; let typeCo = document.getElementById('rl-typeco').value; if(typeCo) party += " (" + typeCo + ")";
-        let header = `*Placement Details (Rev Log) - ${vNum} - ${document.getElementById('rl-from').value} to ${document.getElementById('rl-to').value} - ${document.getElementById('rl-vtype').value} - ${document.getElementById('rl-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${document.getElementById('rl-from').value}\n*To:* ${document.getElementById('rl-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('rl-vtype').value}\n*Charged Weight:* ${document.getElementById('rl-weight').value}\n\n*Broking Agency:* ${document.getElementById('rl-agent').value}\n`;
+        let party = normalizePartyName(document.getElementById('rl-party').value); let typeCo = document.getElementById('rl-typeco').value; if(typeCo) party += " (" + typeCo + ")";
+        let header = `*Placement Details (Rev Log) - ${vNum} - ${document.getElementById('rl-from').value} to ${document.getElementById('rl-to').value} - ${document.getElementById('rl-vtype').value} - ${document.getElementById('rl-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${document.getElementById('rl-from').value}\n*To:* ${document.getElementById('rl-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('rl-vtype').value}\n*Charged Weight:* ${document.getElementById('rl-weight').value}\n\n*Broking Agency:* ${normalizePartyName(document.getElementById('rl-agency').value)}\n`;
         if(document.getElementById('rl-agent').value) header += `*Agent Name:* ${document.getElementById('rl-agent').value}\n`;
         if(document.getElementById('rl-contact').value) header += `*Contact No:* ${document.getElementById('rl-contact').value}\n\n`;
         if(document.getElementById('rl-cfreight').value) header += `*Charged Freight:* ${document.getElementById('rl-cfreight').value}\n`;
@@ -1414,6 +1471,17 @@
         alert("Ledger updated."); renderReconciliation(); 
     }
 
+    function setReportType(type) {
+        currentReportType = type;
+        document.getElementById('report-selection-screen').style.display = 'none';
+        document.getElementById('report-content-area').style.display = 'block';
+        document.getElementById('report-title-text').innerText = type + " Reports";
+        document.getElementById('screen-report').innerHTML = ''; 
+        document.getElementById('print-report-container').innerHTML = ''; 
+        document.getElementById('report-actions').style.display = 'none';
+        triggerCurrentRender();
+    }
+
     function generateCustomReport() {
         const rfPartyEl = document.getElementById('rf-party'); const pName = rfPartyEl ? rfPartyEl.value : "";
         let finalTrips = getFilteredTrips(allTrips).filter(t => (t.bookingType || 'Own Booking') === currentReportType);
@@ -1427,12 +1495,13 @@
         }
 
         const screenContainer = document.getElementById('screen-report'); const printContainer = document.getElementById('print-report-container');
-        document.getElementById('report-actions').style.display = 'grid';
+        document.getElementById('report-actions').style.display = 'flex';
 
         if (finalTrips.length === 0) { screenContainer.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No data matches these filters.</div>`; printContainer.innerHTML = ``; return; }
 
         const today = new Date(); const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
         
+        // Exact formatting strictly required: Sr. No., Booking Date, Delivery Date, Vehicle No. * (Type & Capacity), Party Name, Route, Current Status, Current Location 
         let screenHtml = `<table class="report-table"><thead><tr><th>Sr. No.</th><th>Booking Date</th><th>Delivery Date</th><th>Vehicle No. * (Type & Capacity)</th><th>Party Name</th><th>Route</th><th>Current Status</th><th>Current Location</th></tr></thead><tbody>`;
         finalTrips.forEach((t, i) => {
             let stat = (t.status || '').trim() === 'Delivered' ? `Delivered` : ((t.status || '').trim() === 'Cancelled Trip' ? `Cancelled` : `In-Transit`);
@@ -1524,7 +1593,7 @@
                 
                 let totalPayable = baseCost + loading + unloading + otherExp; let balToPay = totalPayable - (advPaid + bal1 + bal2 + bal3);
                 let isCleared = (ledger.reco.status === 'Cleared'); let savedDed = (isCleared && balToPay > 0) ? balToPay : 0; let finalBal = (isCleared && balToPay > 0) ? 0 : balToPay;
-                let lrAmt = (ledger.expense.find(e=>e.type==='LR') || {amt:0}).amt;
+                let lrObj = ledger.expense.find(e=>e.type==='LR'); let lrAmt = lrObj ? lrObj.amt : 0;
 
                 rawRows.push([t.id, t.date, t.party, t.from, t.to, t.vNum, t.type, t.weight, t.status, t.deliveryDate, t.statusNote||"", t.cNote||"", t.podDate||"", t.createdBy, t.vFreight, t.cFreight, t.dName, t.dContact, t.tName, t.tPerson, t.tContact, t.remarks, t.podRemark, loading, unloading, lrAmt, otherExp, t.otherExpReason||"", finalBal, savedDed]);
             });
@@ -1602,13 +1671,12 @@
                 </div>
             `;
             
-            const isDeliveredOrCancelled = (statusTextStr === 'Delivered' || statusTextStr === 'Cancelled Trip');
+            const isDeliveredOrCancelled = (trip.status || '').trim() === 'Delivered' || (trip.status || '').trim() === 'Cancelled Trip';
             const safeStatusNote = (trip.statusNote || "").replace(/"/g, '&quot;');
 
             cardHtml += `<div style="display:flex; margin-top:5px; gap: 8px; width: 100%; align-items:center;">`;
             
             if (!isDeliveredOrCancelled) {
-                // Trip is Active -> Let Admin/Manager change Status, Let everyone Update Location
                 if (p.changeDelCanStatus) {
                     cardHtml += `
                         <select class="compact-input" onchange="handleStatusChange('${trip.id}', this.value, this)" style="flex:1;">
@@ -1622,7 +1690,6 @@
                         <input type="text" class="compact-input" placeholder="Update current location..." value="${safeStatusNote}" onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="${p.changeDelCanStatus ? 'flex:2;' : 'flex:1; width:100%;'}">
                 `;
             } else {
-                // Trip is Completed -> Provide Admin with Revert tool, Disable the location box for everyone
                 if (isAdmin && p.changeDelCanStatus) {
                     cardHtml += `
                         <select class="compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')" style="flex:1;">
@@ -1635,7 +1702,6 @@
                         <input type="text" class="compact-input" placeholder="Locked (Completed Trip)" value="${safeStatusNote}" disabled style="${isAdmin && p.changeDelCanStatus ? 'flex:2;' : 'flex:1; width:100%;'} background:#e3e3e3; color:#8e8e8e; cursor:not-allowed;">
                 `;
             }
-            
             cardHtml += `</div>`;
             
             cardHtml += `
@@ -1736,6 +1802,14 @@
     function closeAdminEditModal() { document.getElementById('adminEditModal').style.display = "none"; }
     
     function saveAdminEdit() {
+        const partyField = document.getElementById('edit-party');
+        if (isVehicleNumber(partyField.value)) {
+            alert("Error: You have entered a Vehicle Number in the 'Party Name' field. Please correct this before saving.");
+            partyField.style.borderColor = '#b3261e';
+            return;
+        }
+        partyField.style.borderColor = 'transparent';
+
         const tripId = document.getElementById('edit-trip-id').value; const vNum = document.getElementById('edit-vnum').value.toUpperCase();
         const payload = { action: 'adminEditTrip', id: tripId, party: normalizePartyName(document.getElementById('edit-party').value), vNum: vNum, vType: document.getElementById('edit-vtype').value.toUpperCase(), weight: document.getElementById('edit-vcap').value.toUpperCase(), from: document.getElementById('edit-from').value, to: document.getElementById('edit-to').value, vFreight: document.getElementById('edit-vfreight').value, cFreight: document.getElementById('edit-cfreight').value, dName: document.getElementById('edit-dname').value, dContact: formatPhoneString(document.getElementById('edit-dcontact').value) };
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
