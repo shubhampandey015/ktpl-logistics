@@ -142,7 +142,11 @@
     <div class="pin-box">
         <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 160px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <h2>KTPL Login</h2>
-        <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric" oninput="handlePinInput(this.value)">
+        <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric" oninput="if(this.value.length === 4) checkPin()">
+        
+        <!-- The added button -->
+        <button class="btn btn-primary" style="margin-top: 10px;" onclick="checkPin()">Click to Login</button>
+        
         <p id="pin-error" style="display:none; color: #b3261e; font-size: 12px; margin-top: 15px;">Invalid Authorization PIN.</p>
     </div>
 </div>
