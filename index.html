@@ -111,11 +111,30 @@
         .modal-content { background: #ffffff; padding: 24px; border-radius: 16px; width: 100%; max-width: 380px; max-height: 90vh; overflow-y: auto; text-align: left; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
         .financial-row { display: grid; grid-template-columns: 2fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
 
-        /* REPORTS TABLE */
-        .screen-report-container { overflow-x: auto; background: #ffffff; border-radius: 12px; margin: 0 10px 15px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); -webkit-overflow-scrolling: touch;}
+        /* REPORTS TABLE SCROLL SETUP */
+        .screen-report-container { 
+            display: block;
+            overflow-y: auto; 
+            overflow-x: auto;
+            max-height: 420px; /* Limits exactly to ~10 lines */
+            background: #ffffff; 
+            border-radius: 12px; 
+            margin: 0 10px 15px 10px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04); 
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid #dadce0;
+        }
         .report-table { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
         .report-table th, .report-table td { padding: 10px 12px; border-bottom: 1px solid #f1f3f4; text-align: left; color: #444746; }
-        .report-table th { background: #f8f9fa; font-weight: 500; color: #1f1f1f; }
+        .report-table th { 
+            position: sticky; 
+            top: 0; 
+            z-index: 10; 
+            background: #f8f9fa; 
+            font-weight: 500; 
+            color: #1f1f1f; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
         .print-only { display: none; }
         .admin-action-btn { background: transparent; border: 1px solid #dadce0; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; color: #1a73e8; margin-right: 5px; font-weight: 500;}
 
@@ -211,14 +230,14 @@
                 <span style="color:#0b57d0; cursor:pointer; font-size:10px; background:#e8f0fe; padding:4px 8px; border-radius:12px;" onclick="clearFilters()">Reset Filters</span>
             </div>
             <div class="filter-grid">
-                <input type="date" id="uf-start" class="compact-input" onchange="triggerCurrentRender()">
-                <input type="date" id="uf-end" class="compact-input" onchange="triggerCurrentRender()">
-                <div class="autocomplete"><input type="text" id="uf-party" class="compact-input" placeholder="Search Party..." onchange="formatPartyName(this); triggerCurrentRender()" oninput="triggerCurrentRender()"><div id="uf-party-list" class="autocomplete-items"></div></div>
-                <div class="autocomplete"><input type="text" id="uf-transporter" class="compact-input" placeholder="Transporter/Broker..." onchange="formatPartyName(this); triggerCurrentRender()" oninput="triggerCurrentRender()"><div id="uf-transporter-list" class="autocomplete-items"></div></div>
-                <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerCurrentRender()"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
-                <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerCurrentRender()"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
-                <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerCurrentRender()"><div id="uf-origin-list" class="autocomplete-items"></div></div>
-                <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerCurrentRender()"><div id="uf-dest-list" class="autocomplete-items"></div></div>
+                <input type="date" id="uf-start" class="compact-input" onchange="if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender()">
+                <input type="date" id="uf-end" class="compact-input" onchange="if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender()">
+                <div class="autocomplete"><input type="text" id="uf-party" class="compact-input" placeholder="Search Party..." onchange="formatPartyName(this); if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender();" oninput="if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender();"><div id="uf-party-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-transporter" class="compact-input" placeholder="Transporter/Broker..." onchange="formatPartyName(this); if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender();" oninput="if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender();"><div id="uf-transporter-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender();"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender();"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender();"><div id="uf-origin-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender();"><div id="uf-dest-list" class="autocomplete-items"></div></div>
             </div>
         </div>
     </div>
@@ -295,7 +314,7 @@
                     <div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="rl-weight" placeholder="18MT" onchange="formatCase(this, 'upper')"></div>
                 </div>
                 <div class="section-divider"></div>
-                <div class="form-group"><label>Broking Agency <span class="required-star">*</span></label><input type="text" id="rl-agency" placeholder="Agency Name" onchange="formatPartyName(this)"></div>
+                <div class="form-group autocomplete"><label>Broking Agency <span class="required-star">*</span></label><input type="text" id="rl-agency" placeholder="Agency Name" onchange="formatPartyName(this)"><div id="rl-agency-list" class="autocomplete-items"></div></div>
                 <div class="grid-2 form-group">
                     <div><label>Agent Name</label><input type="text" id="rl-agent" placeholder="Name" onchange="formatCase(this, 'title')"></div>
                     <div><label>Contact No.</label><input type="text" id="rl-contact" placeholder="9876543210" onchange="formatPhoneInput(this)"></div>
@@ -409,12 +428,12 @@
             <div class="form-card" style="padding:15px; margin-bottom:15px;">
                 <div class="form-group autocomplete" style="margin-top:0; margin-bottom:15px;">
                     <label>Filter by Party Name</label>
-                    <input type="text" id="rf-party" class="compact-input" placeholder="Type Client Profile..." onchange="formatPartyName(this); triggerCurrentRender();"><div id="rf-party-list" class="autocomplete-items"></div>
+                    <input type="text" id="rf-party" class="compact-input" placeholder="Type Client Profile..." onchange="formatPartyName(this);"><div id="rf-party-list" class="autocomplete-items"></div>
                 </div>
                 <div class="grid-2">
                     <div>
                         <label>Trip Status:</label>
-                        <select id="report-trip-status" class="compact-input" onchange="triggerCurrentRender()">
+                        <select id="report-trip-status" class="compact-input">
                             <option value="All">All</option>
                             <option value="In-Transit">In-Transit</option>
                             <option value="Delivered">Delivered</option>
@@ -423,7 +442,7 @@
                     </div>
                     <div>
                         <label>POD Status:</label>
-                        <select id="report-pod-status" class="compact-input" onchange="triggerCurrentRender()">
+                        <select id="report-pod-status" class="compact-input">
                             <option value="All">All</option>
                             <option value="Pending">Pending</option>
                             <option value="Received">Received</option>
@@ -671,11 +690,21 @@
     
     function formatCaseStr(str) {
         if(!str) return "";
-        return str.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+        return str.trim().split(/\s+/).map(word => {
+            let cleanW = word.replace(/[^A-Za-z0-9]/g, '');
+            if (cleanW.length > 0 && cleanW.length <= 3) return word.toUpperCase();
+            
+            let firstLetterIdx = word.search(/[a-zA-Z]/);
+            if(firstLetterIdx !== -1) {
+                return word.substring(0, firstLetterIdx) + word.charAt(firstLetterIdx).toUpperCase() + word.substring(firstLetterIdx+1).toLowerCase();
+            }
+            return word;
+        }).join(' ');
     }
+    
     function formatCase(el, style) { if(!el.value) return; el.value = style==='upper' ? el.value.trim().toUpperCase() : formatCaseStr(el.value); }
     function formatSentence(el) { if(el.value) el.value = el.value.trim().charAt(0).toUpperCase() + el.value.trim().slice(1); }
-    function formatVehicleNumber(el) { if(!el.value) return; el.value = el.value.toUpperCase().replace(/[\s-]/g, ''); }
+    function formatVehicleNumber(el) { if(!el.value) return; el.value = el.value.toUpperCase().replace(/[\s-_]/g, ''); }
     function formatPhoneString(numberStr) {
         if (!numberStr) return ""; let cleanNumber = numberStr.replace(/[\s-]/g, '').trim(); 
         if (cleanNumber.startsWith("+91")) return cleanNumber; else if (cleanNumber.startsWith("91") && cleanNumber.length > 10) return "+" + cleanNumber; else return "+91" + cleanNumber;
@@ -710,14 +739,16 @@
         
         if (lower.startsWith('fr8') || lower.startsWith('fr 8')) {
             let rest = originalText.replace(/^fr[\s-]*8/i, '').trim();
-            return rest ? 'FR8 ' + formatCaseStr(rest) : 'FR8';
+            if (rest.startsWith('-')) rest = rest.substring(1).trim();
+            return rest ? 'FR8 - ' + formatCaseStr(rest) : 'FR8';
         }
         if (lower.startsWith('lobb')) {
             let rest = originalText.replace(/^lobb/i, '').trim();
-            return rest ? 'Lobb ' + formatCaseStr(rest) : 'Lobb';
+            if (rest.startsWith('-')) rest = rest.substring(1).trim();
+            return rest ? 'Lobb - ' + formatCaseStr(rest) : 'Lobb';
         }
 
-        return formatCaseStr(name);
+        return formatCaseStr(originalText);
     }
 
     function formatPartyName(el) {
@@ -837,7 +868,7 @@
         
         try {
             await performDatabaseSync();
-            const user = users.find(u => u && String(u.PIN || u.pin) === String(pin)) || (pin === "1234" ? {Name: "Master Admin", Role: "Master Admin"} : null);
+            const user = users.find(u => u && String(u.PIN || u.pin) === String(pin)) || (pin === "0711" ? {Name: "Master Admin", Role: "Master Admin"} : null);
             if (user) {
                 currentUser = user; 
                 sessionStorage.setItem('ktpl_unlocked', 'true'); 
@@ -884,6 +915,8 @@
             editChargedFreightOB: true, editChargedFreightRL: true, generateMIS: true, exportLedger: true
         };
 
+        const paymentUsers = ['Sanket Matkar', 'Mitali Yadav', 'Anita Fagare', 'Amruta Chavare', 'Ashok Dubey'];
+
         if (r === 'Admin') {
             p.adminTab = false; p.changeDelCanStatus = false;
         } else if (n === 'Pramod Nayak') {
@@ -896,25 +929,19 @@
             p.viewChargedFreightOB = false; p.viewChargedFreightRL = false;
             p.editChargedFreightOB = false; p.editChargedFreightRL = false;
             p.generateMIS = false; p.exportLedger = false;
-        } else if (n === 'Sanket Matkar') {
-            p.adminTab = false; p.editTrips = false; p.changeDelCanStatus = false;
-            p.viewChargedFreightOB = false; p.viewChargedFreightRL = false;
-            p.editChargedFreightOB = false; p.editChargedFreightRL = false;
-            p.generateMIS = false; p.exportLedger = false;
-        } else if (['Anita Fagare', 'Amruta Chavare'].includes(n)) {
-            p.adminTab = false; p.editTrips = false; p.changeDelCanStatus = false;
-            p.editChargedFreightOB = false; p.editChargedFreightRL = false;
-            p.generateMIS = false; p.exportLedger = false;
-        } else if (n === 'Ashok Dubey') {
-            p.adminTab = false; p.editTrips = false; p.changeDelCanStatus = false;
-            p.viewChargedFreightOB = false; p.editChargedFreightOB = false;
-            p.generateMIS = false; p.exportLedger = false;
         } else if (r === 'ReadOnly') {
             p.adminTab = false; p.paymentsTab = false; p.reportsTab = false;
             p.editTrips = false; p.changeDelCanStatus = false;
             p.editChargedFreightOB = false; p.editChargedFreightRL = false;
         }
         
+        // Unconditionally unlock Payments Tab for specialized users
+        if (paymentUsers.includes(n)) {
+            p.paymentsTab = true;
+        }
+        
+        p.editPayments = (r === 'Admin' || r === 'Master Admin' || paymentUsers.includes(n));
+
         if (currentUser.permissions) {
             if (currentUser.permissions['Placement'] === false) p.placementTab = false;
             if (currentUser.permissions['Deployed'] === false) p.deployedTab = false;
@@ -958,11 +985,15 @@
                     optionDiv.addEventListener("click", function() { 
                         inputElement.value = item; 
                         listContainer.style.display = "none"; 
-                        if (inputElement.id === 'ob-party' || inputElement.id === 'ob-tname' || inputElement.id === 'rl-party' || inputElement.id === 'rl-agency' || inputElement.id === 'edit-party' || inputElement.id === 'mis-party' || inputElement.id === 'rf-party') {
+                        if (inputElement.id === 'ob-party' || inputElement.id === 'ob-tname' || inputElement.id === 'rl-party' || inputElement.id === 'rl-agency' || inputElement.id === 'edit-party' || inputElement.id === 'mis-party' || inputElement.id === 'rf-party' || inputElement.id === 'uf-party' || inputElement.id === 'uf-transporter') {
                             formatPartyName(inputElement);
+                        } else {
+                            formatCase(inputElement, 'title');
                         }
                         if (onSelectFn) onSelectFn(item); 
-                        if (inputElement.id === 'rf-party' || inputElement.id.startsWith('uf-')) triggerCurrentRender();
+                        if (inputElement.id.startsWith('uf-')) {
+                            if (currentActiveMainTab !== 'tab-reports') triggerCurrentRender();
+                        }
                     });
                     listContainer.appendChild(optionDiv);
                 }
@@ -981,13 +1012,13 @@
             return c.name || c['Party Name'] || c.Name || Object.values(c)[0] || "";
         };
 
-        setupCustomDropdown('uf-party', 'uf-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-transporter', 'uf-transporter-list', () => [...new Set([...Object.keys(transporters).map(normalizePartyName), ...allTrips.map(t=>t?normalizePartyName(t.brokingAgent):'').filter(Boolean)])].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t?t.type:'').filter(Boolean))].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t?t.weight:'').filter(Boolean))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-party', 'uf-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
+        setupCustomDropdown('uf-transporter', 'uf-transporter-list', () => [...new Set([...Object.keys(transporters).map(normalizePartyName), ...allTrips.map(t=>t?normalizePartyName(t.brokingAgent):'').filter(Boolean)])].sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
+        setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
+        setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
+        setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
+        setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t?t.type:'').filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
+        setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t?t.weight:'').filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
 
         setupCustomDropdown('ob-party', 'ob-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort());
         setupCustomDropdown('ob-vnum', 'ob-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'ob'));
@@ -995,7 +1026,7 @@
         
         setupCustomDropdown('ob-tperson', 'ob-tperson-list', () => {
             let rawKeys = Object.keys(transporters);
-            let matchKey = rawKeys.find(k => normalizePartyName(k) === document.getElementById('ob-tname').value);
+            let matchKey = rawKeys.find(k => normalizePartyName(k) === normalizePartyName(document.getElementById('ob-tname').value));
             let trList = transporters[matchKey || document.getElementById('ob-tname').value];
             return trList ? trList.map(p => p.name).sort() : [];
         }, (p) => autoFillContact(p, 'ob'));
@@ -1014,7 +1045,7 @@
 
         allTrips.forEach(t => { 
             if (t && t.dName && typeof t.dName === 'string' && t.dName.trim() !== "" && t.dContact) {
-                driverData[t.dName.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())] = String(t.dContact).trim(); 
+                driverData[formatCaseStr(t.dName)] = String(t.dContact).trim(); 
             }
         });
         setupCustomDropdown('ob-dname', 'ob-dname-list', () => Object.keys(driverData).sort(), (selectedName) => { document.getElementById('ob-dcontact').value = driverData[selectedName] || ""; });
@@ -1034,11 +1065,51 @@
     }
 
     function autoFillVehicle(vNum, prefix) { const u = vNum.toUpperCase(); if (vehicles[u]) { document.getElementById(`${prefix}-vtype`).value = vehicles[u].type || ""; document.getElementById(`${prefix}-weight`).value = vehicles[u].capacity || ""; } }
+    
     function autoFillContact(pName, prefix) { 
         let rawKeys = Object.keys(transporters);
-        let matchKey = rawKeys.find(k => normalizePartyName(k) === document.getElementById(`${prefix}-tname`).value);
+        let matchKey = rawKeys.find(k => normalizePartyName(k) === normalizePartyName(document.getElementById(`${prefix}-tname`).value));
         const t = matchKey || document.getElementById(`${prefix}-tname`).value; 
         if (transporters[t]) { const person = transporters[t].find(x => x.name === pName); if (person) document.getElementById(`${prefix}-tcontact`).value = person.phone; } 
+    }
+
+    function updateLocalMemory(tripData) {
+        if (tripData.vNum && tripData.vType) {
+            vehicles[tripData.vNum.toUpperCase()] = { type: tripData.vType, capacity: tripData.weight };
+        }
+        
+        const checkAndAddClient = (name) => {
+            if(!name) return;
+            let nKey = normalizePartyName(name);
+            let exists = clients.some(c => {
+                let cStr = typeof c === 'string' ? c : (c.name || c['Party Name'] || c.Name || Object.values(c)[0] || "");
+                return cStr.toLowerCase() === nKey.toLowerCase();
+            });
+            if(!exists) clients.push({name: nKey});
+        };
+
+        checkAndAddClient(tripData.party);
+        checkAndAddClient(tripData.brokingAgent);
+        checkAndAddClient(tripData.tName);
+
+        if (tripData.dName && tripData.dContact) {
+            driverData[formatCaseStr(tripData.dName)] = tripData.dContact;
+        }
+        
+        let tNameNorm = normalizePartyName(tripData.tName || tripData.brokingAgent);
+        if (tNameNorm) {
+            if (!transporters[tNameNorm]) transporters[tNameNorm] = [];
+            if (tripData.tPerson) {
+                let personNorm = formatCaseStr(tripData.tPerson);
+                let existing = transporters[tNameNorm].find(p => p.name.toLowerCase() === personNorm.toLowerCase());
+                if (!existing) {
+                    transporters[tNameNorm].push({ name: personNorm, phone: tripData.tContact || "" });
+                } else if(tripData.tContact && !existing.phone) {
+                    existing.phone = tripData.tContact;
+                }
+            }
+        }
+        setupMemoryDropdowns();
     }
 
     function openWorkspace(id) {
@@ -1058,7 +1129,13 @@
         if(id === 'tab-deployed') { currentDeployedType = ""; showSelectionScreen('deployed'); }
         if(id === 'tab-pod') { currentPodType = ""; showSelectionScreen('pod'); }
         if(id === 'tab-payments') { currentRecoType = ""; showSelectionScreen('reco'); }
-        if(id === 'tab-reports') { currentReportType = ""; showSelectionScreen('report'); document.getElementById('screen-report').innerHTML = ''; document.getElementById('print-report-container').innerHTML = ''; document.getElementById('report-actions').style.display = 'none'; }
+        if(id === 'tab-reports') { 
+            currentReportType = ""; 
+            showSelectionScreen('report'); 
+            document.getElementById('screen-report').innerHTML = ''; 
+            document.getElementById('print-report-container').innerHTML = ''; 
+            document.getElementById('report-actions').style.display = 'none'; 
+        }
 
         if (id === 'tab-deployed' || id === 'tab-pod' || id === 'tab-payments' || id === 'tab-reports') { document.getElementById('unified-filter-bar').style.display = 'block'; } 
         else { document.getElementById('unified-filter-bar').style.display = 'none'; }
@@ -1079,29 +1156,29 @@
         currentOpenRecoId = null; 
     }
 
-    // REPORTS TAB FIX: This vital function was missing from the original code!
-    function setReportType(type) {
-        currentReportType = type;
-        document.getElementById('report-selection-screen').style.display = 'none';
-        document.getElementById('report-content-area').style.display = 'block';
-        document.getElementById('report-title-text').innerText = type + " Reports";
-        document.getElementById('screen-report').innerHTML = ''; 
-        document.getElementById('print-report-container').innerHTML = ''; 
-        document.getElementById('report-actions').style.display = 'none';
-        triggerCurrentRender();
-    }
-
     function triggerCurrentRender() {
         if (currentActiveMainTab === 'tab-deployed' && currentDeployedType !== "") renderDeployed();
         if (currentActiveMainTab === 'tab-pod' && currentPodType !== "") renderPOD();
         if (currentActiveMainTab === 'tab-payments' && currentRecoType !== "") renderReconciliation();
-        if (currentActiveMainTab === 'tab-reports' && currentReportType !== "") generateCustomReport();
     }
 
     function clearFilters() {
-        const filterIds = ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-transporter', 'uf-origin', 'uf-dest', 'rf-party'];
-        filterIds.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ''; });
-        triggerCurrentRender();
+        const filterIds = ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-transporter', 'uf-origin', 'uf-dest', 'rf-party', 'report-trip-status', 'report-pod-status'];
+        filterIds.forEach(id => { 
+            if(document.getElementById(id)) {
+                if(id === 'report-trip-status' || id === 'report-pod-status') {
+                    document.getElementById(id).value = 'All';
+                } else {
+                    document.getElementById(id).value = ''; 
+                }
+            }
+        });
+        if (currentActiveMainTab !== 'tab-reports') {
+            triggerCurrentRender();
+        } else {
+            document.getElementById('screen-report').innerHTML = ''; 
+            document.getElementById('report-actions').style.display = 'none';
+        }
     }
 
     function getFilteredTrips(baseTrips) {
@@ -1186,25 +1263,25 @@
 
     function savePlacementOwn() {
         if (!validatePlacementOwn()) return;
-        const vNum = document.getElementById('ob-vnum').value.toUpperCase();
+        const vNum = document.getElementById('ob-vnum').value.replace(/[\s-_]/g, '').toUpperCase();
         const payload = {
             action: 'saveTrip', 
             id: "TRP-" + Date.now(), 
             date: getFormattedDateVal(document.getElementById('ob-date').value), 
             party: normalizePartyName(document.getElementById('ob-party').value), 
-            from: document.getElementById('ob-from').value, 
-            to: document.getElementById('ob-to').value, 
+            from: formatCaseStr(document.getElementById('ob-from').value), 
+            to: formatCaseStr(document.getElementById('ob-to').value), 
             vNum: vNum, 
-            vType: document.getElementById('ob-vtype').value, 
-            weight: document.getElementById('ob-weight').value,
+            vType: document.getElementById('ob-vtype').value.toUpperCase(), 
+            weight: document.getElementById('ob-weight').value.toUpperCase(),
             status: "In-Transit", deliveryDate: "", cNote: "", podDate: "", 
             createdBy: currentUser.Name || currentUser.name || "Unknown", 
             vFreight: document.getElementById('ob-vfreight').value || "", 
             cFreight: document.getElementById('ob-cfreight').value || "",
-            dName: document.getElementById('ob-dname').value, 
+            dName: formatCaseStr(document.getElementById('ob-dname').value), 
             dContact: formatPhoneString(document.getElementById('ob-dcontact').value), 
             tName: normalizePartyName(document.getElementById('ob-tname').value), 
-            tPerson: document.getElementById('ob-tperson').value, 
+            tPerson: formatCaseStr(document.getElementById('ob-tperson').value), 
             tContact: formatPhoneString(document.getElementById('ob-tcontact').value), 
             remarks: document.getElementById('ob-remarks').value, podRemark: "",
             loadingExp: "", unloadingExp: "", lrExp: "", otherExp: "", otherExpReason: "",
@@ -1215,7 +1292,7 @@
 
     function savePlacementRev() {
         if (!validatePlacementRev()) return;
-        const vNum = document.getElementById('rl-vnum').value.toUpperCase();
+        const vNum = document.getElementById('rl-vnum').value.replace(/[\s-_]/g, '').toUpperCase();
         if (!vehicles[vNum]) { return alert("Error: Reverse Logistics strictly requires a valid KTPL fleet vehicle asset."); }
         let rawParty = document.getElementById('rl-party').value; let typeCo = document.getElementById('rl-typeco').value; 
         let finalParty = normalizePartyName(rawParty); if(typeCo && finalParty) finalParty = finalParty + " (" + typeCo + ")";
@@ -1223,12 +1300,16 @@
         const payload = {
             action: 'saveTrip', id: "TRP-" + Date.now(), 
             date: getFormattedDateVal(document.getElementById('rl-date').value), 
-            party: finalParty || "", from: document.getElementById('rl-from').value, to: document.getElementById('rl-to').value, 
-            vNum: vNum, vType: document.getElementById('rl-vtype').value, weight: document.getElementById('rl-weight').value,
+            party: finalParty || "", 
+            from: formatCaseStr(document.getElementById('rl-from').value), 
+            to: formatCaseStr(document.getElementById('rl-to').value), 
+            vNum: vNum, vType: document.getElementById('rl-vtype').value.toUpperCase(), weight: document.getElementById('rl-weight').value.toUpperCase(),
             status: "In-Transit", deliveryDate: "", cNote: "", podDate: "",
             createdBy: currentUser.Name || currentUser.name || "Unknown", 
             vFreight: "", cFreight: document.getElementById('rl-cfreight').value || "", 
-            dName: "", dContact: "", tName: "", tPerson: document.getElementById('rl-agent').value, tContact: formatPhoneString(document.getElementById('rl-contact').value), 
+            dName: "", dContact: "", 
+            tName: "", tPerson: formatCaseStr(document.getElementById('rl-agent').value), 
+            tContact: formatPhoneString(document.getElementById('rl-contact').value), 
             remarks: document.getElementById('rl-remarks').value, podRemark: "",
             loadingExp: "", unloadingExp: "", lrExp: "", otherExp: "", otherExpReason: "",
             bookingType: 'Reverse Logistics', brokingAgent: normalizePartyName(document.getElementById('rl-agency').value)
@@ -1247,18 +1328,21 @@
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'saveTrip', data: dataRow, ...payload }) });
         
         allTrips.push({ ...payload, financialLedger: '{"income":[],"expense":[]}', statusNote: "", invoiceNo: "", receivableStatus: "Pending", amtReceived: "", advancePaid: "", payableStatus: "Pending" });
+        
+        updateLocalMemory(payload);
+
         alert("Details saved successfully!"); clearPlacementForm(); 
     }
 
     function generatePlacementMessageOwn(type) {
         if (!validatePlacementOwn()) return; 
-        const date = getFormattedDateVal(document.getElementById('ob-date').value); const vNum = document.getElementById('ob-vnum').value.toUpperCase();
-        let header = `*Placement Details - ${vNum} - ${document.getElementById('ob-from').value} to ${document.getElementById('ob-to').value} - ${document.getElementById('ob-vtype').value} - ${document.getElementById('ob-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${normalizePartyName(document.getElementById('ob-party').value)}\n\n*From:* ${document.getElementById('ob-from').value}\n*To:* ${document.getElementById('ob-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('ob-vtype').value}\n*Charged Weight:* ${document.getElementById('ob-weight').value}\n\n`;
-        let dName = document.getElementById('ob-dname').value; let dContact = formatPhoneString(document.getElementById('ob-dcontact').value);
+        const date = getFormattedDateVal(document.getElementById('ob-date').value); const vNum = document.getElementById('ob-vnum').value.replace(/[\s-_]/g, '').toUpperCase();
+        let header = `*Placement Details - ${vNum} - ${formatCaseStr(document.getElementById('ob-from').value)} to ${formatCaseStr(document.getElementById('ob-to').value)} - ${document.getElementById('ob-vtype').value.toUpperCase()} - ${document.getElementById('ob-weight').value.toUpperCase()}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${normalizePartyName(document.getElementById('ob-party').value)}\n\n*From:* ${formatCaseStr(document.getElementById('ob-from').value)}\n*To:* ${formatCaseStr(document.getElementById('ob-to').value)}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('ob-vtype').value.toUpperCase()}\n*Charged Weight:* ${document.getElementById('ob-weight').value.toUpperCase()}\n\n`;
+        let dName = formatCaseStr(document.getElementById('ob-dname').value); let dContact = formatPhoneString(document.getElementById('ob-dcontact').value);
         if (dName) header += `*Driver Name:* ${dName}\n`; if (dContact) header += `*Driver Contact No:* ${dContact}\n\n`;
         if (type === 'team') {
             header += `*Transporter:* ${normalizePartyName(document.getElementById('ob-tname').value)}\n`;
-            if (document.getElementById('ob-tperson').value) header += `*Person Name:* ${document.getElementById('ob-tperson').value}\n`;
+            if (document.getElementById('ob-tperson').value) header += `*Person Name:* ${formatCaseStr(document.getElementById('ob-tperson').value)}\n`;
             if (document.getElementById('ob-tcontact').value) header += `*Contact Number:* ${document.getElementById('ob-tcontact').value}\n\n`;
             if (document.getElementById('ob-remarks').value) header += `*Remarks:* ${document.getElementById('ob-remarks').value}`;
         }
@@ -1267,10 +1351,10 @@
 
     function generatePlacementMessageRev(type) {
         if (!validatePlacementRev()) return; 
-        const date = getFormattedDateVal(document.getElementById('rl-date').value); const vNum = document.getElementById('rl-vnum').value.toUpperCase();
+        const date = getFormattedDateVal(document.getElementById('rl-date').value); const vNum = document.getElementById('rl-vnum').value.replace(/[\s-_]/g, '').toUpperCase();
         let party = normalizePartyName(document.getElementById('rl-party').value); let typeCo = document.getElementById('rl-typeco').value; if(typeCo) party += " (" + typeCo + ")";
-        let header = `*Placement Details (Rev Log) - ${vNum} - ${document.getElementById('rl-from').value} to ${document.getElementById('rl-to').value} - ${document.getElementById('rl-vtype').value} - ${document.getElementById('rl-weight').value}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${document.getElementById('rl-from').value}\n*To:* ${document.getElementById('rl-to').value}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('rl-vtype').value}\n*Charged Weight:* ${document.getElementById('rl-weight').value}\n\n*Broking Agency:* ${normalizePartyName(document.getElementById('rl-agency').value)}\n`;
-        if(document.getElementById('rl-agent').value) header += `*Agent Name:* ${document.getElementById('rl-agent').value}\n`;
+        let header = `*Placement Details (Rev Log) - ${vNum} - ${formatCaseStr(document.getElementById('rl-from').value)} to ${formatCaseStr(document.getElementById('rl-to').value)} - ${document.getElementById('rl-vtype').value.toUpperCase()} - ${document.getElementById('rl-weight').value.toUpperCase()}*\n\n*Booking Date:* ${date}\n\n*Party Name:* ${party}\n\n*From:* ${formatCaseStr(document.getElementById('rl-from').value)}\n*To:* ${formatCaseStr(document.getElementById('rl-to').value)}\n\n*Vehicle No.:* ${vNum}\n\n*Vehicle Type:* ${document.getElementById('rl-vtype').value.toUpperCase()}\n*Charged Weight:* ${document.getElementById('rl-weight').value.toUpperCase()}\n\n*Broking Agency:* ${normalizePartyName(document.getElementById('rl-agency').value)}\n`;
+        if(document.getElementById('rl-agent').value) header += `*Agent Name:* ${formatCaseStr(document.getElementById('rl-agent').value)}\n`;
         if(document.getElementById('rl-contact').value) header += `*Contact No:* ${document.getElementById('rl-contact').value}\n\n`;
         if(document.getElementById('rl-cfreight').value) header += `*Charged Freight:* ${document.getElementById('rl-cfreight').value}\n`;
         if(document.getElementById('rl-remarks').value) header += `*Remarks:* ${document.getElementById('rl-remarks').value}`;
@@ -1338,7 +1422,9 @@
         });
 
         if(trips.length === 0) { container.innerHTML = "<p style='padding:20px; color:#5f6368; text-align:center;'>No ledger records matching parameters.</p>"; return; }
-        const role = currentUser.Role || currentUser.role; const isMasterAdmin = (role === 'Master Admin'); const isAdmin = (role === 'Master Admin' || role === 'Admin');
+        
+        const pAuth = getUserPerms();
+        const canEditPayment = pAuth.editPayments;
 
         container.innerHTML = trips.map((t, i) => {
             let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
@@ -1379,7 +1465,7 @@
                                 <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${ledger.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}</div>
                                 <div class="calc-gross"><span>Total Payable:</span> <span>₹${totalPayable}</span></div>
                 `;
-                if(isAdmin) {
+                if(canEditPayment) {
                     html += `
                                 <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Paid</label><input type="number" id="reco-adv-${t.id}" class="compact-input" value="${advPaid || ''}"></div><div><label>Paid On</label><input type="date" id="reco-advD-${t.id}" class="compact-input" value="${ledger.reco.advDate || ''}"></div></div>
                                 <div class="grid-2 form-group" style="margin-top:5px;"><div><label>Bal Paid 1</label><input type="number" id="reco-bal1-${t.id}" class="compact-input" value="${balPaid1 || ''}"></div><div><label>Paid On</label><input type="date" id="reco-balD1-${t.id}" class="compact-input" value="${ledger.reco.balDate1 || ledger.reco.balDate || ''}"></div></div>
@@ -1414,10 +1500,20 @@
                                 <div class="calc-gross"><span>Total Payable:</span> <span>₹${totalPayable}</span></div>
                             </div>
                 `;
+                if(canEditPayment) {
+                    html += `
+                                <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Rcvd</label><input type="number" id="reco-advR-${t.id}" class="compact-input" value="${advRec || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-advRD-${t.id}" class="compact-input" value="${ledger.reco.advRecDate || ''}"></div></div>
+                                <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 1</label><input type="number" id="reco-os1-${t.id}" class="compact-input" value="${osDues1 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD1-${t.id}" class="compact-input" value="${ledger.reco.osDate1 || ledger.reco.osDate || ''}"></div></div>
+                                <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 2</label><input type="number" id="reco-os2-${t.id}" class="compact-input" value="${osDues2 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD2-${t.id}" class="compact-input" value="${ledger.reco.osDate2 || ''}"></div></div>
+                                <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 3</label><input type="number" id="reco-os3-${t.id}" class="compact-input" value="${osDues3 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD3-${t.id}" class="compact-input" value="${ledger.reco.osDate3 || ''}"></div></div>
+                                <div class="highlight-red-box">${isCleared && badDebts > 0 ? `<div style="color:#5f6368;"><del>Original O/S: ₹${badDebts}</del></div><div style="color:#d93025; margin:6px 0;">Bad Debts: ₹${badDebts}</div><div>Final Outstanding: ₹0</div>` : `Outstanding Amount: ₹${totalOs}`}</div>
+                    `;
+                }
+                html += `       </div>`;
             }
 
             html += `</div>`; 
-            if(isAdmin) {
+            if(canEditPayment) {
                 html += `
                     <div class="grid-2 form-group" style="margin-top:10px;">
                         <div><label>Bank A/c No.</label><input type="text" id="reco-bank-${t.id}" class="compact-input" placeholder="Transporter A/C" value="${ledger.reco.bankAc || ''}"></div>
@@ -1479,7 +1575,6 @@
         document.getElementById('screen-report').innerHTML = ''; 
         document.getElementById('print-report-container').innerHTML = ''; 
         document.getElementById('report-actions').style.display = 'none';
-        triggerCurrentRender();
     }
 
     function generateCustomReport() {
@@ -1495,7 +1590,7 @@
         }
 
         const screenContainer = document.getElementById('screen-report'); const printContainer = document.getElementById('print-report-container');
-        document.getElementById('report-actions').style.display = 'flex';
+        document.getElementById('report-actions').style.display = 'grid';
 
         if (finalTrips.length === 0) { screenContainer.innerHTML = `<div style="text-align:center; color:#5f6368; padding: 20px;">No data matches these filters.</div>`; printContainer.innerHTML = ``; return; }
 
@@ -1810,10 +1905,16 @@
         }
         partyField.style.borderColor = 'transparent';
 
-        const tripId = document.getElementById('edit-trip-id').value; const vNum = document.getElementById('edit-vnum').value.toUpperCase();
-        const payload = { action: 'adminEditTrip', id: tripId, party: normalizePartyName(document.getElementById('edit-party').value), vNum: vNum, vType: document.getElementById('edit-vtype').value.toUpperCase(), weight: document.getElementById('edit-vcap').value.toUpperCase(), from: document.getElementById('edit-from').value, to: document.getElementById('edit-to').value, vFreight: document.getElementById('edit-vfreight').value, cFreight: document.getElementById('edit-cfreight').value, dName: document.getElementById('edit-dname').value, dContact: formatPhoneString(document.getElementById('edit-dcontact').value) };
+        const tripId = document.getElementById('edit-trip-id').value; const vNum = document.getElementById('edit-vnum').value.replace(/[\s-_]/g, '').toUpperCase();
+        const payload = { action: 'adminEditTrip', id: tripId, party: normalizePartyName(document.getElementById('edit-party').value), vNum: vNum, vType: document.getElementById('edit-vtype').value.toUpperCase(), weight: document.getElementById('edit-vcap').value.toUpperCase(), from: formatCaseStr(document.getElementById('edit-from').value), to: formatCaseStr(document.getElementById('edit-to').value), vFreight: document.getElementById('edit-vfreight').value, cFreight: document.getElementById('edit-cfreight').value, dName: formatCaseStr(document.getElementById('edit-dname').value), dContact: formatPhoneString(document.getElementById('edit-dcontact').value) };
+        
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        
         const t = allTrips.find(x => x.id === tripId); if(t){ t.party = payload.party; t.vNum = payload.vNum; t.type = payload.vType; t.weight = payload.weight; t.from = payload.from; t.to = payload.to; t.vFreight = payload.vFreight; t.cFreight = payload.cFreight; t.dName = payload.dName; t.dContact = payload.dContact; }
+        
+        // Cache corrected data immediately into memory
+        updateLocalMemory(payload);
+
         closeAdminEditModal(); triggerCurrentRender();
     }
 
