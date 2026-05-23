@@ -16,7 +16,7 @@
         #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f4f9; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
         #loading-overlay { display: none; }
         .pin-box { background: #ffffff; padding: 35px 25px; border-radius: 16px; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 20px; padding: 10px; width: 100%; border: none; background: #f1f3f4; border-radius: 8px; }
+        .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 10px; padding: 10px; width: 100%; border: none; background: #f1f3f4; border-radius: 8px; }
         .pin-input:focus { outline: 2px solid #0b57d0; background: #ffffff; }
 
         /* APP SECTIONS & ANIMATIONS */
@@ -52,7 +52,7 @@
         .required-star { color: #b3261e; } 
         input, select { width: 100%; padding: 12px 14px; border: none; border-radius: 8px; font-size: 14px; color: #1f1f1f; background-color: #f1f3f4; transition: 0.2s; box-sizing: border-box; }
         input:focus, select:focus { outline: 2px solid #0b57d0; background-color: #ffffff; }
-        input:disabled { background-color: #e3e3e3; color: #8e8e8e; }
+        input:disabled { background-color: #e3e3e3; color: #8e8e8e; cursor: not-allowed; }
         .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; }
         .error-msg { display: none; color: #b3261e; font-size: 11px; margin-top: 4px; font-weight: 500; }
         .section-divider { height: 1px; background: #e0e0e0; margin: 20px 0; }
@@ -142,11 +142,10 @@
     <div class="pin-box">
         <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 160px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <h2>KTPL Login</h2>
-        <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric" oninput="if(this.value.length === 4) checkPin()">
-        
-        <!-- The added button -->
-        <button class="btn btn-primary" style="margin-top: 10px;" onclick="checkPin()">Click to Login</button>
-        
+        <div style="display:flex; flex-direction:column; gap:10px; align-items:center; width: 100%;">
+            <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric" placeholder="••••" oninput="if(this.value.length === 4) checkPin()" onkeyup="if(event.key === 'Enter') checkPin()">
+            <button class="btn btn-primary" onclick="checkPin()" style="width: 100%; max-width: 250px; font-size: 15px; padding: 12px;">Secure Login</button>
+        </div>
         <p id="pin-error" style="display:none; color: #b3261e; font-size: 12px; margin-top: 15px;">Invalid Authorization PIN.</p>
     </div>
 </div>
@@ -224,7 +223,6 @@
         </div>
     </div>
 
-    <!-- PLACEMENT -->
     <div id="tab-placement" class="app-section">
         <div class="workspace-header">
             <button class="btn-back-home" onclick="returnToHome()">← Home</button>
@@ -314,7 +312,6 @@
         </div>
     </div>
 
-    <!-- DEPLOYED -->
     <div id="tab-deployed" class="app-section">
         <div class="workspace-header">
             <button class="btn-back-home" onclick="returnToHome()">← Home</button>
@@ -341,7 +338,6 @@
         </div>
     </div>
 
-    <!-- POD -->
     <div id="tab-pod" class="app-section">
         <div class="workspace-header">
             <button class="btn-back-home" onclick="returnToHome()">← Home</button>
@@ -368,7 +364,6 @@
         </div>
     </div>
 
-    <!-- PAYMENTS -->
     <div id="tab-payments" class="app-section">
         <div class="workspace-header">
             <button class="btn-back-home" onclick="returnToHome()">← Home</button>
@@ -394,7 +389,6 @@
         </div>
     </div>
 
-    <!-- REPORTS -->
     <div id="tab-reports" class="app-section">
         <div class="workspace-header">
             <button class="btn-back-home" onclick="returnToHome()">← Home</button>
@@ -450,7 +444,6 @@
         </div>
     </div>
 
-    <!-- ADMIN -->
     <div id="tab-admin" class="app-section">
         <div class="workspace-header">
             <button class="btn-back-home" onclick="returnToHome()">← Home</button>
@@ -480,7 +473,6 @@
 
 <div id="print-report-container" class="print-only"></div>
 
-<!-- MODALS -->
 <div id="whatsappChoiceModal" class="modal">
     <div class="modal-content" style="max-width: 300px; padding: 20px;">
         <h3 style="margin-top:0; color:#1f1f1f; font-weight:500; font-size:16px;">Share Details</h3>
@@ -657,6 +649,7 @@
     let allTrips = []; let users = []; let statusLogs = [];
     let driverData = {}; 
     let currentUser = null; 
+    let isCheckingPin = false;
     
     let currentActiveMainTab = 'panel-homepage';
     let currentPlacementType = "";
@@ -724,39 +717,92 @@
     setGreeting();
 
     window.onload = async () => {
-        const savedUser = sessionStorage.getItem('ktpl_user');
-        if(document.getElementById('ob-date')) document.getElementById('ob-date').valueAsDate = new Date(); 
-        if(document.getElementById('rl-date')) document.getElementById('rl-date').valueAsDate = new Date(); 
-        
-        if (sessionStorage.getItem('ktpl_unlocked') === 'true' && savedUser) {
-            currentUser = JSON.parse(savedUser);
-            document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex';
-            try { await performDatabaseSync(); document.getElementById('loading-overlay').style.display = 'none'; applyUserPermissions(); } 
-            catch (error) { console.error(error); document.getElementById('loader-text').innerText = "Offline Mode: Connection Failed."; if(document.getElementById('error-box')) document.getElementById('error-box').innerText = error.message; if(document.getElementById('error-box')) document.getElementById('error-box').style.display = "block"; if(document.getElementById('bypass-btn')) document.getElementById('bypass-btn').style.display = "inline-block"; }
-        } else {
-            document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex';
+        try {
+            const savedUser = sessionStorage.getItem('ktpl_user');
+            if(document.getElementById('ob-date')) document.getElementById('ob-date').valueAsDate = new Date(); 
+            if(document.getElementById('rl-date')) document.getElementById('rl-date').valueAsDate = new Date(); 
+            
+            if (sessionStorage.getItem('ktpl_unlocked') === 'true' && savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('pin-overlay').style.display = 'none'; 
+                document.getElementById('loading-overlay').style.display = 'flex';
+                try { 
+                    await performDatabaseSync(); 
+                    document.getElementById('loading-overlay').style.display = 'none'; 
+                    applyUserPermissions(); 
+                } catch (error) { 
+                    console.error(error); 
+                    document.getElementById('loader-text').innerText = "Offline Mode: Connection Failed."; 
+                    if(document.getElementById('error-box')) document.getElementById('error-box').innerText = error.message; 
+                    if(document.getElementById('error-box')) document.getElementById('error-box').style.display = "block"; 
+                    if(document.getElementById('bypass-btn')) document.getElementById('bypass-btn').style.display = "inline-block"; 
+                }
+            } else {
+                document.getElementById('loading-overlay').style.display = 'none'; 
+                document.getElementById('pin-overlay').style.display = 'flex';
+            }
+        } catch (err) {
+            console.error("Storage error:", err);
+            document.getElementById('loading-overlay').style.display = 'none'; 
+            document.getElementById('pin-overlay').style.display = 'flex';
         }
     };
 
-    function bypassLoading() { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; }
+    function bypassLoading() { 
+        document.getElementById('loading-overlay').style.display = 'none'; 
+        document.getElementById('pin-overlay').style.display = 'flex'; 
+        document.getElementById('app-pin').value = ''; 
+        document.getElementById('error-box').style.display = 'none';
+        document.getElementById('bypass-btn').style.display = 'none';
+    }
+    
     function logoutApp() { sessionStorage.clear(); location.reload(); }
 
     async function checkPin() {
-        const pin = document.getElementById('app-pin').value; if (!pin) return;
-        document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Verifying & Syncing Databank...";
+        if (isCheckingPin) return;
+        const pinInput = document.getElementById('app-pin');
+        const pin = pinInput ? pinInput.value.trim() : ''; 
+        if (!pin) return;
+        if (pin.length !== 4) {
+            document.getElementById('pin-error').innerText = "Please enter a 4-digit PIN.";
+            document.getElementById('pin-error').style.display = 'block';
+            return;
+        }
+
+        isCheckingPin = true;
+        document.getElementById('pin-error').style.display = 'none';
+        document.getElementById('pin-overlay').style.display = 'none'; 
+        document.getElementById('loading-overlay').style.display = 'flex'; 
+        document.getElementById('loader-text').innerText = "Verifying & Syncing Databank...";
+        
         try {
             await performDatabaseSync();
-            const user = users.find(u => String(u.PIN || u.pin) === String(pin)) || (pin === "1234" ? {Name: "Master Admin", Role: "Master Admin"} : null);
+            const user = users.find(u => u && String(u.PIN || u.pin) === String(pin)) || (pin === "1234" ? {Name: "Master Admin", Role: "Master Admin"} : null);
             if (user) {
-                currentUser = user; sessionStorage.setItem('ktpl_unlocked', 'true'); sessionStorage.setItem('ktpl_user', JSON.stringify(user));
-                document.getElementById('loading-overlay').style.display = 'none'; applyUserPermissions();
+                currentUser = user; 
+                sessionStorage.setItem('ktpl_unlocked', 'true'); 
+                sessionStorage.setItem('ktpl_user', JSON.stringify(user));
+                document.getElementById('loading-overlay').style.display = 'none'; 
+                applyUserPermissions();
             } else {
-                document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex';
-                document.getElementById('pin-error').style.display = 'block'; document.getElementById('app-pin').value = '';
+                document.getElementById('loading-overlay').style.display = 'none'; 
+                document.getElementById('pin-overlay').style.display = 'flex';
+                document.getElementById('pin-error').innerText = "Invalid Authorization PIN.";
+                document.getElementById('pin-error').style.display = 'block'; 
+                if (pinInput) pinInput.value = '';
             }
         } catch (error) {
-            console.error(error); document.getElementById('loader-text').innerText = "Sync Failed. Please check connection."; if(document.getElementById('error-box')) document.getElementById('error-box').innerText = error.message; if(document.getElementById('error-box')) document.getElementById('error-box').style.display = "block"; if(document.getElementById('bypass-btn')) document.getElementById('bypass-btn').style.display = "inline-block";
+            console.error("Sync Failed:", error); 
+            document.getElementById('loader-text').innerText = "Sync Failed. Please check connection."; 
+            if(document.getElementById('error-box')) {
+                document.getElementById('error-box').innerText = error.message; 
+                document.getElementById('error-box').style.display = "block"; 
+            }
+            if(document.getElementById('bypass-btn')) {
+                document.getElementById('bypass-btn').style.display = "inline-block";
+            }
         }
+        isCheckingPin = false;
     }
 
     async function performDatabaseSync() {
@@ -881,31 +927,46 @@
     }
 
     function setupMemoryDropdowns() {
-        setupCustomDropdown('uf-party', 'uf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-transporter', 'uf-transporter-list', () => [...new Set([...Object.keys(transporters), ...allTrips.map(t=>t.brokingAgent).filter(Boolean)])].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t.from))].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t.to))].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t.type))].sort(), triggerCurrentRender);
-        setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t.weight))].sort(), triggerCurrentRender);
+        const getClientName = c => {
+            if(!c) return "";
+            if(typeof c === 'string') return c;
+            return c.name || c['Party Name'] || c.Name || Object.values(c)[0] || "";
+        };
 
-        setupCustomDropdown('ob-party', 'ob-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+        setupCustomDropdown('uf-party', 'uf-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-transporter', 'uf-transporter-list', () => [...new Set([...Object.keys(transporters), ...allTrips.map(t=>t?t.brokingAgent:'').filter(Boolean)])].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t?t.type:'').filter(Boolean))].sort(), triggerCurrentRender);
+        setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t?t.weight:'').filter(Boolean))].sort(), triggerCurrentRender);
+
+        setupCustomDropdown('ob-party', 'ob-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort());
         setupCustomDropdown('ob-vnum', 'ob-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'ob'));
         setupCustomDropdown('ob-tname', 'ob-tname-list', () => Object.keys(transporters).sort());
-        setupCustomDropdown('ob-tperson', 'ob-tperson-list', () => transporters[document.getElementById('ob-tname').value]?.map(p => p.name).sort() || [], (p) => autoFillContact(p, 'ob'));
-        setupCustomDropdown('ob-from', 'ob-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
-        setupCustomDropdown('ob-to', 'ob-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
+        
+        setupCustomDropdown('ob-tperson', 'ob-tperson-list', () => {
+            let trList = transporters[document.getElementById('ob-tname').value];
+            return trList ? trList.map(p => p.name).sort() : [];
+        }, (p) => autoFillContact(p, 'ob'));
+        
+        setupCustomDropdown('ob-from', 'ob-from-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort());
+        setupCustomDropdown('ob-to', 'ob-to-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort());
 
-        setupCustomDropdown('rl-party', 'rl-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+        setupCustomDropdown('rl-party', 'rl-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort());
         setupCustomDropdown('rl-vnum', 'rl-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'rl'));
-        setupCustomDropdown('rl-from', 'rl-from-list', () => [...new Set(allTrips.map(t => t.from))].sort());
-        setupCustomDropdown('rl-to', 'rl-to-list', () => [...new Set(allTrips.map(t => t.to))].sort());
-        setupCustomDropdown('rl-agent', 'rl-agent-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+        setupCustomDropdown('rl-from', 'rl-from-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort());
+        setupCustomDropdown('rl-to', 'rl-to-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort());
+        setupCustomDropdown('rl-agent', 'rl-agent-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort());
 
-        setupCustomDropdown('mis-party', 'mis-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
-        setupCustomDropdown('rf-party', 'rf-party-list', () => clients.map(c => typeof c === 'string' ? c : c.name || c['Party Name'] || c.Name || Object.values(c)[0]).sort());
+        setupCustomDropdown('mis-party', 'mis-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort());
+        setupCustomDropdown('rf-party', 'rf-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort());
 
-        allTrips.forEach(t => { if (t.dName && t.dName.trim() !== "" && t.dContact) driverData[t.dName.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())] = t.dContact.trim(); });
+        allTrips.forEach(t => { 
+            if (t && t.dName && typeof t.dName === 'string' && t.dName.trim() !== "" && t.dContact) {
+                driverData[t.dName.trim().replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())] = String(t.dContact).trim(); 
+            }
+        });
         setupCustomDropdown('ob-dname', 'ob-dname-list', () => Object.keys(driverData).sort(), (selectedName) => { document.getElementById('ob-dcontact').value = driverData[selectedName] || ""; });
 
         const driverNums = [...new Set(Object.values(driverData))];
@@ -914,7 +975,7 @@
             dcInput.addEventListener("input", function() {
                 dcList.innerHTML = "";
                 if (this.value.length > 2) {
-                    let c = this.value.replace(/[\s-]/g, '').trim(); const matches = driverNums.filter(n => n.includes(c));
+                    let c = this.value.replace(/[\s-]/g, '').trim(); const matches = driverNums.filter(n => String(n).includes(c));
                     matches.forEach(m => { let div = document.createElement("div"); div.innerHTML = m; div.onclick = () => { dcInput.value = m; dcList.style.display = "none"; }; dcList.appendChild(div); });
                     dcList.style.display = matches.length ? "block" : "none";
                 } else { dcList.style.display = "none"; }
@@ -1288,17 +1349,7 @@
                                 <div class="calc-row"><span>Base Freight:</span> <span>₹${baseRev}</span></div>
                                 <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${ledger.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}</div>
                                 <div class="calc-gross"><span>Total Receivable:</span> <span>₹${totalReceivable}</span></div>
-                `;
-                if(isAdmin) {
-                    html += `
-                                <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Adv Rcvd</label><input type="number" id="reco-advR-${t.id}" class="compact-input" value="${advRec || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-advRD-${t.id}" class="compact-input" value="${ledger.reco.advRecDate || ''}"></div></div>
-                                <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 1</label><input type="number" id="reco-os1-${t.id}" class="compact-input" value="${osDues1 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD1-${t.id}" class="compact-input" value="${ledger.reco.osDate1 || ledger.reco.osDate || ''}"></div></div>
-                                <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 2</label><input type="number" id="reco-os2-${t.id}" class="compact-input" value="${osDues2 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD2-${t.id}" class="compact-input" value="${ledger.reco.osDate2 || ''}"></div></div>
-                                <div class="grid-2 form-group" style="margin-top:5px;"><div><label>O/s Dues 3</label><input type="number" id="reco-os3-${t.id}" class="compact-input" value="${osDues3 || ''}"></div><div><label>Rcvd On</label><input type="date" id="reco-osD3-${t.id}" class="compact-input" value="${ledger.reco.osDate3 || ''}"></div></div>
-                                <div class="highlight-red-box">${isCleared && badDebts > 0 ? `<div style="color:#5f6368;"><del>Original O/S: ₹${badDebts}</del></div><div style="color:#d93025; margin:6px 0;">Bad Debts: ₹${badDebts}</div><div>Final Outstanding: ₹0</div>` : `Outstanding Amount: ₹${totalOs}`}</div>
-                    `;
-                }
-                html += `       </div>
+                            </div>
                             <div class="reco-panel">
                                 <div class="reco-header-title">Payables</div>
                                 <div class="calc-row"><span>Base Cost:</span> <span>₹${baseCost}</span></div>
@@ -1465,13 +1516,17 @@
             rawRows.push(["Trip ID", "Date", "Party Name", "From", "To", "Vehicle No", "Type", "Weight", "Status", "Delivery Date", "Custom Note", "CNote_LR", "POD_Date", "Created By", "Vehicle Freight", "Charged Freight", "Driver Name", "Driver Contact", "Transporter", "Transporter Person", "Transporter Contact", "Remarks", "POD Remark", "Loading", "Unloading", "LR", "Others", "Other Reason", "Balance to Pay", "Saved on add. deduction"]);
             tripsToExport.forEach(t => {
                 let ledger = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p.income) ledger.income = p.income; if(p.expense) ledger.expense = p.expense; if(p.reco) ledger.reco = p.reco; } catch(e){}
-                let baseCost = parseFloat(t.vFreight || 0); let loading = ledger.expense.find(e=>e.type==='Loading')?.amt || 0; let unloading = ledger.expense.find(e=>e.type==='Unloading')?.amt || 0; let otherExp = ledger.expense.filter(e=>e.type!=='Loading' && e.type!=='Unloading').reduce((s,x)=>s+x.amt,0);
+                let baseCost = parseFloat(t.vFreight || 0); 
+                let loadObj = ledger.expense.find(e=>e.type==='Loading'); let loading = loadObj ? loadObj.amt : 0; 
+                let unloadObj = ledger.expense.find(e=>e.type==='Unloading'); let unloading = unloadObj ? unloadObj.amt : 0;
+                let otherExp = ledger.expense.filter(e=>e.type!=='Loading' && e.type!=='Unloading').reduce((s,x)=>s+x.amt,0);
                 let advPaid = parseFloat(ledger.reco.advPaid || t.advancePaid || 0); let bal1 = parseFloat(ledger.reco.balPaid1 || ledger.reco.balPaid || 0); let bal2 = parseFloat(ledger.reco.balPaid2 || 0); let bal3 = parseFloat(ledger.reco.balPaid3 || 0);
                 
                 let totalPayable = baseCost + loading + unloading + otherExp; let balToPay = totalPayable - (advPaid + bal1 + bal2 + bal3);
                 let isCleared = (ledger.reco.status === 'Cleared'); let savedDed = (isCleared && balToPay > 0) ? balToPay : 0; let finalBal = (isCleared && balToPay > 0) ? 0 : balToPay;
+                let lrAmt = (ledger.expense.find(e=>e.type==='LR') || {amt:0}).amt;
 
-                rawRows.push([t.id, t.date, t.party, t.from, t.to, t.vNum, t.type, t.weight, t.status, t.deliveryDate, t.statusNote||"", t.cNote||"", t.podDate||"", t.createdBy, t.vFreight, t.cFreight, t.dName, t.dContact, t.tName, t.tPerson, t.tContact, t.remarks, t.podRemark, loading, unloading, ledger.expense.find(e=>e.type==='LR')?.amt||0, otherExp, t.otherExpReason||"", finalBal, savedDed]);
+                rawRows.push([t.id, t.date, t.party, t.from, t.to, t.vNum, t.type, t.weight, t.status, t.deliveryDate, t.statusNote||"", t.cNote||"", t.podDate||"", t.createdBy, t.vFreight, t.cFreight, t.dName, t.dContact, t.tName, t.tPerson, t.tContact, t.remarks, t.podRemark, loading, unloading, lrAmt, otherExp, t.otherExpReason||"", finalBal, savedDed]);
             });
         } else {
             rawRows.push(["Trip ID", "Date", "Party Name", "From", "To", "Vehicle No", "Type", "Weight", "Status", "Delivery Date", "Custom Note", "CNote_LR", "POD_Date", "Created By", "Vehicle Freight", "Charged Freight", "Driver Name", "Driver Contact", "Transporter", "Transporter Person", "Transporter Contact", "Remarks", "POD Remark", "Loading", "Unloading", "LR", "Others", "Other Reason", "Outstanding Amount", "Bad Debts"]);
@@ -1491,9 +1546,10 @@
     function buildTripCard(trip, index, viewMode) {
         const r = currentUser.Role || currentUser.role; const p = getUserPerms(); let isReadOnly = (r === 'ReadOnly'); const isMasterAdmin = (r === 'Master Admin'); const isAdmin = (r === 'Master Admin' || r === 'Admin');
 
-        let statusClass = 'status-transit'; let statusText = (trip.status || '').trim();
-        if (statusText === 'Delivered') { statusClass = 'status-delivered'; statusText = `Delivered: ${trip.deliveryDate}`; }
-        if (statusText === 'Cancelled Trip') { statusClass = 'status-cancelled'; statusText = `Cancelled`; }
+        let statusClass = 'status-transit'; let statusTextStr = (trip.status || '').trim();
+        let statusText = statusTextStr;
+        if (statusTextStr === 'Delivered') { statusClass = 'status-delivered'; statusText = `Delivered: ${trip.deliveryDate}`; }
+        if (statusTextStr === 'Cancelled Trip') { statusClass = 'status-cancelled'; statusText = `Cancelled`; }
 
         let canEdit = p.editTrips; if (isAdmin && !isMasterAdmin && (statusText.includes('Delivered') || statusText.includes('Cancelled'))) canEdit = false;
 
@@ -1539,55 +1595,48 @@
         cardHtml += `</div></div>`;
 
         if (viewMode === 'deployed' && !isReadOnly) {
-            // Check if trip is still active
-            const isLocked = (trip.status.trim() === 'Delivered' || trip.status.trim() === 'Cancelled Trip');
-
             cardHtml += `
                 <div class="grid-2" style="margin-bottom: 5px;">
-                    <input type="text" class="compact-input" placeholder="Enter C-Note" 
-                           value="${trip.cNote || ''}" 
-                           ${isLocked ? 'disabled style="background:#e3e3e3;"' : `onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)"`}>
-                    
-                    <input type="text" class="compact-input" placeholder="Remarks" 
-                           value="${trip.remarks || ''}" 
-                           ${isLocked ? 'disabled style="background:#e3e3e3;"' : `onchange="updateBackendData('${trip.id}', 'updateTripRemark', this.value)"`}>
+                    <input type="text" class="compact-input" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
+                    <input type="text" class="compact-input" placeholder="Remarks" value="${trip.remarks || ''}" onchange="updateBackendData('${trip.id}', 'updateTripRemark', this.value)">
                 </div>
             `;
+            
+            const isDeliveredOrCancelled = (statusTextStr === 'Delivered' || statusTextStr === 'Cancelled Trip');
+            const safeStatusNote = (trip.statusNote || "").replace(/"/g, '&quot;');
 
-            if (!isLocked) {
-                cardHtml += `
-                    <div style="display:flex; margin-top:5px; gap: 8px; width: 100%;">
+            cardHtml += `<div style="display:flex; margin-top:5px; gap: 8px; width: 100%; align-items:center;">`;
+            
+            if (!isDeliveredOrCancelled) {
+                // Trip is Active -> Let Admin/Manager change Status, Let everyone Update Location
+                if (p.changeDelCanStatus) {
+                    cardHtml += `
                         <select class="compact-input" onchange="handleStatusChange('${trip.id}', this.value, this)" style="flex:1;">
                             <option value="In-Transit" selected>In-Transit</option>
                             <option value="Delivered">Delivered</option>
                             <option value="Cancelled Trip">Cancelled Trip</option>
                         </select>
-                        <input type="text" class="compact-input" placeholder="Update current location..." 
-                               value="${trip.statusNote || ""}" 
-                               onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" 
-                               style="flex:2;">
-                    </div>
+                    `;
+                }
+                cardHtml += `
+                        <input type="text" class="compact-input" placeholder="Update current location..." value="${safeStatusNote}" onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="${p.changeDelCanStatus ? 'flex:2;' : 'flex:1; width:100%;'}">
                 `;
             } else {
+                // Trip is Completed -> Provide Admin with Revert tool, Disable the location box for everyone
+                if (isAdmin && p.changeDelCanStatus) {
+                    cardHtml += `
+                        <select class="compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')" style="flex:1;">
+                            <option value="" selected>Status Locked</option>
+                            <option value="In-Transit">Undo: Revert to In-Transit</option>
+                        </select>
+                    `;
+                }
                 cardHtml += `
-                    <div style="display:flex; margin-top:5px; gap: 8px; width: 100%;">
-                        <input type="text" class="compact-input" value="Status: ${trip.status}" disabled style="flex:1; background:#e3e3e3;">
-                        <input type="text" class="compact-input" value="Location: ${trip.statusNote || "No log"}" disabled style="flex:2; background:#e3e3e3;">
-                    </div>
+                        <input type="text" class="compact-input" placeholder="Locked (Completed Trip)" value="${safeStatusNote}" disabled style="${isAdmin && p.changeDelCanStatus ? 'flex:2;' : 'flex:1; width:100%;'} background:#e3e3e3; color:#8e8e8e; cursor:not-allowed;">
                 `;
             }
             
-            cardHtml += `
-                <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                    <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}', '${viewMode}')">▶ History</button>
-                    <div style="display:flex; gap: 5px;">
-                        <button class="btn btn-clear" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="openExpenseModal('${trip.id}')">₹ Expenses</button>
-                        <button class="btn-primary" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="openShareModal('${trip.id}')">Share</button>
-                    </div>
-                </div>
-                <div id="hist-${viewMode}-${trip.id}" class="history-panel"></div>
-            `;
-        }
+            cardHtml += `</div>`;
             
             cardHtml += `
                 <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
@@ -1806,11 +1855,6 @@
         if (type === 'team' && trip.bookingType === 'Own Booking') { if(trip.tName) header += `*Transporter:* ${trip.tName}\n`; if(trip.tPerson) header += `*Person Name:* ${trip.tPerson}\n`; if(trip.tContact) header += `*Contact Number:* ${trip.tContact}\n\n`; }
         if(trip.remarks) header += `*Remarks:* ${trip.remarks}`;
         openWhatsAppChoice(header);
-    }
-function handlePinInput(val) {
-        if (val.length === 4) {
-            checkPin();
-        }
     }
 </script>
 </body>
