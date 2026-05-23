@@ -1535,13 +1535,22 @@
         cardHtml += `</div></div>`;
 
         if (viewMode === 'deployed' && !isReadOnly) {
+            // Check if trip is still active
+            const isLocked = (trip.status.trim() === 'Delivered' || trip.status.trim() === 'Cancelled Trip');
+
             cardHtml += `
                 <div class="grid-2" style="margin-bottom: 5px;">
-                    <input type="text" class="compact-input" placeholder="Enter C-Note" value="${trip.cNote || ''}" onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)">
-                    <input type="text" class="compact-input" placeholder="Remarks" value="${trip.remarks || ''}" onchange="updateBackendData('${trip.id}', 'updateTripRemark', this.value)">
+                    <input type="text" class="compact-input" placeholder="Enter C-Note" 
+                           value="${trip.cNote || ''}" 
+                           ${isLocked ? 'disabled style="background:#e3e3e3;"' : `onchange="updateBackendData('${trip.id}', 'updateCNote', this.value)"`}>
+                    
+                    <input type="text" class="compact-input" placeholder="Remarks" 
+                           value="${trip.remarks || ''}" 
+                           ${isLocked ? 'disabled style="background:#e3e3e3;"' : `onchange="updateBackendData('${trip.id}', 'updateTripRemark', this.value)"`}>
                 </div>
             `;
-            if ((trip.status || '').trim() === 'In-Transit' && p.changeDelCanStatus) {
+
+            if (!isLocked) {
                 cardHtml += `
                     <div style="display:flex; margin-top:5px; gap: 8px; width: 100%;">
                         <select class="compact-input" onchange="handleStatusChange('${trip.id}', this.value, this)" style="flex:1;">
@@ -1549,19 +1558,32 @@
                             <option value="Delivered">Delivered</option>
                             <option value="Cancelled Trip">Cancelled Trip</option>
                         </select>
-                        <input type="text" class="compact-input" placeholder="Current location..." value="${trip.statusNote || ""}" onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" style="flex:2;">
+                        <input type="text" class="compact-input" placeholder="Update current location..." 
+                               value="${trip.statusNote || ""}" 
+                               onchange="formatSentence(this); updateStatusLog('${trip.id}', this.value)" 
+                               style="flex:2;">
                     </div>
                 `;
-            } else if (isAdmin && p.changeDelCanStatus) {
+            } else {
                 cardHtml += `
-                    <div style="display:flex; margin-top:5px;">
-                        <select class="compact-input" onchange="revertStatus('${trip.id}', 'In-Transit')">
-                            <option value="" selected>Status Locked</option>
-                            <option value="In-Transit">Undo: Revert to In-Transit</option>
-                        </select>
+                    <div style="display:flex; margin-top:5px; gap: 8px; width: 100%;">
+                        <input type="text" class="compact-input" value="Status: ${trip.status}" disabled style="flex:1; background:#e3e3e3;">
+                        <input type="text" class="compact-input" value="Location: ${trip.statusNote || "No log"}" disabled style="flex:2; background:#e3e3e3;">
                     </div>
                 `;
             }
+            
+            cardHtml += `
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${trip.id}', '${viewMode}')">▶ History</button>
+                    <div style="display:flex; gap: 5px;">
+                        <button class="btn btn-clear" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="openExpenseModal('${trip.id}')">₹ Expenses</button>
+                        <button class="btn-primary" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="openShareModal('${trip.id}')">Share</button>
+                    </div>
+                </div>
+                <div id="hist-${viewMode}-${trip.id}" class="history-panel"></div>
+            `;
+        }
             
             cardHtml += `
                 <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
