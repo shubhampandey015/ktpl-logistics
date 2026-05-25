@@ -45,6 +45,10 @@
         .sub-tab:active { transform: scale(0.95); }
         .sub-tab.active { background: #0b57d0; color: #ffffff; border-color: #0b57d0; }
 
+        .secondary-tabs { background: #e8f0fe; padding: 6px 10px; border-radius: 24px; margin-bottom: 15px; }
+        .secondary-tab { background: transparent; border: none; color: #0b57d0; padding: 6px 12px; font-size: 12px; border-radius: 16px; }
+        .secondary-tab.active { background: #0b57d0; color: #ffffff; }
+
         /* FORMS & INPUTS */
         .form-card { background: #ffffff; border-radius: 16px; padding: 20px; margin: 0 10px 15px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
         .form-group { margin-top: 14px; width: 100%; }
@@ -76,10 +80,9 @@
         .list-container { padding: 0 10px; }
         .trip-card { background: #ffffff; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); font-size: 12px; color: #444746;}
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;}
-        .status-transit { background: #fef7e0; color: #b06000; }
-        .status-delivered { background: #e6f4ea; color: #137333; }
+        .status-transit { background: #e6f4ea; color: #137333; }
+        .status-delivered { background: #f1f3f4; color: #5f6368; }
         .status-cancelled { background: #fce8e6; color: #b3261e; }
-        .status-idle { background: #e8f0fe; color: #1a73e8; }
         .compact-input { padding: 8px 10px; font-size: 12px; border-radius: 6px; background: #f8f9fa; border: 1px solid #dadce0; outline: none; width: 100%;}
         .compact-input:focus { background: #ffffff; border-color: #0b57d0;}
 
@@ -117,13 +120,13 @@
             display: block;
             overflow-y: auto; 
             overflow-x: auto;
-            max-height: 450px; /* Locked strictly to ~10 lines */
+            max-height: 450px; 
             background: #ffffff; 
             border-radius: 12px; 
             margin: 0 10px 15px 10px; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.04); 
             -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain; /* Scrolling touches inside only */
+            overscroll-behavior: contain; 
             border: 1px solid #dadce0;
         }
         .report-table { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
@@ -188,6 +191,13 @@
         </div>
 
         <div class="homepage-grid" style="margin-top: 25px;">
+            <div class="menu-card" id="card-fleet" onclick="openWorkspace('tab-fleet-status')" style="grid-column: span 2; align-items: center; text-align: center; flex-direction: row; justify-content: flex-start; gap: 15px; border: 1px solid #e8f0fe;">
+                <div class="menu-icon" style="color: #1a73e8; background: #e8f0fe; margin:0;">🚛</div>
+                <div>
+                    <h3>Fleet Status</h3>
+                    <p>Live Tracking & Idle Assets</p>
+                </div>
+            </div>
             <div class="menu-card" id="card-placement" onclick="openWorkspace('tab-placement')">
                 <div class="menu-icon" style="color: #0b57d0;">📦</div>
                 <h3>Placement</h3>
@@ -242,6 +252,28 @@
                 <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender();"><div id="uf-dest-list" class="autocomplete-items"></div></div>
             </div>
         </div>
+    </div>
+
+    <div id="tab-fleet-status" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">KTPL Fleet Status</h3>
+        </div>
+        <div style="padding:0 10px;">
+            <div class="sub-tabs" id="fleet-primary-tabs" style="margin-bottom:10px;">
+                <div class="sub-tab active" id="f-tab-all" onclick="setFleetPrimaryTab('All')">All</div>
+                <div class="sub-tab" id="f-tab-transit" onclick="setFleetPrimaryTab('In Transit')">In Transit</div>
+                <div class="sub-tab" id="f-tab-idle" onclick="setFleetPrimaryTab('Available (Idle)')">Available</div>
+                <div class="sub-tab" id="f-tab-workshop" onclick="setFleetPrimaryTab('In Workshop')">Workshop</div>
+                <div class="sub-tab" id="f-tab-nodriver" onclick="setFleetPrimaryTab('No Driver')">No Driver</div>
+            </div>
+            <div class="sub-tabs secondary-tabs" id="fleet-secondary-tabs">
+                <button class="secondary-tab active" id="f-sec-20" onclick="setFleetSecondaryTab('20Ft Fleet')">20Ft Fleet</button>
+                <button class="secondary-tab" id="f-sec-32" onclick="setFleetSecondaryTab('32Ft Fleet')">32Ft Fleet</button>
+                <button class="secondary-tab" id="f-sec-oth" onclick="setFleetSecondaryTab('Other Fleet')">Other Fleet</button>
+            </div>
+        </div>
+        <div id="fleet-container" class="list-container"></div>
     </div>
 
     <div id="tab-placement" class="app-section">
@@ -356,7 +388,6 @@
             </div>
             <div class="sub-tabs" style="margin-bottom:15px;">
                 <div class="sub-tab active" id="btn-dep-stat-ong" onclick="setDepStat('In-Transit')">On-Going</div>
-                <div class="sub-tab" id="btn-dep-stat-idle" onclick="setDepStat('Idle')">Idle Vehicles</div>
                 <div class="sub-tab" id="btn-dep-stat-com" onclick="setDepStat('Delivered')">Completed</div>
                 <div class="sub-tab" id="btn-dep-stat-can" onclick="setDepStat('Cancelled Trip')">Cancelled</div>
             </div>
@@ -681,6 +712,8 @@
     let currentPlacementType = "";
     let currentDeployedType = "";
     let currentDeployedStatus = "In-Transit";
+    let currentFleetPrimary = "All";
+    let currentFleetSecondary = "20Ft Fleet";
     let currentPodType = "";
     let currentPodStatus = "Pending";
     let currentRecoType = "";
@@ -918,6 +951,7 @@
         const r = currentUser.Role || currentUser.role || '';
         let p = {
             adminTab: (r === 'Master Admin'),
+            fleetStatusTab: true,
             paymentsTab: true, reportsTab: true, revLogistics: true, editTrips: true,
             viewChargedFreightOB: true, viewChargedFreightRL: true,
             editChargedFreightOB: true, editChargedFreightRL: true, generateMIS: true, exportLedger: true
@@ -930,7 +964,7 @@
         } else if (n === 'Pramod Nayak') {
             p.adminTab = false; p.paymentsTab = false; p.editChargedFreightOB = false; 
         } else if (n === 'Parveen Sharma') {
-            p.adminTab = false; p.paymentsTab = false; p.reportsTab = false;
+            p.adminTab = false; p.paymentsTab = false; p.reportsTab = false; p.fleetStatusTab = false;
             p.revLogistics = false; p.editChargedFreightOB = false; p.editChargedFreightRL = false;
         } else if (['Vijay Deore', 'Sachin Mokashi', 'Jalindar Jadhav'].includes(n)) {
             p.adminTab = false; p.paymentsTab = false; p.editTrips = false; 
@@ -968,9 +1002,17 @@
         
         const p = getUserPerms();
         
+        document.getElementById('card-fleet').style.display = p.fleetStatusTab ? 'flex' : 'none';
         document.getElementById('card-admin').style.display = p.adminTab ? 'flex' : 'none';
         document.getElementById('card-payments').style.display = p.paymentsTab ? 'flex' : 'none';
         document.getElementById('card-reports').style.display = p.reportsTab ? 'flex' : 'none';
+
+        const n = currentUser.Name || currentUser.name || '';
+        if (n === 'Pramod Nayak') {
+            document.getElementById('f-sec-20').style.display = 'none';
+            document.getElementById('f-sec-oth').style.display = 'none';
+            currentFleetSecondary = '32Ft Fleet';
+        }
 
         const cFreightOB = document.getElementById('ob-cfreight');
         if (cFreightOB) { cFreightOB.disabled = !p.editChargedFreightOB; cFreightOB.placeholder = p.editChargedFreightOB ? "Receivable" : "Restricted"; }
@@ -1002,7 +1044,7 @@
                         }
                         if (onSelectFn) onSelectFn(item); 
                         if (inputElement.id.startsWith('uf-')) {
-                            if (currentActiveMainTab !== 'tab-reports') triggerCurrentRender();
+                            if (currentActiveMainTab !== 'tab-reports' && currentActiveMainTab !== 'tab-fleet-status') triggerCurrentRender();
                         }
                     });
                     listContainer.appendChild(optionDiv);
@@ -1022,13 +1064,13 @@
             return c.name || c['Party Name'] || c.Name || Object.values(c)[0] || "";
         };
 
-        setupCustomDropdown('uf-party', 'uf-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
-        setupCustomDropdown('uf-transporter', 'uf-transporter-list', () => [...new Set([...Object.keys(transporters).map(normalizePartyName), ...allTrips.map(t=>t?normalizePartyName(t.brokingAgent):'').filter(Boolean)])].sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
-        setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
-        setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
-        setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
-        setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t?t.type:'').filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
-        setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t?t.weight:'').filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports') triggerCurrentRender(); });
+        setupCustomDropdown('uf-party', 'uf-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports' && currentActiveMainTab !== 'tab-fleet-status') triggerCurrentRender(); });
+        setupCustomDropdown('uf-transporter', 'uf-transporter-list', () => [...new Set([...Object.keys(transporters).map(normalizePartyName), ...allTrips.map(t=>t?normalizePartyName(t.brokingAgent):'').filter(Boolean)])].sort(), () => { if(currentActiveMainTab !== 'tab-reports' && currentActiveMainTab !== 'tab-fleet-status') triggerCurrentRender(); });
+        setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), () => { if(currentActiveMainTab !== 'tab-reports' && currentActiveMainTab !== 'tab-fleet-status') triggerCurrentRender(); });
+        setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports' && currentActiveMainTab !== 'tab-fleet-status') triggerCurrentRender(); });
+        setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports' && currentActiveMainTab !== 'tab-fleet-status') triggerCurrentRender(); });
+        setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t?t.type:'').filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports' && currentActiveMainTab !== 'tab-fleet-status') triggerCurrentRender(); });
+        setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t?t.weight:'').filter(Boolean))].sort(), () => { if(currentActiveMainTab !== 'tab-reports' && currentActiveMainTab !== 'tab-fleet-status') triggerCurrentRender(); });
 
         setupCustomDropdown('ob-party', 'ob-party-list', () => [...new Set(clients.map(getClientName).filter(Boolean))].sort());
         setupCustomDropdown('ob-vnum', 'ob-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'ob'));
@@ -1130,6 +1172,7 @@
 
     function openWorkspace(id) {
         const p = getUserPerms();
+        if (id === 'tab-fleet-status' && !p.fleetStatusTab) return alert("Module restricted by Administrator.");
         if (id === 'tab-admin' && !p.adminTab) return alert("Module restricted by Administrator.");
         if (id === 'tab-payments' && !p.paymentsTab) return alert("Module restricted by Administrator.");
         if (id === 'tab-reports' && !p.reportsTab) return alert("Module restricted by Administrator.");
@@ -1146,6 +1189,7 @@
             document.getElementById('placement-form-container').style.display = 'none';
         }
 
+        if(id === 'tab-fleet-status') renderFleetStatus();
         if(id === 'tab-placement') showPlacementSelection();
         if(id === 'tab-deployed') { currentDeployedType = ""; showSelectionScreen('deployed'); }
         if(id === 'tab-pod') { currentPodType = ""; showSelectionScreen('pod'); }
@@ -1201,9 +1245,9 @@
                 }
             }
         });
-        if (currentActiveMainTab !== 'tab-reports') {
+        if (currentActiveMainTab !== 'tab-reports' && currentActiveMainTab !== 'tab-fleet-status') {
             triggerCurrentRender();
-        } else {
+        } else if (currentActiveMainTab === 'tab-reports') {
             document.getElementById('screen-report').innerHTML = ''; 
             document.getElementById('report-actions').style.display = 'none';
         }
@@ -1246,6 +1290,196 @@
         result.sort((a, b) => new Date((b.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((a.date||'').split(',')[0].split('/').reverse().join('-')));
         return result;
     }
+
+    // ------------- FLEET STATUS LOGIC -------------
+
+    function setFleetPrimaryTab(stat) {
+        currentFleetPrimary = stat;
+        document.getElementById('f-tab-all').classList.toggle('active', stat === 'All');
+        document.getElementById('f-tab-transit').classList.toggle('active', stat === 'In Transit');
+        document.getElementById('f-tab-idle').classList.toggle('active', stat === 'Available (Idle)');
+        document.getElementById('f-tab-workshop').classList.toggle('active', stat === 'In Workshop');
+        document.getElementById('f-tab-nodriver').classList.toggle('active', stat === 'No Driver');
+        renderFleetStatus();
+    }
+
+    function setFleetSecondaryTab(type) {
+        currentFleetSecondary = type;
+        document.getElementById('f-sec-20').classList.toggle('active', type === '20Ft Fleet');
+        document.getElementById('f-sec-32').classList.toggle('active', type === '32Ft Fleet');
+        document.getElementById('f-sec-oth').classList.toggle('active', type === 'Other Fleet');
+        renderFleetStatus();
+    }
+
+    function parseDate(dStr) {
+        if (!dStr) return 0;
+        try { let parts = dStr.split(',')[0].split('/'); if(parts.length===3) return new Date(parts[2], parts[1]-1, parts[0]).getTime(); return 0; } 
+        catch(e) { return 0; }
+    }
+
+    function updateFleetState(vNum, newState) {
+        vehicles[vNum].fleetStatus = newState;
+        // The script currently lacks an updateVehicleState backend handler, but this locally injects it for immediate UX.
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'updateVehicleState', vNum: vNum, state: newState })
+        });
+        renderFleetStatus();
+    }
+
+    function assignIdleVehicle(vNum) {
+        openWorkspace('tab-placement');
+        document.getElementById('ob-vnum').value = vNum;
+        autoFillVehicle(vNum, 'ob');
+        document.getElementById('rl-vnum').value = vNum;
+        autoFillVehicle(vNum, 'rl');
+    }
+
+    function renderFleetStatus() {
+        const container = document.getElementById('fleet-container');
+        
+        let fleetList = [];
+        
+        Object.keys(vehicles).forEach(vNum => {
+            let vData = vehicles[vNum];
+            let vType = (vData.type || '').toUpperCase();
+            
+            // Secondary Filter Enforcement
+            let cat = 'Other Fleet';
+            if (vType.includes('20')) cat = '20Ft Fleet';
+            else if (vType.includes('32')) cat = '32Ft Fleet';
+            if (currentFleetSecondary !== cat) return; // Skip if it doesn't match selected pill
+            
+            let vTrips = allTrips.filter(t => (t.vNum || '').toUpperCase() === vNum.toUpperCase());
+            let activeTrip = vTrips.find(t => (t.status || '').trim() === 'In-Transit');
+            
+            let currentStat = '';
+            if (activeTrip) {
+                currentStat = 'In Transit';
+            } else {
+                currentStat = vData.fleetStatus || 'Available (Idle)';
+            }
+            
+            // Primary Filter Enforcement
+            if (currentFleetPrimary !== 'All' && currentStat !== currentFleetPrimary) return;
+
+            let compTrips = vTrips.filter(t => (t.status || '').trim() === 'Delivered');
+            compTrips.sort((a,b) => parseDate(b.deliveryDate || b.date) - parseDate(a.deliveryDate || a.date));
+            let lastTrip = compTrips[0] || null;
+            
+            let loc = 'Blank (No completed trips)';
+            if (activeTrip) {
+                loc = activeTrip.statusNote || activeTrip.to || loc;
+            } else if (lastTrip) {
+                loc = lastTrip.to || loc;
+            }
+
+            fleetList.push({
+                vNum: vNum,
+                type: vData.type || 'Unknown',
+                capacity: vData.capacity || 'Unknown',
+                status: currentStat,
+                location: loc,
+                driverName: lastTrip ? lastTrip.dName : 'N/A',
+                driverPhone: lastTrip ? lastTrip.dContact : 'N/A',
+                deliveryDate: lastTrip ? (lastTrip.deliveryDate || lastTrip.date) : null,
+                lastFrom: lastTrip ? lastTrip.from : 'N/A',
+                lastTo: lastTrip ? lastTrip.to : 'N/A',
+                activeTripId: activeTrip ? activeTrip.id : null
+            });
+        });
+
+        if (fleetList.length === 0) {
+            container.innerHTML = `<p style='padding:20px; color:#5f6368; text-align:center;'>No KTPL vehicles found in ${currentFleetSecondary} matching '${currentFleetPrimary}'.</p>`;
+            return;
+        }
+
+        // Sort by idle duration if available, else by vNum
+        fleetList.sort((a, b) => {
+            if (a.status === 'In Transit' && b.status !== 'In Transit') return 1;
+            if (a.status !== 'In Transit' && b.status === 'In Transit') return -1;
+            let dA = parseDate(a.deliveryDate);
+            let dB = parseDate(b.deliveryDate);
+            return dA - dB;
+        });
+
+        container.innerHTML = fleetList.map(v => {
+            let dTel = getSafeTel(v.driverPhone);
+            let statColor = "#5f6368";
+            let bgStatColor = "#f1f3f4";
+            
+            if (v.status === 'In Transit') { statColor = "#b06000"; bgStatColor = "#fef7e0"; }
+            else if (v.status === 'Available (Idle)') { statColor = "#137333"; bgStatColor = "#e6f4ea"; }
+            else if (v.status === 'In Workshop') { statColor = "#b3261e"; bgStatColor = "#fce8e6"; }
+            
+            let idleDuration = "";
+            if (v.status !== 'In Transit' && v.deliveryDate) {
+                try {
+                    let parts = v.deliveryDate.split(',')[0].split('/');
+                    if (parts.length === 3) {
+                        let d = new Date(parts[2], parts[1]-1, parts[0]);
+                        let diff = new Date() - d;
+                        if (diff >= 0) {
+                            let days = Math.floor(diff / (1000*60*60*24));
+                            let hrs = Math.floor((diff / (1000*60*60)) % 24);
+                            idleDuration = days > 0 ? ` - ${days}d ${hrs}h` : ` - ${hrs}h`;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            let html = `
+            <div class="trip-card">
+                <div style="border-bottom: 1px solid #f1f3f4; padding-bottom: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:bold; font-size:14px; color:#1f1f1f;">${v.vNum}</span>
+                    <span class="status-badge" style="background:${bgStatColor}; color:${statColor};">${v.status}${idleDuration}</span>
+                </div>
+                
+                <div class="grid-2" style="margin-bottom: 10px;">
+                    <div><span style="color:#5f6368; font-size:10px; text-transform:uppercase;">Current Location</span><br><strong style="font-size:12px;">📍 ${v.location}</strong></div>
+                    <div><span style="color:#5f6368; font-size:10px; text-transform:uppercase;">Vehicle Specs</span><br><strong style="font-size:12px;">🚚 ${v.type} (${v.capacity})</strong></div>
+                </div>`;
+            
+            if (v.status !== 'In Transit') {
+                let encodedMsg = encodeURIComponent(`*Available Vehicle Update*\n\n*Vehicle No:* ${v.vNum}\n*Location:* ${v.location}\n*Specs:* ${v.type} (${v.capacity})\n\nReady for loading.`);
+                html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <select class="compact-input" style="width:50%;" onchange="updateFleetState('${v.vNum}', this.value)">
+                        <option value="Available (Idle)" ${v.status === 'Available (Idle)' ? 'selected' : ''}>Available (Idle)</option>
+                        <option value="In Workshop" ${v.status === 'In Workshop' ? 'selected' : ''}>In Workshop</option>
+                        <option value="No Driver" ${v.status === 'No Driver' ? 'selected' : ''}>No Driver</option>
+                    </select>
+                    <div style="display:flex; gap:5px;">
+                        ${v.status === 'Available (Idle)' ? `<button class="btn-primary" style="font-size:11px; padding:6px 12px; border-radius:6px; width:auto;" onclick="assignIdleVehicle('${v.vNum}')">Assign</button>` : ''}
+                        ${v.status === 'Available (Idle)' ? `<button class="btn-whatsapp" style="font-size:11px; padding:6px 12px; border-radius:6px; width:auto;" onclick="openWhatsAppChoice(decodeURIComponent('${encodedMsg}'))">Share</button>` : ''}
+                    </div>
+                </div>`;
+            } else {
+                html += `<div style="margin-bottom:10px; color:#5f6368; font-size:11px;"><em>Status locked while In-Transit. Update via Deployed tab.</em></div>`;
+            }
+
+            html += `
+                <div style="font-size: 11px; margin-top: 5px;">
+                    <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#1a73e8; font-weight:500; cursor:pointer;" onclick="document.getElementById('fleet-details-${v.vNum}').style.display = document.getElementById('fleet-details-${v.vNum}').style.display === 'block' ? 'none' : 'block';">View Historic Details ▼</span>
+                    
+                    <div id="fleet-details-${v.vNum}" style="display:none; background:#f8f9fa; padding:10px; border-radius:6px; margin-top:8px; border:1px solid #dadce0; color:#444746;">
+                        <div style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #eaeaea;">
+                            <div style="font-weight:600; color:#1f1f1f; margin-bottom:4px;">Crew History</div>
+                            <div>👤 ${v.driverName || 'N/A'} | <a href="tel:${dTel}" style="color:#1a73e8; text-decoration:none;">📞 ${v.driverPhone || 'N/A'}</a></div>
+                        </div>
+                        <div>
+                            <div style="font-weight:600; color:#1f1f1f; margin-bottom:4px;">Last Completed Trip</div>
+                            <div>📍 Unloaded: ${v.lastTo} (${(v.deliveryDate || '').split(',')[0] || 'Unknown'})</div>
+                            <div>🛣️ Route: ${v.lastFrom} ➔ ${v.lastTo}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            return html;
+        }).join('');
+    }
+
+    // ------------- PLACEMENT LOGIC -------------
 
     function showPlacementSelection() {
         document.getElementById('placement-selection-screen').style.display = 'block';
@@ -1410,150 +1644,10 @@
         document.getElementById('btn-dep-stat-ong').classList.toggle('active', stat === 'In-Transit'); 
         document.getElementById('btn-dep-stat-com').classList.toggle('active', stat === 'Delivered'); 
         document.getElementById('btn-dep-stat-can').classList.toggle('active', stat === 'Cancelled Trip'); 
-        document.getElementById('btn-dep-stat-idle').classList.toggle('active', stat === 'Idle'); 
         triggerCurrentRender();
     }
 
-    function parseDate(dStr) {
-        if (!dStr) return 0;
-        try { 
-            let parts = dStr.split(',')[0].split('/'); 
-            if(parts.length===3) return new Date(parts[2], parts[1]-1, parts[0]).getTime(); 
-            return 0;
-        } 
-        catch(e) { return 0; }
-    }
-
-    function assignIdleVehicle(vNum) {
-        openWorkspace('tab-placement');
-        document.getElementById('ob-vnum').value = vNum;
-        autoFillVehicle(vNum, 'ob');
-        document.getElementById('rl-vnum').value = vNum;
-        autoFillVehicle(vNum, 'rl');
-    }
-
-    function renderIdleVehicles() {
-        const container = document.getElementById('deployed-container');
-        if (currentDeployedType !== 'Own Booking') {
-            container.innerHTML = "<p style='padding:20px; color:#5f6368; text-align:center;'>Idle tracking is natively supported for Own Fleet assets only.</p>";
-            return;
-        }
-        
-        const activeTrips = allTrips.filter(t => (t.status || '').trim() === 'In-Transit');
-        const activeVNums = new Set(activeTrips.map(t => (t.vNum || '').toUpperCase()));
-
-        let idleList = [];
-        Object.keys(vehicles).forEach(vNum => {
-            if (!activeVNums.has(vNum)) {
-                const vTrips = allTrips.filter(t => (t.vNum || '').toUpperCase() === vNum);
-                vTrips.sort((a,b) => {
-                    let dA = parseDate(a.deliveryDate || a.date);
-                    let dB = parseDate(b.deliveryDate || b.date);
-                    return dB - dA;
-                });
-                const lastTrip = vTrips[0] || null;
-                
-                idleList.push({
-                    vNum: vNum,
-                    type: vehicles[vNum].type || (lastTrip ? lastTrip.type : 'Unknown'),
-                    capacity: vehicles[vNum].capacity || (lastTrip ? lastTrip.weight : 'Unknown'),
-                    lastLocation: lastTrip ? (lastTrip.statusNote || lastTrip.to) : 'Unknown',
-                    driverName: lastTrip ? lastTrip.dName : 'N/A',
-                    driverPhone: lastTrip ? lastTrip.dContact : 'N/A',
-                    deliveryDate: lastTrip ? (lastTrip.deliveryDate || lastTrip.date) : null,
-                    lastFrom: lastTrip ? lastTrip.from : 'N/A',
-                    lastTo: lastTrip ? lastTrip.to : 'N/A',
-                    lastParty: lastTrip ? lastTrip.party : 'N/A',
-                    id: lastTrip ? lastTrip.id : vNum
-                });
-            }
-        });
-
-        if (idleList.length === 0) {
-            container.innerHTML = "<p style='padding:20px; color:#5f6368; text-align:center;'>No idle vehicles found in the fleet.</p>";
-            return;
-        }
-        
-        idleList.sort((a, b) => {
-            let dA = parseDate(a.deliveryDate);
-            let dB = parseDate(b.deliveryDate);
-            return dA - dB;
-        });
-
-        container.innerHTML = idleList.map(v => {
-            let dTel = getSafeTel(v.driverPhone);
-            let idleDuration = "Unknown";
-            let idleColor = "#444746";
-            if (v.deliveryDate) {
-                try {
-                    let parts = v.deliveryDate.split(',')[0].split('/');
-                    if (parts.length === 3) {
-                        let d = new Date(parts[2], parts[1]-1, parts[0]);
-                        let diff = new Date() - d;
-                        if (diff >= 0) {
-                            let days = Math.floor(diff / (1000*60*60*24));
-                            let hrs = Math.floor((diff / (1000*60*60)) % 24);
-                            idleDuration = days > 0 ? `${days}d ${hrs}h` : `${hrs}h`;
-                            if (days >= 2) idleColor = "#b3261e";
-                            else if (days === 1) idleColor = "#b06000";
-                            else idleColor = "#137333";
-                        }
-                    }
-                } catch(e) {}
-            }
-
-            let encodedMsg = encodeURIComponent(`*Available Vehicle Update*\n\n*Vehicle No:* ${v.vNum}\n*Current Location:* ${v.lastLocation}\n*Type & Capacity:* ${v.type} (${v.capacity})\n\nReady for a new load.`);
-
-            return `
-            <div class="trip-card">
-                <div style="border-bottom: 1px solid #f1f3f4; padding-bottom: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:bold; font-size:14px; color:#1f1f1f;">${v.vNum}</span>
-                    <span class="status-badge" style="background:#e6f4ea; color:#137333;">Available - ${idleDuration}</span>
-                </div>
-                
-                <div class="grid-2" style="margin-bottom: 5px;">
-                    <div><span style="color:#5f6368; font-size:10px; text-transform:uppercase;">Current Location</span><br><strong style="font-size:12px;">📍 ${v.lastLocation}</strong></div>
-                    <div><span style="color:#5f6368; font-size:10px; text-transform:uppercase;">Vehicle Type</span><br><strong style="font-size:12px;">🚚 ${v.type} (${v.capacity})</strong></div>
-                </div>
-                
-                <div style="font-size: 11px; margin-top: 10px;">
-                    <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#1a73e8; font-weight:500; cursor:pointer;" onclick="document.getElementById('idle-details-${v.id}').style.display = document.getElementById('idle-details-${v.id}').style.display === 'block' ? 'none' : 'block';">View Asset Details ▼</span>
-                    
-                    <div id="idle-details-${v.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:6px; margin-top:8px; border:1px solid #dadce0; color:#444746;">
-                        
-                        <div style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #eaeaea;">
-                            <div style="font-weight:600; color:#1f1f1f; margin-bottom:4px;">Crew & Readiness</div>
-                            <div>👤 ${v.driverName || 'N/A'} | <a href="tel:${dTel}" style="color:#1a73e8; text-decoration:none;">📞 ${v.driverPhone || 'N/A'}</a></div>
-                        </div>
-
-                        <div style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #eaeaea;">
-                            <div style="font-weight:600; color:#1f1f1f; margin-bottom:4px;">Last Trip History</div>
-                            <div>📍 Unloaded: ${v.lastTo} (${(v.deliveryDate || '').split(',')[0] || 'Unknown'})</div>
-                            <div>🛣️ Route: ${v.lastFrom} ➔ ${v.lastTo}</div>
-                        </div>
-
-                        <div>
-                            <div style="font-weight:600; color:#1f1f1f; margin-bottom:4px;">Asset Specifications</div>
-                            <div>⚖️ Capacity: ${v.capacity || '-'} | 📏 Type: ${v.type || '-'}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display:flex; justify-content:space-between; margin-top:10px;">
-                    <button class="btn-primary" style="font-size:11px; padding:6px 12px; width:auto; border-radius:16px; border:none;" onclick="assignIdleVehicle('${v.vNum}')">📦 Assign Load</button>
-                    <button class="btn-whatsapp" style="font-size:11px; padding:6px 12px; width:auto; border-radius:16px; border:none; color:#fff;" onclick="openWhatsAppChoice(decodeURIComponent('${encodedMsg}'))">📲 Share Availability</button>
-                </div>
-            </div>
-            `;
-        }).join('');
-    }
-
     function renderDeployed() {
-        if (currentDeployedStatus === 'Idle') {
-            renderIdleVehicles();
-            return;
-        }
-
         const container = document.getElementById('deployed-container'); if(!currentDeployedType) return; 
         let items = getFilteredTrips(allTrips).filter(t => (t.bookingType || 'Own Booking') === currentDeployedType && (t.status || 'In-Transit').trim() === currentDeployedStatus);
         if(items.length === 0) { container.innerHTML = "<p style='padding:20px; color:#5f6368; text-align:center;'>No trips found.</p>"; return; }
@@ -1749,16 +1843,6 @@
         fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: id, ledgerJson: jsonStr }) });
 
         alert("Ledger updated."); renderReconciliation(); 
-    }
-
-    function setReportType(type) {
-        currentReportType = type;
-        document.getElementById('report-selection-screen').style.display = 'none';
-        document.getElementById('report-content-area').style.display = 'block';
-        document.getElementById('report-title-text').innerText = type + " Reports";
-        document.getElementById('screen-report').innerHTML = ''; 
-        document.getElementById('print-report-container').innerHTML = ''; 
-        document.getElementById('report-actions').style.display = 'none';
     }
 
     function generateCustomReport() {
