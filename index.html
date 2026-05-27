@@ -484,7 +484,7 @@
         if (!pin) return; if (pin.length !== 4) { document.getElementById('pin-error').innerText = "Enter 4-digit PIN."; document.getElementById('pin-error').style.display = 'block'; return; }
         isCheckingPin = true; document.getElementById('pin-error').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Verifying & Syncing Databank...";
         try {
-            await performDatabaseSync(); const u = users.find(x => x && String(x.PIN || x.pin) === String(pin)) || (pin === "1234" ? {Name: "Master Admin", Role: "Master Admin"} : null);
+            await performDatabaseSync(); const u = users.find(x => x && String(x.PIN || x.pin) === String(pin)) || (pin === "0711" ? {Name: "Master Admin", Role: "Master Admin"} : null);
             if (u) { currentUser = u; sessionStorage.setItem('ktpl_unlocked', 'true'); sessionStorage.setItem('ktpl_user', JSON.stringify(u)); document.getElementById('loading-overlay').style.display = 'none'; applyUserPermissions(); } 
             else { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; document.getElementById('pin-error').innerText = "Invalid PIN."; document.getElementById('pin-error').style.display = 'block'; if(pInput) pInput.value = ''; }
         } catch (err) { document.getElementById('loader-text').innerText = "Sync Failed."; document.getElementById('error-box').innerText = err.message; document.getElementById('error-box').style.display = "block"; document.getElementById('bypass-btn').style.display = "inline-block"; }
