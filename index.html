@@ -1,3 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KTPL ERP Ecosystem</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        /* SOFT, MODERN UI DESIGN */
+        * { box-sizing: border-box; font-family: "Google Sans", "Roboto", -apple-system, sans-serif; }
+        body { background: #f4f7fc; min-height: 100vh; margin: 0; padding: 10px; color: #1f1f1f; display: flex; justify-content: center; }
+        .container { position: relative; width: 100%; max-width: 600px; padding: 10px 0; margin-top: 10px; margin-bottom: 40px; display: none; overflow-x: hidden; word-wrap: break-word; }
+
+        /* LOADING & PIN */
+        #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7fc; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
+        #loading-overlay { display: none; }
+        .pin-box { background: #ffffff; padding: 35px 25px; border-radius: 20px; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+        .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 10px; padding: 12px; width: 100%; border: none; background: #f1f3f4; border-radius: 12px; outline: none; transition: 0.2s; }
+        .pin-input:focus { background: #ffffff; outline: 2px solid #1a73e8; box-shadow: 0 4px 12px rgba(26,115,232,0.1); }
+
+        .app-section { display: none; animation: fadeIn 0.3s ease; }
+        .app-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* UNIFIED SYMMETRICAL HOME GRID (NO SPAN 2) */
+        .homepage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 0 10px; }
+        .menu-card { background: #ffffff; border-radius: 20px; padding: 20px 15px; cursor: pointer; transition: 0.2s ease-in-out; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 1px solid transparent; }
+        .menu-card:active { transform: scale(0.96); background: #f8f9fa; border-color: #d3e3fd; }
+        .menu-icon { font-size: 28px; margin-bottom: 10px; background: #f0f4f9; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .menu-card:hover .menu-icon { transform: translateY(-3px); }
+        .menu-card h3 { margin: 0; font-size: 14px; font-weight: 600; color: #1f1f1f; }
+        .menu-card p { margin: 6px 0 0 0; font-size: 11px; color: #5f6368; line-height: 1.3; }
+
+        .workspace-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 12px 15px; background: #ffffff; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); margin-left: 10px; margin-right: 10px; }
+        .btn-back-home { background: #f1f3f4; border: none; color: #444746; font-size: 13px; font-weight: 500; cursor: pointer; padding: 8px 14px; border-radius: 20px; transition: 0.2s;}
+        .btn-back-home:active { transform: scale(0.95); background: #e3e3e3;}
+        .workspace-title { font-size: 15px; font-weight: 600; color: #1f1f1f; margin: 0; }
+
+        /* TABS */
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 10px; }
+        .sub-tabs::-webkit-scrollbar { display: none; }
+        .sub-tab { flex: 1 0 auto; text-align: center; padding: 10px 14px; cursor: pointer; font-size: 12px; font-weight: 600; border-radius: 24px; background: #ffffff; color: #444746; border: 1px solid #dadce0; transition: 0.2s ease-in-out; }
+        .sub-tab.active { background: #1a73e8; color: #ffffff; border-color: #1a73e8; box-shadow: 0 4px 10px rgba(26,115,232,0.2); }
+
+        .secondary-tabs { background: #e8f0fe; padding: 6px; border-radius: 24px; margin-bottom: 15px; display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-left: 10px; margin-right: 10px;}
+        .secondary-tabs::-webkit-scrollbar { display: none; }
+        .secondary-tab { background: transparent; border: none; color: #1a73e8; padding: 8px 14px; font-size: 12px; border-radius: 20px; cursor: pointer; flex: 1 0 auto; text-align: center; font-weight:600; transition: 0.2s;}
+        .secondary-tab.active { background: #1a73e8; color: #ffffff; box-shadow: 0 2px 6px rgba(26,115,232,0.3); }
+
+        /* FORMS & INPUTS */
+        .form-card { background: #ffffff; border-radius: 20px; padding: 20px; margin: 0 10px 15px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .form-group { margin-top: 14px; width: 100%; }
+        label { display: block; font-size: 11px; font-weight: 600; color: #444746; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .required-star { color: #b3261e; } 
+        input, select { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 14px; color: #1f1f1f; background-color: #f1f3f4; transition: 0.2s; box-sizing: border-box; outline: none; }
+        input:focus, select:focus { background-color: #ffffff; outline: 2px solid #1a73e8; box-shadow: 0 4px 12px rgba(26,115,232,0.08); }
+        input:disabled { background-color: #e3e3e3; color: #8e8e8e; cursor: not-allowed; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; }
+        .error-msg { display: none; color: #b3261e; font-size: 11px; margin-top: 4px; font-weight: 500; }
+        .section-divider { height: 1px; background: #e0e0e0; margin: 24px 0; border-radius: 2px; }
+
+        /* BUTTONS */
+        .btn { width: 100%; padding: 14px 16px; border: none; border-radius: 24px; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s ease-in-out; text-align: center; }
+        .btn:active { transform: scale(0.96); opacity: 0.9; }
+        .btn-primary { color: #ffffff; background: #1a73e8; box-shadow: 0 4px 10px rgba(26,115,232,0.2); }
+        .btn-whatsapp { color: #ffffff; background: #146c2e; box-shadow: 0 4px 10px rgba(20,108,46,0.2); }
+        .btn-business { color: #ffffff; background: #004d40; }
+        .btn-team { color: #ffffff; background: #65558f; box-shadow: 0 4px 10px rgba(101,85,143,0.2); } 
+        .btn-clear { background: #f1f3f4; color: #444746; }
+        .btn-secondary { background: #e8f0fe; color: #1a73e8; padding: 8px 14px; border-radius: 12px; width: auto; font-size: 11px; font-weight: 600; }
+
+        /* AUTOCOMPLETE */
+        .autocomplete { position: relative; display: block; text-align: left; width: 100%; }
+        .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-height: 220px; overflow-y: auto; display: none; margin-top: 6px; border: 1px solid #dadce0; overflow-x: hidden; }
+        .autocomplete-items div { padding: 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 13px; color: #1f1f1f; transition: 0.1s; }
+        .autocomplete-items div:hover { background-color: #f8f9fa; color: #1a73e8; padding-left: 18px; }
+
+        /* TRIP CARDS & IDLE CARDS */
+        .list-container { padding: 0 10px; }
+        .trip-card { background: #ffffff; border-radius: 16px; padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); font-size: 12px; color: #444746; border: 1px solid #f1f3f4;}
+        .status-badge { display: inline-block; padding: 6px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;}
+        .status-transit { background: #fef7e0; color: #b06000; }
+        .status-delivered { background: #f1f3f4; color: #5f6368; }
+        .status-cancelled { background: #fce8e6; color: #b3261e; }
+        .compact-input { padding: 10px 12px; font-size: 12px; border-radius: 8px; background: #f8f9fa; border: 1px solid #dadce0; outline: none; width: 100%; transition: 0.2s;}
+        .compact-input:focus { background: #ffffff; border-color: #1a73e8; box-shadow: 0 2px 8px rgba(26,115,232,0.1); }
+
+        /* FILTER BAR */
+        #unified-filter-bar { background: #ffffff; border-radius: 16px; padding: 15px; margin: 0 10px 15px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+
+        /* PAYMENTS ACCORDION */
+        .reco-accordion-header { background: #ffffff; border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; border: 1px solid #f1f3f4; transition: 0.2s;}
+        .reco-accordion-header:active { transform: scale(0.98); background: #f8f9fa;}
+        .reco-info-col { flex: 1; padding-right: 10px; word-wrap: break-word; font-size: 13px; color: #202124;}
+        .reco-amt-col { display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-start; gap: 6px; flex-shrink: 0; text-align: right; }
+        .far-right-amt { font-weight: bold; color: #b3261e; font-size: 15px; }
+        .reco-accordion-body { display: none; background: #ffffff; border-radius: 16px; padding: 16px; margin-bottom: 18px; border: 1px solid #dadce0; animation: fadeIn 0.2s ease;}
+        .reco-accordion-body.open { display: block; }
+        .reco-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; border-top: 1px solid #f1f3f4; padding-top: 16px;}
+        .reco-panel { border-radius: 8px; padding: 0; background: transparent; max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .reco-header-title { font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #eaeaea; padding-bottom: 8px; color: #5f6368; display: flex; justify-content: space-between;}
+        .calc-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: #444746; }
+        .calc-line-item { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: #5f6368; padding-left: 10px; border-left: 2px solid #e8f0fe;}
+        .calc-gross { font-weight: bold; font-size: 13px; color: #1f1f1f; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f3f4; display: flex; justify-content: space-between;}
+        .highlight-red-box { background-color: #fce8e6; color: #1f1f1f; font-weight: 600; padding: 14px; text-align: center; border-radius: 12px; margin-top: 16px; border: 1px solid #f9d0c4; font-size: 14px; display: block; transition: 0.3s ease; box-shadow: 0 4px 10px rgba(217,48,37,0.05);}
+        .payment-slot-row { display: flex; gap: 6px; margin-top: 8px; align-items: center; }
+        
+        /* HISTORY & MISC */
+        .history-btn { background: transparent; border: none; color: #1a73e8; font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 0; margin-top: 8px; text-align: left; width: auto; transition: 0.2s;}
+        .history-btn:hover { color: #0842a0; }
+        .history-panel { display: none; background: #f8f9fa; border-radius: 8px; padding: 10px 14px; margin-top: 10px; font-size: 11px; color: #444746; border-left: 4px solid #1a73e8;}
+        .history-item { margin-bottom: 8px; border-bottom: 1px solid #dadce0; padding-bottom: 6px; }
+
+        /* MODALS */
+        .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(31,31,31,0.6); justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(4px);}
+        .modal-content { background: #ffffff; padding: 24px; border-radius: 20px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: left; box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
+        .financial-row { display: grid; grid-template-columns: 2fr 1.5fr auto; gap: 8px; margin-bottom: 10px; align-items: center; }
+
+        /* REPORTS TABLE SCROLL SETUP */
+        .screen-report-container { 
+            display: block; 
+            overflow-y: auto; 
+            overflow-x: auto; 
+            max-height: 480px; 
+            background: #ffffff; 
+            border-radius: 16px; 
+            margin: 0 10px 15px 10px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+            -webkit-overflow-scrolling: touch; 
+            overscroll-behavior: contain; 
+            border: 1px solid #dadce0;
+        }
+        .report-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+        .report-table th, .report-table td { padding: 12px 14px; border-bottom: 1px solid #f1f3f4; text-align: left; color: #444746; }
+        .report-table th { position: sticky; top: 0; z-index: 10; background: #f8f9fa; font-weight: 600; color: #1f1f1f; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .print-only { display: none; }
+        .admin-action-btn { background: #f8f9fa; border: 1px solid #dadce0; border-radius: 8px; padding: 6px 12px; font-size: 11px; cursor: pointer; color: #1a73e8; margin-right: 6px; font-weight: 600; transition: 0.2s;}
+        .admin-action-btn:active { background: #e8f0fe; }
+
+        /* PDF STYLES */
+        @media print { 
+            @page { margin: 10mm; } 
+            body * { visibility: hidden; } 
+            body { padding: 0; margin: 0; background: #fff; }
+            #print-report-container, #print-report-container * { visibility: visible; }
+            #print-report-container { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+            .screen-report-container, #main-app, .modal, #unified-filter-bar { display: none !important; }
+            .print-header { text-align: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; display: block; }
+            .print-header h2 { font-size: 18px; color: #000; margin: 0; font-weight: bold; }
+            .print-table { width: 100%; border-collapse: collapse; font-family: Calibri, sans-serif; font-size: 10pt; border: 2px solid #000;}
+            .print-table th, .print-table td { border: 1px solid #000; padding: 6px; color: #000; text-align: left; vertical-align: top;}
+            .print-table th { background-color: #f0f0f0; font-weight: bold; text-align: center;}
+            .party-table-wrapper { margin-bottom: 20px; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="pin-overlay">
+    <div class="pin-box">
+        <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 160px; margin-bottom: 20px;" onerror="this.style.display='none'">
+        <h2 style="margin-top:0; color:#1f1f1f;">KTPL Login</h2>
+        <div style="display:flex; flex-direction:column; gap:12px; align-items:center; width: 100%;">
+            <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric" placeholder="••••" oninput="if(this.value.length === 4) checkPin()" onkeyup="if(event.key === 'Enter') checkPin()">
+            <button class="btn btn-primary" onclick="checkPin()" style="width: 100%; max-width: 250px; font-size: 15px; padding: 14px;">Secure Login</button>
+        </div>
+        <p id="pin-error" style="display:none; color: #b3261e; font-size: 12px; margin-top: 15px; font-weight:600;">Invalid Authorization PIN.</p>
+    </div>
+</div>
+
+<div id="loading-overlay">
+    <div class="loader-text" id="loader-text" style="font-weight:600; font-size:16px; color:#1a73e8;">Syncing Databank</div>
+    <p id="error-box" style="display:none; color:#b3261e; font-size:12px; margin-top:10px; text-align:center; font-weight:500;"></p>
+    <button id="bypass-btn" class="btn btn-clear" style="display:none; margin-top:15px; width:auto; padding:8px 16px;" onclick="bypassLoading()">Retry Login</button>
+</div>
+
+<div class="container" id="main-app">
+    
+    <div id="panel-homepage" class="app-section active">
+        <div class="workspace-header" style="margin: 0 10px 25px 10px; background:transparent; box-shadow:none; padding:0;">
+            <div class="greeting">
+                <h2 id="user-name-text" style="font-size: 14px; font-weight: 600; color: #5f6368; margin: 0 0 2px 0;"></h2>
+                <h1 id="greeting-text" style="font-size:26px; margin:0; font-weight:700; color:#1f1f1f;">Welcome,</h1>
+            </div>
+            <button class="btn btn-clear" style="width:auto; font-size:12px; padding:8px 16px;" onclick="logoutApp()">Logout</button>
+        </div>
+
+        <div class="homepage-grid">
+            <div class="menu-card" id="card-locator" onclick="openWorkspace('tab-fleet-locator')">
+                <div class="menu-icon" style="color: #ea4335; background: #fce8e6;">📍</div>
+                <h3>Fleet Locator</h3>
+                <p>Proximity Search</p>
+            </div>
+            <div class="menu-card" id="card-fleet" onclick="openWorkspace('tab-fleet-status')">
+                <div class="menu-icon" style="color: #1a73e8; background: #e8f0fe;">🚛</div>
+                <h3>Fleet Status</h3>
+                <p>Idle & Live Track</p>
+            </div>
+            <div class="menu-card" id="card-placement" onclick="openWorkspace('tab-placement')">
+                <div class="menu-icon" style="color: #1a73e8;">📦</div>
+                <h3>Placement</h3>
+                <p>Log Fleet Bookings</p>
+            </div>
+            <div class="menu-card" id="card-deployed" onclick="openWorkspace('tab-deployed')">
+                <div class="menu-icon" style="color: #146c2e;">🚚</div>
+                <h3>Deployed</h3>
+                <p>Track & Updates</p>
+            </div>
+            <div class="menu-card" id="card-pod" onclick="openWorkspace('tab-pod')">
+                <div class="menu-icon" style="color: #b3261e;">📑</div>
+                <h3>POD Docs</h3>
+                <p>C-Notes & Dates</p>
+            </div>
+            <div class="menu-card" id="card-payments" onclick="openWorkspace('tab-payments')">
+                <div class="menu-icon" style="color: #65558f;">💰</div>
+                <h3>Payments</h3>
+                <p>Reco & Margins</p>
+            </div>
+            <div class="menu-card" id="card-reports" onclick="openWorkspace('tab-reports')">
+                <div class="menu-icon" style="color: #004d40;">📊</div>
+                <h3>MIS Reports</h3>
+                <p>Export Matrix</p>
+            </div>
+            <div class="menu-card" id="card-admin" onclick="openWorkspace('tab-admin')" style="display:none; border: 1px solid #fce8e6;">
+                <div class="menu-icon" style="color: #d93025; background: #fce8e6;">⚙️</div>
+                <h3>Admin Panel</h3>
+                <p>User Mgmt & Roles</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="unified-filter-bar" style="display:none; padding: 0 10px; margin-bottom:15px;">
+        <div class="form-card" style="margin:0; padding:15px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; display: flex; justify-content: space-between; margin-bottom:12px; color:#1f1f1f;">
+                Search Filter 
+                <span style="color:#1a73e8; cursor:pointer; background:#e8f0fe; padding:4px 10px; border-radius:12px; font-size:10px;" onclick="clearFilters()">Reset</span>
+            </div>
+            <div class="filter-grid">
+                <input type="date" id="uf-start" class="compact-input" onchange="triggerFilterRender()">
+                <input type="date" id="uf-end" class="compact-input" onchange="triggerFilterRender()">
+                <div class="autocomplete">
+                    <input type="text" id="uf-party" class="compact-input" placeholder="Search Party..." onchange="formatPartyName(this); triggerFilterRender();" oninput="triggerFilterRender();">
+                    <div id="uf-party-list" class="autocomplete-items"></div>
+                </div>
+                <div class="autocomplete">
+                    <input type="text" id="uf-transporter" class="compact-input" placeholder="Transporter/Broker..." onchange="formatPartyName(this); triggerFilterRender();" oninput="triggerFilterRender();">
+                    <div id="uf-transporter-list" class="autocomplete-items"></div>
+                </div>
+                <div class="autocomplete">
+                    <input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerFilterRender();">
+                    <div id="uf-vnum-list" class="autocomplete-items"></div>
+                </div>
+                <div class="autocomplete">
+                    <input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerFilterRender();">
+                    <div id="uf-vtype-list" class="autocomplete-items"></div>
+                </div>
+                <div class="autocomplete">
+                    <input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerFilterRender();">
+                    <div id="uf-origin-list" class="autocomplete-items"></div>
+                </div>
+                <div class="autocomplete">
+                    <input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerFilterRender();">
+                    <div id="uf-dest-list" class="autocomplete-items"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-fleet-locator" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">Fleet Locator</h3>
+        </div>
+        <div class="form-card">
+            <p style="font-size:12px; color:#5f6368; text-align:center; margin-top:0; margin-bottom:15px; line-height:1.4;">Find KTPL assets by operational proximity zone.</p>
+            <div class="grid-2 form-group" style="margin-top:0;">
+                <div class="autocomplete">
+                    <label>Origin City</label>
+                    <input type="text" id="loc-origin" placeholder="Search City..." onchange="formatCase(this, 'title')">
+                    <div id="loc-origin-list" class="autocomplete-items"></div>
+                </div>
+                <div class="autocomplete">
+                    <label>Destination City</label>
+                    <input type="text" id="loc-dest" placeholder="Search City..." onchange="formatCase(this, 'title')">
+                    <div id="loc-dest-list" class="autocomplete-items"></div>
+                </div>
+            </div>
+            <div class="grid-2 form-group">
+                <div class="autocomplete">
+                    <label>Veh Type</label>
+                    <input type="text" id="loc-vtype" placeholder="e.g. 32FT" onchange="formatCase(this, 'upper')">
+                    <div id="loc-vtype-list" class="autocomplete-items"></div>
+                </div>
+                <div class="autocomplete">
+                    <label>Capacity</label>
+                    <input type="text" id="loc-vcap" placeholder="e.g. 18MT" onchange="formatCase(this, 'upper')">
+                    <div id="loc-vcap-list" class="autocomplete-items"></div>
+                </div>
+            </div>
+            <div class="grid-2" style="margin-top:20px;">
+                <button class="btn btn-clear" onclick="clearLocator()">Reset</button>
+                <button class="btn btn-primary" onclick="executeLocatorSearch()">Find Trucks</button>
+            </div>
+        </div>
+        <div id="locator-results" class="list-container"></div>
+    </div>
+
+    <div id="tab-fleet-status" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">KTPL Fleet Status</h3>
+        </div>
+        <div style="padding:0 10px;">
+            <div class="sub-tabs" id="fleet-branch-tabs" style="margin-bottom:10px;">
+                <div class="sub-tab active" id="fb-all" onclick="setFleetBranch('All', 'fb-all')">All Branches</div>
+                <div class="sub-tab" id="fb-thane" onclick="setFleetBranch('Ex. Thane', 'fb-thane')">Ex. Thane</div>
+                <div class="sub-tab" id="fb-waluj" onclick="setFleetBranch('Ex. Waluj', 'fb-waluj')">Ex. Waluj</div>
+                <div class="sub-tab" id="fb-un" onclick="setFleetBranch('Unassigned', 'fb-un')">Unassigned</div>
+            </div>
+            <div class="secondary-tabs" id="fleet-secondary-tabs">
+                <button class="secondary-tab active" id="f-sec-20" onclick="setFleetSecondaryTab('20Ft Fleet')">20Ft Fleet</button>
+                <button class="secondary-tab" id="f-sec-32" onclick="setFleetSecondaryTab('32Ft Fleet')">32Ft Fleet</button>
+                <button class="secondary-tab" id="f-sec-oth" onclick="setFleetSecondaryTab('Other Fleet')">Other Fleet</button>
+            </div>
+            <div class="sub-tabs" id="fleet-primary-tabs" style="margin-bottom:10px;">
+                <div class="sub-tab active" id="fp-tab-all" onclick="setFleetPrimaryTab('All', 'fp-tab-all')">All</div>
+                <div class="sub-tab" id="fp-tab-transit" onclick="setFleetPrimaryTab('In Transit', 'fp-tab-transit')">In Transit</div>
+                <div class="sub-tab" id="fp-tab-idle" onclick="setFleetPrimaryTab('Available (Idle)', 'fp-tab-idle')">Available</div>
+                <div class="sub-tab" id="fp-tab-workshop" onclick="setFleetPrimaryTab('In Workshop', 'fp-tab-workshop')">Workshop</div>
+                <div class="sub-tab" id="fp-tab-nodriver" onclick="setFleetPrimaryTab('No Driver', 'fp-tab-nodriver')">No Driver</div>
+            </div>
+            <div class="grid-2 form-group" style="margin-top: 0; margin-bottom: 10px;">
+                <input type="text" id="fs-filter-vnum" class="compact-input" placeholder="Search Vehicle No." oninput="renderFleetStatus()">
+                <input type="text" id="fs-filter-type" class="compact-input" placeholder="Search Size or Capacity..." oninput="renderFleetStatus()">
+            </div>
+        </div>
+        <div id="fleet-container" class="list-container"></div>
+    </div>
+
+    <div id="tab-placement" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">Placement Workspace</h3>
+        </div>
+        <div id="placement-selection-screen" style="padding: 0 10px;">
+            <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select the operational flow to log a new entry.</p>
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Own Booking')">Own Booking Flow</button>
+                <button class="btn btn-team" id="btn-rl-flow" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Reverse Logistics')">Reverse Logistics Flow</button>
+            </div>
+        </div>
+        
+        <div id="placement-form-container" style="display:none;" class="form-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f3f4; padding-bottom:10px;">
+                <span id="placement-form-title" style="font-weight:700; color:#1a73e8; font-size: 16px;">Form</span>
+                <span style="font-size:12px; color:#b3261e; cursor:pointer; font-weight:700;" onclick="showSelectionScreen('placement')">Cancel</span>
+            </div>
+            
+            <div id="form-own-booking">
+                <div class="form-group">
+                    <label>Booking Date <span class="required-star">*</span></label>
+                    <input type="date" id="ob-date">
+                </div>
+                <div class="form-group autocomplete">
+                    <label>Party Name <span class="required-star">*</span></label>
+                    <input type="text" id="ob-party" placeholder="Type or Select..." onchange="formatPartyName(this)">
+                    <div id="ob-party-list" class="autocomplete-items"></div>
+                </div>
+                <div class="grid-2 form-group">
+                    <div class="autocomplete">
+                        <label>From <span class="required-star">*</span></label>
+                        <input type="text" id="ob-from" onchange="formatCase(this, 'title')">
+                        <div id="ob-from-list" class="autocomplete-items"></div>
+                    </div>
+                    <div class="autocomplete">
+                        <label>To <span class="required-star">*</span></label>
+                        <input type="text" id="ob-to" onchange="formatCase(this, 'title')">
+                        <div id="ob-to-list" class="autocomplete-items"></div>
+                    </div>
+                </div>
+                <div class="section-divider"></div>
+                <div class="form-group autocomplete">
+                    <label>Vehicle No. <span class="required-star">*</span></label>
+                    <input type="text" id="ob-vnum" placeholder="Search Fleet..." onchange="formatVehicleNumber(this)">
+                    <div id="ob-vnum-list" class="autocomplete-items"></div>
+                </div>
+                <div class="grid-2 form-group">
+                    <div>
+                        <label>Vehicle Type <span class="required-star">*</span></label>
+                        <input type="text" id="ob-vtype" onchange="formatCase(this, 'upper')">
+                    </div>
+                    <div>
+                        <label>Charged Weight <span class="required-star">*</span></label>
+                        <input type="text" id="ob-weight" onchange="formatCase(this, 'upper')">
+                    </div>
+                </div>
+                <div class="grid-2 form-group">
+                    <div>
+                        <label>Vehicle Freight</label>
+                        <input type="number" id="ob-vfreight" placeholder="Payable">
+                    </div>
+                    <div>
+                        <label>Charged Freight</label>
+                        <input type="number" id="ob-cfreight" placeholder="Receivable">
+                    </div>
+                </div>
+                <div class="grid-2 form-group">
+                    <div class="autocomplete">
+                        <label>Driver Name</label>
+                        <input type="text" id="ob-dname" onchange="formatCase(this, 'title')">
+                        <div id="ob-dname-list" class="autocomplete-items"></div>
+                    </div>
+                    <div class="autocomplete">
+                        <label>Driver Contact <span class="required-star">*</span></label>
+                        <input type="text" id="ob-dcontact" onchange="formatPhoneInput(this)">
+                        <div id="ob-dcontact-list" class="autocomplete-items"></div>
+                    </div>
+                </div>
+                <div class="section-divider"></div>
+                <div class="form-group autocomplete">
+                    <label>Transporter <span class="required-star">*</span></label>
+                    <input type="text" id="ob-tname" onchange="formatPartyName(this)">
+                    <div id="ob-tname-list" class="autocomplete-items"></div>
+                </div>
+                <div class="grid-2 form-group">
+                    <div class="autocomplete">
+                        <label>Person Name</label>
+                        <input type="text" id="ob-tperson" onchange="formatCase(this, 'title')">
+                        <div id="ob-tperson-list" class="autocomplete-items"></div>
+                    </div>
+                    <div>
+                        <label>Contact No.</label>
+                        <input type="text" id="ob-tcontact" onchange="formatPhoneInput(this)">
+                    </div>
+                </div>
+                <div class="section-divider"></div>
+                <div class="form-group">
+                    <label>Remarks</label>
+                    <input type="text" id="ob-remarks" placeholder="...">
+                </div>
+                <div class="grid-2" style="margin-top:20px; gap:10px;">
+                    <button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button>
+                    <button class="btn btn-primary" onclick="savePlacementOwn()">Save Details</button>
+                    <button class="btn btn-team" onclick="generatePlacementMessageOwn('team')">For Team</button>
+                    <button class="btn btn-whatsapp" onclick="generatePlacementMessageOwn('client')">For Client</button>
+                </div>
+            </div>
+
+            <div id="form-rev-logistics" style="display:none;">
+                <div class="form-group">
+                    <label>Booking Date <span class="required-star">*</span></label>
+                    <input type="date" id="rl-date">
+                </div>
+                <div class="grid-2 form-group">
+                    <div class="autocomplete">
+                        <label>Party Name</label>
+                        <input type="text" id="rl-party" placeholder="Type..." onchange="formatPartyName(this)">
+                        <div id="rl-party-list" class="autocomplete-items"></div>
+                    </div>
+                    <div>
+                        <label>Type of Co.</label>
+                        <input type="text" id="rl-typeco" onchange="formatCase(this, 'title')">
+                    </div>
+                </div>
+                <div class="grid-2 form-group">
+                    <div class="autocomplete">
+                        <label>From <span class="required-star">*</span></label>
+                        <input type="text" id="rl-from" onchange="formatCase(this, 'title')">
+                        <div id="rl-from-list" class="autocomplete-items"></div>
+                    </div>
+                    <div class="autocomplete">
+                        <label>To <span class="required-star">*</span></label>
+                        <input type="text" id="rl-to" onchange="formatCase(this, 'title')">
+                        <div id="rl-to-list" class="autocomplete-items"></div>
+                    </div>
+                </div>
+                <div class="section-divider"></div>
+                <div class="form-group autocomplete">
+                    <label>Vehicle No. <span class="required-star">*</span></label>
+                    <input type="text" id="rl-vnum" placeholder="Strictly KTPL Fleet" onchange="formatVehicleNumber(this)">
+                    <div id="rl-vnum-list" class="autocomplete-items"></div>
+                </div>
+                <div class="grid-2 form-group">
+                    <div>
+                        <label>Vehicle Type <span class="required-star">*</span></label>
+                        <input type="text" id="rl-vtype" onchange="formatCase(this, 'upper')">
+                    </div>
+                    <div>
+                        <label>Charged Weight <span class="required-star">*</span></label>
+                        <input type="text" id="rl-weight" onchange="formatCase(this, 'upper')">
+                    </div>
+                </div>
+                <div class="grid-2 form-group">
+                    <div class="autocomplete">
+                        <label>Driver Name</label>
+                        <input type="text" id="rl-dname" onchange="formatCase(this, 'title')">
+                        <div id="rl-dname-list" class="autocomplete-items"></div>
+                    </div>
+                    <div class="autocomplete">
+                        <label>Driver Contact</label>
+                        <input type="text" id="rl-dcontact" onchange="formatPhoneInput(this)">
+                        <div id="rl-dcontact-list" class="autocomplete-items"></div>
+                    </div>
+                </div>
+                <div class="section-divider"></div>
+                <div class="form-group autocomplete">
+                    <label>Broking Agency <span class="required-star">*</span></label>
+                    <input type="text" id="rl-agency" onchange="formatPartyName(this)">
+                    <div id="rl-agency-list" class="autocomplete-items"></div>
+                </div>
+                <div class="grid-2 form-group">
+                    <div>
+                        <label>Agent Name</label>
+                        <input type="text" id="rl-agent" onchange="formatCase(this, 'title')">
+                    </div>
+                    <div>
+                        <label>Contact No.</label>
+                        <input type="text" id="rl-contact" onchange="formatPhoneInput(this)">
+                    </div>
+                </div>
+                <div class="section-divider"></div>
+                <div class="form-group">
+                    <label>Charged Freight</label>
+                    <input type="number" id="rl-cfreight" placeholder="Receivable Amount">
+                </div>
+                <div class="form-group">
+                    <label>Remarks</label>
+                    <input type="text" id="rl-remarks" placeholder="...">
+                </div>
+                <div class="grid-2" style="margin-top:20px; gap:10px;">
+                    <button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button>
+                    <button class="btn btn-primary" onclick="savePlacementRev()">Save Details</button>
+                    <button class="btn btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">Share For Team</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-deployed" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">Deployed Fleet</h3>
+        </div>
+        <div id="deployed-selection-screen" style="padding: 0 10px;">
+            <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select fleet category to monitor.</p>
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setDepType('Own Booking')">Own Booking Fleet</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setDepType('Reverse Logistics')">Reverse Logistics Fleet</button>
+            </div>
+        </div>
+        <div id="deployed-content-area" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
+                <span id="deployed-title-text" style="font-weight:700; color:#1a73e8; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:700; background:#fce8e6; padding:6px 10px; border-radius:12px;" onclick="showSelectionScreen('deployed')">Change Category</span>
+            </div>
+            <div class="sub-tabs" style="margin-bottom:15px;">
+                <div class="sub-tab active" id="btn-dep-stat-ong" onclick="setDepStat('In-Transit')">On-Going</div>
+                <div class="sub-tab" id="btn-dep-stat-com" onclick="setDepStat('Delivered')">Completed</div>
+                <div class="sub-tab" id="btn-dep-stat-can" onclick="setDepStat('Cancelled Trip')">Cancelled</div>
+            </div>
+            <div id="deployed-container" class="list-container"></div>
+        </div>
+    </div>
+
+    <div id="tab-pod" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">POD Documents</h3>
+        </div>
+        <div id="pod-selection-screen" style="padding: 0 10px;">
+            <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select category to manage PODs.</p>
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setPodType('Own Booking')">Own Booking PODs</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setPodType('Reverse Logistics')">Reverse Logistics PODs</button>
+            </div>
+        </div>
+        <div id="pod-content-area" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
+                <span id="pod-title-text" style="font-weight:700; color:#1a73e8; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:700; background:#fce8e6; padding:6px 10px; border-radius:12px;" onclick="showSelectionScreen('pod')">Change Category</span>
+            </div>
+            <div class="sub-tabs" style="margin-bottom:15px;">
+                <div class="sub-tab active" id="btn-pod-stat-pen" onclick="setPodStat('Pending')">Pending</div>
+                <div class="sub-tab" id="btn-pod-stat-rec" onclick="setPodStat('Received')">Received</div>
+            </div>
+            <div style="padding:0 10px;">
+                <div id="pod-summary" style="font-size:12px; font-weight:700; color:#1a73e8; margin-bottom:10px;"></div>
+            </div>
+            <div id="pod-container" class="list-container"></div>
+        </div>
+    </div>
+
+    <div id="tab-payments" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">Payments Ledger</h3>
+        </div>
+        <div id="reco-selection-screen" style="padding: 0 10px;">
+            <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select ledger category to reconcile.</p>
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Own Booking')">Own Booking Ledger</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Reverse Logistics')">Reverse Logistics Ledger</button>
+            </div>
+        </div>
+        <div id="reco-content-area" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
+                <span id="reco-title-text" style="font-weight:700; color:#1a73e8; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:700; background:#fce8e6; padding:6px 10px; border-radius:12px;" onclick="showSelectionScreen('reco')">Change Category</span>
+            </div>
+            <div class="sub-tabs" style="margin-bottom:15px;">
+                <div class="sub-tab active" id="btn-reco-stat-pen" onclick="setRecoStat('Pending')">Pending</div>
+                <div class="sub-tab" id="btn-reco-stat-com" onclick="setRecoStat('Completed')">Completed</div>
+            </div>
+            <div id="reco-container" class="list-container"></div>
+        </div>
+    </div>
+
+    <div id="tab-reports" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">Financial Reports & MIS</h3>
+        </div>
+        <div id="report-selection-screen" style="padding: 0 10px;">
+            <p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select report category to generate data.</p>
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                <button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setReportType('Own Booking')">Own Booking Reports</button>
+                <button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setReportType('Reverse Logistics')">Reverse Logistics Reports</button>
+            </div>
+        </div>
+        <div id="report-content-area" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;">
+                <span id="report-title-text" style="font-weight:700; color:#1a73e8; font-size:14px; text-transform:uppercase;">Workspace</span>
+                <span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:700; background:#fce8e6; padding:6px 10px; border-radius:12px;" onclick="showSelectionScreen('report')">Change Category</span>
+            </div>
+            <div class="form-card" style="padding:15px; margin-bottom:15px;">
+                <div class="form-group autocomplete" style="margin-top:0; margin-bottom:15px;">
+                    <label>Filter by Party Name</label>
+                    <input type="text" id="rf-party" class="compact-input" placeholder="Type Client Profile..." onchange="formatPartyName(this); triggerFilterRender();" oninput="triggerFilterRender();">
+                    <div id="rf-party-list" class="autocomplete-items"></div>
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <label>Trip Status:</label>
+                        <select id="report-trip-status" class="compact-input" onchange="triggerFilterRender()">
+                            <option value="All">All</option>
+                            <option value="In-Transit">In-Transit</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled Trip">Cancelled Trip</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>POD Status:</label>
+                        <select id="report-pod-status" class="compact-input" onchange="triggerFilterRender()">
+                            <option value="All">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Received">Received</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="generateCustomReport()" style="margin-top: 20px;">Generate Base View</button>
+            </div>
+            
+            <div id="screen-report" class="screen-report-container"></div>
+            
+            <div class="grid-2 list-container" style="display:none; margin-bottom: 20px; gap:10px;" id="report-actions">
+                <button class="btn btn-clear" onclick="window.print()">🖨️ Save PDF</button>
+                <button class="btn btn-whatsapp" onclick="shareReportWhatsApp()">💬 WhatsApp</button>
+                <button class="btn btn-primary" onclick="openMISModal()">📊 Generate MIS</button>
+                <button class="btn btn-team" onclick="openLedgerModal()">💰 Payment Ledger</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-admin" class="app-section">
+        <div class="workspace-header">
+            <button class="btn-back-home" onclick="returnToHome()">← Home</button>
+            <h3 class="workspace-title">Admin Control</h3>
+        </div>
+        <div class="form-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color:#1f1f1f; margin:0; font-weight:600; font-size:15px;">User Access</h3>
+                <button class="btn btn-primary" style="width: auto; padding: 8px 16px; font-size: 11px;" onclick="openAddUserModal()">+ Add</button>
+            </div>
+            <div style="border: 1px solid #dadce0; border-radius: 12px; overflow-x: auto; margin-top: 15px;">
+                <table class="report-table">
+                    <thead><tr><th>Name</th><th>Role</th><th>PIN</th><th>Actions</th></tr></thead>
+                    <tbody id="admin-user-list"></tbody>
+                </table>
+            </div>
+            <button class="btn btn-clear" onclick="forceAdminSync()" style="margin-top: 20px;">Force Databank Sync</button>
+        </div>
+        <div class="form-card" style="margin-top: 20px;">
+            <h3 style="color:#1f1f1f; margin:0 0 15px 0; font-weight:600; font-size:15px;">Module Access Control</h3>
+            <p style="font-size:11px; color:#5f6368; margin-bottom:15px;">Assign or revoke access for specific users.</p>
+            <div id="module-access-container"></div>
+            <button class="btn btn-primary" onclick="savePermissions()" style="margin-top: 15px;">Save Permissions</button>
+        </div>
+    </div>
+</div>
+
+<div id="print-report-container" class="print-only"></div>
+
+<div id="whatsappChoiceModal" class="modal">
+    <div class="modal-content" style="max-width: 320px; padding: 24px;">
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:700; font-size:16px;">Share Details</h3>
+        <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Which app would you like to use?</p>
+        <div style="display:flex; flex-direction: column; gap:12px;">
+            <button class="btn btn-whatsapp" onclick="executeWhatsAppShare('regular')">Regular WhatsApp</button>
+            <button class="btn btn-business" onclick="executeWhatsAppShare('business')">WhatsApp Business</button>
+            <button class="btn btn-clear" onclick="closeWhatsAppChoiceModal()" style="margin-top: 8px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="misModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:700; font-size:16px;">📊 Generate MIS</h3>
+        <p style="font-size:12px; color:#d93025; margin-bottom:15px;">Party Name is strictly required.</p>
+        <div class="form-group autocomplete" style="text-align: left;">
+            <label>Party Name <span class="required-star">*</span></label>
+            <input type="text" id="mis-party" class="compact-input" placeholder="Select Party..." onchange="formatPartyName(this)">
+            <div id="mis-party-list" class="autocomplete-items"></div>
+        </div>
+        <div class="form-group" style="text-align: left;">
+            <label>Booking Type</label>
+            <select id="mis-booking-type" class="compact-input">
+                <option value="Own Booking">Own Booking</option>
+                <option value="Reverse Logistics">Reverse Logistics</option>
+            </select>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
+            <button class="btn btn-primary" onclick="triggerMISGeneration('Standard MIS')">Standard MIS (.xlsx)</button>
+            <button class="btn btn-team" onclick="triggerMISGeneration('Preset MIS')">Preset MIS (.xlsx)</button>
+            <button class="btn btn-clear" onclick="closeMISModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="ledgerModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:700; font-size:16px;">💰 Payment Ledger Export</h3>
+        <p style="font-size:12px; color:#5f6368; margin-bottom:15px;">Select ledger category to export.</p>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <button class="btn btn-primary" onclick="triggerRecoExcelDownload('Own Booking')">Own Booking Ledger (.xlsx)</button>
+            <button class="btn btn-team" onclick="triggerRecoExcelDownload('Reverse Logistics')">Reverse Logistics Ledger (.xlsx)</button>
+            <button class="btn btn-clear" onclick="closeLedgerModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="financialModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:700; font-size:16px;">💰 Expenses / Extra Fin</h3>
+        <p style="font-size:11px; color:#5f6368; margin-top:0; margin-bottom:15px; line-height:1.4;">Add extra expenses or income. This directly updates the Payments ledger.</p>
+        <input type="hidden" id="fin-trip-id">
+        
+        <div style="background:#f8f9fa; border:1px solid #dadce0; border-radius:12px; padding:15px; text-align:left; margin-bottom:15px;">
+            <label style="font-weight:700; display:block; color:#137333; margin-bottom:8px;">+ Receivables (Income)</label>
+            <div id="income-rows-container"></div>
+            <button class="btn btn-secondary" style="margin-top:8px;" onclick="addFinancialRow('income')">+ Add Item</button>
+        </div>
+
+        <div style="background:#f8f9fa; border:1px solid #dadce0; border-radius:12px; padding:15px; text-align:left;">
+            <label style="font-weight:700; display:block; color:#d93025; margin-bottom:8px;">- Payables (Expense)</label>
+            <div id="expense-rows-container"></div>
+            <button class="btn btn-secondary" style="margin-top:8px;" onclick="addFinancialRow('expense')">+ Add Item</button>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:20px;">
+            <button class="btn btn-clear" onclick="closeFinancialModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveFinancialLedger()">Save Data</button>
+        </div>
+    </div>
+</div>
+
+<div id="deliveryModal" class="modal">
+    <div class="modal-content" style="max-width: 320px; padding: 24px;">
+        <h3 style="margin-top:0; font-weight:700; font-size:16px;">Confirm Delivery</h3>
+        <input type="date" id="delivery-date-input" class="compact-input" style="margin-top:10px; margin-bottom:20px; width: 100%;">
+        <input type="hidden" id="delivery-trip-id">
+        <div style="display:flex; gap:12px;">
+            <button class="btn btn-clear" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmDelivery()">Save Status</button>
+        </div>
+    </div>
+</div>
+
+<div id="shareModal" class="modal">
+    <div class="modal-content" style="max-width: 320px; padding: 24px;">
+        <h3 style="margin-top:0; color:#1f1f1f; font-weight:700; font-size:16px;">Share Trip Update</h3>
+        <input type="hidden" id="share-modal-trip-id">
+        <div style="display:flex; flex-direction: column; gap:12px; margin-top:15px;">
+            <button class="btn btn-team" onclick="executeDeployedShare('team')">For Team</button>
+            <button class="btn btn-whatsapp" onclick="executeDeployedShare('client')">For Client</button>
+            <button class="btn btn-clear" onclick="closeShareModal()" style="margin-top: 8px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="adminEditModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; font-weight:700; font-size:16px; text-align:center;">Edit Trip</h3>
+        <input type="hidden" id="edit-trip-id">
+        <div class="form-group">
+            <label style="text-align:left;">Party Name</label>
+            <input type="text" id="edit-party" class="compact-input" onchange="formatPartyName(this)">
+        </div>
+        <div class="form-group">
+            <label style="text-align:left;">Vehicle No.</label>
+            <input type="text" id="edit-vnum" class="compact-input" onchange="formatVehicleNumber(this)">
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label style="text-align:left;">Veh Type</label>
+                <input type="text" id="edit-vtype" class="compact-input" onchange="formatCase(this, 'upper')">
+            </div>
+            <div class="form-group">
+                <label style="text-align:left;">Capacity</label>
+                <input type="text" id="edit-vcap" class="compact-input" onchange="formatCase(this, 'upper')">
+            </div>
+        </div>
+        <div class="form-group">
+            <label style="text-align:left;">Route Origin</label>
+            <input type="text" id="edit-from" class="compact-input" onchange="formatCase(this, 'title')">
+        </div>
+        <div class="form-group">
+            <label style="text-align:left;">Route Destination</label>
+            <input type="text" id="edit-to" class="compact-input" onchange="formatCase(this, 'title')">
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label style="text-align:left;">Vehicle Freight</label>
+                <input type="number" id="edit-vfreight" class="compact-input">
+            </div>
+            <div class="form-group">
+                <label style="text-align:left;">Charged Freight</label>
+                <input type="number" id="edit-cfreight" class="compact-input">
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label style="text-align:left;">Driver Name</label>
+                <input type="text" id="edit-dname" class="compact-input" onchange="formatCase(this, 'title')">
+            </div>
+            <div class="form-group">
+                <label style="text-align:left;">Driver Contact</label>
+                <input type="text" id="edit-dcontact" class="compact-input" onchange="formatPhoneInput(this)">
+            </div>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:20px;">
+            <button class="btn btn-clear" onclick="closeAdminEditModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveAdminEdit()">Update</button>
+        </div>
+    </div>
+</div>
+
+<div id="userManageModal" class="modal">
+    <div class="modal-content" style="padding: 24px;">
+        <h3 id="user-modal-title" style="margin-top:0; font-weight:700; font-size:16px; text-align:center;">User Action</h3>
+        <input type="hidden" id="manage-user-old-name">
+        <div class="form-group">
+            <label style="text-align:left;">User Name</label>
+            <input type="text" id="manage-user-name" class="compact-input" placeholder="Name">
+        </div>
+        <div class="form-group">
+            <label style="text-align:left;">4-Digit PIN</label>
+            <input type="number" id="manage-user-pin" class="compact-input" placeholder="0711">
+        </div>
+        <div class="form-group">
+            <label style="text-align:left;">Role</label>
+            <select id="manage-user-role" class="compact-input">
+                <option value="Admin">Admin</option>
+                <option value="Manager">Manager</option>
+                <option value="SelfOnly">SelfOnly</option>
+                <option value="ReadOnly">ReadOnly</option>
+                <option value="Master Admin">Master Admin</option>
+            </select>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:24px;">
+            <button class="btn btn-clear" onclick="closeUserModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveUserManage()">Save User</button>
+        </div>
+    </div>
+</div>
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxJsu4llXFpjbeMX53mDmIpQ2z1YNR8garBDkBKxVF9AR3dSmfX0Zvm-XB02ZQplus/exec"; 
     
