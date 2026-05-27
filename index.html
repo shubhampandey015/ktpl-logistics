@@ -7,10 +7,12 @@
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
+        /* SOFT, MODERN UI DESIGN */
         * { box-sizing: border-box; font-family: "Google Sans", "Roboto", -apple-system, sans-serif; }
         body { background: #f4f7fc; min-height: 100vh; margin: 0; padding: 10px; color: #1f1f1f; display: flex; justify-content: center; }
         .container { position: relative; width: 100%; max-width: 600px; padding: 10px 0; margin-top: 10px; margin-bottom: 40px; display: none; overflow-x: hidden; word-wrap: break-word; }
 
+        /* LOADING & PIN */
         #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7fc; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
         #loading-overlay { display: none; }
         .pin-box { background: #ffffff; padding: 35px 25px; border-radius: 20px; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
@@ -21,6 +23,7 @@
         .app-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* UNIFIED SYMMETRICAL HOME GRID (NO SPAN 2) */
         .homepage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 0 10px; }
         .menu-card { background: #ffffff; border-radius: 20px; padding: 20px 15px; cursor: pointer; transition: 0.2s ease-in-out; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 1px solid transparent; }
         .menu-card:active { transform: scale(0.96); background: #f8f9fa; border-color: #d3e3fd; }
@@ -34,6 +37,7 @@
         .btn-back-home:active { transform: scale(0.95); background: #e3e3e3;}
         .workspace-title { font-size: 15px; font-weight: 600; color: #1f1f1f; margin: 0; }
 
+        /* TABS */
         .sub-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 10px; }
         .sub-tabs::-webkit-scrollbar { display: none; }
         .sub-tab { flex: 1 0 auto; text-align: center; padding: 10px 14px; cursor: pointer; font-size: 12px; font-weight: 600; border-radius: 24px; background: #ffffff; color: #444746; border: 1px solid #dadce0; transition: 0.2s ease-in-out; }
@@ -44,6 +48,7 @@
         .secondary-tab { background: transparent; border: none; color: #1a73e8; padding: 8px 14px; font-size: 12px; border-radius: 20px; cursor: pointer; flex: 1 0 auto; text-align: center; font-weight:600; transition: 0.2s;}
         .secondary-tab.active { background: #1a73e8; color: #ffffff; box-shadow: 0 2px 6px rgba(26,115,232,0.3); }
 
+        /* FORMS & INPUTS */
         .form-card { background: #ffffff; border-radius: 20px; padding: 20px; margin: 0 10px 15px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .form-group { margin-top: 14px; width: 100%; }
         label { display: block; font-size: 11px; font-weight: 600; color: #444746; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -55,6 +60,7 @@
         .error-msg { display: none; color: #b3261e; font-size: 11px; margin-top: 4px; font-weight: 500; }
         .section-divider { height: 1px; background: #e0e0e0; margin: 24px 0; border-radius: 2px; }
 
+        /* BUTTONS */
         .btn { width: 100%; padding: 14px 16px; border: none; border-radius: 24px; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s ease-in-out; text-align: center; }
         .btn:active { transform: scale(0.96); opacity: 0.9; }
         .btn-primary { color: #ffffff; background: #1a73e8; box-shadow: 0 4px 10px rgba(26,115,232,0.2); }
@@ -64,11 +70,13 @@
         .btn-clear { background: #f1f3f4; color: #444746; }
         .btn-secondary { background: #e8f0fe; color: #1a73e8; padding: 8px 14px; border-radius: 12px; width: auto; font-size: 11px; font-weight: 600; }
 
+        /* AUTOCOMPLETE */
         .autocomplete { position: relative; display: block; text-align: left; width: 100%; }
         .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-height: 220px; overflow-y: auto; display: none; margin-top: 6px; border: 1px solid #dadce0; overflow-x: hidden; }
         .autocomplete-items div { padding: 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 13px; color: #1f1f1f; transition: 0.1s; }
         .autocomplete-items div:hover { background-color: #f8f9fa; color: #1a73e8; padding-left: 18px; }
 
+        /* TRIP CARDS & IDLE CARDS */
         .list-container { padding: 0 10px; }
         .trip-card { background: #ffffff; border-radius: 16px; padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); font-size: 12px; color: #444746; border: 1px solid #f1f3f4;}
         .status-badge { display: inline-block; padding: 6px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -81,6 +89,7 @@
         #unified-filter-bar { background: #ffffff; border-radius: 16px; padding: 15px; margin: 0 10px 15px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 
+        /* PAYMENTS ACCORDION */
         .reco-accordion-header { background: #ffffff; border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; border: 1px solid #f1f3f4; transition: 0.2s;}
         .reco-accordion-header:active { transform: scale(0.98); background: #f8f9fa;}
         .reco-info-col { flex: 1; padding-right: 10px; word-wrap: break-word; font-size: 13px; color: #202124;}
@@ -246,6 +255,10 @@
                 <div class="sub-tab" id="fp-tab-workshop" onclick="setFleetPrimaryTab('In Workshop', 'fp-tab-workshop')">Workshop</div>
                 <div class="sub-tab" id="fp-tab-nodriver" onclick="setFleetPrimaryTab('No Driver', 'fp-tab-nodriver')">No Driver</div>
             </div>
+            <div class="grid-2 form-group" style="margin-top: 0; margin-bottom: 10px;">
+                <input type="text" id="fs-filter-vnum" class="compact-input" placeholder="Search Vehicle No." oninput="renderFleetStatus()">
+                <input type="text" id="fs-filter-type" class="compact-input" placeholder="Search Size or Capacity..." oninput="renderFleetStatus()">
+            </div>
         </div>
         <div id="fleet-container" class="list-container"></div>
     </div>
@@ -378,7 +391,6 @@
 <div id="shareModal" class="modal"><div class="modal-content" style="max-width: 320px; padding: 24px;"><h3 style="margin-top:0; color:#1f1f1f; font-weight:700; font-size:16px;">Share Trip Update</h3><input type="hidden" id="share-modal-trip-id"><div style="display:flex; flex-direction: column; gap:12px; margin-top:15px;"><button class="btn btn-team" onclick="executeDeployedShare('team')">For Team</button><button class="btn btn-whatsapp" onclick="executeDeployedShare('client')">For Client</button><button class="btn btn-clear" onclick="closeShareModal()" style="margin-top: 8px;">Cancel</button></div></div></div>
 <div id="adminEditModal" class="modal"><div class="modal-content"><h3 style="margin-top:0; font-weight:700; font-size:16px; text-align:center;">Edit Trip</h3><input type="hidden" id="edit-trip-id"><div class="form-group"><label style="text-align:left;">Party Name</label><input type="text" id="edit-party" class="compact-input" onchange="formatPartyName(this)"></div><div class="form-group"><label style="text-align:left;">Vehicle No.</label><input type="text" id="edit-vnum" class="compact-input" onchange="formatVehicleNumber(this)"></div><div class="grid-2"><div class="form-group"><label style="text-align:left;">Veh Type</label><input type="text" id="edit-vtype" class="compact-input" onchange="formatCase(this, 'upper')"></div><div class="form-group"><label style="text-align:left;">Capacity</label><input type="text" id="edit-vcap" class="compact-input" onchange="formatCase(this, 'upper')"></div></div><div class="form-group"><label style="text-align:left;">Route Origin</label><input type="text" id="edit-from" class="compact-input" onchange="formatCase(this, 'title')"></div><div class="form-group"><label style="text-align:left;">Route Destination</label><input type="text" id="edit-to" class="compact-input" onchange="formatCase(this, 'title')"></div><div class="grid-2"><div class="form-group"><label style="text-align:left;">Vehicle Freight</label><input type="number" id="edit-vfreight" class="compact-input"></div><div class="form-group"><label style="text-align:left;">Charged Freight</label><input type="number" id="edit-cfreight" class="compact-input"></div></div><div class="grid-2"><div class="form-group"><label style="text-align:left;">Driver Name</label><input type="text" id="edit-dname" class="compact-input" onchange="formatCase(this, 'title')"></div><div class="form-group"><label style="text-align:left;">Driver Contact</label><input type="text" id="edit-dcontact" class="compact-input" onchange="formatPhoneInput(this)"></div></div><div style="display:flex; gap:12px; margin-top:20px;"><button class="btn btn-clear" onclick="closeAdminEditModal()">Cancel</button><button class="btn btn-primary" onclick="saveAdminEdit()">Update</button></div></div></div>
 <div id="userManageModal" class="modal"><div class="modal-content" style="padding: 24px;"><h3 id="user-modal-title" style="margin-top:0; font-weight:700; font-size:16px; text-align:center;">User Action</h3><input type="hidden" id="manage-user-old-name"><div class="form-group"><label style="text-align:left;">User Name</label><input type="text" id="manage-user-name" class="compact-input" placeholder="Name"></div><div class="form-group"><label style="text-align:left;">4-Digit PIN</label><input type="number" id="manage-user-pin" class="compact-input" placeholder="0711"></div><div class="form-group"><label style="text-align:left;">Role</label><select id="manage-user-role" class="compact-input"><option value="Admin">Admin</option><option value="Manager">Manager</option><option value="SelfOnly">SelfOnly</option><option value="ReadOnly">ReadOnly</option><option value="Master Admin">Master Admin</option></select></div><div style="display:flex; gap:12px; margin-top:24px;"><button class="btn btn-clear" onclick="closeUserModal()">Cancel</button><button class="btn btn-primary" onclick="saveUserManage()">Save User</button></div></div></div>
-
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxJsu4llXFpjbeMX53mDmIpQ2z1YNR8garBDkBKxVF9AR3dSmfX0Zvm-XB02ZQplus/exec"; 
     
@@ -630,12 +642,20 @@
     function assignIdleVehicle(vn) { window.pendingAssignVehicle = vn; openWorkspace('tab-placement'); }
     function renderFleetStatus() {
         const c = document.getElementById('fleet-container'); let lst = []; const isAdm = getUserPerms().adminTab; const n = currentUser.Name || currentUser.name || '';
+        const fVnum = document.getElementById('fs-filter-vnum') ? document.getElementById('fs-filter-vnum').value.trim().toLowerCase() : '';
+        const fType = document.getElementById('fs-filter-type') ? document.getElementById('fs-filter-type').value.trim().toLowerCase() : '';
+
         Object.keys(vehicles).forEach(vn => {
             if(!isKTPL(vn)) return;
-            let vd = vehicles[vn]; let vt = (vd.type || '').toUpperCase(); let cat = 'Other Fleet'; if (vt.includes('20')) cat = '20Ft Fleet'; else if (vt.includes('32')) cat = '32Ft Fleet';
+            let vd = vehicles[vn]; let vt = (vd.type || '').toUpperCase(); let vc = (vd.capacity || '').toUpperCase();
+            let cat = 'Other Fleet'; if (vt.includes('20')) cat = '20Ft Fleet'; else if (vt.includes('32')) cat = '32Ft Fleet';
             if (n === 'Pramod Nayak' && !vt.includes('32')) return;
             if (currentFleetSecondary !== cat) return; 
             let vBr = vehicleBranches[vn.toUpperCase()] || 'Unassigned'; if (currentFleetBranch !== 'All' && vBr !== currentFleetBranch) return;
+
+            if (fVnum && !vn.toLowerCase().includes(fVnum)) return;
+            if (fType && !vt.toLowerCase().includes(fType) && !vc.toLowerCase().includes(fType)) return;
+
             let vTr = allTrips.filter(t => (t.vNum || '').toUpperCase() === vn.toUpperCase()); let aTr = vTr.find(t => (t.status || '').trim() === 'In-Transit'); let stat = aTr ? 'In Transit' : (vd.fleetStatus || 'Available (Idle)');
             if (currentFleetPrimary !== 'All' && stat !== currentFleetPrimary) return;
             let cpTr = vTr.filter(t => (t.status || '').trim() === 'Delivered'); cpTr.sort((a,b) => parseDate(b.deliveryDate || b.date) - parseDate(a.deliveryDate || a.date)); let lTr = cpTr[0] || null;
@@ -799,8 +819,8 @@
         try {
             const pName = document.getElementById('rf-party').value.trim().toLowerCase(); let f = getFilteredTrips(allTrips).filter(t => t.computedBookingType === currentReportType); if(pName) f = f.filter(t => (t.party || '').toLowerCase().includes(pName));
             const ts = document.getElementById('report-trip-status').value; const ps = document.getElementById('report-pod-status').value;
-            let finalF = []; const tm = new Date(); tm.setHours(0,0,0,0);
-            f.forEach(t => { let st = (t.status || '').trim(); if(st === 'In-Transit') { finalF.push(t); } else if (st === 'Delivered' && t.deliveryDate) { let pd = parseDate(t.deliveryDate); if(pd > 0 && pd >= tm.getTime()) finalF.push(t); } });
+            let finalF = []; const ydy = new Date(); ydy.setDate(ydy.getDate() - 1); ydy.setHours(0,0,0,0);
+            f.forEach(t => { let st = (t.status || '').trim(); if(st === 'In-Transit') { finalF.push(t); } else if (st === 'Delivered' && t.deliveryDate) { let pd = parseDate(t.deliveryDate); if(pd > 0 && pd >= ydy.getTime()) finalF.push(t); } });
             if (ts !== 'All') finalF = finalF.filter(t => (t.status || '').trim() === ts);
             if (ps !== 'All') { if (ps === 'Pending') finalF = finalF.filter(t => !t.podDate || String(t.podDate).trim() === ''); if (ps === 'Received') finalF = finalF.filter(t => t.podDate && String(t.podDate).trim() !== ''); }
             const sC = document.getElementById('screen-report'); const pC = document.getElementById('print-report-container'); document.getElementById('report-actions').style.display = 'flex';
@@ -830,7 +850,7 @@
         const wb = XLSX.utils.book_new(); let r = [];
         if (ledgerType === 'Own Booking') {
             r.push(["Trip ID", "Date", "Party Name", "From", "To", "Vehicle No", "Type", "Weight", "Status", "Delivery Date", "Custom Note", "CNote_LR", "POD_Date", "Created By", "Vehicle Freight", "Charged Freight", "Driver Name", "Driver Contact", "Transporter", "Transporter Person", "Transporter Contact", "Remarks", "POD Remark", "Loading", "Unloading", "LR", "Others", "Other Reason", "Balance to Pay", "Saved on add. deduction"]);
-            eT.forEach(t => { let l = { income: [], expense: [], reco: {payments:[]} }; try { let p = JSON.parse(t.financialLedger); if(p.income) l.income = p.income; if(p.expense) l.expense = p.expense; if(p.reco) l.reco = p.reco; if(!l.reco.payments) l.reco.payments=[]; } catch(e){} let bC = parseFloat(t.vFreight || 0); let ld = l.expense.find(e=>e.type==='Loading'); let loading = ld ? ld.amt : 0; let un = l.expense.find(e=>e.type==='Unloading'); let unloading = un ? un.amt : 0; let oth = l.expense.filter(e=>e.type!=='Loading' && e.type!=='Unloading').reduce((s,x)=>s+parseFloat(x.amt||0),0); let ptTot = l.reco.payments.reduce((s,x)=>s+parseFloat(x.amt||0),0); if(!l.reco.payments || l.reco.payments.length===0) ptTot = parseFloat(l.reco.advPaid || t.advancePaid || 0) + parseFloat(l.reco.balPaid1 || l.reco.balPaid || 0) + parseFloat(l.reco.balPaid2 || 0) + parseFloat(l.reco.balPaid3 || 0); let tP = bC + (ld?parseFloat(ld.amt||0):0) + (un?parseFloat(un.amt||0):0) + oth; let bToP = tP - ptTot - (l.income.reduce((s,r)=>s+parseFloat(r.amt||0),0)); let isC = (l.reco.status === 'Cleared'); let sDed = (isC && bToP > 0) ? bToP : 0; let fB = (isC && bToP > 0) ? 0 : bToP; let lr = l.expense.find(e=>e.type==='LR'); r.push([t.id, t.date, t.party, t.from, t.to, t.vNum, t.type, t.weight, t.status, t.deliveryDate, t.statusNote||"", t.cNote||"", t.podDate||"", t.createdBy, t.vFreight, t.cFreight, t.dName, t.dContact, t.tName, t.tPerson, t.tContact, t.remarks, t.podRemark, loading, unloading, lr?lr.amt:0, oth, t.otherExpReason||"", fB, sDed]); });
+            eT.forEach(t => { let l = { income: [], expense: [], reco: {payments:[]} }; try { let p = JSON.parse(t.financialLedger); if(p.income) l.income = p.income; if(p.expense) l.expense = p.expense; if(p.reco) l.reco = p.reco; if(!l.reco.payments) l.reco.payments=[]; } catch(e){} let bC = parseFloat(t.vFreight || 0); let ld = l.expense.find(e=>e.type==='Loading'); let loading = ld ? ld.amt : 0; let un = l.expense.find(e=>e.type==='Unloading'); let unloading = un ? un.amt : 0; let oth = l.expense.filter(e=>e.type!=='Loading' && e.type!=='Unloading').reduce((s,x)=>s+parseFloat(x.amt||0),0); let ptTot = l.reco.payments.reduce((s,x)=>s+parseFloat(x.amt||0),0); if(!l.reco.payments || l.reco.payments.length===0) ptTot = parseFloat(l.reco.advPaid || t.advancePaid || 0) + parseFloat(l.reco.balPaid1 || l.reco.balPaid || 0) + parseFloat(l.reco.balPaid2 || 0) + parseFloat(l.reco.balPaid3 || 0); let tP = bC + (ld?parseFloat(ld.amt||0):0) + (un?parseFloat(un.amt||0):0) + oth; let bToP = tP - ptTot - (l.income.reduce((s,x)=>s+parseFloat(x.amt||0),0)); let isC = (l.reco.status === 'Cleared'); let sDed = (isC && bToP > 0) ? bToP : 0; let fB = (isC && bToP > 0) ? 0 : bToP; let lr = l.expense.find(e=>e.type==='LR'); r.push([t.id, t.date, t.party, t.from, t.to, t.vNum, t.type, t.weight, t.status, t.deliveryDate, t.statusNote||"", t.cNote||"", t.podDate||"", t.createdBy, t.vFreight, t.cFreight, t.dName, t.dContact, t.tName, t.tPerson, t.tContact, t.remarks, t.podRemark, loading, unloading, lr?lr.amt:0, oth, t.otherExpReason||"", fB, sDed]); });
         } else {
             r.push(["Trip ID", "Date", "Party Name", "From", "To", "Vehicle No", "Type", "Weight", "Status", "Delivery Date", "Custom Note", "CNote_LR", "POD_Date", "Created By", "Vehicle Freight", "Charged Freight", "Driver Name", "Driver Contact", "Transporter", "Transporter Person", "Transporter Contact", "Remarks", "POD Remark", "Loading", "Unloading", "LR", "Others", "Other Reason", "Outstanding Amount", "Bad Debts"]);
             eT.forEach(t => { let l = { income: [], expense: [], reco: {payments:[]} }; try { let p = JSON.parse(t.financialLedger); if(p.reco) l.reco = p.reco; if(p.expense) l.expense = p.expense; if(p.income) l.income = p.income; if(!l.reco.payments) l.reco.payments=[]; } catch(e){} let bC = parseFloat(t.vFreight || 0); let ptTot = l.reco.payments.reduce((s,x)=>s+parseFloat(x.amt||0),0); if(!l.reco.payments || l.reco.payments.length===0) ptTot = parseFloat(l.reco.advRec || 0) + parseFloat(l.reco.osDues1 || l.reco.osDues || 0) + parseFloat(l.reco.osDues2 || 0) + parseFloat(l.reco.osDues3 || 0); let tOs = (parseFloat(t.cFreight || 0) + l.income.reduce((s,x)=>s+parseFloat(x.amt||0),0)) - (bC + l.expense.reduce((s,x)=>s+parseFloat(x.amt||0),0) + ptTot); let bd = (l.reco.status === "Cleared" && tOs > 0) ? tOs : 0; let fOs = (l.reco.status === "Cleared" && tOs > 0) ? 0 : tOs; r.push([t.id, t.date, t.party, t.from, t.to, t.vNum, t.type, t.weight, t.status, t.deliveryDate, t.statusNote||"", t.cNote||"", t.podDate||"", t.createdBy, "", t.cFreight, "", "", "", "", "", t.remarks, t.podRemark, "", "", "", "", "", fOs, bd]); });
@@ -870,8 +890,8 @@
         if (vMode === 'pod-received') { h += `<div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>C-Note:</strong> ${t.cNote || "N/A"}</div>${t.podRemark ? `<div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>Remarks:</strong> ${t.podRemark}</div>` : ''}<div style="margin-top:10px; color:#137333; font-weight:500;">POD Received: ${t.podDate}</div>`; if (!isRO) { h += `<button class="btn-clear" style="font-size:10px; padding:6px 10px; margin-top:5px; width:auto; border-radius:4px;" onclick="savePOD('${t.id}', true)">Remove Date</button>`; } }
         h += `</div>`; return h;
     }
-    function renderAdminUsers() { const tb = document.getElementById('admin-user-list'); if(!tb) return; tb.innerHTML = users.map(u => `<tr><td>${u.Name || u.name || 'Unknown'}</td><td>${u.Role || u.role || 'Unassigned'}</td><td style="font-family: monospace;">${u.PIN || u.pin || 'None'}</td><td><button class="admin-action-btn" onclick="openEditUserModal('${u.Name || u.name}', '${u.PIN || u.pin}', '${u.Role || u.role}')">Edit</button><button class="admin-action-btn" style="color: #d93025;" onclick="deleteUser('${u.Name || u.name}')">Del</button></td></tr>`).join(''); if (document.getElementById('module-access-container')) renderPermissionsUI(); }
-    function renderPermissionsUI() { const mods = ['Placement', 'Deployed', 'POD', 'Payments', 'Reports']; let h = ''; mods.forEach(m => { h += `<div style="margin-bottom:10px; border:1px solid #dadce0; padding:10px; border-radius:8px; background:#f8f9fa;"><div style="font-weight:bold; cursor:pointer; font-size:13px; color:#0b57d0;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display==='none'?'block':'none'">▶ Manage Access: ${m}</div><div style="display:none; margin-top:10px;">`; users.forEach(u => { let chk = (u.permissions && u.permissions[m] === false) ? '' : 'checked'; h += `<div style="margin-bottom:4px; font-size:12px; color:#444746;"><label style="margin:0; font-weight:normal; text-transform:none;"><input type="checkbox" class="perm-cb" data-user="${u.Name||u.name}" data-mod="${m}" ${chk} style="width:auto; display:inline-block; margin-right:6px;"> ${u.Name||u.name}</label></div>`; }); h += `</div></div>`; }); document.getElementById('module-access-container').innerHTML = h; }
+    function renderAdminUsers() { const tb = document.getElementById('admin-user-list'); if(!tb) return; tb.innerHTML = users.filter(u => u.Name !== '__VCONFIG__' && u.name !== '__VCONFIG__').map(u => `<tr><td>${u.Name || u.name || 'Unknown'}</td><td>${u.Role || u.role || 'Unassigned'}</td><td style="font-family: monospace;">${u.PIN || u.pin || 'None'}</td><td><button class="admin-action-btn" onclick="openEditUserModal('${u.Name || u.name}', '${u.PIN || u.pin}', '${u.Role || u.role}')">Edit</button><button class="admin-action-btn" style="color: #d93025;" onclick="deleteUser('${u.Name || u.name}')">Del</button></td></tr>`).join(''); if (document.getElementById('module-access-container')) renderPermissionsUI(); }
+    function renderPermissionsUI() { const mods = ['Placement', 'Deployed', 'POD', 'Payments', 'Reports']; let h = ''; mods.forEach(m => { h += `<div style="margin-bottom:10px; border:1px solid #dadce0; padding:10px; border-radius:8px; background:#f8f9fa;"><div style="font-weight:bold; cursor:pointer; font-size:13px; color:#0b57d0;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display==='none'?'block':'none'">▶ Manage Access: ${m}</div><div style="display:none; margin-top:10px;">`; users.filter(u => u.Name !== '__VCONFIG__' && u.name !== '__VCONFIG__').forEach(u => { let chk = (u.permissions && u.permissions[m] === false) ? '' : 'checked'; h += `<div style="margin-bottom:4px; font-size:12px; color:#444746;"><label style="margin:0; font-weight:normal; text-transform:none;"><input type="checkbox" class="perm-cb" data-user="${u.Name||u.name}" data-mod="${m}" ${chk} style="width:auto; display:inline-block; margin-right:6px;"> ${u.Name||u.name}</label></div>`; }); h += `</div></div>`; }); document.getElementById('module-access-container').innerHTML = h; }
     function savePermissions() { const cbs = document.querySelectorAll('.perm-cb'); let nP = {}; cbs.forEach(cb => { let un = cb.getAttribute('data-user'); let mod = cb.getAttribute('data-mod'); if(!nP[un]) nP[un] = {}; nP[un][mod] = cb.checked; }); users.forEach(u => { let n = u.Name || u.name; if(nP[n]) u.permissions = nP[n]; }); alert("Module access updated locally."); }
     function openAddUserModal() { document.getElementById('user-modal-title').innerText = "Add New User"; document.getElementById('manage-user-old-name').value = ""; document.getElementById('manage-user-name').value = ""; document.getElementById('manage-user-pin').value = ""; document.getElementById('manage-user-role').value = "ReadOnly"; document.getElementById('userManageModal').style.display = 'flex'; }
     function openEditUserModal(n, p, r) { document.getElementById('user-modal-title').innerText = "Edit User"; document.getElementById('manage-user-old-name').value = n; document.getElementById('manage-user-name').value = n; document.getElementById('manage-user-pin').value = p; document.getElementById('manage-user-role').value = r; document.getElementById('userManageModal').style.display = 'flex'; }
