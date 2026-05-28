@@ -246,9 +246,35 @@
 <div id="batchPaymentModal" class="modal"><div class="modal-content" style="max-width: 320px; padding: 24px;"><h3 style="margin-top:0; color:#1f1f1f; font-weight:700; font-size:16px;">Request Payment</h3><p style="font-size: 13px; color: #5f6368; margin-bottom: 15px;">Select request type and export method.</p><div class="form-group" style="margin-top:0; margin-bottom:15px;"><label>Payment Type</label><select id="batch-pay-type" class="compact-input"><option value="Advance">Advance Request</option><option value="Balance">Balance Request</option><option value="Full Settlement">Full Settlement</option></select></div><div style="display:flex; flex-direction: column; gap:12px;"><button class="btn btn-whatsapp" onclick="executeBatchPayment('whatsapp')">💬 Send via WhatsApp</button><button class="btn btn-team" onclick="executeBatchPayment('excel')">📊 Export Excel</button><button class="btn btn-clear" onclick="closeBatchPaymentModal()" style="margin-top: 8px;">Cancel</button></div></div></div>
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxJsu4llXFpjbeMX53mDmIpQ2z1YNR8garBDkBKxVF9AR3dSmfX0Zvm-XB02ZQplus/exec"; 
-    let vehicles={};let clients=[];let transporters={};let allTrips=[];let users=[];let statusLogs=[];let driverData={};let transporterBanks={};let currentUser=null;let isCheckingPin=false;let currentActiveMainTab='panel-homepage';let currentPlacementType="";let currentDeployedType="";let currentDeployedStatus="In-Transit";let currentFleetBranch="All";let currentFleetPrimary="All";let currentFleetSecondary="20Ft Fleet";let currentPodType="";let currentPodStatus="Pending";let currentRecoType="";let currentRecoStat="Pending";let currentReportType="";let pendingWhatsAppMsg="";let currentReportTrips=[];let currentOpenRecoId=null;let vehicleBranches=JSON.parse(localStorage.getItem('ktpl_branches')||'{}');let selectedPaymentTrips=[];
-    const ZONES = {"Zone 1. West": ["Baramati","Mumbai","Thane","Bhiwandi","Pune","Vapi","Surat","Taloja","JNPT","Nhava Sheva","Vashi","Vasai","Belapur","Dombivali","Dombivli","Kalyan","Yewai Naka","Aurangabad","Waluj","Jalna","Ahmedabad","Panoli","Dahej","Kheda"],"Zone 2. NCR": ["New Delhi","Ghaziabad","Sonipat","Aligarh","Gurugram","Noida","Sahibabad","Bahadurgarh","Alipur"],"Zone 3. North West": ["Zirakpur","Ludhiana","Ambala","Kapurthala","Baddi","Ponta Sahib","Mohali","Chandigarh"],"Zone 4. East / North East": ["Kolkata","Siliguri","Guwahati","Patna","Cuttack","Bhubaneswar"],"Zone 5. South West": ["Bangalore","Hosur","Hoskote","Dhansapura"],"Zone 6. Telangana": ["Hyderabad","Rangareddy","Sangareddy","Uppal","Medchal"],"Zone 7. Chennai": ["Chennai","Sri City","Sriperumbudur","Guindy","Kanchipuram"],"Zone 8. Rajasthan": ["Jaipur","Bagur","VKI","Bhiwadi","Neemrana","Keshwana","Alwar"]};
-    function getZoneForCity(city) { if(!city) return null; let c = city.trim().toLowerCase().replace(/\s+(mh|up|gj|dl|hr|pb|wb|or|ka|ts|tn|rj|uk|ch)$/i, ''); for (let zone in ZONES) { if (ZONES[zone].some(zc => c.includes(zc.toLowerCase()) || zc.toLowerCase().includes(c))) return zone; } return null; }
+    
+    let vehicles = {}; let clients = []; let transporters = {}; let allTrips = []; let users = []; 
+    let statusLogs = []; let driverData = {}; let transporterBanks = {}; 
+    let currentUser = null; let isCheckingPin = false; let currentActiveMainTab = 'panel-homepage';
+    let currentPlacementType = ""; let currentDeployedType = ""; let currentDeployedStatus = "In-Transit";
+    let currentFleetBranch = "All"; let currentFleetPrimary = "All"; let currentFleetSecondary = "20Ft Fleet";
+    let currentPodType = ""; let currentPodStatus = "Pending"; let currentRecoType = ""; let currentRecoStat = "Pending";
+    let currentReportType = ""; let pendingWhatsAppMsg = ""; let currentReportTrips = []; let currentOpenRecoId = null; 
+    let vehicleBranches = JSON.parse(localStorage.getItem('ktpl_branches') || '{}');
+    let selectedPaymentTrips = [];
+
+    const ZONES = {
+        "Zone 1. West": ["Baramati","Mumbai","Thane","Bhiwandi","Pune","Vapi","Surat","Taloja","JNPT","Nhava Sheva","Vashi","Vasai","Belapur","Dombivali","Dombivli","Kalyan","Yewai Naka","Aurangabad","Waluj","Jalna","Ahmedabad","Panoli","Dahej","Kheda"],
+        "Zone 2. NCR": ["New Delhi","Ghaziabad","Sonipat","Aligarh","Gurugram","Noida","Sahibabad","Bahadurgarh","Alipur"],
+        "Zone 3. North West": ["Zirakpur","Ludhiana","Ambala","Kapurthala","Baddi","Ponta Sahib","Mohali","Chandigarh"],
+        "Zone 4. East / North East": ["Kolkata","Siliguri","Guwahati","Patna","Cuttack","Bhubaneswar"],
+        "Zone 5. South West": ["Bangalore","Hosur","Hoskote","Dhansapura"],
+        "Zone 6. Telangana": ["Hyderabad","Rangareddy","Sangareddy","Uppal","Medchal"],
+        "Zone 7. Chennai": ["Chennai","Sri City","Sriperumbudur","Guindy","Kanchipuram"],
+        "Zone 8. Rajasthan": ["Jaipur","Bagur","VKI","Bhiwadi","Neemrana","Keshwana","Alwar"]
+    };
+
+    function getZoneForCity(city) {
+        if(!city) return null; 
+        let c = city.trim().toLowerCase().replace(/\s+(mh|up|gj|dl|hr|pb|wb|or|ka|ts|tn|rj|uk|ch)$/i, ''); 
+        for (let zone in ZONES) { if (ZONES[zone].some(zc => c.includes(zc.toLowerCase()) || zc.toLowerCase().includes(c))) return zone; } 
+        return null; 
+    }
+
     function getSafeTel(n) { if(!n) return ''; let c = String(n).replace(/[\s-]/g, '').trim(); if(c.startsWith('+')) return c; if(c.startsWith('91') && c.length>10) return '+'+c; return '+91'+c; }
     function formatCaseStr(str) { if(!str) return ""; return str.trim().split(/\s+/).map(w => { let cw = w.replace(/[^A-Za-z0-9]/g, ''); if (cw.length>0 && cw.length<=3) return w.toUpperCase(); let i = w.search(/[a-zA-Z]/); if(i !== -1) return w.substring(0, i) + w.charAt(i).toUpperCase() + w.substring(i+1).toLowerCase(); return w; }).join(' '); }
     function formatCase(el, style) { if(el.value) el.value = style==='upper' ? el.value.trim().toUpperCase() : formatCaseStr(el.value); }
@@ -260,7 +286,20 @@
     function parseDate(dStr) { if(!dStr) return 0; try { let p = dStr.split(',')[0].split('/'); if(p.length===3) return new Date(p[2], p[1]-1, p[0]).getTime(); return 0; } catch(e) { return 0; } }
     function isVehicleNumber(str) { if(!str) return false; return /^[A-Z]{2}\d{1,2}[A-Z]{0,3}\d{4}$/.test(str.replace(/[\s-_]/g, '').toUpperCase()); }
     function isKTPL(vNum) { if(!vNum || !vehicles[vNum.toUpperCase()]) return false; let tr = vehicles[vNum.toUpperCase()].transporter; return tr && String(tr).trim().toUpperCase() === 'KTPL'; }
-    function normalizePartyName(name) { if(!name) return ""; let o = name.trim(); let l = o.toLowerCase(); if(/(^|\s)usv(\s|$)/.test(l) || l.startsWith('usv')) return 'USV'; if(/(^|\s)nrb(\s|$)/.test(l) || l.startsWith('nrb')) return 'NRB'; if(/(^|\s)j\.?b\.?\s*chemical/.test(l) || l.startsWith('jb ')) return 'JB Chemicals'; if(/(^|\s)r\.?k\.?\s*foodland/.test(l) || l.startsWith('rk ')) return 'RK Foodland'; if(/(^|\s)tech\s*nova/.test(l) || l.startsWith('technova') || l.startsWith('tech nova')) return 'Tech Nova'; if(/(^|\s)vns(\s|$)/.test(l) || l.startsWith('vns')) return 'VNS'; if(/(^|\s)jnpt(\s|$)/.test(l) || l.startsWith('jnpt')) return 'JNPT'; if(l.startsWith('fr8') || l.startsWith('fr 8')) { let r = o.replace(/^fr[\s-]*8/i, '').trim(); if(r.startsWith('-')) r = r.substring(1).trim(); return r ? 'FR8 - ' + formatCaseStr(r) : 'FR8'; } if(l.startsWith('lobb')) { let r = o.replace(/^lobb/i, '').trim(); if(r.startsWith('-')) r = r.substring(1).trim(); return r ? 'Lobb - ' + formatCaseStr(r) : 'Lobb'; } return formatCaseStr(o); }
+    
+    function normalizePartyName(name) {
+        if(!name) return ""; let o = name.trim(); let l = o.toLowerCase(); 
+        if(/(^|\s)usv(\s|$)/.test(l) || l.startsWith('usv')) return 'USV'; 
+        if(/(^|\s)nrb(\s|$)/.test(l) || l.startsWith('nrb')) return 'NRB'; 
+        if(/(^|\s)j\.?b\.?\s*chemical/.test(l) || l.startsWith('jb ')) return 'JB Chemicals'; 
+        if(/(^|\s)r\.?k\.?\s*foodland/.test(l) || l.startsWith('rk ')) return 'RK Foodland'; 
+        if(/(^|\s)tech\s*nova/.test(l) || l.startsWith('technova') || l.startsWith('tech nova')) return 'Tech Nova'; 
+        if(/(^|\s)vns(\s|$)/.test(l) || l.startsWith('vns')) return 'VNS'; 
+        if(/(^|\s)jnpt(\s|$)/.test(l) || l.startsWith('jnpt')) return 'JNPT'; 
+        if(l.startsWith('fr8') || l.startsWith('fr 8')) { let r = o.replace(/^fr[\s-]*8/i, '').trim(); if(r.startsWith('-')) r = r.substring(1).trim(); return r ? 'FR8 - ' + formatCaseStr(r) : 'FR8'; } 
+        if(l.startsWith('lobb')) { let r = o.replace(/^lobb/i, '').trim(); if(r.startsWith('-')) r = r.substring(1).trim(); return r ? 'Lobb - ' + formatCaseStr(r) : 'Lobb'; } 
+        return formatCaseStr(o); 
+    }
     function formatPartyName(el) { if(el && el.value) el.value = normalizePartyName(el.value); }
     function blockVehicleInPartyFields(mode) { let f = mode === 'Own Booking' ? ['ob-party', 'ob-tname'] : ['rl-party', 'rl-agency']; let err = false; f.forEach(id => { const el = document.getElementById(id); if (el && isVehicleNumber(el.value)) { alert(`Error: Vehicle No. entered in Party/Agency field.`); el.style.borderColor = '#b3261e'; err = true; } }); return err; }
     function openWhatsAppChoice(msg) { pendingWhatsAppMsg = msg; document.getElementById('whatsappChoiceModal').style.display = 'flex'; document.getElementById('shareModal').style.display = 'none'; }
@@ -268,15 +307,64 @@
     function executeWhatsAppShare(appType) { const enc = encodeURIComponent(pendingWhatsAppMsg); const ua = navigator.userAgent || navigator.vendor || window.opera; let url = ""; if(/android/i.test(ua)) { url = appType === 'business' ? `intent://send?text=${enc}#Intent;package=com.whatsapp.w4b;scheme=whatsapp;end` : `intent://send?text=${enc}#Intent;package=com.whatsapp;scheme=whatsapp;end`; window.location.href = url; } else if(/iPad|iPhone|iPod/.test(ua) && !window.MSStream) { url = `whatsapp://send?text=${enc}`; window.location.href = url; } else { url = `whatsapp://send?text=${enc}`; window.open(url, '_blank'); } closeWhatsAppChoiceModal(); }
     function setGreeting() { const h = new Date().getHours(); document.getElementById('greeting-text').innerText = `${h < 12 ? "Good Morning," : h < 17 ? "Good Afternoon," : "Good Evening,"}`; }
     setGreeting();
-    window.onload = async () => { try { const savedUser = sessionStorage.getItem('ktpl_user'); if(document.getElementById('ob-date')) document.getElementById('ob-date').valueAsDate = new Date(); if(document.getElementById('rl-date')) document.getElementById('rl-date').valueAsDate = new Date(); if (sessionStorage.getItem('ktpl_unlocked') === 'true' && savedUser) { currentUser = JSON.parse(savedUser); document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex'; try { await performDatabaseSync(); document.getElementById('loading-overlay').style.display = 'none'; applyUserPermissions(); } catch (err) { document.getElementById('loader-text').innerText = "Offline Mode: Connection Failed."; document.getElementById('error-box').innerText = err.message; document.getElementById('error-box').style.display = "block"; document.getElementById('bypass-btn').style.display = "inline-block"; } } else { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; } } catch (err) { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; } };
+
+    window.onload = async () => { 
+        try { 
+            const savedUser = sessionStorage.getItem('ktpl_user'); 
+            if(document.getElementById('ob-date')) document.getElementById('ob-date').valueAsDate = new Date(); 
+            if(document.getElementById('rl-date')) document.getElementById('rl-date').valueAsDate = new Date(); 
+            if (sessionStorage.getItem('ktpl_unlocked') === 'true' && savedUser) { 
+                currentUser = JSON.parse(savedUser); document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex'; 
+                try { 
+                    await performDatabaseSync(); 
+                    document.getElementById('loading-overlay').style.display = 'none'; 
+                    applyUserPermissions(); 
+                } catch (err) { 
+                    document.getElementById('loader-text').innerText = "Offline Mode: Connection Failed."; 
+                    document.getElementById('error-box').innerText = err.message; 
+                    document.getElementById('error-box').style.display = "block"; 
+                    document.getElementById('bypass-btn').style.display = "inline-block"; 
+                } 
+            } else { 
+                document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; 
+            } 
+        } catch (err) { 
+            document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; 
+        } 
+    };
+
     function bypassLoading() { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; document.getElementById('app-pin').value = ''; document.getElementById('error-box').style.display = 'none'; document.getElementById('bypass-btn').style.display = 'none'; }
     function logoutApp() { sessionStorage.clear(); location.reload(); }
-    async function checkPin() { if (isCheckingPin) return; const pInput = document.getElementById('app-pin'); const pin = pInput ? pInput.value.trim() : ''; if (!pin) return; if (pin.length !== 4) { document.getElementById('pin-error').innerText = "Enter 4-digit PIN."; document.getElementById('pin-error').style.display = 'block'; return; } isCheckingPin = true; document.getElementById('pin-error').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Verifying & Syncing Databank..."; try { await performDatabaseSync(); const u = users.find(x => x && String(x.PIN || x.pin) === String(pin)) || (pin === "0711" ? {Name: "Master Admin", Role: "Master Admin"} : null); if (u) { currentUser = u; sessionStorage.setItem('ktpl_unlocked', 'true'); sessionStorage.setItem('ktpl_user', JSON.stringify(u)); document.getElementById('loading-overlay').style.display = 'none'; applyUserPermissions(); } else { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; document.getElementById('pin-error').innerText = "Invalid PIN."; document.getElementById('pin-error').style.display = 'block'; if(pInput) pInput.value = ''; } } catch (err) { document.getElementById('loader-text').innerText = "Sync Failed."; document.getElementById('error-box').innerText = err.message; document.getElementById('error-box').style.display = "block"; document.getElementById('bypass-btn').style.display = "inline-block"; } isCheckingPin = false; }
+
+    async function checkPin() { 
+        if (isCheckingPin) return; const pInput = document.getElementById('app-pin'); const pin = pInput ? pInput.value.trim() : ''; 
+        if (!pin) return; 
+        if (pin.length !== 4) { document.getElementById('pin-error').innerText = "Enter 4-digit PIN."; document.getElementById('pin-error').style.display = 'block'; return; } 
+        isCheckingPin = true; document.getElementById('pin-error').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Verifying & Syncing Databank..."; 
+        try { 
+            await performDatabaseSync(); 
+            const u = users.find(x => x && String(x.PIN || x.pin) === String(pin)) || (pin === "0711" ? {Name: "Master Admin", Role: "Master Admin"} : null); 
+            if (u) { 
+                currentUser = u; sessionStorage.setItem('ktpl_unlocked', 'true'); sessionStorage.setItem('ktpl_user', JSON.stringify(u)); 
+                document.getElementById('loading-overlay').style.display = 'none'; applyUserPermissions(); 
+            } else { 
+                document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; document.getElementById('pin-error').innerText = "Invalid PIN."; document.getElementById('pin-error').style.display = 'block'; if(pInput) pInput.value = ''; 
+            } 
+        } catch (err) { 
+            document.getElementById('loader-text').innerText = "Sync Failed."; document.getElementById('error-box').innerText = err.message; document.getElementById('error-box').style.display = "block"; document.getElementById('bypass-btn').style.display = "inline-block"; 
+        } 
+        isCheckingPin = false; 
+    }
+
     async function performDatabaseSync() {
         const ts = Date.now(); const res = await fetch(GOOGLE_SCRIPT_URL + "?t=" + ts); if (!res.ok) throw new Error("Connection failed."); const data = await res.json();
         vehicles = data.vehicles || {}; clients = data.clients || []; transporters = data.transporters || {}; users = data.users || []; statusLogs = data.statusLogs || []; transporterBanks = {};
-        let cU = users.find(u => (u.Name || u.name) === '__VCONFIG__'); if (cU) { try { vehicleBranches = JSON.parse(cU.Role || cU.role); localStorage.setItem('ktpl_branches', JSON.stringify(vehicleBranches)); } catch(e){} }
+        
+        let cU = users.find(u => (u.Name || u.name) === '__VCONFIG__'); 
+        if (cU) { try { vehicleBranches = JSON.parse(cU.Role || cU.role); localStorage.setItem('ktpl_branches', JSON.stringify(vehicleBranches)); } catch(e){} }
+        
         const revLogIds = ['TRP-1779115155932','TRP-1779117724465','TRP-1779204199291','TRP-1779272619346','TRP-1779375136137','TRP-1779457814247','TRP-1779638743270','TRP-1779686779691','TRP-1779722314454'];
+        
         allTrips = (data.trips || []).map(t => {
             t.bookingType = 'Own Booking'; t.brokingAgent = '';
             if(t.financialLedger) { try { let j = JSON.parse(t.financialLedger); if(j.bookingType) t.bookingType = j.bookingType; if(j.brokingAgent) t.brokingAgent = j.brokingAgent; } catch(e){} }
@@ -284,19 +372,42 @@
             if(revLogIds.includes(t.id)) t.bookingType = 'Reverse Logistics';
             t.computedBookingType = t.bookingType; return t;
         });
+
         allTrips.forEach(t => {
-            let trName = t.computedBookingType === 'Own Booking' ? t.tName : t.brokingAgent; let nTr = normalizePartyName(trName);
-            if (nTr && t.financialLedger) { try { let j = JSON.parse(t.financialLedger); if (j.reco && (j.reco.bankName || j.reco.bankAc || j.reco.ifsc)) { if (!transporterBanks[nTr]) transporterBanks[nTr] = { bankName: j.reco.bankName||'', bankAc: j.reco.bankAc||'', ifsc: j.reco.ifsc||'', time: parseDate(t.date) }; else { if (parseDate(t.date) >= transporterBanks[nTr].time) { transporterBanks[nTr] = { bankName: j.reco.bankName||'', bankAc: j.reco.bankAc||'', ifsc: j.reco.ifsc||'', time: parseDate(t.date) }; } } } } catch(e){} }
+            let trName = t.computedBookingType === 'Own Booking' ? t.tName : t.brokingAgent; 
+            let nTr = normalizePartyName(trName);
+            if (nTr && t.financialLedger) { 
+                try { 
+                    let j = JSON.parse(t.financialLedger); 
+                    if (j.reco && (j.reco.bankName || j.reco.bankAc || j.reco.ifsc)) { 
+                        if (!transporterBanks[nTr]) transporterBanks[nTr] = { bankName: j.reco.bankName||'', bankAc: j.reco.bankAc||'', ifsc: j.reco.ifsc||'', time: parseDate(t.date) }; 
+                        else { 
+                            if (parseDate(t.date) >= transporterBanks[nTr].time) { 
+                                transporterBanks[nTr] = { bankName: j.reco.bankName||'', bankAc: j.reco.bankAc||'', ifsc: j.reco.ifsc||'', time: parseDate(t.date) }; 
+                            } 
+                        } 
+                    } 
+                } catch(e){} 
+            }
         });
         setupMemoryDropdowns(); renderAdminUsers();
     }
+
     function getUserPerms() {
         const n = currentUser.Name || currentUser.name || ''; const r = currentUser.Role || currentUser.role || '';
         let p = { adminTab: (r === 'Master Admin'), fleetStatusTab: true, paymentsTab: true, reportsTab: true, revLogistics: true, editTrips: true, viewChargedFreightOB: true, viewChargedFreightRL: true, editChargedFreightOB: true, editChargedFreightRL: true, generateMIS: true, exportLedger: true };
         const pUsers = ['Sanket Matkar', 'Mitali Yadav', 'Anita Fagare', 'Amruta Chavare', 'Ashok Dubey'];
-        if (r === 'Admin') { p.adminTab = false; } else if (n === 'Pramod Nayak') { p.adminTab = false; p.paymentsTab = false; p.editChargedFreightOB = false; } else if (n === 'Parveen Sharma') { p.adminTab = false; p.paymentsTab = false; p.reportsTab = false; p.fleetStatusTab = false; p.revLogistics = false; p.editChargedFreightOB = false; p.editChargedFreightRL = false; } else if (['Vijay Deore', 'Sachin Mokashi', 'Jalindar Jadhav'].includes(n)) { p.adminTab = false; p.paymentsTab = false; p.editTrips = false; p.viewChargedFreightOB = false; p.viewChargedFreightRL = false; p.editChargedFreightOB = false; p.editChargedFreightRL = false; p.generateMIS = false; p.exportLedger = false; } else if (r === 'ReadOnly') { p.adminTab = false; p.paymentsTab = false; p.reportsTab = false; p.editTrips = false; p.editChargedFreightOB = false; p.editChargedFreightRL = false; }
-        p.changeDelCanStatus = true; if (pUsers.includes(n)) { p.paymentsTab = true; } p.editPayments = (r === 'Admin' || r === 'Master Admin' || pUsers.includes(n)); p.viewBaseFreight = (['Master Admin', 'Admin'].includes(r) || ['Anita Fagare', 'Amruta Chavare'].includes(n));
-        if (currentUser.permissions) { if (currentUser.permissions['Placement'] === false) p.placementTab = false; if (currentUser.permissions['Deployed'] === false) p.deployedTab = false; if (currentUser.permissions['POD'] === false) p.podTab = false; if (currentUser.permissions['Payments'] === false) p.paymentsTab = false; if (currentUser.permissions['Reports'] === false) p.reportsTab = false; } return p;
+        if (r === 'Admin') { p.adminTab = false; } 
+        else if (n === 'Pramod Nayak') { p.adminTab = false; p.paymentsTab = false; p.editChargedFreightOB = false; } 
+        else if (n === 'Parveen Sharma') { p.adminTab = false; p.paymentsTab = false; p.reportsTab = false; p.fleetStatusTab = false; p.revLogistics = false; p.editChargedFreightOB = false; p.editChargedFreightRL = false; } 
+        else if (['Vijay Deore', 'Sachin Mokashi', 'Jalindar Jadhav'].includes(n)) { p.adminTab = false; p.paymentsTab = false; p.editTrips = false; p.viewChargedFreightOB = false; p.viewChargedFreightRL = false; p.editChargedFreightOB = false; p.editChargedFreightRL = false; p.generateMIS = false; p.exportLedger = false; } 
+        else if (r === 'ReadOnly') { p.adminTab = false; p.paymentsTab = false; p.reportsTab = false; p.editTrips = false; p.editChargedFreightOB = false; p.editChargedFreightRL = false; }
+        p.changeDelCanStatus = true; 
+        if (pUsers.includes(n)) { p.paymentsTab = true; } 
+        p.editPayments = (r === 'Admin' || r === 'Master Admin' || pUsers.includes(n)); 
+        p.viewBaseFreight = (['Master Admin', 'Admin'].includes(r) || ['Anita Fagare', 'Amruta Chavare'].includes(n));
+        if (currentUser.permissions) { if (currentUser.permissions['Placement'] === false) p.placementTab = false; if (currentUser.permissions['Deployed'] === false) p.deployedTab = false; if (currentUser.permissions['POD'] === false) p.podTab = false; if (currentUser.permissions['Payments'] === false) p.paymentsTab = false; if (currentUser.permissions['Reports'] === false) p.reportsTab = false; } 
+        return p;
     }
     function applyUserPermissions() {
         document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('main-app').style.display = 'block'; document.getElementById('user-name-text').innerText = `Hi ${currentUser.Name || currentUser.name}!`; document.getElementById('user-name-text').style.display = 'block';
@@ -305,6 +416,7 @@
         if (n === 'Pramod Nayak') { document.getElementById('f-sec-20').style.display = 'none'; document.getElementById('f-sec-oth').style.display = 'none'; currentFleetSecondary = '32Ft Fleet'; document.querySelectorAll('#fleet-secondary-tabs .secondary-tab').forEach(el => el.classList.remove('active')); document.getElementById('f-sec-32').classList.add('active'); } else { currentFleetSecondary = '20Ft Fleet'; document.querySelectorAll('#fleet-secondary-tabs .secondary-tab').forEach(el => el.classList.remove('active')); document.getElementById('f-sec-20').classList.add('active'); }
         const cFOB = document.getElementById('ob-cfreight'); if (cFOB) { cFOB.disabled = !p.editChargedFreightOB; cFOB.placeholder = p.editChargedFreightOB ? "Receivable" : "Restricted"; } const cFRL = document.getElementById('rl-cfreight'); if (cFRL) { cFRL.disabled = !p.editChargedFreightRL; cFRL.placeholder = p.editChargedFreightRL ? "Receivable Amount" : "Restricted"; } const bRL = document.getElementById('btn-rl-flow'); if (bRL) { bRL.style.display = p.revLogistics ? 'block' : 'none'; } returnToHome();
     }
+
     function setupCustomDropdown(inpId, lstId, fn, onSel=null) {
         const inp = document.getElementById(inpId); const lst = document.getElementById(lstId); if (!inp || !lst) return;
         function showL(text = "") {
@@ -313,6 +425,7 @@
         }
         inp.addEventListener("input", function() { showL(this.value); }); inp.addEventListener("click", function() { showL(this.value); }); document.addEventListener("click", function (e) { if (e.target !== inp) lst.style.display = "none"; });
     }
+
     function setupMemoryDropdowns() {
         const getCN = c => { if(!c) return ""; return typeof c === 'string' ? c : (c.name || c['Party Name'] || c.Name || Object.values(c)[0] || ""); };
         setupCustomDropdown('uf-party', 'uf-party-list', () => [...new Set(clients.map(getCN).filter(Boolean))].sort(), () => triggerFilterRender()); setupCustomDropdown('uf-transporter', 'uf-transporter-list', () => [...new Set([...Object.keys(transporters).map(normalizePartyName), ...allTrips.map(t=>t?normalizePartyName(t.brokingAgent):'').filter(Boolean)])].sort(), () => triggerFilterRender()); setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), () => triggerFilterRender()); setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort(), () => triggerFilterRender()); setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort(), () => triggerFilterRender()); setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t?t.type:'').filter(Boolean))].sort(), () => triggerFilterRender()); setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t?t.weight:'').filter(Boolean))].sort(), () => triggerFilterRender());
@@ -321,13 +434,16 @@
         setupCustomDropdown('ob-from', 'ob-from-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort()); setupCustomDropdown('ob-to', 'ob-to-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort());
         setupCustomDropdown('rl-party', 'rl-party-list', () => [...new Set(clients.map(getCN).filter(Boolean))].sort()); setupCustomDropdown('rl-vnum', 'rl-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'rl')); setupCustomDropdown('rl-from', 'rl-from-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort()); setupCustomDropdown('rl-to', 'rl-to-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort()); setupCustomDropdown('rl-agent', 'rl-agent-list', () => [...new Set(clients.map(getCN).filter(Boolean))].sort()); setupCustomDropdown('mis-party', 'mis-party-list', () => [...new Set(clients.map(getCN).filter(Boolean))].sort()); setupCustomDropdown('rf-party', 'rf-party-list', () => [...new Set(clients.map(getCN).filter(Boolean))].sort());
         setupCustomDropdown('loc-origin', 'loc-origin-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort()); setupCustomDropdown('loc-dest', 'loc-dest-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort()); setupCustomDropdown('loc-vtype', 'loc-vtype-list', () => [...new Set(allTrips.map(t => t?t.type:'').filter(Boolean))].sort()); setupCustomDropdown('loc-vcap', 'loc-vcap-list', () => [...new Set(allTrips.map(t => t?t.weight:'').filter(Boolean))].sort());
+        
         allTrips.forEach(t => { if (t && t.dName && typeof t.dName === 'string' && t.dName.trim() !== "" && t.dContact) driverData[formatCaseStr(t.dName)] = String(t.dContact).trim(); });
         setupCustomDropdown('ob-dname', 'ob-dname-list', () => Object.keys(driverData).sort(), (n) => { document.getElementById('ob-dcontact').value = driverData[n] || ""; }); setupCustomDropdown('rl-dname', 'rl-dname-list', () => Object.keys(driverData).sort(), (n) => { document.getElementById('rl-dcontact').value = driverData[n] || ""; });
         const dNums = [...new Set(Object.values(driverData))];
         ['ob-dcontact', 'rl-dcontact'].forEach(id => { const inp = document.getElementById(id); const lst = document.getElementById(id + '-list'); if(inp && lst) { inp.addEventListener("input", function() { lst.innerHTML = ""; if (this.value.length > 2) { let c = this.value.replace(/[\s-]/g, '').trim(); const matches = dNums.filter(n => String(n).includes(c)); matches.forEach(m => { let div = document.createElement("div"); div.innerHTML = m; div.onclick = () => { inp.value = m; lst.style.display = "none"; }; lst.appendChild(div); }); lst.style.display = matches.length ? "block" : "none"; } else { lst.style.display = "none"; } }); } });
     }
+
     function autoFillVehicle(vNum, pfx) { const u = vNum.toUpperCase(); if (vehicles[u]) { document.getElementById(`${pfx}-vtype`).value = vehicles[u].type || ""; document.getElementById(`${pfx}-weight`).value = vehicles[u].capacity || ""; } }
     function autoFillContact(pName, pfx) { let mk = Object.keys(transporters).find(k => normalizePartyName(k) === normalizePartyName(document.getElementById(`${pfx}-tname`).value)); const t = mk || document.getElementById(`${pfx}-tname`).value; if (transporters[t]) { const person = transporters[t].find(x => x.name === pName); if (person) document.getElementById(`${pfx}-tcontact`).value = person.phone; } }
+    
     function updateLocalMemory(td) {
         if (td.vNum && td.vType) { if(!vehicles[td.vNum.toUpperCase()]) vehicles[td.vNum.toUpperCase()]={}; vehicles[td.vNum.toUpperCase()].type = td.vType; vehicles[td.vNum.toUpperCase()].capacity = td.weight; }
         const checkC = (n) => { if(!n) return; let nk = normalizePartyName(n); let exists = clients.some(c => { let cStr = typeof c === 'string' ? c : (c.name || c['Party Name'] || c.Name || Object.values(c)[0] || ""); return cStr.toLowerCase() === nk.toLowerCase(); }); if(!exists) clients.push({name: nk}); };
@@ -337,23 +453,40 @@
         if (tn) { if (!transporters[tn]) transporters[tn] = []; if (td.tPerson) { let pn = formatCaseStr(td.tPerson); let ex = transporters[tn].find(p => p.name.toLowerCase() === pn.toLowerCase()); if (!ex) { transporters[tn].push({ name: pn, phone: td.tContact || "" }); } else if(td.tContact && !ex.phone) { ex.phone = td.tContact; } } }
         setupMemoryDropdowns(); 
     }
+
     function openWorkspace(id) {
         const p = getUserPerms();
-        if (id === 'tab-fleet-locator' && !p.fleetStatusTab) return alert("Restricted."); if (id === 'tab-fleet-status' && !p.fleetStatusTab) return alert("Restricted."); if (id === 'tab-admin' && !p.adminTab) return alert("Restricted."); if (id === 'tab-payments' && !p.paymentsTab) return alert("Restricted."); if (id === 'tab-reports' && !p.reportsTab) return alert("Restricted.");
-        document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); currentActiveMainTab = id; document.querySelectorAll('.reco-accordion-body').forEach(el => el.classList.remove('open')); currentOpenRecoId = null; 
+        if (id === 'tab-fleet-locator' && !p.fleetStatusTab) return alert("Restricted Module."); 
+        if (id === 'tab-fleet-status' && !p.fleetStatusTab) return alert("Restricted Module."); 
+        if (id === 'tab-admin' && !p.adminTab) return alert("Restricted Module."); 
+        if (id === 'tab-payments' && !p.paymentsTab) return alert("Restricted Module."); 
+        if (id === 'tab-reports' && !p.reportsTab) return alert("Restricted Module.");
+        
+        document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active')); 
+        document.getElementById(id).classList.add('active'); currentActiveMainTab = id; 
+        document.querySelectorAll('.reco-accordion-body').forEach(el => el.classList.remove('open')); currentOpenRecoId = null; 
+        
         if (id !== 'tab-placement') { document.getElementById('placement-selection-screen').style.display = 'block'; document.getElementById('placement-form-container').style.display = 'none'; }
-        if(id === 'tab-fleet-status') renderFleetStatus(); if(id === 'tab-placement') showPlacementSelection(); if(id === 'tab-deployed') { currentDeployedType = ""; showSelectionScreen('deployed'); } if(id === 'tab-pod') { currentPodType = ""; showSelectionScreen('pod'); } if(id === 'tab-payments') { currentRecoType = ""; selectedPaymentTrips = []; updateBatchPaymentUI(); showSelectionScreen('reco'); }
+        if(id === 'tab-fleet-status') renderFleetStatus(); 
+        if(id === 'tab-placement') showPlacementSelection(); 
+        if(id === 'tab-deployed') { currentDeployedType = ""; showSelectionScreen('deployed'); } 
+        if(id === 'tab-pod') { currentPodType = ""; showSelectionScreen('pod'); } 
+        if(id === 'tab-payments') { currentRecoType = ""; selectedPaymentTrips = []; updateBatchPaymentUI(); showSelectionScreen('reco'); }
         if(id === 'tab-reports') { currentReportType = ""; showSelectionScreen('report'); document.getElementById('screen-report').innerHTML = ''; document.getElementById('print-report-container').innerHTML = ''; document.getElementById('report-actions').style.display = 'none'; }
-        if (['tab-deployed','tab-pod','tab-payments','tab-reports'].includes(id)) { document.getElementById('unified-filter-bar').style.display = 'block'; } else { document.getElementById('unified-filter-bar').style.display = 'none'; } clearFilters(); 
+        if (['tab-deployed','tab-pod','tab-payments','tab-reports'].includes(id)) { document.getElementById('unified-filter-bar').style.display = 'block'; } else { document.getElementById('unified-filter-bar').style.display = 'none'; } 
+        clearFilters(); 
     }
+
     function returnToHome() { document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active')); document.getElementById('panel-homepage').classList.add('active'); document.getElementById('unified-filter-bar').style.display = 'none'; currentActiveMainTab = 'panel-homepage'; }
     function showSelectionScreen(ws) { document.getElementById(`${ws}-selection-screen`).style.display = 'block'; document.getElementById(`${ws}-content-area`).style.display = 'none'; if (ws === 'placement') { clearPlacementForm(); document.getElementById('placement-form-container').style.display = 'none'; document.getElementById('form-own-booking').style.display = 'none'; document.getElementById('form-rev-logistics').style.display = 'none'; } currentOpenRecoId = null; }
     function triggerFilterRender() { if(currentActiveMainTab !== 'tab-reports' && currentActiveMainTab !== 'tab-fleet-status' && currentActiveMainTab !== 'tab-fleet-locator') triggerCurrentRender(); }
     function triggerCurrentRender() { if (currentActiveMainTab === 'tab-deployed' && currentDeployedType !== "") renderDeployed(); if (currentActiveMainTab === 'tab-pod' && currentPodType !== "") renderPOD(); if (currentActiveMainTab === 'tab-payments' && currentRecoType !== "") renderReconciliation(); }
+    
     function clearFilters() {
         ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-transporter', 'uf-origin', 'uf-dest', 'rf-party', 'report-trip-status', 'report-pod-status'].forEach(id => { const el = document.getElementById(id); if(el) { if(id === 'report-trip-status' || id === 'report-pod-status') el.value = 'All'; else el.value = ''; } });
         if (currentActiveMainTab !== 'tab-reports' && currentActiveMainTab !== 'tab-fleet-status' && currentActiveMainTab !== 'tab-fleet-locator') { triggerCurrentRender(); } else if (currentActiveMainTab === 'tab-reports') { document.getElementById('screen-report').innerHTML = ''; document.getElementById('report-actions').style.display = 'none'; } else if (currentActiveMainTab === 'tab-fleet-status') renderFleetStatus();
     }
+
     function getFilteredTrips(base) {
         let r = [...base]; const n = currentUser.Name || currentUser.name || '';
         if (n === 'Parveen Sharma') { r = r.filter(t => t.createdBy === n); } 
@@ -366,7 +499,6 @@
         });
         r.sort((a, b) => new Date((b.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((a.date||'').split(',')[0].split('/').reverse().join('-'))); return r;
     }
-
     function clearLocator() { document.getElementById('loc-origin').value = ''; document.getElementById('loc-dest').value = ''; document.getElementById('loc-vtype').value = ''; document.getElementById('loc-vcap').value = ''; document.getElementById('locator-results').innerHTML = ''; }
     function executeLocatorSearch() {
         const c = document.getElementById('locator-results'); const orig = document.getElementById('loc-origin').value.trim(); const dest = document.getElementById('loc-dest').value.trim(); const vt = document.getElementById('loc-vtype').value.trim().toLowerCase(); const vc = document.getElementById('loc-vcap').value.trim().toLowerCase();
@@ -394,10 +526,20 @@
     function setFleetBranch(br, id) { currentFleetBranch = br; document.querySelectorAll('#fleet-branch-tabs .sub-tab').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); renderFleetStatus(); }
     function setFleetPrimaryTab(stat, id) { currentFleetPrimary = stat; document.querySelectorAll('#fleet-primary-tabs .sub-tab').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); renderFleetStatus(); }
     function setFleetSecondaryTab(type) { const n = currentUser.Name || currentUser.name || ''; if (n === 'Pramod Nayak' && type !== '32Ft Fleet') return; currentFleetSecondary = type; document.querySelectorAll('#fleet-secondary-tabs .secondary-tab').forEach(el => el.classList.remove('active')); event.currentTarget.classList.add('active'); renderFleetStatus(); }
-    function updateVehicleBranch(vn, br) { if(!vehicleBranches) vehicleBranches={}; vehicleBranches[vn.toUpperCase()] = br; localStorage.setItem('ktpl_branches', JSON.stringify(vehicleBranches)); let cu = users.find(u => (u.Name || u.name) === '__VCONFIG__'); if (!cu) { users.push({Name: '__VCONFIG__', Role: JSON.stringify(vehicleBranches), PIN: '0000'}); fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addUser', name: '__VCONFIG__', pin: '0000', role: JSON.stringify(vehicleBranches) }) }); } else { cu.Role = JSON.stringify(vehicleBranches); fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateUser', oldName: '__VCONFIG__', newName: '__VCONFIG__', pin: '0000', role: JSON.stringify(vehicleBranches) }) }); } renderFleetStatus(); }
+    
+    function updateVehicleBranch(vn, br) { 
+        if(!vehicleBranches) vehicleBranches={}; 
+        vehicleBranches[vn.toUpperCase()] = br; localStorage.setItem('ktpl_branches', JSON.stringify(vehicleBranches)); 
+        let cu = users.find(u => (u.Name || u.name) === '__VCONFIG__'); 
+        if (!cu) { users.push({Name: '__VCONFIG__', Role: JSON.stringify(vehicleBranches), PIN: '0000'}); fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addUser', name: '__VCONFIG__', pin: '0000', role: JSON.stringify(vehicleBranches) }) }); } 
+        else { cu.Role = JSON.stringify(vehicleBranches); fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateUser', oldName: '__VCONFIG__', newName: '__VCONFIG__', pin: '0000', role: JSON.stringify(vehicleBranches) }) }); } 
+        renderFleetStatus(); 
+    }
+    
     function updateFleetState(vn, st) { if(!vehicles[vn]) vehicles[vn]={}; vehicles[vn].fleetStatus = st; vehicles[vn].statusTimestamp = Date.now(); fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateVehicleState', vNum: vn, state: st }) }); renderFleetStatus(); }
     function updateIdleLocation(vn, locStr, lastTripId) { if (!locStr) return; const formattedLoc = formatCaseStr(locStr); if (lastTripId && lastTripId !== 'null') { updateStatusLog(lastTripId, formattedLoc); } else { let idleLocs = JSON.parse(localStorage.getItem('ktpl_idle_locs') || '{}'); idleLocs[vn.toUpperCase()] = formattedLoc; localStorage.setItem('ktpl_idle_locs', JSON.stringify(idleLocs)); renderFleetStatus(); } }
     function assignIdleVehicle(vn) { window.pendingAssignVehicle = vn; openWorkspace('tab-placement'); }
+    
     function renderFleetStatus() {
         const c = document.getElementById('fleet-container'); let lst = []; const isAdm = getUserPerms().adminTab; const n = currentUser.Name || currentUser.name || '';
         const fVnum = document.getElementById('fs-filter-vnum') ? document.getElementById('fs-filter-vnum').value.trim().toLowerCase() : ''; const fType = document.getElementById('fs-filter-type') ? document.getElementById('fs-filter-type').value.trim().toLowerCase() : '';
@@ -432,8 +574,20 @@
     function showPlacementSelection() { document.getElementById('placement-selection-screen').style.display = 'block'; document.getElementById('placement-form-container').style.display = 'none'; clearPlacementForm(); }
     function openPlacementForm(mode) { currentPlacementType = mode; clearPlacementForm(); document.getElementById('placement-selection-screen').style.display = 'none'; document.getElementById('placement-form-container').style.display = 'block'; document.getElementById('placement-form-title').innerText = mode; document.getElementById('form-own-booking').style.display = 'none'; document.getElementById('form-rev-logistics').style.display = 'none'; document.getElementById(mode === 'Own Booking' ? 'form-own-booking' : 'form-rev-logistics').style.display = 'block'; setupMemoryDropdowns(); if (window.pendingAssignVehicle) { if (mode === 'Own Booking') { document.getElementById('ob-vnum').value = window.pendingAssignVehicle; autoFillVehicle(window.pendingAssignVehicle, 'ob'); } else { document.getElementById('rl-vnum').value = window.pendingAssignVehicle; autoFillVehicle(window.pendingAssignVehicle, 'rl'); } window.pendingAssignVehicle = null; } }
     function clearPlacementForm() { document.querySelectorAll('#form-own-booking input, #form-rev-logistics input').forEach(i => i.value = ''); if (document.getElementById('ob-date')) document.getElementById('ob-date').valueAsDate = new Date(); if (document.getElementById('rl-date')) document.getElementById('rl-date').valueAsDate = new Date(); }
-    function validatePlacementOwn() { document.querySelectorAll('.error-msg').forEach(msg => msg.style.display = 'none'); document.querySelectorAll('input').forEach(input => input.style.borderColor = 'transparent'); if (blockVehicleInPartyFields('Own Booking')) return false; const pAuth = getUserPerms(); if (!pAuth.adminTab) { let pName = document.getElementById('ob-party').value.trim().toLowerCase(); if (pName !== "") { let exists = clients.some(c => { let cStr = typeof c === 'string' ? c : (c.name || c['Party Name'] || c.Name || Object.values(c)[0] || ""); return cStr.toLowerCase() === pName; }); if (!exists) { alert("Only Admins can add a new Party Name. Please select an existing party from the dropdown."); return false; } } } let valid = true; ['ob-date','ob-party','ob-from','ob-to','ob-vnum','ob-vtype','ob-weight','ob-dcontact','ob-tname','ob-tcontact'].forEach(id => { const el = document.getElementById(id); if (el && !el.value.trim()) { el.style.borderColor = '#b3261e'; valid = false; }}); if (!valid) alert("Fill mandatory fields (*)."); return valid; }
-    function validatePlacementRev() { document.querySelectorAll('input').forEach(input => input.style.borderColor = 'transparent'); if (blockVehicleInPartyFields('Reverse Logistics')) return false; const pAuth = getUserPerms(); if (!pAuth.adminTab) { let pName = document.getElementById('rl-party').value.trim().toLowerCase(); if (pName !== "") { let exists = clients.some(c => { let cStr = typeof c === 'string' ? c : (c.name || c['Party Name'] || c.Name || Object.values(c)[0] || ""); return cStr.toLowerCase() === pName; }); if (!exists) { alert("Only Admins can add a new Party Name. Please select an existing party from the dropdown."); return false; } } } let valid = true; ['rl-date','rl-agency','rl-from','rl-to','rl-vnum','rl-vtype','rl-weight'].forEach(id => { const el = document.getElementById(id); if (el && !el.value.trim()) { el.style.borderColor = '#b3261e'; valid = false; }}); if (!valid) alert("Fill mandatory fields (*)."); return valid; }
+    
+    function validatePlacementOwn() { 
+        document.querySelectorAll('.error-msg').forEach(msg => msg.style.display = 'none'); document.querySelectorAll('input').forEach(input => input.style.borderColor = 'transparent'); if (blockVehicleInPartyFields('Own Booking')) return false; 
+        const pAuth = getUserPerms(); 
+        if (!pAuth.adminTab) { let pName = document.getElementById('ob-party').value.trim().toLowerCase(); if (pName !== "") { let exists = clients.some(c => { let cStr = typeof c === 'string' ? c : (c.name || c['Party Name'] || c.Name || Object.values(c)[0] || ""); return cStr.toLowerCase() === pName; }); if (!exists) { alert("Only Admins can add a new Party Name. Please select an existing party from the dropdown."); return false; } } } 
+        let valid = true; ['ob-date','ob-party','ob-from','ob-to','ob-vnum','ob-vtype','ob-weight','ob-dcontact','ob-tname','ob-tcontact'].forEach(id => { const el = document.getElementById(id); if (el && !el.value.trim()) { el.style.borderColor = '#b3261e'; valid = false; }}); if (!valid) alert("Fill mandatory fields (*)."); return valid; 
+    }
+    function validatePlacementRev() { 
+        document.querySelectorAll('input').forEach(input => input.style.borderColor = 'transparent'); if (blockVehicleInPartyFields('Reverse Logistics')) return false; 
+        const pAuth = getUserPerms(); 
+        if (!pAuth.adminTab) { let pName = document.getElementById('rl-party').value.trim().toLowerCase(); if (pName !== "") { let exists = clients.some(c => { let cStr = typeof c === 'string' ? c : (c.name || c['Party Name'] || c.Name || Object.values(c)[0] || ""); return cStr.toLowerCase() === pName; }); if (!exists) { alert("Only Admins can add a new Party Name. Please select an existing party from the dropdown."); return false; } } } 
+        let valid = true; ['rl-date','rl-agency','rl-from','rl-to','rl-vnum','rl-vtype','rl-weight'].forEach(id => { const el = document.getElementById(id); if (el && !el.value.trim()) { el.style.borderColor = '#b3261e'; valid = false; }}); if (!valid) alert("Fill mandatory fields (*)."); return valid; 
+    }
+    
     function savePlacementOwn() { if (!validatePlacementOwn()) return; const vNumClean = document.getElementById('ob-vnum').value.replace(/[\s-_]/g, '').toUpperCase(); const payload = { action: 'saveTrip', id: "TRP-" + Date.now(), date: getFormattedDateVal(document.getElementById('ob-date').value), party: normalizePartyName(document.getElementById('ob-party').value), from: formatCaseStr(document.getElementById('ob-from').value), to: formatCaseStr(document.getElementById('ob-to').value), vNum: vNumClean, vType: document.getElementById('ob-vtype').value.toUpperCase(), weight: document.getElementById('ob-weight').value.toUpperCase(), status: "In-Transit", deliveryDate: "", cNote: "", podDate: "", createdBy: currentUser.Name || currentUser.name || "Unknown", vFreight: document.getElementById('ob-vfreight').value || "", cFreight: document.getElementById('ob-cfreight').value || "", dName: formatCaseStr(document.getElementById('ob-dname').value), dContact: formatPhoneString(document.getElementById('ob-dcontact').value), tName: normalizePartyName(document.getElementById('ob-tname').value), tPerson: formatCaseStr(document.getElementById('ob-tperson').value), tContact: formatPhoneString(document.getElementById('ob-tcontact').value), remarks: document.getElementById('ob-remarks').value, podRemark: "", loadingExp: "", unloadingExp: "", lrExp: "", otherExp: "", otherExpReason: "", bookingType: 'Own Booking', brokingAgent: '' }; finalizePlacementSave(payload); }
     function savePlacementRev() { if (!validatePlacementRev()) return; const vNumClean = document.getElementById('rl-vnum').value.replace(/[\s-_]/g, '').toUpperCase(); if (!isKTPL(vNumClean)) return alert("Reverse Logistics strictly requires a valid KTPL fleet asset."); let rParty = document.getElementById('rl-party').value; let typeCo = document.getElementById('rl-typeco').value; let finalParty = normalizePartyName(rParty); if (typeCo && finalParty) finalParty += " (" + typeCo + ")"; const payload = { action: 'saveTrip', id: "TRP-" + Date.now(), date: getFormattedDateVal(document.getElementById('rl-date').value), party: finalParty || "", from: formatCaseStr(document.getElementById('rl-from').value), to: formatCaseStr(document.getElementById('rl-to').value), vNum: vNumClean, vType: document.getElementById('rl-vtype').value.toUpperCase(), weight: document.getElementById('rl-weight').value.toUpperCase(), status: "In-Transit", deliveryDate: "", cNote: "", podDate: "", createdBy: currentUser.Name || currentUser.name || "Unknown", vFreight: "", cFreight: document.getElementById('rl-cfreight').value || "", dName: formatCaseStr(document.getElementById('rl-dname').value), dContact: formatPhoneString(document.getElementById('rl-dcontact').value), tName: "", tPerson: formatCaseStr(document.getElementById('rl-agent').value), tContact: formatPhoneString(document.getElementById('rl-contact').value), remarks: document.getElementById('rl-remarks').value, podRemark: "", loadingExp: "", unloadingExp: "", lrExp: "", otherExp: "", otherExpReason: "", bookingType: 'Reverse Logistics', brokingAgent: normalizePartyName(document.getElementById('rl-agency').value) }; finalizePlacementSave(payload); }
     function finalizePlacementSave(payload) { const ledgerJson = JSON.stringify({ bookingType: payload.bookingType, brokingAgent: payload.brokingAgent, income: [], expense: [], reco: { payments: [] } }); payload.financialLedger = ledgerJson; const dataRow = [ payload.id, payload.date, payload.party, payload.from, payload.to, payload.vNum, payload.vType, payload.weight, "In-Transit", "", "", "", "", payload.createdBy, payload.vFreight, payload.cFreight, payload.dName, payload.dContact, payload.tName, payload.tPerson, payload.tContact, payload.remarks, "", "", "", "", "", ledgerJson ]; fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'saveTrip', data: dataRow, ...payload }) }); allTrips.push({ ...payload, statusNote: "", computedBookingType: payload.bookingType }); updateLocalMemory(payload); alert("Details saved!"); showSelectionScreen('placement'); }
@@ -444,6 +598,7 @@
     function setDepStat(s) { currentDeployedStatus = s; document.getElementById('btn-dep-stat-ong').classList.toggle('active', s === 'In-Transit'); document.getElementById('btn-dep-stat-com').classList.toggle('active', s === 'Delivered'); document.getElementById('btn-dep-stat-can').classList.toggle('active', s === 'Cancelled Trip'); triggerCurrentRender(); }
     function renderDeployed() { const container = document.getElementById('deployed-container'); if (!currentDeployedType) return; let items = getFilteredTrips(allTrips).filter(t => t.computedBookingType === currentDeployedType && (t.status || 'In-Transit').trim() === currentDeployedStatus); if (items.length === 0) { container.innerHTML = "<p style='padding:20px; text-align:center;'>No trips found.</p>"; return; } container.innerHTML = items.map((t, i) => buildTripCard(t, i, 'deployed')).join(''); }
     function handleStatusChange(tripId, newStatus, el) { const p = getUserPerms(); if (!p.changeDelCanStatus) return alert("No permission."); if (newStatus === 'Delivered') { triggerDeliveryModal(tripId); el.value = 'In-Transit'; } else if (newStatus === 'Cancelled Trip') { if (confirm("Cancel this trip?")) revertStatus(tripId, 'Cancelled Trip'); else el.value = 'In-Transit'; } else { revertStatus(tripId, 'In-Transit'); } }
+    
     function setPodType(typeStr) { currentPodType = typeStr; document.getElementById('pod-selection-screen').style.display = 'none'; document.getElementById('pod-content-area').style.display = 'block'; document.getElementById('pod-title-text').innerText = typeStr + " PODs"; triggerCurrentRender(); }
     function setPodStat(stat) { currentPodStatus = stat; document.getElementById('btn-pod-stat-pen').classList.toggle('active', stat === 'Pending'); document.getElementById('btn-pod-stat-rec').classList.toggle('active', stat === 'Received'); triggerCurrentRender(); }
     function renderPOD() { const container = document.getElementById('pod-container'); if (!currentPodType) return; let items = getFilteredTrips(allTrips).filter(t => t.computedBookingType === currentPodType).filter(t => currentPodStatus === 'Pending' ? !t.podDate : t.podDate); document.getElementById('pod-summary').innerText = `No. of ${currentPodStatus} POD: ${items.length}`; if (items.length === 0) { container.innerHTML = "<p style='padding:20px; text-align:center;'>No records found.</p>"; return; } container.innerHTML = items.map((t, i) => buildTripCard(t, i, currentPodStatus === 'Pending' ? 'pod-pending' : 'pod-received')).join(''); }
@@ -453,6 +608,7 @@
     function toggleRecoCard(id) { const bodyEl = document.getElementById(`reco-body-${id}`); if (bodyEl.classList.contains('open')) { bodyEl.classList.remove('open'); currentOpenRecoId = null; } else { bodyEl.classList.add('open'); currentOpenRecoId = id; } }
     
     function togglePaymentSelection(tripId) { const cb = document.getElementById('cb-pay-' + tripId); if (cb.checked) { if (!selectedPaymentTrips.includes(tripId)) selectedPaymentTrips.push(tripId); } else { selectedPaymentTrips = selectedPaymentTrips.filter(id => id !== tripId); } updateBatchPaymentUI(); }
+    
     function updateBatchPaymentUI() {
         const bar = document.getElementById('batch-payment-bar'); if (selectedPaymentTrips.length === 0) { bar.style.display = 'none'; return; }
         let totalDue = 0;
@@ -467,8 +623,10 @@
         });
         document.getElementById('batch-count').innerText = selectedPaymentTrips.length; document.getElementById('batch-total').innerText = totalDue.toFixed(2); bar.style.display = 'flex';
     }
+    
     function openBatchPaymentModal() { document.getElementById('batchPaymentModal').style.display = 'flex'; }
     function closeBatchPaymentModal() { document.getElementById('batchPaymentModal').style.display = 'none'; }
+    
     function executeBatchPayment(method) {
         const payType = document.getElementById('batch-pay-type').value; const isExcel = method === 'excel';
         let reportStr = `*Payment Request: ${payType}*\nTotal Trips: ${selectedPaymentTrips.length}\n\n`; let excelData = [["Sr", "Transporter", "Party Name", "Vehicle", "Type/Cap", "Route", "Payable Amount", "Bank Name", "Bank A/c", "IFSC"]];
@@ -483,16 +641,20 @@
                 if (isExcel) { excelData.push([ counter, transName || 'N/A', party, t.vNum, `${t.type} (${t.weight})`, `${t.from} to ${t.to}`, amtRem.toFixed(2), l.reco.bankName || 'N/A', l.reco.bankAc || 'N/A', l.reco.ifsc || 'N/A' ]); } else { reportStr += `*${counter}. Transporter: ${transName || 'N/A'}*\n`; reportStr += `Vehicle: ${t.vNum} (${t.type}, ${t.weight})\n`; reportStr += `Party: ${party}\n`; reportStr += `Route: ${t.from} -> ${t.to}\n`; reportStr += `Payable: ₹${amtRem.toFixed(2)}\n`; reportStr += `Bank: ${l.reco.bankName || 'N/A'} | A/c: ${l.reco.bankAc || 'N/A'} | IFSC: ${l.reco.ifsc || 'N/A'}\n\n`; } counter++;
             }
         });
-        if (isExcel) { const wb = XLSX.utils.book_new(); const ws = XLSX.utils.aoa_to_sheet(excelData); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, "Batch Request"); XLSX.writeFile(wb, `Payment_Batch_${payType}_${Date.now()}.xlsx`); } else { const enc = encodeURIComponent(reportStr); const ua = navigator.userAgent || navigator.vendor || window.opera; let url = ""; if (/android/i.test(ua)) { url = `intent://send?text=${enc}#Intent;package=com.whatsapp;scheme=whatsapp;end`; window.location.href = url; } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) { url = `whatsapp://send?text=${enc}`; window.location.href = url; } else { url = `whatsapp://send?text=${enc}`; window.open(url, '_blank'); } } closeBatchPaymentModal();
+        if (isExcel) { const wb = XLSX.utils.book_new(); const ws = XLSX.utils.aoa_to_sheet(excelData); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, "Batch Request"); XLSX.writeFile(wb, `Payment_Batch_${payType}_${Date.now()}.xlsx`); } 
+        else { const enc = encodeURIComponent(reportStr); const ua = navigator.userAgent || navigator.vendor || window.opera; let url = ""; if (/android/i.test(ua)) { url = `intent://send?text=${enc}#Intent;package=com.whatsapp;scheme=whatsapp;end`; window.location.href = url; } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) { url = `whatsapp://send?text=${enc}`; window.location.href = url; } else { url = `whatsapp://send?text=${enc}`; window.open(url, '_blank'); } } 
+        closeBatchPaymentModal();
     }
     
     window.addPaymentSlot = function(tid, type) { let c = document.getElementById(`payment-slots-${tid}`); let s = c.querySelectorAll('.payment-slot-row').length; let p = (type === 'Own Booking') ? (s === 0 ? 'Advance Paid' : 'Balance Paid') : (s === 0 ? 'Advance Recv' : 'O/s Dues'); let h = `<div class="payment-slot-row"><input type="number" class="compact-input pay-amt-${tid}" placeholder="${p}" value="" oninput="calcRecoUI('${tid}', '${type}')"><input type="date" class="compact-input pay-date-${tid}" value=""><button class="btn-clear" onclick="this.parentElement.remove(); calcRecoUI('${tid}', '${type}');" style="padding:6px; font-weight:bold; color:#b3261e; width:auto; border-radius:6px;">X</button></div>`; c.insertAdjacentHTML('beforeend', h); }
+    
     window.calcRecoUI = function(tid, type) {
         let t = allTrips.find(x => x.id === tid); if(!t) return;
         let l = { income: [], expense: [] }; try { let p = JSON.parse(t.financialLedger); if(p.income) l.income = p.income; if(p.expense) l.expense = p.expense; } catch(e){}
         let bC = parseFloat(t.vFreight || 0); let eC = l.expense.reduce((s, r) => s + parseFloat(r.amt||0), 0); let bR = parseFloat(t.cFreight || 0); let eR = l.income.reduce((s, r) => s + parseFloat(r.amt||0), 0); let tP = bC + eC; let tR = bR + eR;
         let tPay = 0; document.querySelectorAll(`.pay-amt-${tid}`).forEach(inp => { tPay += parseFloat(inp.value || 0); }); let isC = document.getElementById(`mstat-${tid}`).value === 'Cleared';
-        if (type === 'Own Booking') { let bToP = tP - tPay - eR; let el = document.getElementById(`dyn-bal-${tid}`); if (el) { if (isC && bToP > 0) { el.innerHTML = `<div style="color:#5f6368;"><del>Original Balance: ₹${bToP.toFixed(2)}</del></div><div style="color:#188c38; margin:6px 0;">Saved on deduction: ₹${bToP.toFixed(2)}</div><div>Final Balance to Pay: ₹0</div>`; } else { el.innerHTML = `Balance to Pay: ₹${bToP.toFixed(2)}`; } } } else { let os = tR - tP - tPay; let el = document.getElementById(`dyn-bal-${tid}`); if (el) { if (isC && os > 0) { el.innerHTML = `<div style="color:#5f6368;"><del>Original O/S: ₹${os.toFixed(2)}</del></div><div style="color:#d93025; margin:6px 0;">Bad Debts: ₹${os.toFixed(2)}</div><div>Final Outstanding: ₹0</div>`; } else { el.innerHTML = `Outstanding Amount: ₹${os.toFixed(2)}`; } } }
+        if (type === 'Own Booking') { let bToP = tP - tPay - eR; let el = document.getElementById(`dyn-bal-${tid}`); if (el) { if (isC && bToP > 0) { el.innerHTML = `<div style="color:#5f6368;"><del>Original Balance: ₹${bToP.toFixed(2)}</del></div><div style="color:#188c38; margin:6px 0;">Saved on deduction: ₹${bToP.toFixed(2)}</div><div>Final Balance to Pay: ₹0</div>`; } else { el.innerHTML = `Balance to Pay: ₹${bToP.toFixed(2)}`; } } } 
+        else { let os = tR - tP - tPay; let el = document.getElementById(`dyn-bal-${tid}`); if (el) { if (isC && os > 0) { el.innerHTML = `<div style="color:#5f6368;"><del>Original O/S: ₹${os.toFixed(2)}</del></div><div style="color:#d93025; margin:6px 0;">Bad Debts: ₹${os.toFixed(2)}</div><div>Final Outstanding: ₹0</div>`; } else { el.innerHTML = `Outstanding Amount: ₹${os.toFixed(2)}`; } } }
         if (document.getElementById(`cb-pay-${tid}`) && document.getElementById(`cb-pay-${tid}`).checked) { updateBatchPaymentUI(); }
     }
 
@@ -514,11 +676,11 @@
             let hdr = `<strong>${(t.date||'').split(',')[0]}</strong> | <strong>${t.vNum}</strong> | ${t.from}➔${t.to} <br> <span style="color:#5f6368; font-size:11px;">Party: ${t.party || 'N/A'} | ${currentRecoType==='Own Booking'?'Transporter':'Broker'}: ${currentRecoType==='Own Booking'?t.tName:brAgt}</span>`;
             let oC = (currentOpenRecoId === t.id) ? 'open' : ''; let isC = (l.reco.status === "Cleared"); let ptTot = l.reco.payments.reduce((s, x)=> s + parseFloat(x.amt||0), 0);
             let amtRem = currentRecoType === 'Own Booking' ? (tP - ptTot - eR) : (tR - tP - ptTot); 
-            
             let dH = ""; if (isC && amtRem > 0) dH = `<del style="color:#8e8e8e; margin-right:4px;">₹${amtRem.toFixed(2)}</del> ₹0`; else dH = `₹${amtRem.toFixed(2)}`;
             
             let trName = currentRecoType === 'Own Booking' ? t.tName : brAgt;
-            let memBank = transporterBanks[normalizePartyName(trName)] || {bankName:'', bankAc:'', ifsc:''};
+            let nTr = normalizePartyName(trName);
+            let memBank = transporterBanks[nTr] || {bankName:'', bankAc:'', ifsc:''};
             let bNameVal = l.reco.bankName || memBank.bankName || '';
             let bAcVal = l.reco.bankAc || memBank.bankAc || '';
             let ifscVal = l.reco.ifsc || memBank.ifsc || '';
@@ -532,56 +694,27 @@
             <div id="reco-body-${t.id}" class="reco-accordion-body ${oC}">
                 <div class="reco-split-grid">
                     <div class="reco-panel"><div class="reco-header-title">Receivables</div>`;
-                        
             if (canViewBaseFreight || currentRecoType !== 'Own Booking') { h += `<div class="calc-row"><span>Base Freight:</span> <span>₹${bR}</span></div><div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${l.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}</div><div class="calc-gross"><span>Total Receivable:</span> <span>₹${tR}</span></div>`; } 
             else { h += `<div class="calc-row"><span>Base Freight:</span> <span style="color:#b3261e;">🔒 Restricted</span></div><div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${l.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}</div><div class="calc-gross"><span>Total Receivable:</span> <span style="color:#b3261e;">🔒 Restricted</span></div>`; }
-            
-            h += `
-                    </div>
-                    <div class="reco-panel">
-                        <div class="reco-header-title">Payables</div>
-                        <div class="calc-row"><span>Base Cost:</span> <span>₹${bC}</span></div>
-                        <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
-                            ${l.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
-                        </div>
-                        <div class="calc-gross"><span>Total Payable:</span> <span>₹${tP}</span></div>`;
-                        
+            h += `</div><div class="reco-panel"><div class="reco-header-title">Payables</div><div class="calc-row"><span>Base Cost:</span> <span>₹${bC}</span></div><div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${l.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}</div><div class="calc-gross"><span>Total Payable:</span> <span>₹${tP}</span></div>`;
             if (canEditPayment) {
-                h += `      <div style="margin-top:10px;">
-                                <label>${currentRecoType === 'Own Booking' ? 'Payments Processed' : 'Dues Received'}</label>
-                                <div id="payment-slots-${t.id}">`;
-                l.reco.payments.forEach((p, idx) => { let pld = (currentRecoType === 'Own Booking') ? (idx === 0 ? 'Advance Paid' : 'Balance Paid') : (idx === 0 ? 'Advance Recv' : 'O/s Dues'); h += `          <div class="payment-slot-row"><input type="number" class="compact-input pay-amt-${t.id}" placeholder="${pld}" value="${p.amt||''}" oninput="calcRecoUI('${t.id}', '${currentRecoType}')"><input type="date" class="compact-input pay-date-${t.id}" value="${p.date||''}"><button class="btn-clear" onclick="this.parentElement.remove(); calcRecoUI('${t.id}', '${currentRecoType}');" style="padding:6px; font-weight:bold; color:#b3261e; width:auto; border-radius:6px;">X</button></div>`; });
-                h += `          </div>
-                                <button class="btn-secondary" style="padding:6px 12px; font-size:11px; width:auto; border-radius:6px; margin-top:8px;" onclick="addPaymentSlot('${t.id}', '${currentRecoType}')">+ Add Slot</button>
-                            </div>`;
-                h += `      <div class="highlight-red-box" id="dyn-bal-${t.id}">`;
+                h += `<div style="margin-top:10px;"><label>${currentRecoType === 'Own Booking' ? 'Payments Processed' : 'Dues Received'}</label><div id="payment-slots-${t.id}">`;
+                l.reco.payments.forEach((p, idx) => { let pld = (currentRecoType === 'Own Booking') ? (idx === 0 ? 'Advance Paid' : 'Balance Paid') : (idx === 0 ? 'Advance Recv' : 'O/s Dues'); h += `<div class="payment-slot-row"><input type="number" class="compact-input pay-amt-${t.id}" placeholder="${pld}" value="${p.amt||''}" oninput="calcRecoUI('${t.id}', '${currentRecoType}')"><input type="date" class="compact-input pay-date-${t.id}" value="${p.date||''}"><button class="btn-clear" onclick="this.parentElement.remove(); calcRecoUI('${t.id}', '${currentRecoType}');" style="padding:6px; font-weight:bold; color:#b3261e; width:auto; border-radius:6px;">X</button></div>`; });
+                h += `</div><button class="btn-secondary" style="padding:6px 12px; font-size:11px; width:auto; border-radius:6px; margin-top:8px;" onclick="addPaymentSlot('${t.id}', '${currentRecoType}')">+ Add Slot</button></div>`;
+                h += `<div class="highlight-red-box" id="dyn-bal-${t.id}">`;
                 if (isC && amtRem > 0) { if (currentRecoType === 'Own Booking') { h += `<div style="color:#5f6368;"><del>Original Balance: ₹${amtRem.toFixed(2)}</del></div><div style="color:#188c38; margin:6px 0;">Saved on deduction: ₹${amtRem.toFixed(2)}</div><div>Final Balance to Pay: ₹0</div>`; } else { h += `<div style="color:#5f6368;"><del>Original O/S: ₹${amtRem.toFixed(2)}</del></div><div style="color:#d93025; margin:6px 0;">Bad Debts: ₹${amtRem.toFixed(2)}</div><div>Final Outstanding: ₹0</div>`; } } else { if (currentRecoType === 'Own Booking') h += `Balance to Pay: ₹${amtRem.toFixed(2)}`; else h += `Outstanding Amount: ₹${amtRem.toFixed(2)}`; }
                 h += `</div>`;
             }
-            h += `      </div>
-                    </div>`; 
-                    
+            h += `</div></div>`; 
             if (canEditPayment) { 
                 h += `
-                    <div class="form-group" style="margin-top:10px;">
-                        <label>Bank Name</label>
-                        <input type="text" id="reco-bankname-${t.id}" class="compact-input" value="${bNameVal}">
-                    </div>
-                    <div class="grid-2 form-group" style="margin-top:10px;">
-                        <div><label>Bank A/c No.</label><input type="text" id="reco-bank-${t.id}" class="compact-input" value="${bAcVal}"></div>
-                        <div><label>IFSC Code</label><input type="text" id="reco-ifsc-${t.id}" class="compact-input" value="${ifscVal}"></div>
-                    </div>
-                    <div class="form-group" style="margin-top:10px;">
-                        <label>Remarks</label>
-                        <input type="text" id="reco-remarks-${t.id}" class="compact-input" value="${l.reco.remarks||''}">
-                    </div>
+                    <div class="form-group" style="margin-top:10px;"><label>Bank Name</label><input type="text" id="reco-bankname-${t.id}" class="compact-input" value="${bNameVal}"></div>
+                    <div class="grid-2 form-group" style="margin-top:10px;"><div><label>Bank A/c No.</label><input type="text" id="reco-bank-${t.id}" class="compact-input" value="${bAcVal}"></div><div><label>IFSC Code</label><input type="text" id="reco-ifsc-${t.id}" class="compact-input" value="${ifscVal}"></div></div>
+                    <div class="form-group" style="margin-top:10px;"><label>Remarks</label><input type="text" id="reco-remarks-${t.id}" class="compact-input" value="${l.reco.remarks||''}"></div>
                     <div style="border-top:1px solid #dadce0; margin-top:15px; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
                         <button class="btn-clear" style="padding:8px 12px; font-size:11px; width:auto; border-radius:8px; font-weight:600;" onclick="openFinancialAllocation('${t.id}')">💰 Extra Fin</button>
                         <div style="display:flex; gap:8px;">
-                            <select id="mstat-${t.id}" class="compact-input" style="width:105px;" onchange="calcRecoUI('${t.id}', '${currentRecoType}')">
-                                <option value="Pending" ${l.reco.status!=='Cleared'?'selected':''}>Pending</option>
-                                <option value="Cleared" ${l.reco.status==='Cleared'?'selected':''}>Cleared</option>
-                            </select>
+                            <select id="mstat-${t.id}" class="compact-input" style="width:105px;" onchange="calcRecoUI('${t.id}', '${currentRecoType}')"><option value="Pending" ${l.reco.status!=='Cleared'?'selected':''}>Pending</option><option value="Cleared" ${l.reco.status==='Cleared'?'selected':''}>Cleared</option></select>
                             <button class="btn-primary" style="padding:8px 16px; font-size:11px; width:auto; border-radius:8px;" onclick="commitRecoRecord('${t.id}', '${currentRecoType}')">Save</button>
                         </div>
                     </div>
@@ -593,9 +726,7 @@
     }
 
     function commitRecoRecord(id, mode) {
-        let t = allTrips.find(x => x.id === id); 
-        if(!t) return;
-        
+        let t = allTrips.find(x => x.id === id); if(!t) return;
         let l = { income: [], expense: [], reco: { payments: [] } }; 
         try { let p = JSON.parse(t.financialLedger); if (p) Object.assign(l, p); if (!l.reco) l.reco = {payments:[]}; } catch(e){}
         
@@ -608,39 +739,21 @@
         let memBank = transporterBanks[nTr] || {};
         
         if (nTr && ((memBank.bankAc && nBankAc && memBank.bankAc !== nBankAc) || (memBank.ifsc && nIfsc && memBank.ifsc !== nIfsc))) {
-            if (!confirm(`You are changing existing Bank Details for ${nTr}.\nOld A/C: ${memBank.bankAc || 'N/A'}\nNew A/C: ${nBankAc || 'N/A'}\n\nDo you want to proceed and overwrite?`)) {
-                return;
-            }
+            if (!confirm(`You are changing existing Bank Details for ${nTr}.\nOld A/C: ${memBank.bankAc || 'N/A'}\nNew A/C: ${nBankAc || 'N/A'}\n\nDo you want to proceed and overwrite?`)) { return; }
         }
         
         l.reco.status = document.getElementById(`mstat-${id}`).value; 
         l.reco.remarks = document.getElementById(`reco-remarks-${id}`) ? document.getElementById(`reco-remarks-${id}`).value : '';
-        l.reco.bankName = nBankName;
-        l.reco.bankAc = nBankAc;
-        l.reco.ifsc = nIfsc;
-        
+        l.reco.bankName = nBankName; l.reco.bankAc = nBankAc; l.reco.ifsc = nIfsc;
         if (nTr) { transporterBanks[nTr] = { bankName: nBankName, bankAc: nBankAc, ifsc: nIfsc, time: Date.now() }; }
         
-        let amtInps = document.querySelectorAll(`.pay-amt-${id}`); 
-        let dtInps = document.querySelectorAll(`.pay-date-${id}`); 
+        let amtInps = document.querySelectorAll(`.pay-amt-${id}`); let dtInps = document.querySelectorAll(`.pay-date-${id}`); 
         l.reco.payments = [];
-        
-        for (let i=0; i<amtInps.length; i++) { 
-            if (amtInps[i].value || dtInps[i].value) {
-                l.reco.payments.push({amt: amtInps[i].value, date: dtInps[i].value}); 
-            }
-        }
-        
-        const jsonStr = JSON.stringify(l); 
-        t.financialLedger = jsonStr; 
-        
+        for (let i=0; i<amtInps.length; i++) { if (amtInps[i].value || dtInps[i].value) { l.reco.payments.push({amt: amtInps[i].value, date: dtInps[i].value}); } }
+        const jsonStr = JSON.stringify(l); t.financialLedger = jsonStr; 
         fetch(GOOGLE_SCRIPT_URL + "?t=" + Date.now(), { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: id, ledgerJson: jsonStr }) }); 
-        
-        alert("Ledger updated. Other users will see this change upon next data sync."); 
-        renderReconciliation(); 
+        alert("Ledger updated. Other users will see this change upon next data sync."); renderReconciliation(); 
     }
-
-    // ------------- REPORTS -------------
 
     function setReportType(typeStr) { currentReportType = typeStr; document.getElementById('report-selection-screen').style.display = 'none'; document.getElementById('report-content-area').style.display = 'block'; document.getElementById('report-title-text').innerText = typeStr + " Reports"; document.getElementById('screen-report').innerHTML = ''; document.getElementById('print-report-container').innerHTML = ''; document.getElementById('report-actions').style.display = 'none'; }
     function generateCustomReport() {
@@ -664,42 +777,71 @@
         } catch(e) { console.error(e); alert('Error generating report.'); }
     }
     function shareReportWhatsApp() {
-        if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share."); 
-        const dStr = getFormattedDateVal(new Date()); 
-        let totalInTransit = currentReportTrips.filter(t => (t.status || '').trim() === 'In-Transit').length;
-        let totalDelivered = currentReportTrips.filter(t => (t.status || '').trim() === 'Delivered').length;
-        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party || 'Unknown'))];
-        let ownVehicles = currentReportTrips.filter(t => isKTPL(t.vNum)).length;
-        let marketVehicles = currentReportTrips.length - ownVehicles;
+        if (!currentReportTrips || currentReportTrips.length === 0) return alert("No trips to share."); const dStr = getFormattedDateVal(new Date()); 
+        let totalInTransit = currentReportTrips.filter(t => (t.status || '').trim() === 'In-Transit').length; let totalDelivered = currentReportTrips.filter(t => (t.status || '').trim() === 'Delivered').length;
+        const uniqueParties = [...new Set(currentReportTrips.map(t => t.party || 'Unknown'))]; let ownVehicles = currentReportTrips.filter(t => isKTPL(t.vNum)).length; let marketVehicles = currentReportTrips.length - ownVehicles;
         let m = currentReportType === 'Own Booking' ? `*Own Booking Vehicle Status Report - ${dStr}*\n\n` : `*Reverse Logistics Vehicle Status Report - ${dStr}*\n\n`; 
-        m += `*At a Glance:*\n`; m += `Total In-Transit: ${totalInTransit}\n`; m += `Total Delivered: ${totalDelivered}\n`; m += `Clients Running For: ${uniqueParties.length}\n`; m += `Own Vehicles: ${ownVehicles} | Market Vehicles: ${marketVehicles}\n\n`;
-        uniqueParties.forEach(p => { m += `*Client:* ${p}\n`; let c = 1; currentReportTrips.forEach(t => { if ((t.party || 'Unknown') === p) { let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`; m += `${c}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight}\n*Status:* *${stat}*\n`; if (t.statusNote) m += `*Loc:* ${t.statusNote}\n`; m += `\n`; c++; } }); }); openWhatsAppChoice(m);
+        m += `*At a Glance:*\nTotal In-Transit: ${totalInTransit}\nTotal Delivered: ${totalDelivered}\nClients Running For: ${uniqueParties.length}\nOwn Vehicles: ${ownVehicles} | Market Vehicles: ${marketVehicles}\n\n`;
+        uniqueParties.forEach(p => { m += `*Client:* ${p}\n`; let c = 1; currentReportTrips.forEach(t => { if ((t.party || 'Unknown') === p) { let stat = (t.status || '').trim() === 'Delivered' ? `Delivered (${t.deliveryDate})` : `In-Transit`; m += `${c}. *${t.vNum}* | ${t.from} to ${t.to} | ${t.type} | ${t.weight}\n*Status:* *${stat}*\n`; if (t.statusNote) m += `*Loc:* ${t.statusNote}\n`; m += `\n`; c++; } }); }); 
+        openWhatsAppChoice(m);
     }
-
-    // MODAL LOGICS
-    function openMISModal() { document.getElementById('misModal').style.display = 'flex'; } function closeMISModal() { document.getElementById('misModal').style.display = 'none'; }
-    function openLedgerModal() { const r = currentUser.Role || currentUser.role; if (r !== 'Admin' && r !== 'Master Admin') return alert("Restricted to Admins."); document.getElementById('ledgerModal').style.display = 'flex'; } function closeLedgerModal() { document.getElementById('ledgerModal').style.display = 'none'; }
-    function triggerMISGeneration(misType) {
-        const pName = document.getElementById('mis-party').value.trim(); const bType = document.getElementById('mis-booking-type').value; if(!pName) return alert("Party Name mandatory.");
-        let eT = allTrips.filter(t => t.computedBookingType === bType && (t.party || '').toLowerCase() === pName.toLowerCase()); if (eT.length === 0) return alert("No records found.");
-        const wb = XLSX.utils.book_new(); let grouped = {};
-        eT.forEach(t => { let mName = "Master"; if (t.date && t.date.includes('/')) { let pts = t.date.split('/'); if (pts[1]) { const mos = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]; let idx = parseInt(pts[1]) - 1; if (mos[idx]) mName = mos[idx] + " " + pts[2]; } } if (!grouped[mName]) grouped[mName] = []; grouped[mName].push(t); });
-        for (let mK in grouped) { let r = []; r.push(["Sr. No.", "C-Note No.", "Booking Date", "Delivery Date", "TAT", "From", "To", "Qty", "Pkg Type", "Vehicle No.", "Vehicle Type", "Vehicle Capacity", "Remarks"]); grouped[mK].forEach((t, i) => { let tat = ""; if (t.deliveryDate && t.date) { try { let p1 = t.date.split(',')[0].split('/'); let p2 = t.deliveryDate.split('/'); let d1 = new Date(p1[2], p1[1]-1, p1[0]); let d2 = new Date(p2[2], p2[1]-1, p2[0]); let diff = d2 - d1; if (diff >= 0) tat = Math.round(diff / 86400000) + " Days"; } catch(e){} } r.push([i+1, t.cNote || "-", (t.date || '').split(',')[0], t.deliveryDate || "-", tat, t.from, t.to, t.weight, t.type, t.vNum, t.type, t.weight, t.remarks || ""]); }); const ws = XLSX.utils.aoa_to_sheet(r); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, mK); }
-        XLSX.writeFile(wb, `KTPL_${misType}_${pName}.xlsx`); closeMISModal();
-    }
-    function triggerRecoExcelDownload(ledgerType) {
-        let eT = getFilteredTrips(allTrips).filter(t => t.computedBookingType === ledgerType); if (eT.length === 0) return alert("No data.");
-        const wb = XLSX.utils.book_new(); let r = [];
-        if (ledgerType === 'Own Booking') {
-            r.push(["Trip ID", "Date", "Party Name", "From", "To", "Vehicle No", "Type", "Weight", "Status", "Delivery Date", "Custom Note", "CNote_LR", "POD_Date", "Created By", "Vehicle Freight", "Charged Freight", "Driver Name", "Driver Contact", "Transporter", "Transporter Person", "Transporter Contact", "Remarks", "POD Remark", "Loading", "Unloading", "LR", "Others", "Other Reason", "Balance to Pay", "Saved on add. deduction"]);
-            eT.forEach(t => { let l = { income: [], expense: [], reco: {payments:[]} }; try { let p = JSON.parse(t.financialLedger); if(p.income) l.income = p.income; if(p.expense) l.expense = p.expense; if(p.reco) l.reco = p.reco; if(!l.reco.payments) l.reco.payments=[]; } catch(e){} let bC = parseFloat(t.vFreight || 0); let ld = l.expense.find(e=>e.type==='Loading'); let loading = ld ? ld.amt : 0; let un = l.expense.find(e=>e.type==='Unloading'); let unloading = un ? un.amt : 0; let oth = l.expense.filter(e=>e.type!=='Loading' && e.type!=='Unloading').reduce((s,x)=>s+parseFloat(x.amt||0),0); let ptTot = l.reco.payments.reduce((s,x)=>s+parseFloat(x.amt||0),0); if(!l.reco.payments || l.reco.payments.length===0) ptTot = parseFloat(l.reco.advPaid || t.advancePaid || 0) + parseFloat(l.reco.balPaid1 || l.reco.balPaid || 0) + parseFloat(l.reco.balPaid2 || 0) + parseFloat(l.reco.balPaid3 || 0); let tP = bC + (ld?parseFloat(ld.amt||0):0) + (un?parseFloat(un.amt||0):0) + oth; let bToP = tP - ptTot - (l.income.reduce((s,r)=>s+parseFloat(r.amt||0),0)); let isC = (l.reco.status === 'Cleared'); let sDed = (isC && bToP > 0) ? bToP : 0; let fB = (isC && bToP > 0) ? 0 : bToP; let lr = l.expense.find(e=>e.type==='LR'); r.push([t.id, t.date, t.party, t.from, t.to, t.vNum, t.type, t.weight, t.status, t.deliveryDate, t.statusNote||"", t.cNote||"", t.podDate||"", t.createdBy, t.vFreight, t.cFreight, t.dName, t.dContact, t.tName, t.tPerson, t.tContact, t.remarks, t.podRemark, loading, unloading, lr?lr.amt:0, oth, t.otherExpReason||"", fB, sDed]); });
-        } else {
-            r.push(["Trip ID", "Date", "Party Name", "From", "To", "Vehicle No", "Type", "Weight", "Status", "Delivery Date", "Custom Note", "CNote_LR", "POD_Date", "Created By", "Vehicle Freight", "Charged Freight", "Driver Name", "Driver Contact", "Transporter", "Transporter Person", "Transporter Contact", "Remarks", "POD Remark", "Loading", "Unloading", "LR", "Others", "Other Reason", "Outstanding Amount", "Bad Debts"]);
-            eT.forEach(t => { let l = { income: [], expense: [], reco: {payments:[]} }; try { let p = JSON.parse(t.financialLedger); if(p.reco) l.reco = p.reco; if(p.expense) l.expense = p.expense; if(p.income) l.income = p.income; if(!l.reco.payments) l.reco.payments=[]; } catch(e){} let bC = parseFloat(t.vFreight || 0); let ptTot = l.reco.payments.reduce((s,x)=>s+parseFloat(x.amt||0),0); if(!l.reco.payments || l.reco.payments.length===0) ptTot = parseFloat(l.reco.advRec || 0) + parseFloat(l.reco.osDues1 || l.reco.osDues || 0) + parseFloat(l.reco.osDues2 || 0) + parseFloat(l.reco.osDues3 || 0); let tOs = (parseFloat(t.cFreight || 0) + l.income.reduce((s,x)=>s+parseFloat(x.amt||0),0)) - (bC + l.expense.reduce((s,x)=>s+parseFloat(x.amt||0),0) + ptTot); let bd = (l.reco.status === "Cleared" && tOs > 0) ? tOs : 0; let fOs = (l.reco.status === "Cleared" && tOs > 0) ? 0 : tOs; r.push([t.id, t.date, t.party, t.from, t.to, t.vNum, t.type, t.weight, t.status, t.deliveryDate, t.statusNote||"", t.cNote||"", t.podDate||"", t.createdBy, "", t.cFreight, "", "", "", "", "", t.remarks, t.podRemark, "", "", "", "", "", fOs, bd]); });
+    
+    function buildTripCard(t, idx, vMode) {
+        const r = currentUser.Role || currentUser.role; const p = getUserPerms(); let isRO = (r === 'ReadOnly'); const isMA = (r === 'Master Admin'); const isA = (r === 'Master Admin' || r === 'Admin');
+        let sC = 'status-transit'; let st = (t.status || '').trim(); if (st === 'Delivered') { sC = 'status-delivered'; st = `Delivered: ${t.deliveryDate}`; } if (st === 'Cancelled Trip') { sC = 'status-cancelled'; st = `Cancelled`; }
+        let cE = p.editTrips; if (isA && !isMA && (st.includes('Delivered') || st.includes('Cancelled'))) cE = false;
+        let h = `<div class="trip-card"><div style="border-bottom: 1px solid #f1f3f4; padding-bottom: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;"><span><strong>#${idx + 1}</strong> | ${(t.date||'').split(',')[0]}</span><span class="status-badge ${sC}">${st}</span></div><div style="margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;"><span><strong>Party:</strong> ${t.party || 'N/A'}</span>`;
+        if (cE) { h += `<span style="cursor:pointer; color:#1a73e8; font-size:10px; font-weight:600; text-transform:uppercase;" onclick="openAdminEdit('${t.id}')">Edit Trip</span>`; }
+        h += `</div><div style="margin-bottom: 5px;"><strong>Route:</strong> ${t.from} ➔ ${t.to}</div><div style="margin-bottom: 5px;"><strong>Vehicle:</strong> ${t.vNum} (${t.type || '-'}, ${t.weight || '-'})</div>`;
+        let bt = t.computedBookingType; let brAgt = t.brokingAgent; if(!brAgt) { try { let pf = JSON.parse(t.financialLedger); if(pf.brokingAgent) brAgt = pf.brokingAgent; } catch(e){} }
+        if (bt === 'Reverse Logistics' && brAgt) h += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Agency:</strong> ${brAgt}</div>`;
+        let sVF = isA; if (vMode === 'deployed') sVF = true; if (sVF && t.vFreight && (t.vFreight || '').trim() !== '') h += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Vehicle Freight:</strong> ${t.vFreight}</div>`;
+        let sCF = (bt === 'Own Booking') ? p.viewChargedFreightOB : p.viewChargedFreightRL; if (sCF && t.cFreight && (t.cFreight || '').trim() !== '') { h += `<div style="margin-bottom: 5px; color:#137333; font-size:11px; font-weight:500;"><strong>Charged Freight:</strong> ${t.cFreight}</div>`; }
+        const dTel = getSafeTel(t.dContact); const tTel = getSafeTel(t.tContact);
+        h += `<div style="font-size: 11px; margin-bottom: 10px;"><span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#1a73e8; font-weight:500; cursor:pointer;" onclick="document.getElementById('c-${vMode}-${t.id}').style.display = document.getElementById('c-${vMode}-${t.id}').style.display === 'block' ? 'none' : 'block';">View Contacts ▼</span><div id="c-${vMode}-${t.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:6px; margin-top:5px; border:1px solid #dadce0; color:#444746;"><div style="margin-bottom:6px;"><strong>Driver:</strong> ${t.dName || 'N/A'} <br> <a href="tel:${dTel}" style="color:#1a73e8; text-decoration:none;">📞 ${t.dContact || 'N/A'}</a></div>`;
+        if (bt === 'Own Booking') { h += `<div><strong>Transporter:</strong> ${t.tName || 'N/A'} ${t.tPerson ? '('+t.tPerson+')' : ''} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none;">📞 ${t.tContact || 'N/A'}</a></div>`; } else { h += `<div><strong>Broking Agent:</strong> ${brAgt || t.tPerson || 'N/A'} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none;">📞 ${t.tContact || 'N/A'}</a></div>`; }
+        h += `</div></div>`;
+        if (vMode === 'deployed') {
+            h += `<div class="grid-2" style="margin-bottom: 5px;"><input type="text" class="compact-input" placeholder="Enter C-Note" value="${t.cNote || ''}" onchange="updateBackendData('${t.id}', 'updateCNote', this.value)" ${isRO ? 'disabled' : ''}><input type="text" class="compact-input" placeholder="Remarks" value="${t.remarks || ''}" onchange="updateBackendData('${t.id}', 'updateTripRemark', this.value)" ${isRO ? 'disabled' : ''}></div>`;
+            const isDelCan = (st.includes('Delivered') || st.includes('Cancelled')); const ssn = (t.statusNote || "").replace(/"/g, '&quot;');
+            h += `<div style="display:flex; margin-top:5px; gap: 8px; width: 100%; align-items:center;">`;
+            if (!isDelCan) { if (p.changeDelCanStatus) { h += `<select class="compact-input" onchange="handleStatusChange('${t.id}', this.value, this)" style="flex:1;"><option value="In-Transit" selected>In-Transit</option><option value="Delivered">Delivered</option><option value="Cancelled Trip">Cancelled Trip</option></select>`; } h += `<input type="text" class="compact-input" placeholder="Update location..." value="${ssn}" onchange="formatSentence(this); updateStatusLog('${t.id}', this.value)" style="${p.changeDelCanStatus ? 'flex:2;' : 'flex:1; width:100%;'}">`; } 
+            else { if (isA) { h += `<select class="compact-input" onchange="revertStatus('${t.id}', 'In-Transit')" style="flex:1;"><option value="" selected>Status Locked</option><option value="In-Transit">Undo: Revert to In-Transit</option></select>`; } h += `<input type="text" class="compact-input" placeholder="Locked" value="${ssn}" disabled style="${isA ? 'flex:2;' : 'flex:1; width:100%;'} background:#e3e3e3; color:#8e8e8e; cursor:not-allowed;">`; }
+            h += `</div><div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;"><button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${t.id}', '${vMode}')">▶ History</button><div style="display:flex; gap: 5px;">${!isRO ? `<button class="btn-clear" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="openFinancialAllocation('${t.id}')">₹ Expenses</button>` : ''}<button class="btn-primary" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="openShareModal('${t.id}')">Share</button></div></div><div id="hist-${vMode}-${t.id}" class="history-panel"></div>`;
         }
-        const ws = XLSX.utils.aoa_to_sheet(r); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, "Reconciliation Master"); XLSX.writeFile(wb, `KTPL_${ledgerType.replace(' ', '_')}_Ledger.xlsx`); closeLedgerModal();
+        if (vMode === 'pod-pending' && !isRO) { h += `<div style="margin-bottom: 5px;"><input type="text" class="compact-input" placeholder="Enter C-Note" value="${t.cNote || ''}" onchange="updateBackendData('${t.id}', 'updateCNote', this.value)"></div><div style="margin-bottom: 5px;"><input type="text" class="compact-input" placeholder="Add POD Remarks..." value="${t.podRemark || ''}" onchange="updateBackendData('${t.id}', 'updatePODRemark', this.value)"></div><div style="display:flex; gap:10px; margin-top:10px; align-items:center; width: 100%;"><label style="margin:0;">POD Date:</label><input type="date" class="compact-input" id="pod-date-${t.id}"><button class="btn-primary" style="padding: 6px 12px; margin:0; width:auto; border-radius:4px;" onclick="savePOD('${t.id}', false)">Save</button></div>`; }
+        if (vMode === 'pod-received') { h += `<div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>C-Note:</strong> ${t.cNote || "N/A"}</div>${t.podRemark ? `<div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>Remarks:</strong> ${t.podRemark}</div>` : ''}<div style="margin-top:10px; color:#137333; font-weight:500;">POD Received: ${t.podDate}</div>`; if (!isRO) { h += `<button class="btn-clear" style="font-size:10px; padding:6px 10px; margin-top:5px; width:auto; border-radius:4px;" onclick="savePOD('${t.id}', true)">Remove Date</button>`; } }
+        h += `</div>`; return h;
     }
 
+    function renderAdminUsers() { 
+        const tb = document.getElementById('admin-user-list'); if(!tb) return; 
+        tb.innerHTML = users.filter(u => u.Name !== '__VCONFIG__' && u.name !== '__VCONFIG__').map(u => `<tr><td>${u.Name || u.name || 'Unknown'}</td><td>${u.Role || u.role || 'Unassigned'}</td><td style="font-family: monospace;">${u.PIN || u.pin || 'None'}</td><td><button class="admin-action-btn" onclick="openEditUserModal('${u.Name || u.name}', '${u.PIN || u.pin}', '${u.Role || u.role}')">Edit</button><button class="admin-action-btn" style="color: #d93025;" onclick="deleteUser('${u.Name || u.name}')">Del</button></td></tr>`).join(''); 
+        if (document.getElementById('module-access-container')) renderPermissionsUI(); 
+    }
+    
+    function renderPermissionsUI() { const mods = ['Placement', 'Deployed', 'POD', 'Payments', 'Reports']; let h = ''; mods.forEach(m => { h += `<div style="margin-bottom:10px; border:1px solid #dadce0; padding:10px; border-radius:8px; background:#f8f9fa;"><div style="font-weight:bold; cursor:pointer; font-size:13px; color:#0b57d0;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display==='none'?'block':'none'">▶ Manage Access: ${m}</div><div style="display:none; margin-top:10px;">`; users.filter(u => u.Name !== '__VCONFIG__' && u.name !== '__VCONFIG__').forEach(u => { let chk = (u.permissions && u.permissions[m] === false) ? '' : 'checked'; h += `<div style="margin-bottom:4px; font-size:12px; color:#444746;"><label style="margin:0; font-weight:normal; text-transform:none;"><input type="checkbox" class="perm-cb" data-user="${u.Name||u.name}" data-mod="${m}" ${chk} style="width:auto; display:inline-block; margin-right:6px;"> ${u.Name||u.name}</label></div>`; }); h += `</div></div>`; }); document.getElementById('module-access-container').innerHTML = h; }
+    function savePermissions() { const cbs = document.querySelectorAll('.perm-cb'); let nP = {}; cbs.forEach(cb => { let un = cb.getAttribute('data-user'); let mod = cb.getAttribute('data-mod'); if(!nP[un]) nP[un] = {}; nP[un][mod] = cb.checked; }); users.forEach(u => { let n = u.Name || u.name; if(nP[n]) u.permissions = nP[n]; }); alert("Module access updated locally."); }
+    function openAddUserModal() { document.getElementById('user-modal-title').innerText = "Add New User"; document.getElementById('manage-user-old-name').value = ""; document.getElementById('manage-user-name').value = ""; document.getElementById('manage-user-pin').value = ""; document.getElementById('manage-user-role').value = "ReadOnly"; document.getElementById('userManageModal').style.display = 'flex'; }
+    function openEditUserModal(n, p, r) { document.getElementById('user-modal-title').innerText = "Edit User"; document.getElementById('manage-user-old-name').value = n; document.getElementById('manage-user-name').value = n; document.getElementById('manage-user-pin').value = p; document.getElementById('manage-user-role').value = r; document.getElementById('userManageModal').style.display = 'flex'; }
+    function closeUserModal() { document.getElementById('userManageModal').style.display = 'none'; }
+    function saveUserManage() { const on = document.getElementById('manage-user-old-name').value; const nn = document.getElementById('manage-user-name').value.trim(); const pin = document.getElementById('manage-user-pin').value.trim(); const role = document.getElementById('manage-user-role').value; if (!nn || !pin) return alert("Required."); if (on) { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateUser', oldName: on, newName: nn, pin: pin, role: role }) }); let u = users.find(x => (x.Name || x.name) === on); if(u) { u.Name = nn; u.name = nn; u.PIN = pin; u.pin = pin; u.Role = role; u.role = role; } } else { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addUser', name: nn, pin: pin, role: role }) }); users.push({ Name: nn, name: nn, PIN: pin, pin: pin, Role: role, role: role }); } renderAdminUsers(); closeUserModal(); }
+    function deleteUser(n) { if (!confirm(`Delete access for ${n}?`)) return; fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', name: n }) }); users = users.filter(u => (u.Name || u.name) !== n); renderAdminUsers(); }
+    async function forceAdminSync() { document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Forcing Sync..."; try { await performDatabaseSync(); alert("Synced!"); } catch(e) { alert("Failed."); } document.getElementById('loading-overlay').style.display = 'none'; }
+    
+    function openAdminEdit(tId) { const t = allTrips.find(x => x.id === tId); if(!t) return; document.getElementById('edit-trip-id').value = tId; document.getElementById('edit-party').value = t.party || ""; document.getElementById('edit-vnum').value = t.vNum || ""; document.getElementById('edit-vtype').value = t.type || ""; document.getElementById('edit-vcap').value = t.weight || ""; document.getElementById('edit-from').value = t.from || ""; document.getElementById('edit-to').value = t.to || ""; document.getElementById('edit-vfreight').value = t.vFreight || ""; document.getElementById('edit-cfreight').value = t.cFreight || ""; document.getElementById('edit-dname').value = t.dName || ""; document.getElementById('edit-dcontact').value = t.dContact || ""; document.getElementById('adminEditModal').style.display = "flex"; }
+    function closeAdminEditModal() { document.getElementById('adminEditModal').style.display = "none"; }
+    function saveAdminEdit() { const pF = document.getElementById('edit-party'); if (isVehicleNumber(pF.value)) { alert("Error: Vehicle Number in Party field."); pF.style.borderColor = '#b3261e'; return; } pF.style.borderColor = 'transparent'; const tId = document.getElementById('edit-trip-id').value; const vn = document.getElementById('edit-vnum').value.replace(/[\s-_]/g, '').toUpperCase(); const p = { action: 'adminEditTrip', id: tId, party: normalizePartyName(document.getElementById('edit-party').value), vNum: vn, vType: document.getElementById('edit-vtype').value.toUpperCase(), weight: document.getElementById('edit-vcap').value.toUpperCase(), from: formatCaseStr(document.getElementById('edit-from').value), to: formatCaseStr(document.getElementById('edit-to').value), vFreight: document.getElementById('edit-vfreight').value, cFreight: document.getElementById('edit-cfreight').value, dName: formatCaseStr(document.getElementById('edit-dname').value), dContact: formatPhoneString(document.getElementById('edit-dcontact').value) }; fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(p) }); const t = allTrips.find(x => x.id === tId); if(t){ Object.assign(t, p); } updateLocalMemory(p); closeAdminEditModal(); triggerCurrentRender(); }
+    
+    function triggerDeliveryModal(tId) { document.getElementById('delivery-trip-id').value = tId; document.getElementById('deliveryModal').style.display = "flex"; }
+    function closeModal() { document.getElementById('deliveryModal').style.display = "none"; triggerCurrentRender(); }
+    function confirmDelivery() { const d = document.getElementById('delivery-date-input').value; if (!d) return alert("Select date."); const tId = document.getElementById('delivery-trip-id').value; const fd = getFormattedDateVal(d); fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTripStatus', id: tId, status: 'Delivered', deliveryDate: fd }) }); const t = allTrips.find(x => x.id === tId); if(t){ t.status = 'Delivered'; t.deliveryDate = fd; } closeModal(); }
+    function revertStatus(tId, ns) { if (ns === 'In-Transit') { if (!confirm("Move trip back to In-Transit?")) return; } fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTripStatus', id: tId, status: ns, deliveryDate: '' }) }); const t = allTrips.find(x => x.id === tId); if(t){ t.status = ns; t.deliveryDate = ''; t.podDate = '';} triggerCurrentRender(); }
+    function updateBackendData(tId, act, val) { const p = { action: act, id: tId }; if (act === 'updateCNote') p.value = val; if (act === 'updatePODRemark') p.value = val; if (act === 'updateTripRemark') p.value = val; if (act === 'updatePOD') p.date = val; fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(p) }); const t = allTrips.find(x => x.id === tId); if (t) { if (act === 'updateCNote') t.cNote = val; if (act === 'updatePODRemark') t.podRemark = val; if (act === 'updateTripRemark') t.remarks = val; if (act === 'updatePOD') t.podDate = val; } if (act === 'updatePOD') triggerCurrentRender(); }
+    function savePOD(tId, clr = false) { let fd = ""; if (clr) { if(!confirm("Remove POD Date?")) return; } else { const d = document.getElementById(`pod-date-${tId}`).value; const r = currentUser.Role || currentUser.role; const isA = (r === 'Admin' || r === 'Master Admin'); if (!d) { if (!isA || !confirm("Save without date?")) return alert("Select POD date."); fd = "No Date"; } else { fd = getFormattedDateVal(d); } } updateBackendData(tId, 'updatePOD', fd); }
+    function updateStatusLog(tId, nv) { const tm = new Date().toISOString(); fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addStatusLog', id: tId, note: nv, timestamp: tm }) }); const t = allTrips.find(x => x.id === tId); if (t) t.statusNote = nv; statusLogs.push({tripId: tId, note: nv, time: tm}); }
+    function toggleHistory(tId, vMode) { document.querySelectorAll('.history-panel').forEach(p => { if (p.id !== `hist-${vMode}-${tId}`) p.style.display = 'none'; }); const p = document.getElementById(`hist-${vMode}-${tId}`); const ls = statusLogs.filter(l => String(l.tripId) === String(tId)); if (ls.length === 0) { p.innerHTML = "<div class='history-item'>No history found.</div>"; } else { p.innerHTML = ls.map(l => { const d = new Date(l.time); return `<div class="history-item"><strong>${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes() < 10 ? '0':''}${d.getMinutes()}</strong> - ${l.note}</div>`; }).join(''); } p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
+    
     function openFinancialAllocation(tId) { const t = allTrips.find(x => x.id === tId); if(!t) return; document.getElementById('fin-trip-id').value = tId; document.getElementById('income-rows-container').innerHTML = ""; document.getElementById('expense-rows-container').innerHTML = ""; let l = { income: [], expense: [] }; try { let p = JSON.parse(t.financialLedger); if(p.income) l.income = p.income; if(p.expense) l.expense = p.expense; } catch(e){} if((l.expense || []).length === 0 && (t.otherExp || t.loadingExp || t.unloadingExp || t.lrExp)) { if(t.otherExp) l.expense.push({type: t.otherExpReason || 'Generic', amt: parseFloat(t.otherExp)}); if(t.loadingExp) l.expense.push({type: 'Loading', amt: parseFloat(t.loadingExp)}); if(t.unloadingExp) l.expense.push({type: 'Unloading', amt: parseFloat(t.unloadingExp)}); if(t.lrExp) l.expense.push({type: 'LR', amt: parseFloat(t.lrExp)}); } (l.income || []).forEach(r => addFinancialRow('income', r.type, r.amt)); (l.expense || []).forEach(r => addFinancialRow('expense', r.type, r.amt)); document.getElementById('financialModal').style.display = "flex"; }
     function addFinancialRow(cat, t = "", a = "") { const c = document.getElementById(`${cat}-rows-container`); const r = document.createElement('div'); r.className = "financial-row"; r.innerHTML = `<input type="text" placeholder="Desc/Type" class="compact-input fin-desc" value="${t}"><input type="number" placeholder="Amount" class="compact-input fin-amt" value="${a}"><button class="btn btn-clear" onclick="this.parentElement.remove()" style="padding:10px; font-weight:bold; color:#b3261e; width:auto; border-radius:8px;">X</button>`; c.appendChild(r); }
     function closeFinancialModal() { document.getElementById('financialModal').style.display = "none"; }
