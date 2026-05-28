@@ -1,4 +1,152 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"><title>KTPL ERP Ecosystem</title><link rel="manifest" href="manifest.json"><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><style>*{box-sizing:border-box;font-family:"Google Sans","Roboto",-apple-system,sans-serif;}body{background:#f4f7fc;min-height:100vh;margin:0;padding:10px;color:#1f1f1f;display:flex;justify-content:center;}.container{position:relative;width:100%;max-width:600px;padding:10px 0;margin-top:10px;margin-bottom:40px;display:none;overflow-x:hidden;word-wrap:break-word;}#pin-overlay,#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:#f4f7fc;z-index:9999;display:flex;justify-content:center;align-items:center;flex-direction:column;padding:20px;}#loading-overlay{display:none;}.pin-box{background:#ffffff;padding:35px 25px;border-radius:20px;text-align:center;width:100%;max-width:320px;box-shadow:0 8px 24px rgba(0,0,0,0.06);}.pin-input{font-size:28px;letter-spacing:12px;text-align:center;font-weight:500;margin-bottom:10px;padding:12px;width:100%;border:none;background:#f1f3f4;border-radius:12px;outline:none;transition:0.2s;}.pin-input:focus{background:#ffffff;outline:2px solid #1a73e8;box-shadow:0 4px 12px rgba(26,115,232,0.1);}.app-section{display:none;animation:fadeIn 0.3s ease;}.app-section.active{display:block;}@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}.homepage-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:0 10px;}.menu-card{background:#ffffff;border-radius:20px;padding:20px 15px;cursor:pointer;transition:0.2s ease-in-out;box-shadow:0 4px 12px rgba(0,0,0,0.03);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:1px solid transparent;}.menu-card:active{transform:scale(0.96);background:#f8f9fa;border-color:#d3e3fd;}.menu-icon{font-size:28px;margin-bottom:10px;background:#f0f4f9;width:55px;height:55px;border-radius:50%;display:flex;justify-content:center;align-items:center;transition:0.2s;}.menu-card:hover .menu-icon{transform:translateY(-3px);}.menu-card h3{margin:0;font-size:14px;font-weight:600;color:#1f1f1f;}.menu-card p{margin:6px 0 0 0;font-size:11px;color:#5f6368;line-height:1.3;}.workspace-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;padding:12px 15px;background:#1a73e8;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin-left:10px;margin-right:10px;}.btn-back-home{background:rgba(255,255,255,0.2);border:none;color:#ffffff;font-size:13px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:20px;transition:0.2s;}.btn-back-home:active{transform:scale(0.95);background:rgba(255,255,255,0.3);}.workspace-title{font-size:15px;font-weight:600;color:#ffffff;margin:0;}.sub-tabs{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 10px;}.sub-tabs::-webkit-scrollbar{display:none;}.sub-tab{flex:1 0 auto;text-align:center;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;border-radius:24px;background:#ffffff;color:#444746;border:1px solid #dadce0;transition:0.2s ease-in-out;}.sub-tab.active{background:#1a73e8;color:#ffffff;border-color:#1a73e8;box-shadow:0 4px 10px rgba(26,115,232,0.2);}.secondary-tabs{background:#e8f0fe;padding:6px;border-radius:24px;margin-bottom:15px;display:flex;gap:6px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-left:10px;margin-right:10px;}.secondary-tabs::-webkit-scrollbar{display:none;}.secondary-tab{background:transparent;border:none;color:#1a73e8;padding:8px 14px;font-size:12px;border-radius:20px;cursor:pointer;flex:1 0 auto;text-align:center;font-weight:600;transition:0.2s;}.secondary-tab.active{background:#1a73e8;color:#ffffff;box-shadow:0 2px 6px rgba(26,115,232,0.3);}.form-card{background:#ffffff;border-radius:20px;padding:20px;margin:0 10px 15px 10px;box-shadow:0 4px 12px rgba(0,0,0,0.03);}.form-group{margin-top:14px;width:100%;}label{display:block;font-size:11px;font-weight:600;color:#444746;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;}.required-star{color:#b3261e;}input,select{width:100%;padding:14px;border:none;border-radius:12px;font-size:14px;color:#1f1f1f;background-color:#f1f3f4;transition:0.2s;box-sizing:border-box;outline:none;}input:focus,select:focus{background-color:#ffffff;outline:2px solid #1a73e8;box-shadow:0 4px 12px rgba(26,115,232,0.08);}input:disabled{background-color:#e3e3e3;color:#8e8e8e;cursor:not-allowed;}.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%;}.error-msg{display:none;color:#b3261e;font-size:11px;margin-top:4px;font-weight:500;}.section-divider{height:1px;background:#e0e0e0;margin:24px 0;border-radius:2px;}.btn{width:100%;padding:14px 16px;border:none;border-radius:24px;cursor:pointer;font-size:13px;font-weight:600;transition:0.2s ease-in-out;text-align:center;}.btn:active{transform:scale(0.96);opacity:0.9;}.btn-primary{color:#ffffff;background:#1a73e8;box-shadow:0 4px 10px rgba(26,115,232,0.2);}.btn-whatsapp{color:#ffffff;background:#146c2e;box-shadow:0 4px 10px rgba(20,108,46,0.2);}.btn-business{color:#ffffff;background:#004d40;}.btn-team{color:#ffffff;background:#65558f;box-shadow:0 4px 10px rgba(101,85,143,0.2);}.btn-clear{background:#f1f3f4;color:#444746;}.btn-secondary{background:#e8f0fe;color:#1a73e8;padding:8px 14px;border-radius:12px;width:auto;font-size:11px;font-weight:600;}.autocomplete{position:relative;display:block;text-align:left;width:100%;}.autocomplete-items{position:absolute;z-index:99;top:100%;left:0;right:0;background-color:#ffffff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);max-height:220px;overflow-y:auto;display:none;margin-top:6px;border:1px solid #dadce0;overflow-x:hidden;}.autocomplete-items div{padding:14px;cursor:pointer;border-bottom:1px solid #f1f3f4;font-size:13px;color:#1f1f1f;transition:0.1s;}.autocomplete-items div:hover{background-color:#f8f9fa;color:#1a73e8;padding-left:18px;}.list-container{padding:0 10px;}.trip-card{background:#ffffff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 4px 12px rgba(0,0,0,0.03);font-size:12px;color:#444746;border:1px solid #f1f3f4;position:relative;}.status-badge{display:inline-block;padding:6px 10px;border-radius:8px;font-size:10px;font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px;}.status-transit{background:#fef7e0;color:#b06000;}.status-delivered{background:#f1f3f4;color:#5f6368;}.status-cancelled{background:#fce8e6;color:#b3261e;}.compact-input{padding:10px 12px;font-size:12px;border-radius:8px;background:#f8f9fa;border:1px solid #dadce0;outline:none;width:100%;transition:0.2s;}.compact-input:focus{background:#ffffff;border-color:#1a73e8;box-shadow:0 2px 8px rgba(26,115,232,0.1);}#unified-filter-bar{background:#ffffff;border-radius:16px;padding:15px;margin:0 10px 15px 10px;box-shadow:0 4px 12px rgba(0,0,0,0.03);}.filter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}.reco-accordion-header{background:#ffffff;border-radius:16px;padding:14px 16px;margin-bottom:10px;box-shadow:0 4px 12px rgba(0,0,0,0.03);cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;border:1px solid #f1f3f4;transition:0.2s;position:relative;}.reco-accordion-header:active{transform:scale(0.98);background:#f8f9fa;}.reco-info-col{flex:1;padding-right:10px;word-wrap:break-word;font-size:13px;color:#202124;}.reco-amt-col{display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-start;gap:6px;flex-shrink:0;text-align:right;}.far-right-amt{font-weight:bold;color:#b3261e;font-size:15px;}.reco-accordion-body{display:none;background:#ffffff;border-radius:16px;padding:16px;margin-bottom:18px;border:1px solid #dadce0;animation:fadeIn 0.2s ease;}.reco-accordion-body.open{display:block;}.reco-split-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px;border-top:1px solid #f1f3f4;padding-top:16px;}.reco-panel{border-radius:8px;padding:0;background:transparent;max-height:250px;overflow-y:auto;padding-right:5px;}.reco-header-title{font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:12px;border-bottom:1px solid #eaeaea;padding-bottom:8px;color:#5f6368;display:flex;justify-content:space-between;}.calc-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:#444746;}.calc-line-item{display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px;color:#5f6368;padding-left:10px;border-left:2px solid #e8f0fe;}.calc-gross{font-weight:bold;font-size:13px;color:#1f1f1f;margin-top:10px;padding-top:10px;border-top:1px solid #f1f3f4;display:flex;justify-content:space-between;}.highlight-red-box{background-color:#fce8e6;color:#1f1f1f;font-weight:600;padding:14px;text-align:center;border-radius:12px;margin-top:16px;border:1px solid #f9d0c4;font-size:14px;display:block;transition:0.3s ease;box-shadow:0 4px 10px rgba(217,48,37,0.05);}.payment-slot-row{display:flex;gap:6px;margin-top:8px;align-items:center;}.batch-checkbox{width:18px;height:18px;cursor:pointer;accent-color:#0b57d0;margin-left:10px;}#batch-payment-bar{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1f1f1f;color:#ffffff;padding:12px 20px;border-radius:30px;z-index:10000;box-shadow:0 8px 24px rgba(0,0,0,0.3);align-items:center;gap:15px;animation:fadeIn 0.3s ease;width:90%;max-width:400px;justify-content:space-between;}.history-btn{background:transparent;border:none;color:#1a73e8;font-size:12px;font-weight:600;cursor:pointer;padding:6px 0;margin-top:8px;text-align:left;width:auto;transition:0.2s;}.history-btn:hover{color:#0842a0;}.history-panel{display:none;background:#f8f9fa;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:11px;color:#444746;border-left:4px solid #1a73e8;}.history-item{margin-bottom:8px;border-bottom:1px solid #dadce0;padding-bottom:6px;}.modal{display:none;position:fixed;z-index:10000;left:0;top:0;width:100%;height:100%;background-color:rgba(31,31,31,0.6);justify-content:center;align-items:center;padding:15px;backdrop-filter:blur(4px);}.modal-content{background:#ffffff;padding:24px;border-radius:20px;width:100%;max-width:400px;max-height:90vh;overflow-y:auto;text-align:left;box-shadow:0 12px 32px rgba(0,0,0,0.2);}.financial-row{display:grid;grid-template-columns:2fr 1.5fr auto;gap:8px;margin-bottom:10px;align-items:center;}.screen-report-container{display:block;overflow-y:auto;overflow-x:auto;max-height:480px;background:#ffffff;border-radius:16px;margin:0 10px 15px 10px;box-shadow:0 4px 12px rgba(0,0,0,0.03);-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border:1px solid #dadce0;}.report-table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap;}.report-table th,.report-table td{padding:12px 14px;border-bottom:1px solid #f1f3f4;text-align:left;color:#444746;}.report-table th{position:sticky;top:0;z-index:10;background:#f8f9fa;font-weight:600;color:#1f1f1f;box-shadow:0 2px 4px rgba(0,0,0,0.05);}.print-only{display:none;}.admin-action-btn{background:#f8f9fa;border:1px solid #dadce0;border-radius:8px;padding:6px 12px;font-size:11px;cursor:pointer;color:#1a73e8;margin-right:6px;font-weight:600;transition:0.2s;}.admin-action-btn:active{background:#e8f0fe;}@media print{@page{margin:10mm;}body *{visibility:hidden;}body{padding:0;margin:0;background:#fff;}#print-report-container,#print-report-container *{visibility:visible;}#print-report-container{position:absolute;left:0;top:0;width:100%;display:block !important;}.screen-report-container,#main-app,.modal,#unified-filter-bar{display:none !important;}.print-header{text-align:center;border:2px solid #000;padding:10px;margin-bottom:20px;display:block;}.print-header h2{font-size:18px;color:#000;margin:0;font-weight:bold;}.print-table{width:100%;border-collapse:collapse;font-family:Calibri,sans-serif;font-size:10pt;border:2px solid #000;}.print-table th,.print-table td{border:1px solid #000;padding:6px;color:#000;text-align:left;vertical-align:top;}.print-table th{background-color:#f0f0f0;font-weight:bold;text-align:center;}.party-table-wrapper{margin-bottom:20px;page-break-inside:avoid;}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KTPL ERP Ecosystem</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        /* SOFT, MODERN UI DESIGN */
+        * { box-sizing: border-box; font-family: "Google Sans", "Roboto", -apple-system, sans-serif; }
+        body { background: #f4f7fc; min-height: 100vh; margin: 0; padding: 10px; color: #1f1f1f; display: flex; justify-content: center; }
+        .container { position: relative; width: 100%; max-width: 600px; padding: 10px 0; margin-top: 10px; margin-bottom: 40px; display: none; overflow-x: hidden; word-wrap: break-word; }
+
+        /* LOADING & PIN */
+        #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7fc; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
+        #loading-overlay { display: none; }
+        .pin-box { background: #ffffff; padding: 35px 25px; border-radius: 20px; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+        .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 10px; padding: 12px; width: 100%; border: none; background: #f1f3f4; border-radius: 12px; outline: none; transition: 0.2s; }
+        .pin-input:focus { background: #ffffff; outline: 2px solid #1a73e8; box-shadow: 0 4px 12px rgba(26,115,232,0.1); }
+
+        .app-section { display: none; animation: fadeIn 0.3s ease; }
+        .app-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* UNIFIED SYMMETRICAL HOME GRID (NO SPAN 2) */
+        .homepage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 0 10px; }
+        .menu-card { background: #ffffff; border-radius: 20px; padding: 20px 15px; cursor: pointer; transition: 0.2s ease-in-out; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 1px solid transparent; }
+        .menu-card:active { transform: scale(0.96); background: #f8f9fa; border-color: #d3e3fd; }
+        .menu-icon { font-size: 28px; margin-bottom: 10px; background: #f0f4f9; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .menu-card:hover .menu-icon { transform: translateY(-3px); }
+        .menu-card h3 { margin: 0; font-size: 14px; font-weight: 600; color: #1f1f1f; }
+        .menu-card p { margin: 6px 0 0 0; font-size: 11px; color: #5f6368; line-height: 1.3; }
+
+        .workspace-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 12px 15px; background: #ffffff; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); margin-left: 10px; margin-right: 10px; }
+        .btn-back-home { background: #f1f3f4; border: none; color: #444746; font-size: 13px; font-weight: 500; cursor: pointer; padding: 8px 14px; border-radius: 20px; transition: 0.2s;}
+        .btn-back-home:active { transform: scale(0.95); background: #e3e3e3;}
+        .workspace-title { font-size: 15px; font-weight: 600; color: #1f1f1f; margin: 0; }
+
+        /* SOFT TABS */
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 10px; }
+        .sub-tabs::-webkit-scrollbar { display: none; }
+        .sub-tab { flex: 1 0 auto; text-align: center; padding: 10px 14px; cursor: pointer; font-size: 12px; font-weight: 600; border-radius: 24px; background: #ffffff; color: #444746; border: 1px solid #dadce0; transition: 0.2s ease-in-out; }
+        .sub-tab.active { background: #1a73e8; color: #ffffff; border-color: #1a73e8; box-shadow: 0 4px 10px rgba(26,115,232,0.2); }
+
+        .secondary-tabs { background: #e8f0fe; padding: 6px; border-radius: 24px; margin-bottom: 15px; display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-left: 10px; margin-right: 10px;}
+        .secondary-tabs::-webkit-scrollbar { display: none; }
+        .secondary-tab { background: transparent; border: none; color: #1a73e8; padding: 8px 14px; font-size: 12px; border-radius: 20px; cursor: pointer; flex: 1 0 auto; text-align: center; font-weight:600; transition: 0.2s;}
+        .secondary-tab.active { background: #1a73e8; color: #ffffff; box-shadow: 0 2px 6px rgba(26,115,232,0.3); }
+
+        /* FORMS & INPUTS */
+        .form-card { background: #ffffff; border-radius: 20px; padding: 20px; margin: 0 10px 15px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .form-group { margin-top: 14px; width: 100%; }
+        label { display: block; font-size: 11px; font-weight: 600; color: #444746; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .required-star { color: #b3261e; } 
+        input, select { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 14px; color: #1f1f1f; background-color: #f1f3f4; transition: 0.2s; box-sizing: border-box; outline: none; }
+        input:focus, select:focus { background-color: #ffffff; outline: 2px solid #1a73e8; box-shadow: 0 4px 12px rgba(26,115,232,0.08); }
+        input:disabled { background-color: #e3e3e3; color: #8e8e8e; cursor: not-allowed; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; }
+        .error-msg { display: none; color: #b3261e; font-size: 11px; margin-top: 4px; font-weight: 500; }
+        .section-divider { height: 1px; background: #e0e0e0; margin: 24px 0; border-radius: 2px; }
+
+        /* BUTTONS */
+        .btn { width: 100%; padding: 14px 16px; border: none; border-radius: 24px; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s ease-in-out; text-align: center; }
+        .btn:active { transform: scale(0.96); opacity: 0.9; }
+        .btn-primary { color: #ffffff; background: #1a73e8; box-shadow: 0 4px 10px rgba(26,115,232,0.2); }
+        .btn-whatsapp { color: #ffffff; background: #146c2e; box-shadow: 0 4px 10px rgba(20,108,46,0.2); }
+        .btn-business { color: #ffffff; background: #004d40; }
+        .btn-team { color: #ffffff; background: #65558f; box-shadow: 0 4px 10px rgba(101,85,143,0.2); } 
+        .btn-clear { background: #f1f3f4; color: #444746; }
+        .btn-secondary { background: #e8f0fe; color: #1a73e8; padding: 8px 14px; border-radius: 12px; width: auto; font-size: 11px; font-weight: 600; }
+
+        /* AUTOCOMPLETE */
+        .autocomplete { position: relative; display: block; text-align: left; width: 100%; }
+        .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-height: 220px; overflow-y: auto; display: none; margin-top: 6px; border: 1px solid #dadce0; overflow-x: hidden; }
+        .autocomplete-items div { padding: 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 13px; color: #1f1f1f; transition: 0.1s; }
+        .autocomplete-items div:hover { background-color: #f8f9fa; color: #1a73e8; padding-left: 18px; }
+
+        /* TRIP CARDS & IDLE CARDS */
+        .list-container { padding: 0 10px; }
+        .trip-card { background: #ffffff; border-radius: 16px; padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); font-size: 12px; color: #444746; border: 1px solid #f1f3f4; position: relative;}
+        .status-badge { display: inline-block; padding: 6px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;}
+        .status-transit { background: #fef7e0; color: #b06000; }
+        .status-delivered { background: #f1f3f4; color: #5f6368; }
+        .status-cancelled { background: #fce8e6; color: #b3261e; }
+        .compact-input { padding: 10px 12px; font-size: 12px; border-radius: 8px; background: #f8f9fa; border: 1px solid #dadce0; outline: none; width: 100%; transition: 0.2s;}
+        .compact-input:focus { background: #ffffff; border-color: #1a73e8; box-shadow: 0 2px 8px rgba(26,115,232,0.1); }
+
+        /* FILTER BAR */
+        #unified-filter-bar { background: #ffffff; border-radius: 16px; padding: 15px; margin: 0 10px 15px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+
+        /* PAYMENTS ACCORDION */
+        .reco-accordion-header { background: #ffffff; border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; border: 1px solid #f1f3f4; transition: 0.2s; position: relative;}
+        .reco-accordion-header:active { transform: scale(0.98); background: #f8f9fa;}
+        .reco-info-col { flex: 1; padding-right: 10px; word-wrap: break-word; font-size: 13px; color: #202124;}
+        .reco-amt-col { display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-start; gap: 6px; flex-shrink: 0; text-align: right; }
+        .far-right-amt { font-weight: bold; color: #b3261e; font-size: 15px; }
+        .reco-accordion-body { display: none; background: #ffffff; border-radius: 16px; padding: 16px; margin-bottom: 18px; border: 1px solid #dadce0; animation: fadeIn 0.2s ease;}
+        .reco-accordion-body.open { display: block; }
+        .reco-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; border-top: 1px solid #f1f3f4; padding-top: 16px;}
+        .reco-panel { border-radius: 8px; padding: 0; background: transparent; max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .reco-header-title { font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #eaeaea; padding-bottom: 8px; color: #5f6368; display: flex; justify-content: space-between;}
+        .calc-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: #444746; }
+        .calc-line-item { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: #5f6368; padding-left: 10px; border-left: 2px solid #e8f0fe;}
+        .calc-gross { font-weight: bold; font-size: 13px; color: #1f1f1f; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f3f4; display: flex; justify-content: space-between;}
+        .highlight-red-box { background-color: #fce8e6; color: #1f1f1f; font-weight: 600; padding: 14px; text-align: center; border-radius: 12px; margin-top: 16px; border: 1px solid #f9d0c4; font-size: 14px; display: block; transition: 0.3s ease; box-shadow: 0 4px 10px rgba(217,48,37,0.05);}
+        
+        /* THE PAYMENT SLOT CSS FIX */
+        .payment-slot-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; width: 100%; }
+        .payment-slot-row input { flex: 1; min-width: 0; padding: 12px; }
+        .payment-slot-row button { flex-shrink: 0; padding: 12px; }
+        
+        .batch-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: #0b57d0; margin-left: 10px; }
+        #batch-payment-bar { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1f1f1f; color: #ffffff; padding: 12px 20px; border-radius: 30px; z-index: 10000; box-shadow: 0 8px 24px rgba(0,0,0,0.3); align-items: center; gap: 15px; animation: fadeIn 0.3s ease; width: 90%; max-width: 400px; justify-content: space-between; }
+
+        /* HISTORY & MISC */
+        .history-btn { background: transparent; border: none; color: #1a73e8; font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 0; margin-top: 8px; text-align: left; width: auto; transition: 0.2s;}
+        .history-btn:hover { color: #0842a0; }
+        .history-panel { display: none; background: #f8f9fa; border-radius: 8px; padding: 10px 14px; margin-top: 10px; font-size: 11px; color: #444746; border-left: 4px solid #1a73e8;}
+        .history-item { margin-bottom: 8px; border-bottom: 1px solid #dadce0; padding-bottom: 6px; }
+
+        /* MODALS */
+        .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(31,31,31,0.6); justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(4px);}
+        .modal-content { background: #ffffff; padding: 24px; border-radius: 20px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: left; box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
+        .financial-row { display: grid; grid-template-columns: 2fr 1.5fr auto; gap: 8px; margin-bottom: 10px; align-items: center; }
+
+        /* REPORTS TABLE SCROLL SETUP */
+        .screen-report-container { display: block; overflow-y: auto; overflow-x: auto; max-height: 480px; background: #ffffff; border-radius: 16px; margin: 0 10px 15px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); -webkit-overflow-scrolling: touch; overscroll-behavior: contain; border: 1px solid #dadce0;}
+        .report-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+        .report-table th, .report-table td { padding: 12px 14px; border-bottom: 1px solid #f1f3f4; text-align: left; color: #444746; }
+        .report-table th { position: sticky; top: 0; z-index: 10; background: #f8f9fa; font-weight: 600; color: #1f1f1f; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .print-only { display: none; }
+        .admin-action-btn { background: #f8f9fa; border: 1px solid #dadce0; border-radius: 8px; padding: 6px 12px; font-size: 11px; cursor: pointer; color: #1a73e8; margin-right: 6px; font-weight: 600; transition: 0.2s;}
+        .admin-action-btn:active { background: #e8f0fe; }
+
+        /* PDF STYLES */
+        @media print { 
+            @page { margin: 10mm; } body * { visibility: hidden; } body { padding: 0; margin: 0; background: #fff; }
+            #print-report-container, #print-report-container * { visibility: visible; }
+            #print-report-container { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+            .screen-report-container, #main-app, .modal, #unified-filter-bar { display: none !important; }
+            .print-header { text-align: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; display: block; }
+            .print-header h2 { font-size: 18px; color: #000; margin: 0; font-weight: bold; }
+            .print-table { width: 100%; border-collapse: collapse; font-family: Calibri, sans-serif; font-size: 10pt; border: 2px solid #000;}
+            .print-table th, .print-table td { border: 1px solid #000; padding: 6px; color: #000; text-align: left; vertical-align: top;}
+            .print-table th { background-color: #f0f0f0; font-weight: bold; text-align: center;}
+            .party-table-wrapper { margin-bottom: 20px; page-break-inside: avoid; }
+        }
     </style>
 </head>
 <body>
@@ -43,7 +191,7 @@
         <div id="placement-form-container" style="display:none;" class="form-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f3f4; padding-bottom:10px;"><span id="placement-form-title" style="font-weight:700; color:#1a73e8; font-size: 16px;">Form</span><span style="font-size:12px; color:#b3261e; cursor:pointer; font-weight:700;" onclick="showSelectionScreen('placement')">Cancel</span></div>
             <div id="form-own-booking"><div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="ob-date"></div><div class="form-group autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="ob-party" placeholder="Type or Select..." onchange="formatPartyName(this)"><div id="ob-party-list" class="autocomplete-items"></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="ob-from" onchange="formatCase(this, 'title')"><div id="ob-from-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="ob-to" onchange="formatCase(this, 'title')"><div id="ob-to-list" class="autocomplete-items"></div></div></div><div class="section-divider"></div><div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="ob-vnum" placeholder="Search Fleet..." onchange="formatVehicleNumber(this)"><div id="ob-vnum-list" class="autocomplete-items"></div></div><div class="grid-2 form-group"><div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="ob-vtype" onchange="formatCase(this, 'upper')"></div><div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="ob-weight" onchange="formatCase(this, 'upper')"></div></div><div class="grid-2 form-group"><div><label>Vehicle Freight</label><input type="number" id="ob-vfreight" placeholder="Payable"></div><div><label>Charged Freight</label><input type="number" id="ob-cfreight" placeholder="Receivable"></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>Driver Name</label><input type="text" id="ob-dname" onchange="formatCase(this, 'title')"><div id="ob-dname-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>Driver Contact <span class="required-star">*</span></label><input type="text" id="ob-dcontact" onchange="formatPhoneInput(this)"><div id="ob-dcontact-list" class="autocomplete-items"></div></div></div><div class="section-divider"></div><div class="form-group autocomplete"><label>Transporter <span class="required-star">*</span></label><input type="text" id="ob-tname" onchange="formatPartyName(this)"><div id="ob-tname-list" class="autocomplete-items"></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>Person Name</label><input type="text" id="ob-tperson" onchange="formatCase(this, 'title')"><div id="ob-tperson-list" class="autocomplete-items"></div></div><div><label>Contact No.</label><input type="text" id="ob-tcontact" onchange="formatPhoneInput(this)"></div></div><div class="section-divider"></div><div class="form-group"><label>Remarks</label><input type="text" id="ob-remarks" placeholder="..."></div><div class="grid-2" style="margin-top:20px; gap:10px;"><button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button><button class="btn btn-primary" onclick="savePlacementOwn()">Save Details</button><button class="btn btn-team" onclick="generatePlacementMessageOwn('team')">For Team</button><button class="btn btn-whatsapp" onclick="generatePlacementMessageOwn('client')">For Client</button></div></div>
-            <div id="form-rev-logistics" style="display:none;"><div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="rl-date"></div><div class="grid-2 form-group"><div class="autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="rl-party" placeholder="Type..." onchange="formatPartyName(this)"><div id="rl-party-list" class="autocomplete-items"></div></div><div><label>Type of Co.</label><input type="text" id="rl-typeco" onchange="formatCase(this, 'title')"></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="rl-from" onchange="formatCase(this, 'title')"><div id="rl-from-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="rl-to" onchange="formatCase(this, 'title')"><div id="rl-to-list" class="autocomplete-items"></div></div></div><div class="section-divider"></div><div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="rl-vnum" placeholder="Strictly KTPL Fleet" onchange="formatVehicleNumber(this)"><div id="rl-vnum-list" class="autocomplete-items"></div></div><div class="grid-2 form-group"><div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="rl-vtype" onchange="formatCase(this, 'upper')"></div><div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="rl-weight" onchange="formatCase(this, 'upper')"></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>Driver Name</label><input type="text" id="rl-dname" onchange="formatCase(this, 'title')"><div id="rl-dname-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>Driver Contact</label><input type="text" id="rl-dcontact" onchange="formatPhoneInput(this)"><div id="rl-dcontact-list" class="autocomplete-items"></div></div></div><div class="section-divider"></div><div class="form-group autocomplete"><label>Broking Agency <span class="required-star">*</span></label><input type="text" id="rl-agency" onchange="formatPartyName(this)"><div id="rl-agency-list" class="autocomplete-items"></div></div><div class="grid-2 form-group"><div><label>Agent Name</label><input type="text" id="rl-agent" onchange="formatCase(this, 'title')"></div><div><label>Contact No.</label><input type="text" id="rl-contact" onchange="formatPhoneInput(this)"></div></div><div class="section-divider"></div><div class="form-group"><label>Charged Freight</label><input type="number" id="rl-cfreight" placeholder="Receivable Amount"></div><div class="form-group"><label>Remarks</label><input type="text" id="rl-remarks" placeholder="..."></div><div class="grid-2" style="margin-top:20px; gap:10px;"><button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button><button class="btn btn-primary" onclick="savePlacementRev()">Save Details</button><button class="btn btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">Share For Team</button></div></div>
+            <div id="form-rev-logistics" style="display:none;"><div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="rl-date"></div><div class="grid-2 form-group"><div class="autocomplete"><label>Party Name</label><input type="text" id="rl-party" placeholder="Type..." onchange="formatPartyName(this)"><div id="rl-party-list" class="autocomplete-items"></div></div><div><label>Type of Co.</label><input type="text" id="rl-typeco" onchange="formatCase(this, 'title')"></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="rl-from" onchange="formatCase(this, 'title')"><div id="rl-from-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="rl-to" onchange="formatCase(this, 'title')"><div id="rl-to-list" class="autocomplete-items"></div></div></div><div class="section-divider"></div><div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="rl-vnum" placeholder="Strictly KTPL Fleet" onchange="formatVehicleNumber(this)"><div id="rl-vnum-list" class="autocomplete-items"></div></div><div class="grid-2 form-group"><div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="rl-vtype" onchange="formatCase(this, 'upper')"></div><div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="rl-weight" onchange="formatCase(this, 'upper')"></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>Driver Name</label><input type="text" id="rl-dname" onchange="formatCase(this, 'title')"><div id="rl-dname-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>Driver Contact</label><input type="text" id="rl-dcontact" onchange="formatPhoneInput(this)"><div id="rl-dcontact-list" class="autocomplete-items"></div></div></div><div class="section-divider"></div><div class="form-group autocomplete"><label>Broking Agency <span class="required-star">*</span></label><input type="text" id="rl-agency" onchange="formatPartyName(this)"><div id="rl-agency-list" class="autocomplete-items"></div></div><div class="grid-2 form-group"><div><label>Agent Name</label><input type="text" id="rl-agent" onchange="formatCase(this, 'title')"></div><div><label>Contact No.</label><input type="text" id="rl-contact" onchange="formatPhoneInput(this)"></div></div><div class="section-divider"></div><div class="form-group"><label>Charged Freight</label><input type="number" id="rl-cfreight" placeholder="Receivable Amount"></div><div class="form-group"><label>Remarks</label><input type="text" id="rl-remarks" placeholder="..."></div><div class="grid-2" style="margin-top:20px; gap:10px;"><button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button><button class="btn btn-primary" onclick="savePlacementRev()">Save Details</button><button class="btn btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">Share For Team</button></div></div>
         </div>
     </div>
 
@@ -96,12 +244,11 @@
 
 <div id="batch-payment-bar"><div style="font-size:13px; font-weight:600;"><span id="batch-count">0</span> Trips | ₹<span id="batch-total">0</span></div><button class="btn-primary" style="padding:8px 16px; font-size:11px; border-radius:16px; border:none; outline:none; width:auto; cursor:pointer;" onclick="openBatchPaymentModal()">Request Approval</button></div>
 <div id="batchPaymentModal" class="modal"><div class="modal-content" style="max-width: 320px; padding: 24px;"><h3 style="margin-top:0; color:#1f1f1f; font-weight:700; font-size:16px;">Request Payment</h3><p style="font-size: 13px; color: #5f6368; margin-bottom: 15px;">Select request type and export method.</p><div class="form-group" style="margin-top:0; margin-bottom:15px;"><label>Payment Type</label><select id="batch-pay-type" class="compact-input"><option value="Advance">Advance Request</option><option value="Balance">Balance Request</option><option value="Full Settlement">Full Settlement</option></select></div><div style="display:flex; flex-direction: column; gap:12px;"><button class="btn btn-whatsapp" onclick="executeBatchPayment('whatsapp')">💬 Send via WhatsApp</button><button class="btn btn-team" onclick="executeBatchPayment('excel')">📊 Export Excel</button><button class="btn btn-clear" onclick="closeBatchPaymentModal()" style="margin-top: 8px;">Cancel</button></div></div></div>
-
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxJsu4llXFpjbeMX53mDmIpQ2z1YNR8garBDkBKxVF9AR3dSmfX0Zvm-XB02ZQplus/exec"; 
-    let vehicles={};let clients=[];let transporters={};let allTrips=[];let users=[];let statusLogs=[];let driverData={};let currentUser=null;let isCheckingPin=false;let currentActiveMainTab='panel-homepage';let currentPlacementType="";let currentDeployedType="";let currentDeployedStatus="In-Transit";let currentFleetBranch="All";let currentFleetPrimary="All";let currentFleetSecondary="20Ft Fleet";let currentPodType="";let currentPodStatus="Pending";let currentRecoType="";let currentRecoStat="Pending";let currentReportType="";let pendingWhatsAppMsg="";let currentReportTrips=[];let currentOpenRecoId=null;let vehicleBranches=JSON.parse(localStorage.getItem('ktpl_branches')||'{}');let selectedPaymentTrips=[];
-    const ZONES = {"Zone 1. West": ["Mumbai","Thane","Bhiwandi","Pune","Vapi","Surat","Taloja","JNPT","Nhava Sheva","Vashi","Vasai","Belapur","Dombivali","Dombivli","Kalyan","Yewai Naka","Aurangabad","Waluj","Jalna","Ahmedabad","Panoli","Dahej","Kheda"],"Zone 2. NCR": ["New Delhi","Ghaziabad","Sonipat","Aligarh","Gurugram","Noida","Sahibabad","Bahadurgarh","Alipur"],"Zone 3. North West": ["Zirakpur","Ludhiana","Ambala","Kapurthala","Baddi","Ponta Sahib","Mohali","Chandigarh"],"Zone 4. East / North East": ["Kolkata","Siliguri","Guwahati","Patna","Cuttack","Bhubaneswar"],"Zone 5. South West": ["Bangalore","Hosur","Hoskote","Dhansapura"],"Zone 6. Telangana": ["Hyderabad","Rangareddy","Sangareddy","Uppal","Medchal"],"Zone 7. Chennai": ["Chennai","Sri City","Sriperumbudur","Guindy","Kanchipuram"],"Zone 8. Rajasthan": ["Jaipur","Bagur","VKI","Bhiwadi","Neemrana","Keshwana","Alwar"]};
-    function getZoneForCity(city) { if(!city) return null; let c = city.trim().toLowerCase().replace(/\s+(mh|up|gj|dl|hr|pb|wb|or|ka|ts|tn|rj)$/i, ''); for (let zone in ZONES) { if (ZONES[zone].some(zc => c.includes(zc.toLowerCase()))) return zone; } return null; }
+    let vehicles={};let clients=[];let transporters={};let allTrips=[];let users=[];let statusLogs=[];let driverData={};let transporterBanks={};let currentUser=null;let isCheckingPin=false;let currentActiveMainTab='panel-homepage';let currentPlacementType="";let currentDeployedType="";let currentDeployedStatus="In-Transit";let currentFleetBranch="All";let currentFleetPrimary="All";let currentFleetSecondary="20Ft Fleet";let currentPodType="";let currentPodStatus="Pending";let currentRecoType="";let currentRecoStat="Pending";let currentReportType="";let pendingWhatsAppMsg="";let currentReportTrips=[];let currentOpenRecoId=null;let vehicleBranches=JSON.parse(localStorage.getItem('ktpl_branches')||'{}');let selectedPaymentTrips=[];
+    const ZONES = {"Zone 1. West": ["Baramati","Mumbai","Thane","Bhiwandi","Pune","Vapi","Surat","Taloja","JNPT","Nhava Sheva","Vashi","Vasai","Belapur","Dombivali","Dombivli","Kalyan","Yewai Naka","Aurangabad","Waluj","Jalna","Ahmedabad","Panoli","Dahej","Kheda"],"Zone 2. NCR": ["New Delhi","Ghaziabad","Sonipat","Aligarh","Gurugram","Noida","Sahibabad","Bahadurgarh","Alipur"],"Zone 3. North West": ["Zirakpur","Ludhiana","Ambala","Kapurthala","Baddi","Ponta Sahib","Mohali","Chandigarh"],"Zone 4. East / North East": ["Kolkata","Siliguri","Guwahati","Patna","Cuttack","Bhubaneswar"],"Zone 5. South West": ["Bangalore","Hosur","Hoskote","Dhansapura"],"Zone 6. Telangana": ["Hyderabad","Rangareddy","Sangareddy","Uppal","Medchal"],"Zone 7. Chennai": ["Chennai","Sri City","Sriperumbudur","Guindy","Kanchipuram"],"Zone 8. Rajasthan": ["Jaipur","Bagur","VKI","Bhiwadi","Neemrana","Keshwana","Alwar"]};
+    function getZoneForCity(city) { if(!city) return null; let c = city.trim().toLowerCase().replace(/\s+(mh|up|gj|dl|hr|pb|wb|or|ka|ts|tn|rj|uk|ch)$/i, ''); for (let zone in ZONES) { if (ZONES[zone].some(zc => c.includes(zc.toLowerCase()) || zc.toLowerCase().includes(c))) return zone; } return null; }
     function getSafeTel(n) { if(!n) return ''; let c = String(n).replace(/[\s-]/g, '').trim(); if(c.startsWith('+')) return c; if(c.startsWith('91') && c.length>10) return '+'+c; return '+91'+c; }
     function formatCaseStr(str) { if(!str) return ""; return str.trim().split(/\s+/).map(w => { let cw = w.replace(/[^A-Za-z0-9]/g, ''); if (cw.length>0 && cw.length<=3) return w.toUpperCase(); let i = w.search(/[a-zA-Z]/); if(i !== -1) return w.substring(0, i) + w.charAt(i).toUpperCase() + w.substring(i+1).toLowerCase(); return w; }).join(' '); }
     function formatCase(el, style) { if(el.value) el.value = style==='upper' ? el.value.trim().toUpperCase() : formatCaseStr(el.value); }
@@ -124,18 +271,22 @@
     window.onload = async () => { try { const savedUser = sessionStorage.getItem('ktpl_user'); if(document.getElementById('ob-date')) document.getElementById('ob-date').valueAsDate = new Date(); if(document.getElementById('rl-date')) document.getElementById('rl-date').valueAsDate = new Date(); if (sessionStorage.getItem('ktpl_unlocked') === 'true' && savedUser) { currentUser = JSON.parse(savedUser); document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex'; try { await performDatabaseSync(); document.getElementById('loading-overlay').style.display = 'none'; applyUserPermissions(); } catch (err) { document.getElementById('loader-text').innerText = "Offline Mode: Connection Failed."; document.getElementById('error-box').innerText = err.message; document.getElementById('error-box').style.display = "block"; document.getElementById('bypass-btn').style.display = "inline-block"; } } else { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; } } catch (err) { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; } };
     function bypassLoading() { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; document.getElementById('app-pin').value = ''; document.getElementById('error-box').style.display = 'none'; document.getElementById('bypass-btn').style.display = 'none'; }
     function logoutApp() { sessionStorage.clear(); location.reload(); }
-    async function checkPin() { if (isCheckingPin) return; const pInput = document.getElementById('app-pin'); const pin = pInput ? pInput.value.trim() : ''; if (!pin) return; if (pin.length !== 4) { document.getElementById('pin-error').innerText = "Enter 4-digit PIN."; document.getElementById('pin-error').style.display = 'block'; return; } isCheckingPin = true; document.getElementById('pin-error').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Verifying & Syncing Databank..."; try { await performDatabaseSync(); const u = users.find(x => x && String(x.PIN || x.pin) === String(pin)) || (pin === "1234" ? {Name: "Master Admin", Role: "Master Admin"} : null); if (u) { currentUser = u; sessionStorage.setItem('ktpl_unlocked', 'true'); sessionStorage.setItem('ktpl_user', JSON.stringify(u)); document.getElementById('loading-overlay').style.display = 'none'; applyUserPermissions(); } else { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; document.getElementById('pin-error').innerText = "Invalid PIN."; document.getElementById('pin-error').style.display = 'block'; if(pInput) pInput.value = ''; } } catch (err) { document.getElementById('loader-text').innerText = "Sync Failed."; document.getElementById('error-box').innerText = err.message; document.getElementById('error-box').style.display = "block"; document.getElementById('bypass-btn').style.display = "inline-block"; } isCheckingPin = false; }
+    async function checkPin() { if (isCheckingPin) return; const pInput = document.getElementById('app-pin'); const pin = pInput ? pInput.value.trim() : ''; if (!pin) return; if (pin.length !== 4) { document.getElementById('pin-error').innerText = "Enter 4-digit PIN."; document.getElementById('pin-error').style.display = 'block'; return; } isCheckingPin = true; document.getElementById('pin-error').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'none'; document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Verifying & Syncing Databank..."; try { await performDatabaseSync(); const u = users.find(x => x && String(x.PIN || x.pin) === String(pin)) || (pin === "0711" ? {Name: "Master Admin", Role: "Master Admin"} : null); if (u) { currentUser = u; sessionStorage.setItem('ktpl_unlocked', 'true'); sessionStorage.setItem('ktpl_user', JSON.stringify(u)); document.getElementById('loading-overlay').style.display = 'none'; applyUserPermissions(); } else { document.getElementById('loading-overlay').style.display = 'none'; document.getElementById('pin-overlay').style.display = 'flex'; document.getElementById('pin-error').innerText = "Invalid PIN."; document.getElementById('pin-error').style.display = 'block'; if(pInput) pInput.value = ''; } } catch (err) { document.getElementById('loader-text').innerText = "Sync Failed."; document.getElementById('error-box').innerText = err.message; document.getElementById('error-box').style.display = "block"; document.getElementById('bypass-btn').style.display = "inline-block"; } isCheckingPin = false; }
     async function performDatabaseSync() {
         const ts = Date.now(); const res = await fetch(GOOGLE_SCRIPT_URL + "?t=" + ts); if (!res.ok) throw new Error("Connection failed."); const data = await res.json();
-        vehicles = data.vehicles || {}; clients = data.clients || []; transporters = data.transporters || {}; users = data.users || []; statusLogs = data.statusLogs || []; 
+        vehicles = data.vehicles || {}; clients = data.clients || []; transporters = data.transporters || {}; users = data.users || []; statusLogs = data.statusLogs || []; transporterBanks = {};
         let cU = users.find(u => (u.Name || u.name) === '__VCONFIG__'); if (cU) { try { vehicleBranches = JSON.parse(cU.Role || cU.role); localStorage.setItem('ktpl_branches', JSON.stringify(vehicleBranches)); } catch(e){} }
         const revLogIds = ['TRP-1779115155932','TRP-1779117724465','TRP-1779204199291','TRP-1779272619346','TRP-1779375136137','TRP-1779457814247','TRP-1779638743270','TRP-1779686779691','TRP-1779722314454'];
         allTrips = (data.trips || []).map(t => {
             t.bookingType = 'Own Booking'; t.brokingAgent = '';
             if(t.financialLedger) { try { let j = JSON.parse(t.financialLedger); if(j.bookingType) t.bookingType = j.bookingType; if(j.brokingAgent) t.brokingAgent = j.brokingAgent; } catch(e){} }
-            if(!t.bookingType || t.bookingType==='Own Booking') { if(t.brokingAgent) { t.bookingType = 'Reverse Logistics'; t.tName = ''; } }
+            if(!t.bookingType || t.bookingType==='Own Booking') { if(t.brokingAgent && t.brokingAgent.trim() !== '') { t.bookingType = 'Reverse Logistics'; t.tName = ''; } }
             if(revLogIds.includes(t.id)) t.bookingType = 'Reverse Logistics';
             t.computedBookingType = t.bookingType; return t;
+        });
+        allTrips.forEach(t => {
+            let trName = t.computedBookingType === 'Own Booking' ? t.tName : t.brokingAgent; let nTr = normalizePartyName(trName);
+            if (nTr && t.financialLedger) { try { let j = JSON.parse(t.financialLedger); if (j.reco && (j.reco.bankName || j.reco.bankAc || j.reco.ifsc)) { if (!transporterBanks[nTr]) transporterBanks[nTr] = { bankName: j.reco.bankName||'', bankAc: j.reco.bankAc||'', ifsc: j.reco.ifsc||'', time: parseDate(t.date) }; else { if (parseDate(t.date) >= transporterBanks[nTr].time) { transporterBanks[nTr] = { bankName: j.reco.bankName||'', bankAc: j.reco.bankAc||'', ifsc: j.reco.ifsc||'', time: parseDate(t.date) }; } } } } catch(e){} }
         });
         setupMemoryDropdowns(); renderAdminUsers();
     }
@@ -166,7 +317,7 @@
         const getCN = c => { if(!c) return ""; return typeof c === 'string' ? c : (c.name || c['Party Name'] || c.Name || Object.values(c)[0] || ""); };
         setupCustomDropdown('uf-party', 'uf-party-list', () => [...new Set(clients.map(getCN).filter(Boolean))].sort(), () => triggerFilterRender()); setupCustomDropdown('uf-transporter', 'uf-transporter-list', () => [...new Set([...Object.keys(transporters).map(normalizePartyName), ...allTrips.map(t=>t?normalizePartyName(t.brokingAgent):'').filter(Boolean)])].sort(), () => triggerFilterRender()); setupCustomDropdown('uf-vnum', 'uf-vnum-list', () => Object.keys(vehicles).sort(), () => triggerFilterRender()); setupCustomDropdown('uf-origin', 'uf-origin-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort(), () => triggerFilterRender()); setupCustomDropdown('uf-dest', 'uf-dest-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort(), () => triggerFilterRender()); setupCustomDropdown('uf-vtype', 'uf-vtype-list', () => [...new Set(allTrips.map(t => t?t.type:'').filter(Boolean))].sort(), () => triggerFilterRender()); setupCustomDropdown('uf-vcap', 'uf-vcap-list', () => [...new Set(allTrips.map(t => t?t.weight:'').filter(Boolean))].sort(), () => triggerFilterRender());
         setupCustomDropdown('ob-party', 'ob-party-list', () => [...new Set(clients.map(getCN).filter(Boolean))].sort()); setupCustomDropdown('ob-vnum', 'ob-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'ob')); setupCustomDropdown('ob-tname', 'ob-tname-list', () => Object.keys(transporters).map(normalizePartyName).sort());
-        setupCustomDropdown('ob-tperson', 'ob-tperson-list', () => { let mk = Object.keys(transporters).find(k => normalizePartyName(k) === normalizePartyName(document.getElementById('ob-tname').value)); let lst = transporters[mk || document.getElementById('ob-tname').value]; return lst ? [...new Set(lst.map(p => p.name))].sort() : []; }, (p) => autoFillContact(p, 'ob'));
+        setupCustomDropdown('ob-tperson', 'ob-tperson-list', () => { let mk = Object.keys(transporters).find(k => normalizePartyName(k) === normalizePartyName(document.getElementById('ob-tname').value)); let lst = transporters[mk || document.getElementById('ob-tname').value]; return lst ? lst.map(p => p.name).sort() : []; }, (p) => autoFillContact(p, 'ob'));
         setupCustomDropdown('ob-from', 'ob-from-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort()); setupCustomDropdown('ob-to', 'ob-to-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort());
         setupCustomDropdown('rl-party', 'rl-party-list', () => [...new Set(clients.map(getCN).filter(Boolean))].sort()); setupCustomDropdown('rl-vnum', 'rl-vnum-list', () => Object.keys(vehicles).sort(), (v) => autoFillVehicle(v, 'rl')); setupCustomDropdown('rl-from', 'rl-from-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort()); setupCustomDropdown('rl-to', 'rl-to-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort()); setupCustomDropdown('rl-agent', 'rl-agent-list', () => [...new Set(clients.map(getCN).filter(Boolean))].sort()); setupCustomDropdown('mis-party', 'mis-party-list', () => [...new Set(clients.map(getCN).filter(Boolean))].sort()); setupCustomDropdown('rf-party', 'rf-party-list', () => [...new Set(clients.map(getCN).filter(Boolean))].sort());
         setupCustomDropdown('loc-origin', 'loc-origin-list', () => [...new Set(allTrips.map(t => t?t.from:'').filter(Boolean))].sort()); setupCustomDropdown('loc-dest', 'loc-dest-list', () => [...new Set(allTrips.map(t => t?t.to:'').filter(Boolean))].sort()); setupCustomDropdown('loc-vtype', 'loc-vtype-list', () => [...new Set(allTrips.map(t => t?t.type:'').filter(Boolean))].sort()); setupCustomDropdown('loc-vcap', 'loc-vcap-list', () => [...new Set(allTrips.map(t => t?t.weight:'').filter(Boolean))].sort());
@@ -188,7 +339,7 @@
     }
     function openWorkspace(id) {
         const p = getUserPerms();
-        if (id === 'tab-fleet-locator' && !p.fleetStatusTab) return alert("Restricted Module."); if (id === 'tab-fleet-status' && !p.fleetStatusTab) return alert("Restricted Module."); if (id === 'tab-admin' && !p.adminTab) return alert("Restricted Module."); if (id === 'tab-payments' && !p.paymentsTab) return alert("Restricted Module."); if (id === 'tab-reports' && !p.reportsTab) return alert("Restricted Module.");
+        if (id === 'tab-fleet-locator' && !p.fleetStatusTab) return alert("Restricted."); if (id === 'tab-fleet-status' && !p.fleetStatusTab) return alert("Restricted."); if (id === 'tab-admin' && !p.adminTab) return alert("Restricted."); if (id === 'tab-payments' && !p.paymentsTab) return alert("Restricted."); if (id === 'tab-reports' && !p.reportsTab) return alert("Restricted.");
         document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); currentActiveMainTab = id; document.querySelectorAll('.reco-accordion-body').forEach(el => el.classList.remove('open')); currentOpenRecoId = null; 
         if (id !== 'tab-placement') { document.getElementById('placement-selection-screen').style.display = 'block'; document.getElementById('placement-form-container').style.display = 'none'; }
         if(id === 'tab-fleet-status') renderFleetStatus(); if(id === 'tab-placement') showPlacementSelection(); if(id === 'tab-deployed') { currentDeployedType = ""; showSelectionScreen('deployed'); } if(id === 'tab-pod') { currentPodType = ""; showSelectionScreen('pod'); } if(id === 'tab-payments') { currentRecoType = ""; selectedPaymentTrips = []; updateBatchPaymentUI(); showSelectionScreen('reco'); }
@@ -203,18 +354,17 @@
         ['uf-start', 'uf-end', 'uf-vnum', 'uf-vtype', 'uf-vcap', 'uf-party', 'uf-transporter', 'uf-origin', 'uf-dest', 'rf-party', 'report-trip-status', 'report-pod-status'].forEach(id => { const el = document.getElementById(id); if(el) { if(id === 'report-trip-status' || id === 'report-pod-status') el.value = 'All'; else el.value = ''; } });
         if (currentActiveMainTab !== 'tab-reports' && currentActiveMainTab !== 'tab-fleet-status' && currentActiveMainTab !== 'tab-fleet-locator') { triggerCurrentRender(); } else if (currentActiveMainTab === 'tab-reports') { document.getElementById('screen-report').innerHTML = ''; document.getElementById('report-actions').style.display = 'none'; } else if (currentActiveMainTab === 'tab-fleet-status') renderFleetStatus();
     }
-    function getFilteredTrips(baseArray) {
-        let results = [...baseArray]; const n = currentUser.Name || currentUser.name || '';
-        if (n === 'Parveen Sharma') { results = results.filter(t => t.createdBy === n); } 
-        else if (n === 'Pramod Nayak') { results = results.filter(t => { let isK = isKTPL(t.vNum); let is32 = (t.type || '').includes('32'); return (isK && is32) || (t.createdBy === n); }); }
-        const sD = document.getElementById('uf-start') ? document.getElementById('uf-start').value : ''; const eD = document.getElementById('uf-end') ? document.getElementById('uf-end').value : '';
-        const vM = document.getElementById('uf-vnum') ? document.getElementById('uf-vnum').value.trim().toLowerCase() : ''; const vtM = document.getElementById('uf-vtype') ? document.getElementById('uf-vtype').value.trim().toLowerCase() : ''; const vcM = document.getElementById('uf-vcap') ? document.getElementById('uf-vcap').value.trim().toLowerCase() : ''; const pM = document.getElementById('uf-party') ? document.getElementById('uf-party').value.trim().toLowerCase() : ''; const tM = document.getElementById('uf-transporter') ? document.getElementById('uf-transporter').value.trim().toLowerCase() : ''; const oM = document.getElementById('uf-origin') ? document.getElementById('uf-origin').value.trim().toLowerCase() : ''; const dM = document.getElementById('uf-dest') ? document.getElementById('uf-dest').value.trim().toLowerCase() : '';
+    function getFilteredTrips(base) {
+        let r = [...base]; const n = currentUser.Name || currentUser.name || '';
+        if (n === 'Parveen Sharma') { r = r.filter(t => t.createdBy === n); } 
+        else if (n === 'Pramod Nayak') { r = r.filter(t => { let isK = isKTPL(t.vNum); let is32 = (t.type || '').includes('32'); return (isK && is32) || (t.createdBy === n); }); }
+        const sD = document.getElementById('uf-start') ? document.getElementById('uf-start').value : ''; const eD = document.getElementById('uf-end') ? document.getElementById('uf-end').value : ''; const vM = document.getElementById('uf-vnum') ? document.getElementById('uf-vnum').value.trim().toLowerCase() : ''; const vtM = document.getElementById('uf-vtype') ? document.getElementById('uf-vtype').value.trim().toLowerCase() : ''; const vcM = document.getElementById('uf-vcap') ? document.getElementById('uf-vcap').value.trim().toLowerCase() : ''; const pM = document.getElementById('uf-party') ? document.getElementById('uf-party').value.trim().toLowerCase() : ''; const tM = document.getElementById('uf-transporter') ? document.getElementById('uf-transporter').value.trim().toLowerCase() : ''; const oM = document.getElementById('uf-origin') ? document.getElementById('uf-origin').value.trim().toLowerCase() : ''; const dM = document.getElementById('uf-dest') ? document.getElementById('uf-dest').value.trim().toLowerCase() : '';
         let sDate = sD ? new Date(sD) : null; if(sDate) sDate.setHours(0,0,0,0); let eDate = eD ? new Date(eD) : null; if(eDate) eDate.setHours(23,59,59,999);
-        results = results.filter(t => {
+        r = r.filter(t => {
             let pD = true; if (sDate || eDate) { const pts = t.date ? (t.date || '').split(',')[0].split('/') : []; if (pts.length === 3) { const tT = new Date(pts[2], pts[1]-1, pts[0]).getTime(); if (sDate && tT < sDate.getTime()) pD = false; if (eDate && tT > eDate.getTime()) pD = false; } }
             return pD && (!vM || (t.vNum || '').toLowerCase().includes(vM)) && (!vtM || (t.type || '').toLowerCase().includes(vtM)) && (!vcM || (t.weight || '').toLowerCase().includes(vcM)) && (!pM || (t.party || '').toLowerCase().includes(pM)) && (!tM || (t.tName || '').toLowerCase().includes(tM) || (t.brokingAgent || '').toLowerCase().includes(tM)) && (!oM || (t.from || '').toLowerCase().includes(oM)) && (!dM || (t.to || '').toLowerCase().includes(dM));
         });
-        results.sort((a, b) => new Date((b.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((a.date||'').split(',')[0].split('/').reverse().join('-'))); return results;
+        r.sort((a, b) => new Date((b.date||'').split(',')[0].split('/').reverse().join('-')) - new Date((a.date||'').split(',')[0].split('/').reverse().join('-'))); return r;
     }
 
     function clearLocator() { document.getElementById('loc-origin').value = ''; document.getElementById('loc-dest').value = ''; document.getElementById('loc-vtype').value = ''; document.getElementById('loc-vcap').value = ''; document.getElementById('locator-results').innerHTML = ''; }
@@ -230,7 +380,7 @@
             let cT = trs.filter(t => (t.status||'').trim() === 'Delivered'); cT.sort((a,b) => parseDate(b.deliveryDate||b.date) - parseDate(a.deliveryDate||a.date)); let lTr = cT[0] || null;
             let locCity = 'Unknown'; if(aTr) locCity = aTr.to || locCity; else if(lTr) locCity = lTr.to || locCity;
             let match = false;
-            if (tZone) { if(getZoneForCity(locCity) === tZone) match = true; } else if (orig) { if(locCity.toLowerCase().includes(orig.toLowerCase())) match = true; } else { match = true; }
+            if (tZone) { if(getZoneForCity(locCity) === tZone) match = true; } else if (orig) { if(locCity.toLowerCase().includes(orig.toLowerCase()) || orig.toLowerCase().includes(locCity.toLowerCase())) match = true; } else { match = true; }
             if (dest && aTr && !(aTr.to||'').toLowerCase().includes(dest.toLowerCase())) match = false;
             if (match) r.push({ vNum: vn, type: vd.type||'-', cap: vd.capacity||'-', status: st, loc: locCity, currLoc: aTr?aTr.statusNote:'' });
         });
@@ -290,8 +440,8 @@
     function generatePlacementMessageOwn(typeStr) { if (!validatePlacementOwn()) return; const dVal = getFormattedDateVal(document.getElementById('ob-date').value); const vNum = document.getElementById('ob-vnum').value.replace(/[\s-_]/g, '').toUpperCase(); let header = `*Placement Details - ${vNum} - ${formatCaseStr(document.getElementById('ob-from').value)} to ${formatCaseStr(document.getElementById('ob-to').value)} - ${document.getElementById('ob-vtype').value.toUpperCase()}*\n\n`; header += `*Date:* ${dVal}\n`; header += `*Party:* ${normalizePartyName(document.getElementById('ob-party').value)}\n`; header += `*From:* ${formatCaseStr(document.getElementById('ob-from').value)}\n`; header += `*To:* ${formatCaseStr(document.getElementById('ob-to').value)}\n`; header += `*Veh No:* ${vNum}\n`; header += `*Type:* ${document.getElementById('ob-vtype').value.toUpperCase()} (${document.getElementById('ob-weight').value.toUpperCase()})\n\n`; let dName = formatCaseStr(document.getElementById('ob-dname').value); let dContact = formatPhoneString(document.getElementById('ob-dcontact').value); if (dName) header += `*Driver:* ${dName}\n`; if (dContact) header += `*Contact:* ${dContact}\n\n`; if (typeStr === 'team') { header += `*Transporter:* ${normalizePartyName(document.getElementById('ob-tname').value)}\n`; if (document.getElementById('ob-tperson').value) header += `*Person:* ${formatCaseStr(document.getElementById('ob-tperson').value)}\n`; if (document.getElementById('ob-tcontact').value) header += `*Contact:* ${document.getElementById('ob-tcontact').value}\n\n`; if (document.getElementById('ob-remarks').value) header += `*Remarks:* ${document.getElementById('ob-remarks').value}`; } openWhatsAppChoice(header); }
     function generatePlacementMessageRev(typeStr) { if (!validatePlacementRev()) return; const dVal = getFormattedDateVal(document.getElementById('rl-date').value); const vNum = document.getElementById('rl-vnum').value.replace(/[\s-_]/g, '').toUpperCase(); let pName = normalizePartyName(document.getElementById('rl-party').value); let tCo = document.getElementById('rl-typeco').value; if (tCo) pName += " (" + tCo + ")"; let header = `*Reverse Logistics*\n*Placement Details - ${vNum} - ${formatCaseStr(document.getElementById('rl-from').value)} to ${formatCaseStr(document.getElementById('rl-to').value)} - ${document.getElementById('rl-vtype').value.toUpperCase()}*\n\n`; header += `*Date:* ${dVal}\n`; header += `*Party:* ${pName}\n`; header += `*From:* ${formatCaseStr(document.getElementById('rl-from').value)}\n`; header += `*To:* ${formatCaseStr(document.getElementById('rl-to').value)}\n`; header += `*Veh No:* ${vNum}\n`; header += `*Type:* ${document.getElementById('rl-vtype').value.toUpperCase()} (${document.getElementById('rl-weight').value.toUpperCase()})\n\n`; header += `*Agency:* ${normalizePartyName(document.getElementById('rl-agency').value)}\n`; let dName = formatCaseStr(document.getElementById('rl-dname').value); let dContact = formatPhoneString(document.getElementById('rl-dcontact').value); if (dName) header += `*Driver:* ${dName}\n`; if (dContact) header += `*Contact:* ${dContact}\n\n`; if (document.getElementById('rl-agent').value) header += `*Agent:* ${formatCaseStr(document.getElementById('rl-agent').value)}\n`; if (document.getElementById('rl-contact').value) header += `*Contact:* ${document.getElementById('rl-contact').value}\n\n`; if (document.getElementById('rl-cfreight').value) header += `*Freight:* ${document.getElementById('rl-cfreight').value}\n`; if (document.getElementById('rl-remarks').value) header += `*Remarks:* ${document.getElementById('rl-remarks').value}`; openWhatsAppChoice(header); }
 
-    function setDepType(typeStr) { currentDeployedType = typeStr; document.getElementById('deployed-selection-screen').style.display = 'none'; document.getElementById('deployed-content-area').style.display = 'block'; document.getElementById('deployed-title-text').innerText = typeStr + " Fleet"; triggerCurrentRender(); }
-    function setDepStat(stat) { currentDeployedStatus = stat; document.getElementById('btn-dep-stat-ong').classList.toggle('active', stat === 'In-Transit'); document.getElementById('btn-dep-stat-com').classList.toggle('active', stat === 'Delivered'); document.getElementById('btn-dep-stat-can').classList.toggle('active', stat === 'Cancelled Trip'); triggerCurrentRender(); }
+    function setDepType(t) { currentDeployedType = t; document.getElementById('deployed-selection-screen').style.display = 'none'; document.getElementById('deployed-content-area').style.display = 'block'; document.getElementById('deployed-title-text').innerText = t + " Fleet"; triggerCurrentRender(); }
+    function setDepStat(s) { currentDeployedStatus = s; document.getElementById('btn-dep-stat-ong').classList.toggle('active', s === 'In-Transit'); document.getElementById('btn-dep-stat-com').classList.toggle('active', s === 'Delivered'); document.getElementById('btn-dep-stat-can').classList.toggle('active', s === 'Cancelled Trip'); triggerCurrentRender(); }
     function renderDeployed() { const container = document.getElementById('deployed-container'); if (!currentDeployedType) return; let items = getFilteredTrips(allTrips).filter(t => t.computedBookingType === currentDeployedType && (t.status || 'In-Transit').trim() === currentDeployedStatus); if (items.length === 0) { container.innerHTML = "<p style='padding:20px; text-align:center;'>No trips found.</p>"; return; } container.innerHTML = items.map((t, i) => buildTripCard(t, i, 'deployed')).join(''); }
     function handleStatusChange(tripId, newStatus, el) { const p = getUserPerms(); if (!p.changeDelCanStatus) return alert("No permission."); if (newStatus === 'Delivered') { triggerDeliveryModal(tripId); el.value = 'In-Transit'; } else if (newStatus === 'Cancelled Trip') { if (confirm("Cancel this trip?")) revertStatus(tripId, 'Cancelled Trip'); else el.value = 'In-Transit'; } else { revertStatus(tripId, 'In-Transit'); } }
     function setPodType(typeStr) { currentPodType = typeStr; document.getElementById('pod-selection-screen').style.display = 'none'; document.getElementById('pod-content-area').style.display = 'block'; document.getElementById('pod-title-text').innerText = typeStr + " PODs"; triggerCurrentRender(); }
@@ -321,7 +471,7 @@
     function closeBatchPaymentModal() { document.getElementById('batchPaymentModal').style.display = 'none'; }
     function executeBatchPayment(method) {
         const payType = document.getElementById('batch-pay-type').value; const isExcel = method === 'excel';
-        let reportStr = `*Payment Request: ${payType}*\nTotal Trips: ${selectedPaymentTrips.length}\n\n`; let excelData = [["Sr", "Transporter", "Vehicle", "Type/Cap", "Route", "Payable Amount", "Bank A/c", "IFSC"]];
+        let reportStr = `*Payment Request: ${payType}*\nTotal Trips: ${selectedPaymentTrips.length}\n\n`; let excelData = [["Sr", "Transporter", "Party Name", "Vehicle", "Type/Cap", "Route", "Payable Amount", "Bank Name", "Bank A/c", "IFSC"]];
         let counter = 1;
         selectedPaymentTrips.forEach(id => {
             let t = allTrips.find(x => x.id === id);
@@ -330,12 +480,12 @@
                 let bC = parseFloat(t.vFreight || 0); let eC = l.expense.reduce((s, r) => s + parseFloat(r.amt||0), 0); let bR = parseFloat(t.cFreight || 0); let eR = l.income.reduce((s, r) => s + parseFloat(r.amt||0), 0); let tP = bC + eC; let tR = bR + eR;
                 let ptTot = 0; if (l.reco.payments && l.reco.payments.length > 0) { ptTot = l.reco.payments.reduce((s, x)=> s + parseFloat(x.amt||0), 0); } else { if (currentRecoType === 'Own Booking') ptTot = parseFloat(l.reco.advPaid || t.advancePaid || 0) + parseFloat(l.reco.balPaid1 || l.reco.balPaid || 0) + parseFloat(l.reco.balPaid2 || 0) + parseFloat(l.reco.balPaid3 || 0); else ptTot = parseFloat(l.reco.advRec || 0) + parseFloat(l.reco.osDues1 || l.reco.osDues || 0) + parseFloat(l.reco.osDues2 || 0) + parseFloat(l.reco.osDues3 || 0); }
                 let amtRem = currentRecoType === 'Own Booking' ? (tP - ptTot - eR) : (tR - tP - ptTot); let transName = currentRecoType === 'Own Booking' ? t.tName : t.brokingAgent; let party = t.party || 'N/A';
-                if (isExcel) { excelData.push([ counter, transName || 'N/A', t.vNum, `${t.type} (${t.weight})`, `${t.from} to ${t.to}`, amtRem.toFixed(2), l.reco.bankAc || 'N/A', l.reco.ifsc || 'N/A' ]); } else { reportStr += `*${counter}. Transporter: ${transName || 'N/A'}*\n`; reportStr += `Vehicle: ${t.vNum} (${t.type}, ${t.weight})\n`; reportStr += `Party: ${party}\n`; reportStr += `Route: ${t.from} -> ${t.to}\n`; reportStr += `Payable: ₹${amtRem.toFixed(2)}\n`; reportStr += `Bank: ${l.reco.bankAc || 'N/A'} | IFSC: ${l.reco.ifsc || 'N/A'}\n\n`; } counter++;
+                if (isExcel) { excelData.push([ counter, transName || 'N/A', party, t.vNum, `${t.type} (${t.weight})`, `${t.from} to ${t.to}`, amtRem.toFixed(2), l.reco.bankName || 'N/A', l.reco.bankAc || 'N/A', l.reco.ifsc || 'N/A' ]); } else { reportStr += `*${counter}. Transporter: ${transName || 'N/A'}*\n`; reportStr += `Vehicle: ${t.vNum} (${t.type}, ${t.weight})\n`; reportStr += `Party: ${party}\n`; reportStr += `Route: ${t.from} -> ${t.to}\n`; reportStr += `Payable: ₹${amtRem.toFixed(2)}\n`; reportStr += `Bank: ${l.reco.bankName || 'N/A'} | A/c: ${l.reco.bankAc || 'N/A'} | IFSC: ${l.reco.ifsc || 'N/A'}\n\n`; } counter++;
             }
         });
         if (isExcel) { const wb = XLSX.utils.book_new(); const ws = XLSX.utils.aoa_to_sheet(excelData); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, "Batch Request"); XLSX.writeFile(wb, `Payment_Batch_${payType}_${Date.now()}.xlsx`); } else { const enc = encodeURIComponent(reportStr); const ua = navigator.userAgent || navigator.vendor || window.opera; let url = ""; if (/android/i.test(ua)) { url = `intent://send?text=${enc}#Intent;package=com.whatsapp;scheme=whatsapp;end`; window.location.href = url; } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) { url = `whatsapp://send?text=${enc}`; window.location.href = url; } else { url = `whatsapp://send?text=${enc}`; window.open(url, '_blank'); } } closeBatchPaymentModal();
     }
-
+    
     window.addPaymentSlot = function(tid, type) { let c = document.getElementById(`payment-slots-${tid}`); let s = c.querySelectorAll('.payment-slot-row').length; let p = (type === 'Own Booking') ? (s === 0 ? 'Advance Paid' : 'Balance Paid') : (s === 0 ? 'Advance Recv' : 'O/s Dues'); let h = `<div class="payment-slot-row"><input type="number" class="compact-input pay-amt-${tid}" placeholder="${p}" value="" oninput="calcRecoUI('${tid}', '${type}')"><input type="date" class="compact-input pay-date-${tid}" value=""><button class="btn-clear" onclick="this.parentElement.remove(); calcRecoUI('${tid}', '${type}');" style="padding:6px; font-weight:bold; color:#b3261e; width:auto; border-radius:6px;">X</button></div>`; c.insertAdjacentHTML('beforeend', h); }
     window.calcRecoUI = function(tid, type) {
         let t = allTrips.find(x => x.id === tid); if(!t) return;
@@ -363,9 +513,16 @@
             let brAgt = t.brokingAgent; if (!brAgt) { try { let p = JSON.parse(t.financialLedger); if(p.brokingAgent) brAgt = p.brokingAgent; } catch(e){} }
             let hdr = `<strong>${(t.date||'').split(',')[0]}</strong> | <strong>${t.vNum}</strong> | ${t.from}➔${t.to} <br> <span style="color:#5f6368; font-size:11px;">Party: ${t.party || 'N/A'} | ${currentRecoType==='Own Booking'?'Transporter':'Broker'}: ${currentRecoType==='Own Booking'?t.tName:brAgt}</span>`;
             let oC = (currentOpenRecoId === t.id) ? 'open' : ''; let isC = (l.reco.status === "Cleared"); let ptTot = l.reco.payments.reduce((s, x)=> s + parseFloat(x.amt||0), 0);
-            let amtRem = currentRecoType === 'Own Booking' ? (tP - ptTot - eR) : (tR - tP - ptTot); let dH = "";
-            if (isC && amtRem > 0) dH = `<del style="color:#8e8e8e; margin-right:4px;">₹${amtRem.toFixed(2)}</del> ₹0`; else dH = `₹${amtRem.toFixed(2)}`;
+            let amtRem = currentRecoType === 'Own Booking' ? (tP - ptTot - eR) : (tR - tP - ptTot); 
             
+            let dH = ""; if (isC && amtRem > 0) dH = `<del style="color:#8e8e8e; margin-right:4px;">₹${amtRem.toFixed(2)}</del> ₹0`; else dH = `₹${amtRem.toFixed(2)}`;
+            
+            let trName = currentRecoType === 'Own Booking' ? t.tName : brAgt;
+            let memBank = transporterBanks[normalizePartyName(trName)] || {bankName:'', bankAc:'', ifsc:''};
+            let bNameVal = l.reco.bankName || memBank.bankName || '';
+            let bAcVal = l.reco.bankAc || memBank.bankAc || '';
+            let ifscVal = l.reco.ifsc || memBank.ifsc || '';
+
             let h = `
             <div class="reco-accordion-header" style="position:relative;">
                 ${currentRecoStat === 'Pending' ? `<input type="checkbox" class="batch-checkbox" id="cb-pay-${t.id}" onchange="togglePaymentSelection('${t.id}')" ${selectedPaymentTrips.includes(t.id) ? 'checked' : ''} style="position:absolute; left:-5px; top:12px;">` : ''}
@@ -375,36 +532,116 @@
             <div id="reco-body-${t.id}" class="reco-accordion-body ${oC}">
                 <div class="reco-split-grid">
                     <div class="reco-panel"><div class="reco-header-title">Receivables</div>`;
+                        
             if (canViewBaseFreight || currentRecoType !== 'Own Booking') { h += `<div class="calc-row"><span>Base Freight:</span> <span>₹${bR}</span></div><div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${l.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}</div><div class="calc-gross"><span>Total Receivable:</span> <span>₹${tR}</span></div>`; } 
             else { h += `<div class="calc-row"><span>Base Freight:</span> <span style="color:#b3261e;">🔒 Restricted</span></div><div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${l.income.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}</div><div class="calc-gross"><span>Total Receivable:</span> <span style="color:#b3261e;">🔒 Restricted</span></div>`; }
-            h += `</div><div class="reco-panel"><div class="reco-header-title">Payables</div><div class="calc-row"><span>Base Cost:</span> <span>₹${bC}</span></div><div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${l.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}</div><div class="calc-gross"><span>Total Payable:</span> <span>₹${tP}</span></div>`;
+            
+            h += `
+                    </div>
+                    <div class="reco-panel">
+                        <div class="reco-header-title">Payables</div>
+                        <div class="calc-row"><span>Base Cost:</span> <span>₹${bC}</span></div>
+                        <div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">
+                            ${l.expense.map(x=>`<div class="calc-line-item"><span>${x.type}:</span> <span>₹${x.amt}</span></div>`).join('')}
+                        </div>
+                        <div class="calc-gross"><span>Total Payable:</span> <span>₹${tP}</span></div>`;
+                        
             if (canEditPayment) {
-                h += `<div style="margin-top:10px;"><label>${currentRecoType === 'Own Booking' ? 'Payments Processed' : 'Dues Received'}</label><div id="payment-slots-${t.id}">`;
-                l.reco.payments.forEach((p, idx) => { let pld = (currentRecoType === 'Own Booking') ? (idx === 0 ? 'Advance Paid' : 'Balance Paid') : (idx === 0 ? 'Advance Recv' : 'O/s Dues'); h += `<div class="payment-slot-row"><input type="number" class="compact-input pay-amt-${t.id}" placeholder="${pld}" value="${p.amt||''}" oninput="calcRecoUI('${t.id}', '${currentRecoType}')"><input type="date" class="compact-input pay-date-${t.id}" value="${p.date||''}"><button class="btn-clear" onclick="this.parentElement.remove(); calcRecoUI('${t.id}', '${currentRecoType}');" style="padding:6px; font-weight:bold; color:#b3261e; width:auto; border-radius:6px;">X</button></div>`; });
-                h += `</div><button class="btn-secondary" style="padding:6px 12px; font-size:11px; width:auto; border-radius:6px; margin-top:8px;" onclick="addPaymentSlot('${t.id}', '${currentRecoType}')">+ Add Slot</button></div>`;
-                h += `<div class="highlight-red-box" id="dyn-bal-${t.id}">`;
-                if (isC && amtRem > 0) { if (currentRecoType === 'Own Booking') { h += `<div style="color:#5f6368;"><del>Original Balance: ₹${amtRem.toFixed(2)}</del></div><div style="color:#188c38; margin:6px 0;">Saved on deduction: ₹${amtRem.toFixed(2)}</div><div>Final Balance to Pay: ₹0</div>`; } else { h += `<div style="color:#5f6368;"><del>Original O/S: ₹${amtRem.toFixed(2)}</del></div><div style="color:#d93025; margin:6px 0;">Bad Debts: ₹${amtRem.toFixed(2)}</div><div>Final Outstanding: ₹0</div>`; } } 
-                else { if (currentRecoType === 'Own Booking') h += `Balance to Pay: ₹${amtRem.toFixed(2)}`; else h += `Outstanding Amount: ₹${amtRem.toFixed(2)}`; }
+                h += `      <div style="margin-top:10px;">
+                                <label>${currentRecoType === 'Own Booking' ? 'Payments Processed' : 'Dues Received'}</label>
+                                <div id="payment-slots-${t.id}">`;
+                l.reco.payments.forEach((p, idx) => { let pld = (currentRecoType === 'Own Booking') ? (idx === 0 ? 'Advance Paid' : 'Balance Paid') : (idx === 0 ? 'Advance Recv' : 'O/s Dues'); h += `          <div class="payment-slot-row"><input type="number" class="compact-input pay-amt-${t.id}" placeholder="${pld}" value="${p.amt||''}" oninput="calcRecoUI('${t.id}', '${currentRecoType}')"><input type="date" class="compact-input pay-date-${t.id}" value="${p.date||''}"><button class="btn-clear" onclick="this.parentElement.remove(); calcRecoUI('${t.id}', '${currentRecoType}');" style="padding:6px; font-weight:bold; color:#b3261e; width:auto; border-radius:6px;">X</button></div>`; });
+                h += `          </div>
+                                <button class="btn-secondary" style="padding:6px 12px; font-size:11px; width:auto; border-radius:6px; margin-top:8px;" onclick="addPaymentSlot('${t.id}', '${currentRecoType}')">+ Add Slot</button>
+                            </div>`;
+                h += `      <div class="highlight-red-box" id="dyn-bal-${t.id}">`;
+                if (isC && amtRem > 0) { if (currentRecoType === 'Own Booking') { h += `<div style="color:#5f6368;"><del>Original Balance: ₹${amtRem.toFixed(2)}</del></div><div style="color:#188c38; margin:6px 0;">Saved on deduction: ₹${amtRem.toFixed(2)}</div><div>Final Balance to Pay: ₹0</div>`; } else { h += `<div style="color:#5f6368;"><del>Original O/S: ₹${amtRem.toFixed(2)}</del></div><div style="color:#d93025; margin:6px 0;">Bad Debts: ₹${amtRem.toFixed(2)}</div><div>Final Outstanding: ₹0</div>`; } } else { if (currentRecoType === 'Own Booking') h += `Balance to Pay: ₹${amtRem.toFixed(2)}`; else h += `Outstanding Amount: ₹${amtRem.toFixed(2)}`; }
                 h += `</div>`;
             }
-            h += `</div></div>`; 
+            h += `      </div>
+                    </div>`; 
+                    
             if (canEditPayment) { 
-                h += `<div class="grid-2 form-group" style="margin-top:10px;"><div><label>Bank A/c No.</label><input type="text" id="reco-bank-${t.id}" class="compact-input" value="${l.reco.bankAc||''}"></div><div><label>IFSC Code</label><input type="text" id="reco-ifsc-${t.id}" class="compact-input" value="${l.reco.ifsc||''}"></div></div><div class="form-group" style="margin-top:10px;"><label>Remarks</label><input type="text" id="reco-remarks-${t.id}" class="compact-input" value="${l.reco.remarks||''}"></div><div style="border-top:1px solid #dadce0; margin-top:15px; padding-top:15px; display:flex; justify-content:space-between; align-items:center;"><button class="btn-clear" style="padding:8px 12px; font-size:11px; width:auto; border-radius:8px; font-weight:600;" onclick="openFinancialAllocation('${t.id}')">💰 Extra Fin</button><div style="display:flex; gap:8px;"><select id="mstat-${t.id}" class="compact-input" style="width:105px;" onchange="calcRecoUI('${t.id}', '${currentRecoType}')"><option value="Pending" ${l.reco.status!=='Cleared'?'selected':''}>Pending</option><option value="Cleared" ${l.reco.status==='Cleared'?'selected':''}>Cleared</option></select><button class="btn-primary" style="padding:8px 16px; font-size:11px; width:auto; border-radius:8px;" onclick="commitRecoRecord('${t.id}', '${currentRecoType}')">Save</button></div></div>`; 
+                h += `
+                    <div class="form-group" style="margin-top:10px;">
+                        <label>Bank Name</label>
+                        <input type="text" id="reco-bankname-${t.id}" class="compact-input" value="${bNameVal}">
+                    </div>
+                    <div class="grid-2 form-group" style="margin-top:10px;">
+                        <div><label>Bank A/c No.</label><input type="text" id="reco-bank-${t.id}" class="compact-input" value="${bAcVal}"></div>
+                        <div><label>IFSC Code</label><input type="text" id="reco-ifsc-${t.id}" class="compact-input" value="${ifscVal}"></div>
+                    </div>
+                    <div class="form-group" style="margin-top:10px;">
+                        <label>Remarks</label>
+                        <input type="text" id="reco-remarks-${t.id}" class="compact-input" value="${l.reco.remarks||''}">
+                    </div>
+                    <div style="border-top:1px solid #dadce0; margin-top:15px; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
+                        <button class="btn-clear" style="padding:8px 12px; font-size:11px; width:auto; border-radius:8px; font-weight:600;" onclick="openFinancialAllocation('${t.id}')">💰 Extra Fin</button>
+                        <div style="display:flex; gap:8px;">
+                            <select id="mstat-${t.id}" class="compact-input" style="width:105px;" onchange="calcRecoUI('${t.id}', '${currentRecoType}')">
+                                <option value="Pending" ${l.reco.status!=='Cleared'?'selected':''}>Pending</option>
+                                <option value="Cleared" ${l.reco.status==='Cleared'?'selected':''}>Cleared</option>
+                            </select>
+                            <button class="btn-primary" style="padding:8px 16px; font-size:11px; width:auto; border-radius:8px;" onclick="commitRecoRecord('${t.id}', '${currentRecoType}')">Save</button>
+                        </div>
+                    </div>
+                `;
             }
-            h += `</div>`; return h;
+            h += `</div>`; 
+            return h;
         }).join('');
     }
+
     function commitRecoRecord(id, mode) {
-        let t = allTrips.find(x => x.id === id); if(!t) return;
-        let l = { income: [], expense: [], reco: { payments: [] } }; try { let p = JSON.parse(t.financialLedger); if (p) Object.assign(l, p); if (!l.reco) l.reco = {payments:[]}; } catch(e){}
-        l.reco.status = document.getElementById(`mstat-${id}`).value; l.reco.remarks = document.getElementById(`reco-remarks-${id}`) ? document.getElementById(`reco-remarks-${id}`).value : '';
-        if (document.getElementById(`reco-bank-${id}`)) l.reco.bankAc = document.getElementById(`reco-bank-${id}`).value; if (document.getElementById(`reco-ifsc-${id}`)) l.reco.ifsc = document.getElementById(`reco-ifsc-${id}`).value;
-        let amtInps = document.querySelectorAll(`.pay-amt-${id}`); let dtInps = document.querySelectorAll(`.pay-date-${id}`); l.reco.payments = [];
-        for (let i=0; i<amtInps.length; i++) { if (amtInps[i].value || dtInps[i].value) { l.reco.payments.push({amt: amtInps[i].value, date: dtInps[i].value}); } }
-        const jsonStr = JSON.stringify(l); t.financialLedger = jsonStr; fetch(GOOGLE_SCRIPT_URL + "?t=" + Date.now(), { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: id, ledgerJson: jsonStr }) }); alert("Ledger updated. Other users will see this change upon next data sync."); renderReconciliation(); 
+        let t = allTrips.find(x => x.id === id); 
+        if(!t) return;
+        
+        let l = { income: [], expense: [], reco: { payments: [] } }; 
+        try { let p = JSON.parse(t.financialLedger); if (p) Object.assign(l, p); if (!l.reco) l.reco = {payments:[]}; } catch(e){}
+        
+        let nBankName = document.getElementById(`reco-bankname-${id}`) ? document.getElementById(`reco-bankname-${id}`).value.trim() : '';
+        let nBankAc = document.getElementById(`reco-bank-${id}`) ? document.getElementById(`reco-bank-${id}`).value.trim() : '';
+        let nIfsc = document.getElementById(`reco-ifsc-${id}`) ? document.getElementById(`reco-ifsc-${id}`).value.trim() : '';
+        
+        let trName = mode === 'Own Booking' ? t.tName : t.brokingAgent;
+        let nTr = normalizePartyName(trName);
+        let memBank = transporterBanks[nTr] || {};
+        
+        if (nTr && ((memBank.bankAc && nBankAc && memBank.bankAc !== nBankAc) || (memBank.ifsc && nIfsc && memBank.ifsc !== nIfsc))) {
+            if (!confirm(`You are changing existing Bank Details for ${nTr}.\nOld A/C: ${memBank.bankAc || 'N/A'}\nNew A/C: ${nBankAc || 'N/A'}\n\nDo you want to proceed and overwrite?`)) {
+                return;
+            }
+        }
+        
+        l.reco.status = document.getElementById(`mstat-${id}`).value; 
+        l.reco.remarks = document.getElementById(`reco-remarks-${id}`) ? document.getElementById(`reco-remarks-${id}`).value : '';
+        l.reco.bankName = nBankName;
+        l.reco.bankAc = nBankAc;
+        l.reco.ifsc = nIfsc;
+        
+        if (nTr) { transporterBanks[nTr] = { bankName: nBankName, bankAc: nBankAc, ifsc: nIfsc, time: Date.now() }; }
+        
+        let amtInps = document.querySelectorAll(`.pay-amt-${id}`); 
+        let dtInps = document.querySelectorAll(`.pay-date-${id}`); 
+        l.reco.payments = [];
+        
+        for (let i=0; i<amtInps.length; i++) { 
+            if (amtInps[i].value || dtInps[i].value) {
+                l.reco.payments.push({amt: amtInps[i].value, date: dtInps[i].value}); 
+            }
+        }
+        
+        const jsonStr = JSON.stringify(l); 
+        t.financialLedger = jsonStr; 
+        
+        fetch(GOOGLE_SCRIPT_URL + "?t=" + Date.now(), { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: id, ledgerJson: jsonStr }) }); 
+        
+        alert("Ledger updated. Other users will see this change upon next data sync."); 
+        renderReconciliation(); 
     }
 
-    // REPORTS LOGIC
+    // ------------- REPORTS -------------
+
     function setReportType(typeStr) { currentReportType = typeStr; document.getElementById('report-selection-screen').style.display = 'none'; document.getElementById('report-content-area').style.display = 'block'; document.getElementById('report-title-text').innerText = typeStr + " Reports"; document.getElementById('screen-report').innerHTML = ''; document.getElementById('print-report-container').innerHTML = ''; document.getElementById('report-actions').style.display = 'none'; }
     function generateCustomReport() {
         try {
@@ -462,136 +699,12 @@
         }
         const ws = XLSX.utils.aoa_to_sheet(r); ws['!views'] = [{ showGridLines: false }]; XLSX.utils.book_append_sheet(wb, ws, "Reconciliation Master"); XLSX.writeFile(wb, `KTPL_${ledgerType.replace(' ', '_')}_Ledger.xlsx`); closeLedgerModal();
     }
-    function buildTripCard(t, idx, vMode) {
-        const r = currentUser.Role || currentUser.role; const p = getUserPerms(); let isRO = (r === 'ReadOnly'); const isMA = (r === 'Master Admin'); const isA = (r === 'Master Admin' || r === 'Admin');
-        let sC = 'status-transit'; let st = (t.status || '').trim(); if (st === 'Delivered') { sC = 'status-delivered'; st = `Delivered: ${t.deliveryDate}`; } if (st === 'Cancelled Trip') { sC = 'status-cancelled'; st = `Cancelled`; }
-        let cE = p.editTrips; if (isA && !isMA && (st.includes('Delivered') || st.includes('Cancelled'))) cE = false;
-        let h = `
-        <div class="trip-card">
-            <div style="border-bottom: 1px solid #f1f3f4; padding-bottom: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;">
-                <span><strong>#${idx + 1}</strong> | ${(t.date||'').split(',')[0]}</span>
-                <span class="status-badge ${sC}">${st}</span>
-            </div>
-            <div style="margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
-                <span><strong>Party:</strong> ${t.party || 'N/A'}</span>`;
-        if (cE) { h += `<span style="cursor:pointer; color:#1a73e8; font-size:10px; font-weight:600; text-transform:uppercase;" onclick="openAdminEdit('${t.id}')">Edit Trip</span>`; }
-        h += `</div>
-            <div style="margin-bottom: 5px;"><strong>Route:</strong> ${t.from} ➔ ${t.to}</div>
-            <div style="margin-bottom: 5px;"><strong>Vehicle:</strong> ${t.vNum} (${t.type || '-'}, ${t.weight || '-'})</div>`;
-        let bt = t.computedBookingType; let brAgt = t.brokingAgent; if(!brAgt) { try { let pf = JSON.parse(t.financialLedger); if(pf.brokingAgent) brAgt = pf.brokingAgent; } catch(e){} }
-        if (bt === 'Reverse Logistics' && brAgt) h += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Agency:</strong> ${brAgt}</div>`;
-        let sVF = isA; if (vMode === 'deployed') sVF = true; if (sVF && t.vFreight && (t.vFreight || '').trim() !== '') h += `<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Vehicle Freight:</strong> ${t.vFreight}</div>`;
-        let sCF = (bt === 'Own Booking') ? p.viewChargedFreightOB : p.viewChargedFreightRL; if (sCF && t.cFreight && (t.cFreight || '').trim() !== '') { h += `<div style="margin-bottom: 5px; color:#137333; font-size:11px; font-weight:500;"><strong>Charged Freight:</strong> ${t.cFreight}</div>`; }
-        const dTel = getSafeTel(t.dContact); const tTel = getSafeTel(t.tContact);
-        h += `
-            <div style="font-size: 11px; margin-bottom: 10px;">
-                <span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#1a73e8; font-weight:500; cursor:pointer;" onclick="document.getElementById('c-${vMode}-${t.id}').style.display = document.getElementById('c-${vMode}-${t.id}').style.display === 'block' ? 'none' : 'block';">View Contacts ▼</span>
-                <div id="c-${vMode}-${t.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:6px; margin-top:5px; border:1px solid #dadce0; color:#444746;">
-                    <div style="margin-bottom:6px;"><strong>Driver:</strong> ${t.dName || 'N/A'} <br> <a href="tel:${dTel}" style="color:#1a73e8; text-decoration:none;">📞 ${t.dContact || 'N/A'}</a></div>`;
-        if (bt === 'Own Booking') { h += `<div><strong>Transporter:</strong> ${t.tName || 'N/A'} ${t.tPerson ? '('+t.tPerson+')' : ''} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none;">📞 ${t.tContact || 'N/A'}</a></div>`; } else { h += `<div><strong>Broking Agent:</strong> ${brAgt || t.tPerson || 'N/A'} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none;">📞 ${t.tContact || 'N/A'}</a></div>`; }
-        h += `  </div>
-            </div>`;
-        if (vMode === 'deployed') {
-            h += `
-            <div class="grid-2" style="margin-bottom: 5px;">
-                <input type="text" class="compact-input" placeholder="Enter C-Note" value="${t.cNote || ''}" onchange="updateBackendData('${t.id}', 'updateCNote', this.value)" ${isRO ? 'disabled' : ''}>
-                <input type="text" class="compact-input" placeholder="Remarks" value="${t.remarks || ''}" onchange="updateBackendData('${t.id}', 'updateTripRemark', this.value)" ${isRO ? 'disabled' : ''}>
-            </div>`;
-            const isDelCan = (st.includes('Delivered') || st.includes('Cancelled')); const ssn = (t.statusNote || "").replace(/"/g, '&quot;');
-            h += `<div style="display:flex; margin-top:5px; gap: 8px; width: 100%; align-items:center;">`;
-            if (!isDelCan) {
-                if (p.changeDelCanStatus) { h += `
-                    <select class="compact-input" onchange="handleStatusChange('${t.id}', this.value, this)" style="flex:1;">
-                        <option value="In-Transit" selected>In-Transit</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled Trip">Cancelled Trip</option>
-                    </select>`; }
-                h += `<input type="text" class="compact-input" placeholder="Update location..." value="${ssn}" onchange="formatSentence(this); updateStatusLog('${t.id}', this.value)" style="${p.changeDelCanStatus ? 'flex:2;' : 'flex:1; width:100%;'}">`;
-            } else {
-                if (isA) { h += `
-                    <select class="compact-input" onchange="revertStatus('${t.id}', 'In-Transit')" style="flex:1;">
-                        <option value="" selected>Status Locked</option>
-                        <option value="In-Transit">Undo: Revert to In-Transit</option>
-                    </select>`; }
-                h += `<input type="text" class="compact-input" placeholder="Locked" value="${ssn}" disabled style="${isA ? 'flex:2;' : 'flex:1; width:100%;'} background:#e3e3e3; color:#8e8e8e; cursor:not-allowed;">`;
-            }
-            h += `
-            </div>
-            <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                <button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${t.id}', '${vMode}')">▶ History</button>
-                <div style="display:flex; gap: 5px;">
-                    ${!isRO ? `<button class="btn-clear" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="openFinancialAllocation('${t.id}')">₹ Expenses</button>` : ''}
-                    <button class="btn-primary" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="openShareModal('${t.id}')">Share</button>
-                </div>
-            </div>
-            <div id="hist-${vMode}-${t.id}" class="history-panel"></div>`;
-        }
-        if (vMode === 'pod-pending' && !isRO) { h += `
-            <div style="margin-bottom: 5px;">
-                <input type="text" class="compact-input" placeholder="Enter C-Note" value="${t.cNote || ''}" onchange="updateBackendData('${t.id}', 'updateCNote', this.value)">
-            </div>
-            <div style="margin-bottom: 5px;">
-                <input type="text" class="compact-input" placeholder="Add POD Remarks..." value="${t.podRemark || ''}" onchange="updateBackendData('${t.id}', 'updatePODRemark', this.value)">
-            </div>
-            <div style="display:flex; gap:10px; margin-top:10px; align-items:center; width: 100%;">
-                <label style="margin:0;">POD Date:</label>
-                <input type="date" class="compact-input" id="pod-date-${t.id}">
-                <button class="btn-primary" style="padding: 6px 12px; margin:0; width:auto; border-radius:4px;" onclick="savePOD('${t.id}', false)">Save</button>
-            </div>`; }
-        if (vMode === 'pod-received') { h += `
-            <div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>C-Note:</strong> ${t.cNote || "N/A"}</div>
-            ${t.podRemark ? `<div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>Remarks:</strong> ${t.podRemark}</div>` : ''}
-            <div style="margin-top:10px; color:#137333; font-weight:500;">POD Received: ${t.podDate}</div>`; 
-            if (!isRO) { h += `<button class="btn-clear" style="font-size:10px; padding:6px 10px; margin-top:5px; width:auto; border-radius:4px;" onclick="savePOD('${t.id}', true)">Remove Date</button>`; } }
-        h += `</div>`; return h;
-    }
 
-    function renderAdminUsers() { const tb = document.getElementById('admin-user-list'); if(!tb) return; tb.innerHTML = users.filter(u => u.Name !== '__VCONFIG__' && u.name !== '__VCONFIG__').map(u => `
-            <tr>
-                <td>${u.Name || u.name || 'Unknown'}</td>
-                <td>${u.Role || u.role || 'Unassigned'}</td>
-                <td style="font-family: monospace;">${u.PIN || u.pin || 'None'}</td>
-                <td>
-                    <button class="admin-action-btn" onclick="openEditUserModal('${u.Name || u.name}', '${u.PIN || u.pin}', '${u.Role || u.role}')">Edit</button>
-                    <button class="admin-action-btn" style="color: #d93025;" onclick="deleteUser('${u.Name || u.name}')">Del</button>
-                </td>
-            </tr>
-        `).join(''); if (document.getElementById('module-access-container')) renderPermissionsUI(); }
-    function renderPermissionsUI() { const mods = ['Placement', 'Deployed', 'POD', 'Payments', 'Reports']; let h = ''; mods.forEach(m => { h += `
-            <div style="margin-bottom:10px; border:1px solid #dadce0; padding:10px; border-radius:8px; background:#f8f9fa;">
-                <div style="font-weight:bold; cursor:pointer; font-size:13px; color:#0b57d0;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display==='none'?'block':'none'">▶ Manage Access: ${m}</div>
-                <div style="display:none; margin-top:10px;">`; 
-            users.filter(u => u.Name !== '__VCONFIG__' && u.name !== '__VCONFIG__').forEach(u => { let chk = (u.permissions && u.permissions[m] === false) ? '' : 'checked'; h += `
-                    <div style="margin-bottom:4px; font-size:12px; color:#444746;">
-                        <label style="margin:0; font-weight:normal; text-transform:none;">
-                            <input type="checkbox" class="perm-cb" data-user="${u.Name||u.name}" data-mod="${m}" ${chk} style="width:auto; display:inline-block; margin-right:6px;"> ${u.Name||u.name}
-                        </label>
-                    </div>`; }); h += `</div></div>`; }); document.getElementById('module-access-container').innerHTML = h; }
-    function savePermissions() { const cbs = document.querySelectorAll('.perm-cb'); let nP = {}; cbs.forEach(cb => { let un = cb.getAttribute('data-user'); let mod = cb.getAttribute('data-mod'); if(!nP[un]) nP[un] = {}; nP[un][mod] = cb.checked; }); users.forEach(u => { let n = u.Name || u.name; if(nP[n]) u.permissions = nP[n]; }); alert("Module access updated locally."); }
-    function openAddUserModal() { document.getElementById('user-modal-title').innerText = "Add New User"; document.getElementById('manage-user-old-name').value = ""; document.getElementById('manage-user-name').value = ""; document.getElementById('manage-user-pin').value = ""; document.getElementById('manage-user-role').value = "ReadOnly"; document.getElementById('userManageModal').style.display = 'flex'; }
-    function openEditUserModal(n, p, r) { document.getElementById('user-modal-title').innerText = "Edit User"; document.getElementById('manage-user-old-name').value = n; document.getElementById('manage-user-name').value = n; document.getElementById('manage-user-pin').value = p; document.getElementById('manage-user-role').value = r; document.getElementById('userManageModal').style.display = 'flex'; }
-    function closeUserModal() { document.getElementById('userManageModal').style.display = 'none'; }
-    function saveUserManage() { const on = document.getElementById('manage-user-old-name').value; const nn = document.getElementById('manage-user-name').value.trim(); const pin = document.getElementById('manage-user-pin').value.trim(); const role = document.getElementById('manage-user-role').value; if (!nn || !pin) return alert("Required."); if (on) { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateUser', oldName: on, newName: nn, pin: pin, role: role }) }); let u = users.find(x => (x.Name || x.name) === on); if(u) { u.Name = nn; u.name = nn; u.PIN = pin; u.pin = pin; u.Role = role; u.role = role; } } else { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addUser', name: nn, pin: pin, role: role }) }); users.push({ Name: nn, name: nn, PIN: pin, pin: pin, Role: role, role: role }); } renderAdminUsers(); closeUserModal(); }
-    function deleteUser(n) { if (!confirm(`Delete access for ${n}?`)) return; fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', name: n }) }); users = users.filter(u => (u.Name || u.name) !== n); renderAdminUsers(); }
-    async function forceAdminSync() { document.getElementById('loading-overlay').style.display = 'flex'; document.getElementById('loader-text').innerText = "Forcing Sync..."; try { await performDatabaseSync(); alert("Synced!"); } catch(e) { alert("Failed."); } document.getElementById('loading-overlay').style.display = 'none'; }
-    function openAdminEdit(tId) { const t = allTrips.find(x => x.id === tId); if(!t) return; document.getElementById('edit-trip-id').value = tId; document.getElementById('edit-party').value = t.party || ""; document.getElementById('edit-vnum').value = t.vNum || ""; document.getElementById('edit-vtype').value = t.type || ""; document.getElementById('edit-vcap').value = t.weight || ""; document.getElementById('edit-from').value = t.from || ""; document.getElementById('edit-to').value = t.to || ""; document.getElementById('edit-vfreight').value = t.vFreight || ""; document.getElementById('edit-cfreight').value = t.cFreight || ""; document.getElementById('edit-dname').value = t.dName || ""; document.getElementById('edit-dcontact').value = t.dContact || ""; document.getElementById('adminEditModal').style.display = "flex"; }
-    function closeAdminEditModal() { document.getElementById('adminEditModal').style.display = "none"; }
-    function saveAdminEdit() { const pF = document.getElementById('edit-party'); if (isVehicleNumber(pF.value)) { alert("Error: Vehicle Number in Party field."); pF.style.borderColor = '#b3261e'; return; } pF.style.borderColor = 'transparent'; const tId = document.getElementById('edit-trip-id').value; const vn = document.getElementById('edit-vnum').value.replace(/[\s-_]/g, '').toUpperCase(); const p = { action: 'adminEditTrip', id: tId, party: normalizePartyName(document.getElementById('edit-party').value), vNum: vn, vType: document.getElementById('edit-vtype').value.toUpperCase(), weight: document.getElementById('edit-vcap').value.toUpperCase(), from: formatCaseStr(document.getElementById('edit-from').value), to: formatCaseStr(document.getElementById('edit-to').value), vFreight: document.getElementById('edit-vfreight').value, cFreight: document.getElementById('edit-cfreight').value, dName: formatCaseStr(document.getElementById('edit-dname').value), dContact: formatPhoneString(document.getElementById('edit-dcontact').value) }; fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(p) }); const t = allTrips.find(x => x.id === tId); if(t){ Object.assign(t, p); } updateLocalMemory(p); closeAdminEditModal(); triggerCurrentRender(); }
-    function triggerDeliveryModal(tId) { document.getElementById('delivery-trip-id').value = tId; document.getElementById('deliveryModal').style.display = "flex"; }
-    function closeModal() { document.getElementById('deliveryModal').style.display = "none"; triggerCurrentRender(); }
-    function confirmDelivery() { const d = document.getElementById('delivery-date-input').value; if (!d) return alert("Select date."); const tId = document.getElementById('delivery-trip-id').value; const fd = getFormattedDateVal(d); fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTripStatus', id: tId, status: 'Delivered', deliveryDate: fd }) }); const t = allTrips.find(x => x.id === tId); if(t){ t.status = 'Delivered'; t.deliveryDate = fd; } closeModal(); }
-    function revertStatus(tId, ns) { if (ns === 'In-Transit') { if (!confirm("Move trip back to In-Transit?")) return; } fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateTripStatus', id: tId, status: ns, deliveryDate: '' }) }); const t = allTrips.find(x => x.id === tId); if(t){ t.status = ns; t.deliveryDate = ''; t.podDate = '';} triggerCurrentRender(); }
-    function updateBackendData(tId, act, val) { const p = { action: act, id: tId }; if (act === 'updateCNote') p.value = val; if (act === 'updatePODRemark') p.value = val; if (act === 'updateTripRemark') p.value = val; if (act === 'updatePOD') p.date = val; fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(p) }); const t = allTrips.find(x => x.id === tId); if (t) { if (act === 'updateCNote') t.cNote = val; if (act === 'updatePODRemark') t.podRemark = val; if (act === 'updateTripRemark') t.remarks = val; if (act === 'updatePOD') t.podDate = val; } if (act === 'updatePOD') triggerCurrentRender(); }
-    function savePOD(tId, clr = false) { let fd = ""; if (clr) { if(!confirm("Remove POD Date?")) return; } else { const d = document.getElementById(`pod-date-${tId}`).value; const r = currentUser.Role || currentUser.role; const isA = (r === 'Admin' || r === 'Master Admin'); if (!d) { if (!isA || !confirm("Save without date?")) return alert("Select POD date."); fd = "No Date"; } else { fd = getFormattedDateVal(d); } } updateBackendData(tId, 'updatePOD', fd); }
-    function updateStatusLog(tId, nv) { const tm = new Date().toISOString(); fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addStatusLog', id: tId, note: nv, timestamp: tm }) }); const t = allTrips.find(x => x.id === tId); if (t) t.statusNote = nv; statusLogs.push({tripId: tId, note: nv, time: tm}); }
-    function toggleHistory(tId, vMode) { document.querySelectorAll('.history-panel').forEach(p => { if (p.id !== `hist-${vMode}-${tId}`) p.style.display = 'none'; }); const p = document.getElementById(`hist-${vMode}-${tId}`); const ls = statusLogs.filter(l => String(l.tripId) === String(tId)); if (ls.length === 0) { p.innerHTML = "<div class='history-item'>No history found.</div>"; } else { p.innerHTML = ls.map(l => { const d = new Date(l.time); return `<div class="history-item"><strong>${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes() < 10 ? '0':''}${d.getMinutes()}</strong> - ${l.note}</div>`; }).join(''); } p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
-    function openExpenseModal(tId) { const t = allTrips.find(x => x.id === tId); if(!t) return; document.getElementById('expense-trip-id').value = tId; document.getElementById('exp-loading').value = t.loadingExp || ""; document.getElementById('exp-unloading').value = t.unloadingExp || ""; document.getElementById('exp-lr').value = t.lrExp || ""; document.getElementById('exp-others').value = t.otherExp || ""; document.getElementById('exp-other-reason').value = t.otherExpReason || ""; document.getElementById('expenseModal').style.display = "flex"; }
-    function closeExpenseModal() { document.getElementById('expenseModal').style.display = "none"; }
-    function saveExpenses() { const tId = document.getElementById('expense-trip-id').value; const l = document.getElementById('exp-loading').value; const un = document.getElementById('exp-unloading').value; const lr = document.getElementById('exp-lr').value; const oth = document.getElementById('exp-others').value; const othR = document.getElementById('exp-other-reason').value; fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateExpenses', id: tId, loading: l, unloading: un, lr: lr, others: oth, otherReason: othR }) }); const t = allTrips.find(x => x.id === tId); if(t) { t.loadingExp = l; t.unloadingExp = un; t.lrExp = lr; t.otherExp = oth; t.otherExpReason = othR; } closeExpenseModal(); alert("Expenses saved."); }
     function openFinancialAllocation(tId) { const t = allTrips.find(x => x.id === tId); if(!t) return; document.getElementById('fin-trip-id').value = tId; document.getElementById('income-rows-container').innerHTML = ""; document.getElementById('expense-rows-container').innerHTML = ""; let l = { income: [], expense: [] }; try { let p = JSON.parse(t.financialLedger); if(p.income) l.income = p.income; if(p.expense) l.expense = p.expense; } catch(e){} if((l.expense || []).length === 0 && (t.otherExp || t.loadingExp || t.unloadingExp || t.lrExp)) { if(t.otherExp) l.expense.push({type: t.otherExpReason || 'Generic', amt: parseFloat(t.otherExp)}); if(t.loadingExp) l.expense.push({type: 'Loading', amt: parseFloat(t.loadingExp)}); if(t.unloadingExp) l.expense.push({type: 'Unloading', amt: parseFloat(t.unloadingExp)}); if(t.lrExp) l.expense.push({type: 'LR', amt: parseFloat(t.lrExp)}); } (l.income || []).forEach(r => addFinancialRow('income', r.type, r.amt)); (l.expense || []).forEach(r => addFinancialRow('expense', r.type, r.amt)); document.getElementById('financialModal').style.display = "flex"; }
     function addFinancialRow(cat, t = "", a = "") { const c = document.getElementById(`${cat}-rows-container`); const r = document.createElement('div'); r.className = "financial-row"; r.innerHTML = `<input type="text" placeholder="Desc/Type" class="compact-input fin-desc" value="${t}"><input type="number" placeholder="Amount" class="compact-input fin-amt" value="${a}"><button class="btn btn-clear" onclick="this.parentElement.remove()" style="padding:10px; font-weight:bold; color:#b3261e; width:auto; border-radius:8px;">X</button>`; c.appendChild(r); }
     function closeFinancialModal() { document.getElementById('financialModal').style.display = "none"; }
     function saveFinancialLedger() { const tId = document.getElementById('fin-trip-id').value; const t = allTrips.find(x => x.id === tId); let l = { income: [], expense: [], reco: {} }; try { let p = JSON.parse(t.financialLedger); if(p) Object.assign(l, p); l.income=[]; l.expense=[]; } catch(e){} document.querySelectorAll('#income-rows-container .financial-row').forEach(r => { let d = r.querySelector('.fin-desc').value; let a = r.querySelector('.fin-amt').value; if(d && a) l.income.push({ type: d, amt: parseFloat(a) }); }); document.querySelectorAll('#expense-rows-container .financial-row').forEach(r => { let d = r.querySelector('.fin-desc').value; let a = r.querySelector('.fin-amt').value; if(d && a) l.expense.push({ type: d, amt: parseFloat(a) }); }); const js = JSON.stringify(l); t.financialLedger = js; fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now(), { method: 'POST', body: JSON.stringify({ action: 'updateFinancialLedger', id: tId, ledgerJson: js }) }); closeFinancialModal(); triggerCurrentRender(); }
+    
     function openShareModal(tId) { const t = allTrips.find(x => x.id === tId); if (!t) return; document.getElementById('share-modal-trip-id').value = tId; document.getElementById('shareModal').style.display = "flex"; }
     function closeShareModal() { document.getElementById('shareModal').style.display = "none"; }
     function executeDeployedShare(type) { const tId = document.getElementById('share-modal-trip-id').value; const t = allTrips.find(x => x.id === tId); if (!t) return; let bt = t.computedBookingType; let h = `*${bt === 'Reverse Logistics' ? 'Reverse Logistics*\n*' : ''}Placement Details - ${t.vNum} - ${formatCaseStr(t.from)} to ${formatCaseStr(t.to)} - ${t.type} - ${t.weight}*\n\n`; h += `*Date:* ${(t.date||'').split(',')[0]}\n\n`; h += `*Party:* ${t.party || 'N/A'}\n\n`; h += `*From:* ${formatCaseStr(t.from)}\n*To:* ${formatCaseStr(t.to)}\n\n`; h += `*Veh No:* ${t.vNum}\n*Type:* ${t.type}\n*Weight:* ${t.weight}\n\n`; if (bt === 'Reverse Logistics') { h += `*Agency:* ${t.brokingAgent}\n`; if(t.tPerson) h += `*Agent Name:* ${t.tPerson}\n`; if(t.tContact) h += `*Contact No:* ${t.tContact}\n\n`; } else { if(t.dName) h += `*Driver:* ${t.dName}\n`; if(t.dContact) h += `*Contact:* ${t.dContact}\n\n`; } if (type === 'team' && bt === 'Own Booking') { if(t.tName) h += `*Transporter:* ${t.tName}\n`; if(t.tPerson) h += `*Person:* ${t.tPerson}\n`; if(t.tContact) h += `*Contact:* ${t.tContact}\n\n`; } if (t.remarks) h += `*Remarks:* ${t.remarks}`; openWhatsAppChoice(h); }
