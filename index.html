@@ -298,9 +298,8 @@
 
         let localLocs = JSON.parse(localStorage.getItem('ktpl_custom_locs') || '{}');
 
-       allTrips.forEach(t=>{
+        allTrips.forEach(t=>{
             let trName=t.computedBookingType==="Own Booking"?t.tName:t.brokingAgent; let nTr=normalizePartyName(trName);
-            let serverLoc="", serverTime=0;
             if(t.financialLedger){
                 try{
                     let j=JSON.parse(t.financialLedger);
@@ -308,19 +307,12 @@
                         let pDt=parseDate(t.date);
                         if(!transporterBanks[nTr] || pDt>=transporterBanks[nTr].time){ transporterBanks[nTr]={bankName:j.reco.bankName||"",bankAc:j.reco.bankAc||"",ifsc:j.reco.ifsc||"",time:pDt}; }
                     }
-                    // Pull the latest location logged to the cloud
-                    if(j.currentLoc){ serverLoc=j.currentLoc; serverTime=j.locTime||0; }
                 }catch(e){}
             }
-            
-            let localLoc="", localTime=0;
             if(localLocs[t.id] && localLocs[t.id].length > 0) {
                 let sorted = localLocs[t.id].sort((a,b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-                localLoc = sorted[0].note; localTime = new Date(sorted[0].time).getTime();
+                t.statusNote = sorted[0].note;
             }
-            
-            // Compare cloud vs local and always display the absolute newest update
-            t.statusNote = (serverTime >= localTime && serverLoc) ? serverLoc : (localLoc || "");
         });
 
         let pU=users.find(u=>(u.Name||u.name)==="__PERMS__"); if(pU){try{let pObj=JSON.parse(pU.Role||pU.role);users.forEach(u=>{let n=u.Name||u.name;if(pObj[n])u.permissions=pObj[n];});}catch(e){}}
@@ -447,10 +439,61 @@
         r.sort((a,b)=>new Date(String(b.date||"").split(",")[0].split("/").reverse().join("-"))-new Date(String(a.date||"").split(",")[0].split("/").reverse().join("-"))); return r;
     }
     
-    function triggerShare(id) {
-        if(window.shareMessages && window.shareMessages[id]) {
-            openWhatsAppChoice(window.shareMessages[id]);
-        } else { alert("Error loading trip data."); }
+    function triggerShare(tId) {
+        document.getElementById("share-modal-trip-id").value = tId;
+        document.getElementById("shareModal").style.display = "flex";
+    }
+    
+    function closeShareModal() {
+        document.getElementById("shareModal").style.display = "none";
+    }
+    
+    function executeDeployedShare(target) {
+        const tId = document.getElementById("share-modal-trip-id").value;
+        const t = allTrips.find(x => x.id === tId);
+        if (!t) return alert("Error loading trip data.");
+        
+        let bt = t.computedBookingType;
+        let brAgt = t.brokingAgent;
+        if(!brAgt) { try { let pf = JSON.parse(t.financialLedger); if(pf.brokingAgent) brAgt = pf.brokingAgent; } catch(err){} }
+
+        let st = String(t.status||"").trim();
+        let statusText = st;
+        if(st === "Delivered") statusText = `Delivered on ${t.deliveryDate||"N/A"}`;
+        if(st === "Cancelled Trip") statusText = "Cancelled";
+        
+        let h = `*Trip Update - ${t.vNum}*\n\n`;
+        h += `*Date:* ${getFormattedDateVal(t.date)}\n`;
+        h += `*Route:* ${formatCaseStr(t.from)} to ${formatCaseStr(t.to)}\n`;
+        h += `*Type:* ${safeStr(t.type||t.vType||"-")} (${safeStr(t.weight||"-")})\n`;
+        
+        if(target === "team") {
+            h += `*Party:* ${t.party||"N/A"}\n`;
+            if(bt === "Own Booking") {
+                if(t.tName) h += `*Transporter:* ${t.tName}\n`;
+                if(t.tPerson) h += `*Contact Person:* ${t.tPerson}\n`;
+            } else {
+                if(brAgt) h += `*Agency:* ${brAgt}\n`;
+                if(t.tPerson) h += `*Agent Name:* ${t.tPerson}\n`;
+            }
+            if(t.vFreight) h += `*Veh Freight:* ${t.vFreight}\n`;
+            if(t.cFreight) h += `*Chg Freight:* ${t.cFreight}\n`;
+        }
+        
+        h += `\n*Status:* ${statusText}\n`;
+        if(t.statusNote) h += `*Current Loc:* ${t.statusNote}\n`;
+        
+        if(t.dName || t.dContact) {
+            h += `\n*Driver Details:*\n`;
+            if(t.dName) h += `${t.dName}\n`;
+            if(t.dContact) h += `${t.dContact}\n`;
+        }
+        
+        if(t.cNote) h += `\n*C-Note:* ${t.cNote}\n`;
+        if(t.remarks) h += `*Remarks:* ${t.remarks}\n`;
+        
+        closeShareModal();
+        openWhatsAppChoice(h);
     }
     
     function triggerFleetShare(vNum) {
@@ -458,6 +501,13 @@
             openWhatsAppChoice(window.fleetShareData[vNum]);
         }
     }
+    
+    function openMISModal(){ document.getElementById('misModal').style.display='flex'; }
+    function closeMISModal(){ document.getElementById('misModal').style.display='none'; }
+    function triggerMISGeneration(type) { alert("MIS Generation logic not currently implemented in this environment."); }
+    function openLedgerModal(){ document.getElementById('ledgerModal').style.display='flex'; }
+    function closeLedgerModal(){ document.getElementById('ledgerModal').style.display='none'; }
+    function triggerRecoExcelDownload(type) { alert("Excel Download logic not currently implemented in this environment."); }
 </script>
 <script>
     function clearLocator(){document.getElementById("loc-origin").value="";document.getElementById("loc-dest").value="";document.getElementById("loc-vtype").value="";document.getElementById("loc-vcap").value="";document.getElementById("locator-results").innerHTML="";}
@@ -608,6 +658,17 @@
         let oldLogs=statusLogs.filter(l=>String(l.tripId)===String(tId));
         oldLogs.forEach(ol=>{if(!hist.some(h=>h.loc===ol.note)){hist.push({loc:ol.note,time:new Date(ol.time).getTime()});}});
         
+        let baseDate = parseDate(t.date);
+        if(baseDate > 0 && !hist.some(h=>h.loc && h.loc.includes("Trip Dispatched"))) {
+             hist.push({loc: `Trip Dispatched from ${safeStr(t.from)}`, time: baseDate});
+        }
+        if(t.status === "Delivered" && t.deliveryDate) {
+             let delDate = parseDate(t.deliveryDate);
+             if(delDate > 0 && !hist.some(h=>h.loc && h.loc.includes("Delivered"))) {
+                  hist.push({loc: `Delivered at ${safeStr(t.to)}`, time: delDate});
+             }
+        }
+
         if(hist.length===0){ p.innerHTML="<div class='history-item'>No history found.</div>"; }
         else{ hist.sort((a,b)=>b.time-a.time); p.innerHTML=hist.map(h=>{const d=new Date(h.time);return `<div class="history-item"><strong>${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes()<10?"0":""}${d.getMinutes()}</strong> - ${safeStr(h.loc)}</div>`;}).join(""); }
         p.style.display=p.style.display==="block"?"none":"block";
@@ -725,12 +786,10 @@
         if(bt==="Reverse Logistics"&&brAgt)h+=`<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Agency:</strong> ${safeStr(brAgt)}</div>`;
         let sVF=isA; if(vMode==="deployed")sVF=!0; if(sVF&&e.vFreight&&String(e.vFreight).trim()!=="")h+=`<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Vehicle Freight:</strong> ${e.vFreight}</div>`;
         let sCF=bt==="Own Booking"?p.viewChargedFreightOB:p.viewChargedFreightRL; if(sCF&&e.cFreight&&String(e.cFreight).trim()!=="")h+=`<div style="margin-bottom: 5px; color:#137333; font-size:11px; font-weight:500;"><strong>Charged Freight:</strong> ${e.cFreight}</div>`;
+        
         const dTel=getSafeTel(e.dContact); const tTel=getSafeTel(e.tContact);
         window.shareMessages=window.shareMessages||{};
-        let msgB=`*${bt==="Reverse Logistics"?"Reverse Logistics*\n*":""}Placement Details - ${e.vNum} - ${formatCaseStr(e.from)} to ${formatCaseStr(e.to)} - ${safeStr(e.type||e.vType||"-")}*\n\n*Date:* ${getFormattedDateVal(e.date)}\n*Party:* ${e.party||"N/A"}\n*From:* ${formatCaseStr(e.from)}\n*To:* ${formatCaseStr(e.to)}\n*Veh No:* ${e.vNum}\n*Type:* ${safeStr(e.type||e.vType||"-")} (${safeStr(e.weight)||"-"})\n\n`;
-        if(bt==="Reverse Logistics"){msgB+=`*Agency:* ${brAgt}\n`;if(e.tPerson)msgB+=`*Agent Name:* ${e.tPerson}\n`;if(e.tContact)msgB+=`*Contact No:* ${e.tContact}\n\n`;}else{if(e.dName)msgB+=`*Driver:* ${e.dName}\n`;if(e.dContact)msgB+=`*Contact:* ${e.dContact}\n\n`;}
-        if(bt==="Own Booking"){if(e.tName)msgB+=`*Transporter:* ${e.tName}\n`;if(e.tPerson)msgB+=`*Person:* ${e.tPerson}\n`;if(e.tContact)msgB+=`*Contact:* ${e.tContact}\n\n`;}
-        if(e.remarks)msgB+=`*Remarks:* ${e.remarks}`; window.shareMessages[e.id]=msgB;
+        
         h+=`<div style="font-size: 11px; margin-bottom: 10px;"><span style="display:inline-block; background:#f1f3f4; padding:4px 10px; border-radius:12px; color:#1a73e8; font-weight:500; cursor:pointer;" onclick="document.getElementById('c-${vMode}-${e.id}').style.display = document.getElementById('c-${vMode}-${e.id}').style.display === 'block' ? 'none' : 'block';">View Contacts ▼</span><div id="c-${vMode}-${e.id}" style="display:none; background:#f8f9fa; padding:10px; border-radius:6px; margin-top:5px; border:1px solid #dadce0; color:#444746;"><div style="margin-bottom:6px;"><strong>Driver:</strong> ${safeStr(e.dName)||"N/A"} <br> <a href="tel:${dTel}" style="color:#1a73e8; text-decoration:none;">📞 ${safeStr(e.dContact)||"N/A"}</a></div>`;
         if(bt==="Own Booking")h+=`<div><strong>Transporter:</strong> ${safeStr(e.tName)||"N/A"} ${e.tPerson?"("+safeStr(e.tPerson)+")":""} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none;">📞 ${safeStr(e.tContact)||"N/A"}</a></div>`;else h+=`<div><strong>Broking Agent:</strong> ${safeStr(brAgt)||safeStr(e.tPerson)||"N/A"} <br> <a href="tel:${tTel}" style="color:#1a73e8; text-decoration:none;">📞 ${safeStr(e.tContact)||"N/A"}</a></div>`;
         h+=`</div></div>`;
@@ -801,6 +860,13 @@
     function saveUserManage(){const on=document.getElementById("manage-user-old-name").value;const nn=document.getElementById("manage-user-name").value.trim();const pin=document.getElementById("manage-user-pin").value.trim();const role=document.getElementById("manage-user-role").value;if(!nn||!pin)return alert("Required.");if(on){fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"updateUser",oldName:on,newName:nn,pin:pin,role:role})});let u=users.find(x=>(x.Name||x.name)===on);if(u){u.Name=nn;u.name=nn;u.PIN=pin;u.pin=pin;u.Role=role;u.role=role;}}else{fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"addUser",name:nn,pin:pin,role:role})});users.push({Name:nn,name:nn,PIN:pin,pin:pin,Role:role,role:role});}renderAdminUsers();closeUserModal();}
     function deleteUser(n){if(!confirm(`Delete access for ${n}?`))return;fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"deleteUser",name:n})});users=users.filter(u=>(u.Name||u.name)!==n);renderAdminUsers();}
     async function forceAdminSync(){document.getElementById("loading-overlay").style.display="flex";document.getElementById("loader-text").innerText="Forcing Sync...";try{await performDatabaseSync();alert("Synced!");}catch(e){alert("Failed.");}document.getElementById("loading-overlay").style.display="none";}
+    
+    function openMISModal(){ document.getElementById('misModal').style.display='flex'; }
+    function closeMISModal(){ document.getElementById('misModal').style.display='none'; }
+    function triggerMISGeneration(type) { alert("MIS Generation logic not currently implemented in this environment."); }
+    function openLedgerModal(){ document.getElementById('ledgerModal').style.display='flex'; }
+    function closeLedgerModal(){ document.getElementById('ledgerModal').style.display='none'; }
+    function triggerRecoExcelDownload(type) { alert("Excel Download logic not currently implemented in this environment."); }
 </script>
 </body>
 </html>
