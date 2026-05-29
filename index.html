@@ -312,24 +312,37 @@
         isCheckingPin = false; 
     }
 
-    async function performDatabaseSync() {
-        const ts = Date.now(); const res = await fetch(GOOGLE_SCRIPT_URL + "?t=" + ts); if (!res.ok) throw new Error("Connection failed."); const data = await res.json();
-        vehicles = data.vehicles || {}; clients = data.clients || []; transporters = data.transporters || {}; users = data.users || []; statusLogs = data.statusLogs || []; transporterBanks = {};
+   async function performDatabaseSync() {
+        const ts = Date.now(); 
+        const res = await fetch(GOOGLE_SCRIPT_URL + "?t=" + ts); 
+        if (!res.ok) throw new Error("Connection failed."); 
+        
+        const data = await res.json();
+        vehicles = data.vehicles || {}; 
+        clients = data.clients || []; 
+        transporters = data.transporters || {}; 
+        users = data.users || []; 
+        statusLogs = data.statusLogs || []; 
+        transporterBanks = {};
         
         let cU = users.find(u => (u.Name || u.name) === '__VCONFIG__'); 
         if (cU) { try { vehicleBranches = JSON.parse(cU.Role || cU.role); localStorage.setItem('ktpl_branches', JSON.stringify(vehicleBranches)); } catch(e){} }
         
         const revLogIds = ['TRP-1779115155932','TRP-1779117724465','TRP-1779204199291','TRP-1779272619346','TRP-1779375136137','TRP-1779457814247','TRP-1779638743270','TRP-1779686779691','TRP-1779722314454'];
+        
         allTrips = (data.trips || []).map(t => {
             t.bookingType = 'Own Booking'; t.brokingAgent = '';
             if(t.financialLedger) { try { let j = JSON.parse(t.financialLedger); if(j.bookingType) t.bookingType = j.bookingType; if(j.brokingAgent) t.brokingAgent = j.brokingAgent; } catch(e){} }
             if(!t.bookingType || t.bookingType==='Own Booking') { if(t.brokingAgent && t.brokingAgent.trim() !== '') { t.bookingType = 'Reverse Logistics'; t.tName = ''; } }
             if(revLogIds.includes(t.id)) t.bookingType = 'Reverse Logistics';
-            t.computedBookingType = t.bookingType; return t;
+            t.computedBookingType = t.bookingType; 
+            return t;
         });
 
         allTrips.forEach(t => {
-            let trName = t.computedBookingType === 'Own Booking' ? t.tName : t.brokingAgent; let nTr = normalizePartyName(trName);
+            // Map the Bank Details memory
+            let trName = t.computedBookingType === 'Own Booking' ? t.tName : t.brokingAgent; 
+            let nTr = normalizePartyName(trName);
             if (nTr && t.financialLedger) { 
                 try { 
                     let j = JSON.parse(t.financialLedger); 
@@ -339,6 +352,14 @@
                     } 
                 } catch(e){} 
             }
+
+            // *** THE GLITCH FIX: Attach the latest location log to the trip ***
+            let tripLogs = statusLogs.filter(l => String(l.tripId) === String(t.id));
+            if (tripLogs.length > 0) {
+                // Sort logs so the newest one is at the top
+                tripLogs.sort((a, b) => new Date(b.time) - new Date(a.time));
+                t.statusNote = tripLogs[0].note;
+            }
         });
         
         let pU = users.find(u => (u.Name || u.name) === '__PERMS__'); 
@@ -346,7 +367,6 @@
 
         setupMemoryDropdowns(); renderAdminUsers();
     }
-
     function getUserPerms() {
         const n = currentUser.Name || currentUser.name || ''; const r = currentUser.Role || currentUser.role || '';
         let p = { adminTab: (r === 'Master Admin'), fleetStatusTab: true, paymentsTab: true, reportsTab: true, revLogistics: true, editTrips: true, viewChargedFreightOB: true, viewChargedFreightRL: true, editChargedFreightOB: true, editChargedFreightRL: true, generateMIS: true, exportLedger: true };
