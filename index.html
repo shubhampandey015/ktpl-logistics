@@ -298,8 +298,9 @@
 
         let localLocs = JSON.parse(localStorage.getItem('ktpl_custom_locs') || '{}');
 
-        allTrips.forEach(t=>{
+       allTrips.forEach(t=>{
             let trName=t.computedBookingType==="Own Booking"?t.tName:t.brokingAgent; let nTr=normalizePartyName(trName);
+            let serverLoc="", serverTime=0;
             if(t.financialLedger){
                 try{
                     let j=JSON.parse(t.financialLedger);
@@ -307,12 +308,19 @@
                         let pDt=parseDate(t.date);
                         if(!transporterBanks[nTr] || pDt>=transporterBanks[nTr].time){ transporterBanks[nTr]={bankName:j.reco.bankName||"",bankAc:j.reco.bankAc||"",ifsc:j.reco.ifsc||"",time:pDt}; }
                     }
+                    // Pull the latest location logged to the cloud
+                    if(j.currentLoc){ serverLoc=j.currentLoc; serverTime=j.locTime||0; }
                 }catch(e){}
             }
+            
+            let localLoc="", localTime=0;
             if(localLocs[t.id] && localLocs[t.id].length > 0) {
                 let sorted = localLocs[t.id].sort((a,b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-                t.statusNote = sorted[0].note;
+                localLoc = sorted[0].note; localTime = new Date(sorted[0].time).getTime();
             }
+            
+            // Compare cloud vs local and always display the absolute newest update
+            t.statusNote = (serverTime >= localTime && serverLoc) ? serverLoc : (localLoc || "");
         });
 
         let pU=users.find(u=>(u.Name||u.name)==="__PERMS__"); if(pU){try{let pObj=JSON.parse(pU.Role||pU.role);users.forEach(u=>{let n=u.Name||u.name;if(pObj[n])u.permissions=pObj[n];});}catch(e){}}
