@@ -7,17 +7,23 @@
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
+        /* BASE STYLES */
         * { box-sizing: border-box; font-family: "Google Sans", "Roboto", -apple-system, sans-serif; }
         body { background: #f4f7fc; min-height: 100vh; margin: 0; padding: 10px; color: #1f1f1f; display: flex; justify-content: center; }
         .container { position: relative; width: 100%; max-width: 600px; padding: 10px 0; margin-top: 10px; margin-bottom: 40px; display: none; overflow-x: hidden; word-wrap: break-word; }
+
+        /* OVERLAYS */
         #pin-overlay, #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7fc; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
         #loading-overlay { display: none; }
         .pin-box { background: #ffffff; padding: 35px 25px; border-radius: 20px; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
         .pin-input { font-size: 28px; letter-spacing: 12px; text-align: center; font-weight: 500; margin-bottom: 10px; padding: 12px; width: 100%; border: none; background: #f1f3f4; border-radius: 12px; outline: none; transition: 0.2s; }
         .pin-input:focus { background: #ffffff; outline: 2px solid #1a73e8; box-shadow: 0 4px 12px rgba(26,115,232,0.1); }
+
+        /* NAVIGATION & TABS */
         .app-section { display: none; animation: fadeIn 0.3s ease; }
         .app-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        
         .homepage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 0 10px; }
         .menu-card { background: #ffffff; border-radius: 20px; padding: 20px 15px; cursor: pointer; transition: 0.2s ease-in-out; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 1px solid transparent; }
         .menu-card:active { transform: scale(0.96); background: #f8f9fa; border-color: #d3e3fd; }
@@ -25,18 +31,23 @@
         .menu-card:hover .menu-icon { transform: translateY(-3px); }
         .menu-card h3 { margin: 0; font-size: 14px; font-weight: 600; color: #1f1f1f; }
         .menu-card p { margin: 6px 0 0 0; font-size: 11px; color: #5f6368; line-height: 1.3; }
+        
         .workspace-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 12px 15px; background: #ffffff; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); margin-left: 10px; margin-right: 10px; }
         .btn-back-home { background: #f1f3f4; border: none; color: #444746; font-size: 13px; font-weight: 500; cursor: pointer; padding: 8px 14px; border-radius: 20px; transition: 0.2s;}
         .btn-back-home:active { transform: scale(0.95); background: #e3e3e3;}
         .workspace-title { font-size: 15px; font-weight: 600; color: #1f1f1f; margin: 0; }
+        
         .sub-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 10px; }
         .sub-tabs::-webkit-scrollbar { display: none; }
         .sub-tab { flex: 1 0 auto; text-align: center; padding: 10px 14px; cursor: pointer; font-size: 12px; font-weight: 600; border-radius: 24px; background: #ffffff; color: #444746; border: 1px solid #dadce0; transition: 0.2s ease-in-out; }
         .sub-tab.active { background: #1a73e8; color: #ffffff; border-color: #1a73e8; box-shadow: 0 4px 10px rgba(26,115,232,0.2); }
+        
         .secondary-tabs { background: #e8f0fe; padding: 6px; border-radius: 24px; margin-bottom: 15px; display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-left: 10px; margin-right: 10px;}
         .secondary-tabs::-webkit-scrollbar { display: none; }
         .secondary-tab { background: transparent; border: none; color: #1a73e8; padding: 8px 14px; font-size: 12px; border-radius: 20px; cursor: pointer; flex: 1 0 auto; text-align: center; font-weight:600; transition: 0.2s;}
         .secondary-tab.active { background: #1a73e8; color: #ffffff; box-shadow: 0 2px 6px rgba(26,115,232,0.3); }
+
+        /* FORMS & INPUTS */
         .form-card { background: #ffffff; border-radius: 20px; padding: 20px; margin: 0 10px 15px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .form-group { margin-top: 14px; width: 100%; }
         label { display: block; font-size: 11px; font-weight: 600; color: #444746; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -47,6 +58,8 @@
         .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; }
         .error-msg { display: none; color: #b3261e; font-size: 11px; margin-top: 4px; font-weight: 500; }
         .section-divider { height: 1px; background: #e0e0e0; margin: 24px 0; border-radius: 2px; }
+
+        /* BUTTONS */
         .btn { width: 100%; padding: 14px 16px; border: none; border-radius: 24px; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s ease-in-out; text-align: center; }
         .btn:active { transform: scale(0.96); opacity: 0.9; }
         .btn-primary { color: #ffffff; background: #1a73e8; box-shadow: 0 4px 10px rgba(26,115,232,0.2); }
@@ -55,10 +68,14 @@
         .btn-team { color: #ffffff; background: #65558f; box-shadow: 0 4px 10px rgba(101,85,143,0.2); } 
         .btn-clear { background: #f1f3f4; color: #444746; }
         .btn-secondary { background: #e8f0fe; color: #1a73e8; padding: 8px 14px; border-radius: 12px; width: auto; font-size: 11px; font-weight: 600; }
+
+        /* AUTOCOMPLETE */
         .autocomplete { position: relative; display: block; text-align: left; width: 100%; }
         .autocomplete-items { position: absolute; z-index: 99; top: 100%; left: 0; right: 0; background-color: #ffffff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-height: 220px; overflow-y: auto; display: none; margin-top: 6px; border: 1px solid #dadce0; overflow-x: hidden; }
         .autocomplete-items div { padding: 14px; cursor: pointer; border-bottom: 1px solid #f1f3f4; font-size: 13px; color: #1f1f1f; transition: 0.1s; }
         .autocomplete-items div:hover { background-color: #f8f9fa; color: #1a73e8; padding-left: 18px; }
+
+        /* CARDS & FILTERS */
         .list-container { padding: 0 10px; }
         .trip-card { background: #ffffff; border-radius: 16px; padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); font-size: 12px; color: #444746; border: 1px solid #f1f3f4; position: relative;}
         .status-badge { display: inline-block; padding: 6px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -67,8 +84,11 @@
         .status-cancelled { background: #fce8e6; color: #b3261e; }
         .compact-input { padding: 10px 12px; font-size: 12px; border-radius: 8px; background: #f8f9fa; border: 1px solid #dadce0; outline: none; width: 100%; transition: 0.2s;}
         .compact-input:focus { background: #ffffff; border-color: #1a73e8; box-shadow: 0 2px 8px rgba(26,115,232,0.1); }
+        
         #unified-filter-bar { background: #ffffff; border-radius: 16px; padding: 15px; margin: 0 10px 15px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+
+        /* PAYMENTS ACCORDION & SLOTS */
         .reco-accordion-header { background: #ffffff; border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; border: 1px solid #f1f3f4; transition: 0.2s; position: relative;}
         .reco-accordion-header:active { transform: scale(0.98); background: #f8f9fa;}
         .reco-info-col { flex: 1; padding-right: 10px; word-wrap: break-word; font-size: 13px; color: #202124;}
@@ -83,18 +103,26 @@
         .calc-line-item { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; color: #5f6368; padding-left: 10px; border-left: 2px solid #e8f0fe;}
         .calc-gross { font-weight: bold; font-size: 13px; color: #1f1f1f; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f3f4; display: flex; justify-content: space-between;}
         .highlight-red-box { background-color: #fce8e6; color: #1f1f1f; font-weight: 600; padding: 14px; text-align: center; border-radius: 12px; margin-top: 16px; border: 1px solid #f9d0c4; font-size: 14px; display: block; transition: 0.3s ease; box-shadow: 0 4px 10px rgba(217,48,37,0.05);}
+        
+        /* MOBILE INPUT FIX */
         .payment-slot-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; width: 100%; box-sizing: border-box; }
-        .payment-slot-row input { flex: 1; min-width: 0; padding: 12px; }
+        .payment-slot-row input { flex: 1 1 0%; min-width: 0; padding: 12px; }
         .payment-slot-row button { flex-shrink: 0; padding: 12px; }
+        
         .batch-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: #1a73e8; margin-left: 10px; }
         #batch-payment-bar { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1f1f1f; color: #ffffff; padding: 12px 20px; border-radius: 30px; z-index: 10000; box-shadow: 0 8px 24px rgba(0,0,0,0.3); align-items: center; gap: 15px; animation: fadeIn 0.3s ease; width: 90%; max-width: 400px; justify-content: space-between; }
+
+        /* HISTORY & MISC */
         .history-btn { background: transparent; border: none; color: #1a73e8; font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 0; margin-top: 8px; text-align: left; width: auto; transition: 0.2s;}
         .history-btn:hover { color: #0842a0; }
         .history-panel { display: none; background: #f8f9fa; border-radius: 8px; padding: 10px 14px; margin-top: 10px; font-size: 11px; color: #444746; border-left: 4px solid #1a73e8;}
         .history-item { margin-bottom: 8px; border-bottom: 1px solid #dadce0; padding-bottom: 6px; }
+
+        /* MODALS & TABLES */
         .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(31,31,31,0.6); justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(4px);}
         .modal-content { background: #ffffff; padding: 24px; border-radius: 20px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: left; box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
         .financial-row { display: grid; grid-template-columns: 2fr 1.5fr auto; gap: 8px; margin-bottom: 10px; align-items: center; }
+
         .screen-report-container { display: block; overflow-y: auto; overflow-x: auto; max-height: 480px; background: #ffffff; border-radius: 16px; margin: 0 10px 15px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); -webkit-overflow-scrolling: touch; overscroll-behavior: contain; border: 1px solid #dadce0;}
         .report-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
         .report-table th, .report-table td { padding: 12px 14px; border-bottom: 1px solid #f1f3f4; text-align: left; color: #444746; }
@@ -102,6 +130,7 @@
         .print-only { display: none; }
         .admin-action-btn { background: #f8f9fa; border: 1px solid #dadce0; border-radius: 8px; padding: 6px 12px; font-size: 11px; cursor: pointer; color: #1a73e8; margin-right: 6px; font-weight: 600; transition: 0.2s;}
         .admin-action-btn:active { background: #e8f0fe; }
+
         @media print { 
             @page { margin: 10mm; } body * { visibility: hidden; } body { padding: 0; margin: 0; background: #fff; }
             #print-report-container, #print-report-container * { visibility: visible; }
@@ -118,12 +147,33 @@
 </head>
 <body>
 
-<div id="pin-overlay"><div class="pin-box"><img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 160px; margin-bottom: 20px;" onerror="this.style.display='none'"><h2 style="margin-top:0; color:#1f1f1f;">KTPL Login</h2><div style="display:flex; flex-direction:column; gap:12px; align-items:center; width: 100%;"><input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric" placeholder="••••" oninput="if(this.value.length === 4) checkPin()" onkeyup="if(event.key === 'Enter') checkPin()"><button class="btn btn-primary" onclick="checkPin()" style="width: 100%; max-width: 250px; font-size: 15px; padding: 14px;">Secure Login</button></div><p id="pin-error" style="display:none; color: #b3261e; font-size: 12px; margin-top: 15px; font-weight:600;">Invalid Authorization PIN.</p></div></div>
-<div id="loading-overlay"><div class="loader-text" id="loader-text" style="font-weight:600; font-size:16px; color:#1a73e8;">Syncing Databank</div><p id="error-box" style="display:none; color:#b3261e; font-size:12px; margin-top:10px; text-align:center; font-weight:500;"></p><button id="bypass-btn" class="btn btn-clear" style="display:none; margin-top:15px; width:auto; padding:8px 16px;" onclick="bypassLoading()">Retry Login</button></div>
+<div id="pin-overlay">
+    <div class="pin-box">
+        <img src="KTPL Logo.png" alt="KTPL Logo" style="max-width: 160px; margin-bottom: 20px;" onerror="this.style.display='none'">
+        <h2 style="margin-top:0; color:#1f1f1f;">KTPL Login</h2>
+        <div style="display:flex; flex-direction:column; gap:12px; align-items:center; width: 100%;">
+            <input type="password" id="app-pin" class="pin-input" maxlength="4" pattern="\d{4}" inputmode="numeric" placeholder="••••" oninput="if(this.value.length === 4) checkPin()" onkeyup="if(event.key === 'Enter') checkPin()">
+            <button class="btn btn-primary" onclick="checkPin()" style="width: 100%; max-width: 250px; font-size: 15px; padding: 14px;">Secure Login</button>
+        </div>
+        <p id="pin-error" style="display:none; color: #b3261e; font-size: 12px; margin-top: 15px; font-weight:600;">Invalid Authorization PIN.</p>
+    </div>
+</div>
+
+<div id="loading-overlay">
+    <div class="loader-text" id="loader-text" style="font-weight:600; font-size:16px; color:#1a73e8;">Syncing Databank</div>
+    <p id="error-box" style="display:none; color:#b3261e; font-size:12px; margin-top:10px; text-align:center; font-weight:500;"></p>
+    <button id="bypass-btn" class="btn btn-clear" style="display:none; margin-top:15px; width:auto; padding:8px 16px;" onclick="bypassLoading()">Retry Login</button>
+</div>
 
 <div class="container" id="main-app">
     <div id="panel-homepage" class="app-section active">
-        <div class="workspace-header" style="margin: 0 10px 25px 10px; background:transparent; box-shadow:none; padding:0;"><div class="greeting"><h2 id="user-name-text" style="font-size: 14px; font-weight: 600; color: #5f6368; margin: 0 0 2px 0;"></h2><h1 id="greeting-text" style="font-size:26px; margin:0; font-weight:700; color:#1f1f1f;">Welcome,</h1></div><button class="btn btn-clear" style="width:auto; font-size:12px; padding:8px 16px;" onclick="logoutApp()">Logout</button></div>
+        <div class="workspace-header" style="margin: 0 10px 25px 10px; background:transparent; box-shadow:none; padding:0;">
+            <div class="greeting">
+                <h2 id="user-name-text" style="font-size: 14px; font-weight: 600; color: #5f6368; margin: 0 0 2px 0;"></h2>
+                <h1 id="greeting-text" style="font-size:26px; margin:0; font-weight:700; color:#1f1f1f;">Welcome,</h1>
+            </div>
+            <button class="btn btn-clear" style="width:auto; font-size:12px; padding:8px 16px;" onclick="logoutApp()">Logout</button>
+        </div>
         <div class="homepage-grid">
             <div class="menu-card" id="card-locator" onclick="openWorkspace('tab-fleet-locator')"><div class="menu-icon" style="color: #ea4335; background: #fce8e6;">📍</div><h3>Fleet Locator</h3><p>Proximity Search</p></div>
             <div class="menu-card" id="card-fleet" onclick="openWorkspace('tab-fleet-status')"><div class="menu-icon" style="color: #1a73e8; background: #e8f0fe;">🚛</div><h3>Fleet Status</h3><p>Idle & Live Track</p></div>
@@ -136,24 +186,136 @@
         </div>
     </div>
 
-    <div id="unified-filter-bar" style="display:none; padding: 0 10px; margin-bottom:15px;"><div class="form-card" style="margin:0; padding:15px;"><div style="font-size: 11px; font-weight: 700; text-transform: uppercase; display: flex; justify-content: space-between; margin-bottom:12px; color:#1f1f1f;">Search Filter <span style="color:#1a73e8; cursor:pointer; background:#e8f0fe; padding:4px 10px; border-radius:12px; font-size:10px;" onclick="clearFilters()">Reset</span></div><div class="filter-grid"><input type="date" id="uf-start" class="compact-input" onchange="triggerFilterRender()"><input type="date" id="uf-end" class="compact-input" onchange="triggerFilterRender()"><div class="autocomplete"><input type="text" id="uf-party" class="compact-input" placeholder="Search Party..." onchange="formatPartyName(this); triggerFilterRender();" oninput="triggerFilterRender();"><div id="uf-party-list" class="autocomplete-items"></div></div><div class="autocomplete"><input type="text" id="uf-transporter" class="compact-input" placeholder="Transporter/Broker..." onchange="formatPartyName(this); triggerFilterRender();" oninput="triggerFilterRender();"><div id="uf-transporter-list" class="autocomplete-items"></div></div><div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerFilterRender();"><div id="uf-vnum-list" class="autocomplete-items"></div></div><div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerFilterRender();"><div id="uf-vtype-list" class="autocomplete-items"></div></div><div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerFilterRender();"><div id="uf-origin-list" class="autocomplete-items"></div></div><div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerFilterRender();"><div id="uf-dest-list" class="autocomplete-items"></div></div></div></div></div>
-
-    <div id="tab-fleet-locator" class="app-section"><div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">Fleet Locator</h3></div><div class="form-card"><p style="font-size:12px; color:#5f6368; text-align:center; margin-top:0; margin-bottom:15px; line-height:1.4;">Find KTPL assets by operational proximity zone.</p><div class="grid-2 form-group" style="margin-top:0;"><div class="autocomplete"><label>Origin City</label><input type="text" id="loc-origin" placeholder="Search City..." onchange="formatCase(this, 'title')"><div id="loc-origin-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>Destination City</label><input type="text" id="loc-dest" placeholder="Search City..." onchange="formatCase(this, 'title')"><div id="loc-dest-list" class="autocomplete-items"></div></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>Veh Type</label><input type="text" id="loc-vtype" placeholder="e.g. 32FT" onchange="formatCase(this, 'upper')"><div id="loc-vtype-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>Capacity</label><input type="text" id="loc-vcap" placeholder="e.g. 18MT" onchange="formatCase(this, 'upper')"><div id="loc-vcap-list" class="autocomplete-items"></div></div></div><div class="grid-2" style="margin-top:20px;"><button class="btn btn-clear" onclick="clearLocator()">Reset</button><button class="btn btn-primary" onclick="executeLocatorSearch()">Find Trucks</button></div></div><div id="locator-results" class="list-container"></div></div>
-    
-    <div id="tab-fleet-status" class="app-section"><div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">KTPL Fleet Status</h3></div><div style="padding:0 10px;"><div class="sub-tabs" id="fleet-branch-tabs" style="margin-bottom:10px;"><div class="sub-tab active" id="fb-all" onclick="setFleetBranch('All', 'fb-all')">All Branches</div><div class="sub-tab" id="fb-thane" onclick="setFleetBranch('Ex. Thane', 'fb-thane')">Ex. Thane</div><div class="sub-tab" id="fb-waluj" onclick="setFleetBranch('Ex. Waluj', 'fb-waluj')">Ex. Waluj</div><div class="sub-tab" id="fb-un" onclick="setFleetBranch('Unassigned', 'fb-un')">Unassigned</div></div><div class="secondary-tabs" id="fleet-secondary-tabs"><button class="secondary-tab active" id="f-sec-20" onclick="setFleetSecondaryTab('20Ft Fleet')">20Ft Fleet</button><button class="secondary-tab" id="f-sec-32" onclick="setFleetSecondaryTab('32Ft Fleet')">32Ft Fleet</button><button class="secondary-tab" id="f-sec-oth" onclick="setFleetSecondaryTab('Other Fleet')">Other Fleet</button></div><div class="sub-tabs" id="fleet-primary-tabs" style="margin-bottom:10px;"><div class="sub-tab active" id="fp-tab-all" onclick="setFleetPrimaryTab('All', 'fp-tab-all')">All</div><div class="sub-tab" id="fp-tab-transit" onclick="setFleetPrimaryTab('In Transit', 'fp-tab-transit')">In Transit</div><div class="sub-tab" id="fp-tab-idle" onclick="setFleetPrimaryTab('Available (Idle)', 'fp-tab-idle')">Available</div><div class="sub-tab" id="fp-tab-workshop" onclick="setFleetPrimaryTab('In Workshop', 'fp-tab-workshop')">Workshop</div><div class="sub-tab" id="fp-tab-nodriver" onclick="setFleetPrimaryTab('No Driver', 'fp-tab-nodriver')">No Driver</div></div><div class="grid-2 form-group" style="margin-top: 0; margin-bottom: 10px;"><input type="text" id="fs-filter-vnum" class="compact-input" placeholder="Search Vehicle No." oninput="renderFleetStatus()"><input type="text" id="fs-filter-type" class="compact-input" placeholder="Search Size or Capacity..." oninput="renderFleetStatus()"></div></div><div id="fleet-container" class="list-container"></div></div>
-    
-    <div id="tab-placement" class="app-section"><div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">Placement Workspace</h3></div><div id="placement-selection-screen" style="padding: 0 10px;"><p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select the operational flow to log a new entry.</p><div style="display:flex; flex-direction:column; gap:15px;"><button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Own Booking')">Own Booking Flow</button><button class="btn btn-team" id="btn-rl-flow" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Reverse Logistics')">Reverse Logistics Flow</button></div></div><div id="placement-form-container" style="display:none;" class="form-card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f3f4; padding-bottom:10px;"><span id="placement-form-title" style="font-weight:700; color:#1a73e8; font-size: 16px;">Form</span><span style="font-size:12px; color:#b3261e; cursor:pointer; font-weight:700;" onclick="showSelectionScreen('placement')">Cancel</span></div><div id="form-own-booking"><div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="ob-date"></div><div class="form-group autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="ob-party" placeholder="Type or Select..." onchange="formatPartyName(this)"><div id="ob-party-list" class="autocomplete-items"></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="ob-from" onchange="formatCase(this, 'title')"><div id="ob-from-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="ob-to" onchange="formatCase(this, 'title')"><div id="ob-to-list" class="autocomplete-items"></div></div></div><div class="section-divider"></div><div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="ob-vnum" placeholder="Search Fleet..." onchange="formatVehicleNumber(this)"><div id="ob-vnum-list" class="autocomplete-items"></div></div><div class="grid-2 form-group"><div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="ob-vtype" onchange="formatCase(this, 'upper')"></div><div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="ob-weight" onchange="formatCase(this, 'upper')"></div></div><div class="grid-2 form-group"><div><label>Vehicle Freight</label><input type="number" id="ob-vfreight" placeholder="Payable"></div><div><label>Charged Freight</label><input type="number" id="ob-cfreight" placeholder="Receivable"></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>Driver Name</label><input type="text" id="ob-dname" onchange="formatCase(this, 'title')"><div id="ob-dname-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>Driver Contact <span class="required-star">*</span></label><input type="text" id="ob-dcontact" onchange="formatPhoneInput(this)"><div id="ob-dcontact-list" class="autocomplete-items"></div></div></div><div class="section-divider"></div><div class="form-group autocomplete"><label>Transporter <span class="required-star">*</span></label><input type="text" id="ob-tname" onchange="formatPartyName(this)"><div id="ob-tname-list" class="autocomplete-items"></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>Person Name</label><input type="text" id="ob-tperson" onchange="formatCase(this, 'title')"><div id="ob-tperson-list" class="autocomplete-items"></div></div><div><label>Contact No.</label><input type="text" id="ob-tcontact" onchange="formatPhoneInput(this)"></div></div><div class="section-divider"></div><div class="form-group"><label>Remarks</label><input type="text" id="ob-remarks" placeholder="..."></div><div class="grid-2" style="margin-top:20px; gap:10px;"><button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button><button class="btn btn-primary" onclick="savePlacementOwn()">Save Details</button><button class="btn btn-team" onclick="generatePlacementMessageOwn('team')">For Team</button><button class="btn btn-whatsapp" onclick="generatePlacementMessageOwn('client')">For Client</button></div></div><div id="form-rev-logistics" style="display:none;"><div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="rl-date"></div><div class="grid-2 form-group"><div class="autocomplete"><label>Party Name</label><input type="text" id="rl-party" placeholder="Type..." onchange="formatPartyName(this)"><div id="rl-party-list" class="autocomplete-items"></div></div><div><label>Type of Co.</label><input type="text" id="rl-typeco" onchange="formatCase(this, 'title')"></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="rl-from" onchange="formatCase(this, 'title')"><div id="rl-from-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="rl-to" onchange="formatCase(this, 'title')"><div id="rl-to-list" class="autocomplete-items"></div></div></div><div class="section-divider"></div><div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="rl-vnum" placeholder="Strictly KTPL Fleet" onchange="formatVehicleNumber(this)"><div id="rl-vnum-list" class="autocomplete-items"></div></div><div class="grid-2 form-group"><div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="rl-vtype" onchange="formatCase(this, 'upper')"></div><div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="rl-weight" onchange="formatCase(this, 'upper')"></div></div><div class="grid-2 form-group"><div class="autocomplete"><label>Driver Name</label><input type="text" id="rl-dname" onchange="formatCase(this, 'title')"><div id="rl-dname-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>Driver Contact</label><input type="text" id="rl-dcontact" onchange="formatPhoneInput(this)"><div id="rl-dcontact-list" class="autocomplete-items"></div></div></div><div class="section-divider"></div><div class="form-group autocomplete"><label>Broking Agency <span class="required-star">*</span></label><input type="text" id="rl-agency" onchange="formatPartyName(this)"><div id="rl-agency-list" class="autocomplete-items"></div></div><div class="grid-2 form-group"><div><label>Agent Name</label><input type="text" id="rl-agent" onchange="formatCase(this, 'title')"></div><div><label>Contact No.</label><input type="text" id="rl-contact" onchange="formatPhoneInput(this)"></div></div><div class="section-divider"></div><div class="form-group"><label>Charged Freight</label><input type="number" id="rl-cfreight" placeholder="Receivable Amount"></div><div class="form-group"><label>Remarks</label><input type="text" id="rl-remarks" placeholder="..."></div><div class="grid-2" style="margin-top:20px; gap:10px;"><button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button><button class="btn btn-primary" onclick="savePlacementRev()">Save Details</button><button class="btn btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">Share For Team</button></div></div></div>
+    <div id="unified-filter-bar" style="display:none; padding: 0 10px; margin-bottom:15px;">
+        <div class="form-card" style="margin:0; padding:15px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; display: flex; justify-content: space-between; margin-bottom:12px; color:#1f1f1f;">Search Filter <span style="color:#1a73e8; cursor:pointer; background:#e8f0fe; padding:4px 10px; border-radius:12px; font-size:10px;" onclick="clearFilters()">Reset</span></div>
+            <div class="filter-grid">
+                <input type="date" id="uf-start" class="compact-input" onchange="triggerFilterRender()">
+                <input type="date" id="uf-end" class="compact-input" onchange="triggerFilterRender()">
+                <div class="autocomplete"><input type="text" id="uf-party" class="compact-input" placeholder="Search Party..." onchange="formatPartyName(this); triggerFilterRender();" oninput="triggerFilterRender();"><div id="uf-party-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-transporter" class="compact-input" placeholder="Transporter/Broker..." onchange="formatPartyName(this); triggerFilterRender();" oninput="triggerFilterRender();"><div id="uf-transporter-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-vnum" class="compact-input" placeholder="Vehicle No." oninput="triggerFilterRender();"><div id="uf-vnum-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-vtype" class="compact-input" placeholder="Veh Type" oninput="triggerFilterRender();"><div id="uf-vtype-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-origin" class="compact-input" placeholder="Origin" oninput="triggerFilterRender();"><div id="uf-origin-list" class="autocomplete-items"></div></div>
+                <div class="autocomplete"><input type="text" id="uf-dest" class="compact-input" placeholder="Destination" oninput="triggerFilterRender();"><div id="uf-dest-list" class="autocomplete-items"></div></div>
+            </div>
+        </div>
     </div>
 
-    <div id="tab-deployed" class="app-section"><div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">Deployed Fleet</h3></div><div id="deployed-selection-screen" style="padding: 0 10px;"><p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select fleet category to monitor.</p><div style="display:flex; flex-direction:column; gap:15px;"><button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setDepType('Own Booking')">Own Booking Fleet</button><button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setDepType('Reverse Logistics')">Reverse Logistics Fleet</button></div></div><div id="deployed-content-area" style="display:none;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;"><span id="deployed-title-text" style="font-weight:700; color:#1a73e8; font-size:14px; text-transform:uppercase;">Workspace</span><span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:700; background:#fce8e6; padding:6px 10px; border-radius:12px;" onclick="showSelectionScreen('deployed')">Change Category</span></div><div class="sub-tabs" style="margin-bottom:15px;"><div class="sub-tab active" id="btn-dep-stat-ong" onclick="setDepStat('In-Transit')">On-Going</div><div class="sub-tab" id="btn-dep-stat-com" onclick="setDepStat('Delivered')">Completed</div><div class="sub-tab" id="btn-dep-stat-can" onclick="setDepStat('Cancelled Trip')">Cancelled</div></div><div id="deployed-container" class="list-container"></div></div></div>
-    
-    <div id="tab-pod" class="app-section"><div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">POD Documents</h3></div><div id="pod-selection-screen" style="padding: 0 10px;"><p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select category to manage PODs.</p><div style="display:flex; flex-direction:column; gap:15px;"><button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setPodType('Own Booking')">Own Booking PODs</button><button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setPodType('Reverse Logistics')">Reverse Logistics PODs</button></div></div><div id="pod-content-area" style="display:none;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;"><span id="pod-title-text" style="font-weight:700; color:#1a73e8; font-size:14px; text-transform:uppercase;">Workspace</span><span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:700; background:#fce8e6; padding:6px 10px; border-radius:12px;" onclick="showSelectionScreen('pod')">Change Category</span></div><div class="sub-tabs" style="margin-bottom:15px;"><div class="sub-tab active" id="btn-pod-stat-pen" onclick="setPodStat('Pending')">Pending</div><div class="sub-tab" id="btn-pod-stat-rec" onclick="setPodStat('Received')">Received</div></div><div style="padding:0 10px;"><div id="pod-summary" style="font-size:12px; font-weight:700; color:#1a73e8; margin-bottom:10px;"></div></div><div id="pod-container" class="list-container"></div></div></div>
-    
-    <div id="tab-payments" class="app-section"><div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">Payments Ledger</h3></div><div id="reco-selection-screen" style="padding: 0 10px;"><p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select ledger category to reconcile.</p><div style="display:flex; flex-direction:column; gap:15px;"><button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Own Booking')">Own Booking Ledger</button><button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Reverse Logistics')">Reverse Logistics Ledger</button></div></div><div id="reco-content-area" style="display:none;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;"><span id="reco-title-text" style="font-weight:700; color:#1a73e8; font-size:14px; text-transform:uppercase;">Workspace</span><span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:700; background:#fce8e6; padding:6px 10px; border-radius:12px;" onclick="showSelectionScreen('reco')">Change Category</span></div><div class="sub-tabs" style="margin-bottom:15px;"><div class="sub-tab active" id="btn-reco-stat-pen" onclick="setRecoStat('Pending')">Pending</div><div class="sub-tab" id="btn-reco-stat-com" onclick="setRecoStat('Completed')">Completed</div></div><div id="reco-container" class="list-container"></div></div></div>
-    
-    <div id="tab-reports" class="app-section"><div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">Financial Reports & MIS</h3></div><div id="report-selection-screen" style="padding: 0 10px;"><p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select report category to generate data.</p><div style="display:flex; flex-direction:column; gap:15px;"><button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setReportType('Own Booking')">Own Booking Reports</button><button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setReportType('Reverse Logistics')">Reverse Logistics Reports</button></div></div><div id="report-content-area" style="display:none;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;"><span id="report-title-text" style="font-weight:700; color:#1a73e8; font-size:14px; text-transform:uppercase;">Workspace</span><span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:700; background:#fce8e6; padding:6px 10px; border-radius:12px;" onclick="showSelectionScreen('report')">Change Category</span></div><div class="form-card" style="padding:15px; margin-bottom:15px;"><div class="form-group autocomplete" style="margin-top:0; margin-bottom:15px;"><label>Filter by Party Name</label><input type="text" id="rf-party" class="compact-input" placeholder="Type Client Profile..." onchange="formatPartyName(this); triggerFilterRender();" oninput="triggerFilterRender();"><div id="rf-party-list" class="autocomplete-items"></div></div><div class="grid-2"><div><label>Trip Status:</label><select id="report-trip-status" class="compact-input" onchange="triggerFilterRender()"><option value="All">All (Excl. Cancelled)</option><option value="In-Transit">In-Transit</option><option value="Delivered">Delivered</option><option value="Cancelled Trip">Cancelled Trip</option></select></div><div><label>POD Status:</label><select id="report-pod-status" class="compact-input" onchange="triggerFilterRender()"><option value="All">All</option><option value="Pending">Pending</option><option value="Received">Received</option></select></div></div><button class="btn btn-primary" onclick="generateCustomReport()" style="margin-top: 20px;">Generate Base View</button></div><div id="screen-report" class="screen-report-container"></div><div class="grid-2 list-container" style="display:none; margin-bottom: 20px; gap:10px;" id="report-actions"><button class="btn btn-clear" onclick="window.print()">🖨️ Save PDF</button><button class="btn btn-whatsapp" onclick="shareReportWhatsApp()">💬 WhatsApp</button><button class="btn btn-primary" onclick="openMISModal()">📊 Generate MIS</button><button class="btn btn-team" onclick="openLedgerModal()">💰 Payment Ledger</button></div></div></div>
-    
-    <div id="tab-admin" class="app-section"><div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">Admin Control</h3></div><div class="form-card"><div style="display: flex; justify-content: space-between; align-items: center;"><h3 style="color:#1f1f1f; margin:0; font-weight:600; font-size:15px;">User Access</h3><button class="btn btn-primary" style="width: auto; padding: 8px 16px; font-size: 11px;" onclick="openAddUserModal()">+ Add</button></div><div style="border: 1px solid #dadce0; border-radius: 12px; overflow-x: auto; margin-top: 15px;"><table class="report-table"><thead><tr><th>Name</th><th>Role</th><th>PIN</th><th>Actions</th></tr></thead><tbody id="admin-user-list"></tbody></table></div><button class="btn btn-clear" onclick="forceAdminSync()" style="margin-top: 20px;">Force Databank Sync</button></div><div class="form-card" style="margin-top: 20px;"><h3 style="color:#1f1f1f; margin:0 0 15px 0; font-weight:600; font-size:15px;">Module Access Control</h3><p style="font-size:11px; color:#5f6368; margin-bottom:15px;">Assign or revoke access for specific users.</p><div id="module-access-container"></div><button class="btn btn-primary" onclick="savePermissions()" style="margin-top: 15px;">Save Permissions</button></div></div>
+    <div id="tab-fleet-locator" class="app-section">
+        <div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">Fleet Locator</h3></div>
+        <div class="form-card">
+            <p style="font-size:12px; color:#5f6368; text-align:center; margin-top:0; margin-bottom:15px; line-height:1.4;">Find KTPL assets by operational proximity zone.</p>
+            <div class="grid-2 form-group" style="margin-top:0;"><div class="autocomplete"><label>Origin City</label><input type="text" id="loc-origin" placeholder="Search City..." onchange="formatCase(this, 'title')"><div id="loc-origin-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>Destination City</label><input type="text" id="loc-dest" placeholder="Search City..." onchange="formatCase(this, 'title')"><div id="loc-dest-list" class="autocomplete-items"></div></div></div>
+            <div class="grid-2 form-group"><div class="autocomplete"><label>Veh Type</label><input type="text" id="loc-vtype" placeholder="e.g. 32FT" onchange="formatCase(this, 'upper')"><div id="loc-vtype-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>Capacity</label><input type="text" id="loc-vcap" placeholder="e.g. 18MT" onchange="formatCase(this, 'upper')"><div id="loc-vcap-list" class="autocomplete-items"></div></div></div>
+            <div class="grid-2" style="margin-top:20px;"><button class="btn btn-clear" onclick="clearLocator()">Reset</button><button class="btn btn-primary" onclick="executeLocatorSearch()">Find Trucks</button></div>
+        </div>
+        <div id="locator-results" class="list-container"></div>
+    </div>
+
+    <div id="tab-fleet-status" class="app-section">
+        <div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">KTPL Fleet Status</h3></div>
+        <div style="padding:0 10px;">
+            <div class="sub-tabs" id="fleet-branch-tabs" style="margin-bottom:10px;"><div class="sub-tab active" id="fb-all" onclick="setFleetBranch('All', 'fb-all')">All Branches</div><div class="sub-tab" id="fb-thane" onclick="setFleetBranch('Ex. Thane', 'fb-thane')">Ex. Thane</div><div class="sub-tab" id="fb-waluj" onclick="setFleetBranch('Ex. Waluj', 'fb-waluj')">Ex. Waluj</div><div class="sub-tab" id="fb-un" onclick="setFleetBranch('Unassigned', 'fb-un')">Unassigned</div></div>
+            <div class="secondary-tabs" id="fleet-secondary-tabs"><button class="secondary-tab active" id="f-sec-20" onclick="setFleetSecondaryTab('20Ft Fleet')">20Ft Fleet</button><button class="secondary-tab" id="f-sec-32" onclick="setFleetSecondaryTab('32Ft Fleet')">32Ft Fleet</button><button class="secondary-tab" id="f-sec-oth" onclick="setFleetSecondaryTab('Other Fleet')">Other Fleet</button></div>
+            <div class="sub-tabs" id="fleet-primary-tabs" style="margin-bottom:10px;"><div class="sub-tab active" id="fp-tab-all" onclick="setFleetPrimaryTab('All', 'fp-tab-all')">All</div><div class="sub-tab" id="fp-tab-transit" onclick="setFleetPrimaryTab('In Transit', 'fp-tab-transit')">In Transit</div><div class="sub-tab" id="fp-tab-idle" onclick="setFleetPrimaryTab('Available (Idle)', 'fp-tab-idle')">Available</div><div class="sub-tab" id="fp-tab-workshop" onclick="setFleetPrimaryTab('In Workshop', 'fp-tab-workshop')">Workshop</div><div class="sub-tab" id="fp-tab-nodriver" onclick="setFleetPrimaryTab('No Driver', 'fp-tab-nodriver')">No Driver</div></div>
+            <div class="grid-2 form-group" style="margin-top: 0; margin-bottom: 10px;"><input type="text" id="fs-filter-vnum" class="compact-input" placeholder="Search Vehicle No." oninput="renderFleetStatus()"><input type="text" id="fs-filter-type" class="compact-input" placeholder="Search Size or Capacity..." oninput="renderFleetStatus()"></div>
+        </div>
+        <div id="fleet-container" class="list-container"></div>
+    </div>
+
+    <div id="tab-placement" class="app-section">
+        <div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">Placement Workspace</h3></div>
+        <div id="placement-selection-screen" style="padding: 0 10px;"><p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select the operational flow to log a new entry.</p><div style="display:flex; flex-direction:column; gap:15px;"><button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Own Booking')">Own Booking Flow</button><button class="btn btn-team" id="btn-rl-flow" style="padding: 16px; font-size: 15px;" onclick="openPlacementForm('Reverse Logistics')">Reverse Logistics Flow</button></div></div>
+        
+        <div id="placement-form-container" style="display:none;" class="form-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #f1f3f4; padding-bottom:10px;"><span id="placement-form-title" style="font-weight:700; color:#1a73e8; font-size: 16px;">Form</span><span style="font-size:12px; color:#b3261e; cursor:pointer; font-weight:700;" onclick="showSelectionScreen('placement')">Cancel</span></div>
+            <div id="form-own-booking">
+                <div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="ob-date"></div>
+                <div class="form-group autocomplete"><label>Party Name <span class="required-star">*</span></label><input type="text" id="ob-party" placeholder="Type or Select..." onchange="formatPartyName(this)"><div id="ob-party-list" class="autocomplete-items"></div></div>
+                <div class="grid-2 form-group"><div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="ob-from" onchange="formatCase(this, 'title')"><div id="ob-from-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="ob-to" onchange="formatCase(this, 'title')"><div id="ob-to-list" class="autocomplete-items"></div></div></div>
+                <div class="section-divider"></div>
+                <div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="ob-vnum" placeholder="Search Fleet..." onchange="formatVehicleNumber(this)"><div id="ob-vnum-list" class="autocomplete-items"></div></div>
+                <div class="grid-2 form-group"><div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="ob-vtype" onchange="formatCase(this, 'upper')"></div><div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="ob-weight" onchange="formatCase(this, 'upper')"></div></div>
+                <div class="grid-2 form-group"><div><label>Vehicle Freight</label><input type="number" id="ob-vfreight" placeholder="Payable"></div><div><label>Charged Freight</label><input type="number" id="ob-cfreight" placeholder="Receivable"></div></div>
+                <div class="grid-2 form-group"><div class="autocomplete"><label>Driver Name</label><input type="text" id="ob-dname" onchange="formatCase(this, 'title')"><div id="ob-dname-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>Driver Contact <span class="required-star">*</span></label><input type="text" id="ob-dcontact" onchange="formatPhoneInput(this)"><div id="ob-dcontact-list" class="autocomplete-items"></div></div></div>
+                <div class="section-divider"></div>
+                <div class="form-group autocomplete"><label>Transporter <span class="required-star">*</span></label><input type="text" id="ob-tname" onchange="formatPartyName(this)"><div id="ob-tname-list" class="autocomplete-items"></div></div>
+                <div class="grid-2 form-group"><div class="autocomplete"><label>Person Name</label><input type="text" id="ob-tperson" onchange="formatCase(this, 'title')"><div id="ob-tperson-list" class="autocomplete-items"></div></div><div><label>Contact No.</label><input type="text" id="ob-tcontact" onchange="formatPhoneInput(this)"></div></div>
+                <div class="section-divider"></div>
+                <div class="form-group"><label>Remarks</label><input type="text" id="ob-remarks" placeholder="..."></div>
+                <div class="grid-2" style="margin-top:20px; gap:10px;"><button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button><button class="btn btn-primary" onclick="savePlacementOwn()">Save Details</button><button class="btn btn-team" onclick="generatePlacementMessageOwn('team')">For Team</button><button class="btn btn-whatsapp" onclick="generatePlacementMessageOwn('client')">For Client</button></div>
+            </div>
+            <div id="form-rev-logistics" style="display:none;">
+                <div class="form-group"><label>Booking Date <span class="required-star">*</span></label><input type="date" id="rl-date"></div>
+                <div class="grid-2 form-group"><div class="autocomplete"><label>Party Name</label><input type="text" id="rl-party" placeholder="Type..." onchange="formatPartyName(this)"><div id="rl-party-list" class="autocomplete-items"></div></div><div><label>Type of Co.</label><input type="text" id="rl-typeco" onchange="formatCase(this, 'title')"></div></div>
+                <div class="grid-2 form-group"><div class="autocomplete"><label>From <span class="required-star">*</span></label><input type="text" id="rl-from" onchange="formatCase(this, 'title')"><div id="rl-from-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>To <span class="required-star">*</span></label><input type="text" id="rl-to" onchange="formatCase(this, 'title')"><div id="rl-to-list" class="autocomplete-items"></div></div></div>
+                <div class="section-divider"></div>
+                <div class="form-group autocomplete"><label>Vehicle No. <span class="required-star">*</span></label><input type="text" id="rl-vnum" placeholder="Strictly KTPL Fleet" onchange="formatVehicleNumber(this)"><div id="rl-vnum-list" class="autocomplete-items"></div></div>
+                <div class="grid-2 form-group"><div><label>Vehicle Type <span class="required-star">*</span></label><input type="text" id="rl-vtype" onchange="formatCase(this, 'upper')"></div><div><label>Charged Weight <span class="required-star">*</span></label><input type="text" id="rl-weight" onchange="formatCase(this, 'upper')"></div></div>
+                <div class="grid-2 form-group"><div class="autocomplete"><label>Driver Name</label><input type="text" id="rl-dname" onchange="formatCase(this, 'title')"><div id="rl-dname-list" class="autocomplete-items"></div></div><div class="autocomplete"><label>Driver Contact</label><input type="text" id="rl-dcontact" onchange="formatPhoneInput(this)"><div id="rl-dcontact-list" class="autocomplete-items"></div></div></div>
+                <div class="section-divider"></div>
+                <div class="form-group autocomplete"><label>Broking Agency <span class="required-star">*</span></label><input type="text" id="rl-agency" onchange="formatPartyName(this)"><div id="rl-agency-list" class="autocomplete-items"></div></div>
+                <div class="grid-2 form-group"><div><label>Agent Name</label><input type="text" id="rl-agent" onchange="formatCase(this, 'title')"></div><div><label>Contact No.</label><input type="text" id="rl-contact" onchange="formatPhoneInput(this)"></div></div>
+                <div class="section-divider"></div>
+                <div class="form-group"><label>Charged Freight</label><input type="number" id="rl-cfreight" placeholder="Receivable Amount"></div>
+                <div class="form-group"><label>Remarks</label><input type="text" id="rl-remarks" placeholder="..."></div>
+                <div class="grid-2" style="margin-top:20px; gap:10px;"><button class="btn btn-clear" onclick="clearPlacementForm()">Clear</button><button class="btn btn-primary" onclick="savePlacementRev()">Save Details</button><button class="btn btn-team" onclick="generatePlacementMessageRev('team')" style="grid-column: span 2;">Share For Team</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-deployed" class="app-section">
+        <div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">Deployed Fleet</h3></div>
+        <div id="deployed-selection-screen" style="padding: 0 10px;"><p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select fleet category to monitor.</p><div style="display:flex; flex-direction:column; gap:15px;"><button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setDepType('Own Booking')">Own Booking Fleet</button><button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setDepType('Reverse Logistics')">Reverse Logistics Fleet</button></div></div>
+        <div id="deployed-content-area" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;"><span id="deployed-title-text" style="font-weight:700; color:#1a73e8; font-size:14px; text-transform:uppercase;">Workspace</span><span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:700; background:#fce8e6; padding:6px 10px; border-radius:12px;" onclick="showSelectionScreen('deployed')">Change Category</span></div>
+            <div class="sub-tabs" style="margin-bottom:15px;"><div class="sub-tab active" id="btn-dep-stat-ong" onclick="setDepStat('In-Transit')">On-Going</div><div class="sub-tab" id="btn-dep-stat-com" onclick="setDepStat('Delivered')">Completed</div><div class="sub-tab" id="btn-dep-stat-can" onclick="setDepStat('Cancelled Trip')">Cancelled</div></div>
+            <div id="deployed-container" class="list-container"></div>
+        </div>
+    </div>
+
+    <div id="tab-pod" class="app-section">
+        <div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">POD Documents</h3></div>
+        <div id="pod-selection-screen" style="padding: 0 10px;"><p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select category to manage PODs.</p><div style="display:flex; flex-direction:column; gap:15px;"><button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setPodType('Own Booking')">Own Booking PODs</button><button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setPodType('Reverse Logistics')">Reverse Logistics PODs</button></div></div>
+        <div id="pod-content-area" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;"><span id="pod-title-text" style="font-weight:700; color:#1a73e8; font-size:14px; text-transform:uppercase;">Workspace</span><span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:700; background:#fce8e6; padding:6px 10px; border-radius:12px;" onclick="showSelectionScreen('pod')">Change Category</span></div>
+            <div class="sub-tabs" style="margin-bottom:15px;"><div class="sub-tab active" id="btn-pod-stat-pen" onclick="setPodStat('Pending')">Pending</div><div class="sub-tab" id="btn-pod-stat-rec" onclick="setPodStat('Received')">Received</div></div>
+            <div style="padding:0 10px;"><div id="pod-summary" style="font-size:12px; font-weight:700; color:#1a73e8; margin-bottom:10px;"></div></div>
+            <div id="pod-container" class="list-container"></div>
+        </div>
+    </div>
+
+    <div id="tab-payments" class="app-section">
+        <div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">Payments Ledger</h3></div>
+        <div id="reco-selection-screen" style="padding: 0 10px;"><p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select ledger category to reconcile.</p><div style="display:flex; flex-direction:column; gap:15px;"><button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Own Booking')">Own Booking Ledger</button><button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setRecoType('Reverse Logistics')">Reverse Logistics Ledger</button></div></div>
+        <div id="reco-content-area" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;"><span id="reco-title-text" style="font-weight:700; color:#1a73e8; font-size:14px; text-transform:uppercase;">Workspace</span><span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:700; background:#fce8e6; padding:6px 10px; border-radius:12px;" onclick="showSelectionScreen('reco')">Change Category</span></div>
+            <div class="sub-tabs" style="margin-bottom:15px;"><div class="sub-tab active" id="btn-reco-stat-pen" onclick="setRecoStat('Pending')">Pending</div><div class="sub-tab" id="btn-reco-stat-com" onclick="setRecoStat('Completed')">Completed</div></div>
+            <div id="reco-container" class="list-container"></div>
+        </div>
+    </div>
+
+    <div id="tab-reports" class="app-section">
+        <div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">Financial Reports & MIS</h3></div>
+        <div id="report-selection-screen" style="padding: 0 10px;"><p style="font-size:13px; color:#5f6368; text-align:center; margin-bottom:20px;">Select report category to generate data.</p><div style="display:flex; flex-direction:column; gap:15px;"><button class="btn btn-primary" style="padding: 16px; font-size: 15px;" onclick="setReportType('Own Booking')">Own Booking Reports</button><button class="btn btn-team" style="padding: 16px; font-size: 15px;" onclick="setReportType('Reverse Logistics')">Reverse Logistics Reports</button></div></div>
+        <div id="report-content-area" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #dadce0; padding-bottom:10px; margin-left:10px; margin-right:10px;"><span id="report-title-text" style="font-weight:700; color:#1a73e8; font-size:14px; text-transform:uppercase;">Workspace</span><span style="font-size:11px; color:#b3261e; cursor:pointer; font-weight:700; background:#fce8e6; padding:6px 10px; border-radius:12px;" onclick="showSelectionScreen('report')">Change Category</span></div>
+            <div class="form-card" style="padding:15px; margin-bottom:15px;">
+                <div class="form-group autocomplete" style="margin-top:0; margin-bottom:15px;"><label>Filter by Party Name</label><input type="text" id="rf-party" class="compact-input" placeholder="Type Client Profile..." onchange="formatPartyName(this); triggerFilterRender();" oninput="triggerFilterRender();"><div id="rf-party-list" class="autocomplete-items"></div></div>
+                <div class="grid-2"><div><label>Trip Status:</label><select id="report-trip-status" class="compact-input" onchange="triggerFilterRender()"><option value="All">All (Excl. Cancelled)</option><option value="In-Transit">In-Transit</option><option value="Delivered">Delivered</option><option value="Cancelled Trip">Cancelled Trip</option></select></div><div><label>POD Status:</label><select id="report-pod-status" class="compact-input" onchange="triggerFilterRender()"><option value="All">All</option><option value="Pending">Pending</option><option value="Received">Received</option></select></div></div>
+                <button class="btn btn-primary" onclick="generateCustomReport()" style="margin-top: 20px;">Generate Base View</button>
+            </div>
+            <div id="screen-report" class="screen-report-container"></div>
+            <div class="grid-2 list-container" style="display:none; margin-bottom: 20px; gap:10px;" id="report-actions"><button class="btn btn-clear" onclick="window.print()">🖨️ Save PDF</button><button class="btn btn-whatsapp" onclick="shareReportWhatsApp()">💬 WhatsApp</button><button class="btn btn-primary" onclick="openMISModal()">📊 Generate MIS</button><button class="btn btn-team" onclick="openLedgerModal()">💰 Payment Ledger</button></div>
+        </div>
+    </div>
+
+    <div id="tab-admin" class="app-section">
+        <div class="workspace-header"><button class="btn-back-home" onclick="returnToHome()">← Home</button><h3 class="workspace-title">Admin Control</h3></div>
+        <div class="form-card"><div style="display: flex; justify-content: space-between; align-items: center;"><h3 style="color:#1f1f1f; margin:0; font-weight:600; font-size:15px;">User Access</h3><button class="btn btn-primary" style="width: auto; padding: 8px 16px; font-size: 11px;" onclick="openAddUserModal()">+ Add</button></div><div style="border: 1px solid #dadce0; border-radius: 12px; overflow-x: auto; margin-top: 15px;"><table class="report-table"><thead><tr><th>Name</th><th>Role</th><th>PIN</th><th>Actions</th></tr></thead><tbody id="admin-user-list"></tbody></table></div><button class="btn btn-clear" onclick="forceAdminSync()" style="margin-top: 20px;">Force Databank Sync</button></div>
+        <div class="form-card" style="margin-top: 20px;"><h3 style="color:#1f1f1f; margin:0 0 15px 0; font-weight:600; font-size:15px;">Module Access Control</h3><p style="font-size:11px; color:#5f6368; margin-bottom:15px;">Assign or revoke access for specific users.</p><div id="module-access-container"></div><button class="btn btn-primary" onclick="savePermissions()" style="margin-top: 15px;">Save Permissions</button></div>
+    </div>
 </div>
 
 <div id="print-report-container" class="print-only"></div>
@@ -168,157 +330,121 @@
 <div id="userManageModal" class="modal"><div class="modal-content" style="padding: 24px;"><h3 id="user-modal-title" style="margin-top:0; font-weight:700; font-size:16px; text-align:center;">User Action</h3><input type="hidden" id="manage-user-old-name"><div class="form-group"><label style="text-align:left;">User Name</label><input type="text" id="manage-user-name" class="compact-input" placeholder="Name"></div><div class="form-group"><label style="text-align:left;">4-Digit PIN</label><input type="number" id="manage-user-pin" class="compact-input" placeholder="0711"></div><div class="form-group"><label style="text-align:left;">Role</label><select id="manage-user-role" class="compact-input"><option value="Admin">Admin</option><option value="Manager">Manager</option><option value="SelfOnly">SelfOnly</option><option value="ReadOnly">ReadOnly</option><option value="Master Admin">Master Admin</option></select></div><div style="display:flex; gap:12px; margin-top:24px;"><button class="btn btn-clear" onclick="closeUserModal()">Cancel</button><button class="btn btn-primary" onclick="saveUserManage()">Save User</button></div></div></div>
 <div id="batch-payment-bar"><div style="font-size:13px; font-weight:600;"><span id="batch-count">0</span> Trips | ₹<span id="batch-total">0</span></div><button class="btn-primary" style="padding:8px 16px; font-size:11px; border-radius:16px; border:none; outline:none; width:auto; cursor:pointer;" onclick="openBatchPaymentModal()">Request Approval</button></div>
 <div id="batchPaymentModal" class="modal"><div class="modal-content" style="max-width: 320px; padding: 24px;"><h3 style="margin-top:0; color:#1f1f1f; font-weight:700; font-size:16px;">Request Payment</h3><p style="font-size: 13px; color: #5f6368; margin-bottom: 15px;">Select request type and export method.</p><div class="form-group" style="margin-top:0; margin-bottom:15px;"><label>Payment Type</label><select id="batch-pay-type" class="compact-input"><option value="Advance">Advance Request</option><option value="Balance">Balance Request</option><option value="Full Settlement">Full Settlement</option></select></div><div style="display:flex; flex-direction: column; gap:12px;"><button class="btn btn-whatsapp" onclick="executeBatchPayment('whatsapp')">💬 Send via WhatsApp</button><button class="btn btn-team" onclick="executeBatchPayment('excel')">📊 Export Excel</button><button class="btn btn-clear" onclick="closeBatchPaymentModal()" style="margin-top: 8px;">Cancel</button></div></div></div>
+</body>
 <script>
     const GOOGLE_SCRIPT_URL="https://script.google.com/macros/s/AKfycbyxJsu4llXFpjbeMX53mDmIpQ2z1YNR8garBDkBKxVF9AR3dSmfX0Zvm-XB02ZQplus/exec";
     
-    let vehicles={},clients=[],transporters={},allTrips=[],users=[],driverData={},transporterBanks={},statusLogs=[];
-    let currentUser=null,isCheckingPin=false,currentActiveMainTab="panel-homepage";
-    let currentPlacementType="",currentDeployedType="",currentDeployedStatus="In-Transit";
-    let currentFleetBranch="All",currentFleetPrimary="All",currentFleetSecondary="20Ft Fleet";
-    let currentPodType="",currentPodStatus="Pending",currentRecoType="",currentRecoStat="Pending";
-    let currentReportType="",pendingWhatsAppMsg="",currentReportTrips=[],currentOpenRecoId=null;
+    let vehicles={}, clients=[], transporters={}, allTrips=[], users=[], statusLogs=[];
+    let driverData={}, transporterBanks={};
+    let currentUser=null, isCheckingPin=!1, currentActiveMainTab="panel-homepage";
+    let currentPlacementType="", currentDeployedType="", currentDeployedStatus="In-Transit";
+    let currentFleetBranch="All", currentFleetPrimary="All", currentFleetSecondary="20Ft Fleet";
+    let currentPodType="", currentPodStatus="Pending", currentRecoType="", currentRecoStat="Pending";
+    let currentReportType="", pendingWhatsAppMsg="", currentReportTrips=[], currentOpenRecoId=null;
     let vehicleBranches=JSON.parse(localStorage.getItem("ktpl_branches")||"{}");
     let selectedPaymentTrips=[];
     
     const ZONES={"Zone 1. West":["Baramati","Mumbai","Thane","Bhiwandi","Pune","Vapi","Surat","Taloja","JNPT","Nhava Sheva","Vashi","Vasai","Belapur","Dombivali","Dombivli","Kalyan","Yewai Naka","Aurangabad","Waluj","Jalna","Ahmedabad","Panoli","Dahej","Kheda"],"Zone 2. NCR":["New Delhi","Ghaziabad","Sonipat","Aligarh","Gurugram","Noida","Sahibabad","Bahadurgarh","Alipur"],"Zone 3. North West":["Zirakpur","Ludhiana","Ambala","Kapurthala","Baddi","Ponta Sahib","Mohali","Chandigarh"],"Zone 4. East / North East":["Kolkata","Siliguri","Guwahati","Patna","Cuttack","Bhubaneswar"],"Zone 5. South West":["Bangalore","Hosur","Hoskote","Dhansapura"],"Zone 6. Telangana":["Hyderabad","Rangareddy","Sangareddy","Uppal","Medchal"],"Zone 7. Chennai":["Chennai","Sri City","Sriperumbudur","Guindy","Kanchipuram"],"Zone 8. Rajasthan":["Jaipur","Bagur","VKI","Bhiwadi","Neemrana","Keshwana","Alwar"]};
     
-    window.onclick = function(e){if(e.target.classList.contains("modal")) e.target.style.display="none"};
-    function getZoneForCity(c){if(!c)return null;let t=c.trim().toLowerCase().replace(/\s+(mh|up|gj|dl|hr|pb|wb|or|ka|ts|tn|rj|uk|ch)$/i,"");for(let z in ZONES){if(ZONES[z].some(x=>t.includes(x.toLowerCase())||x.toLowerCase().includes(t)))return z;}return null;}
-    function safeStr(s){if(s===null||s===undefined)return"";return String(s).replace(/"/g,'&quot;').replace(/'/g,"\\'");}
-    function getSafeTel(n){if(!n)return"";let c=String(n).replace(/[\s-]/g,"").trim();return c.startsWith("+")?c:c.startsWith("91")&&c.length>10?"+"+c:"+91"+c;}
-    function formatCaseStr(s){if(!s)return"";return s.trim().split(/\s+/).map(w=>{let cw=w.replace(/[^A-Za-z0-9]/g,"");if(cw.length>0&&cw.length<=3)return w.toUpperCase();let i=w.search(/[a-zA-Z]/);return i!==-1?w.substring(0,i)+w.charAt(i).toUpperCase()+w.substring(i+1).toLowerCase():w;}).join(" ");}
-    function formatCase(e,s){if(e.value)e.value=s==="upper"?e.value.trim().toUpperCase():formatCaseStr(e.value);}
-    function formatSentence(e){if(e.value)e.value=e.value.trim().charAt(0).toUpperCase()+e.value.trim().slice(1);}
-    function formatVehicleNumber(e){if(e.value)e.value=e.value.toUpperCase().replace(/[\s-_]/g,"");}
-    function formatPhoneString(n){if(!n)return"";let c=n.replace(/[\s-]/g,"").trim();return c.startsWith("+91")?c:c.startsWith("91")&&c.length>10?"+"+c:"+91"+c;}
-    function formatPhoneInput(e){e.value=formatPhoneString(e.value);}
+    window.onclick=function(e){if(e.target.classList.contains("modal"))e.target.style.display="none"};
+    function getZoneForCity(e){if(!e)return null;let t=e.trim().toLowerCase().replace(/\s+(mh|up|gj|dl|hr|pb|wb|or|ka|ts|tn|rj|uk|ch)$/i,"");for(let a in ZONES)if(ZONES[a].some(e=>t.includes(e.toLowerCase())||e.toLowerCase().includes(t)))return a;return null}
+    function getSafeTel(e){if(!e)return"";let t=String(e).replace(/[\s-]/g,"").trim();return t.startsWith("+")?t:t.startsWith("91")&&t.length>10?"+"+t:"+91"+t}
+    function formatCaseStr(e){return e?e.trim().split(/\s+/).map(e=>{let t=e.replace(/[^A-Za-z0-9]/g,"");if(t.length>0&&t.length<=3)return e.toUpperCase();let a=e.search(/[a-zA-Z]/);return-1!==a?e.substring(0,a)+e.charAt(a).toUpperCase()+e.substring(a+1).toLowerCase():e}).join(" "):""}
+    function formatCase(e,t){e.value&&(e.value="upper"===t?e.value.trim().toUpperCase():formatCaseStr(e.value))}
+    function formatSentence(e){e.value&&(e.value=e.value.trim().charAt(0).toUpperCase()+e.value.trim().slice(1))}
+    function formatVehicleNumber(e){e.value&&(e.value=e.value.toUpperCase().replace(/[\s-_]/g,""))}
+    function formatPhoneString(e){if(!e)return"";let t=e.replace(/[\s-]/g,"").trim();return t.startsWith("+91")?t:t.startsWith("91")&&t.length>10?"+"+t:"+91"+t}
+    function formatPhoneInput(e){e.value=formatPhoneString(e.value)}
+    function getFormattedDateVal(e){if(!e)return"";let t;if(e.includes("-")){const[a,n,r]=e.split("-");t=new Date(a,n-1,r)}else if(e.includes("/")){try{let a=e.split(",")[0].split("/");3===a.length?t=new Date(a[2],a[1]-1,a[0]):t=new Date(e)}catch(a){t=new Date(e)}}else t=new Date(e);if(isNaN(t.getTime()))return e;return`${String(t.getDate()).padStart(2,"0")}/${String(t.getMonth()+1).padStart(2,"0")}/${t.getFullYear()}, ${["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][t.getDay()]}`}
+    function parseDate(e){if(!e)return 0;try{let t=e.split(",")[0].split("/");return 3===t.length?new Date(t[2],t[1]-1,t[0]).getTime():0}catch(e){return 0}}
+    function isVehicleNumber(e){return!!e&&/^[A-Z]{2}\d{1,2}[A-Z]{0,3}\d{4}$/.test(e.replace(/[\s-_]/g,"").toUpperCase())}
+    function isKTPL(e){if(!e||!vehicles[e.toUpperCase()])return!1;let t=vehicles[e.toUpperCase()].transporter;return t&&"KTPL"===String(t).trim().toUpperCase()}
+    function safeStr(e){return null==e?"":String(e).replace(/"/g,"&quot;").replace(/'/g,"\\'")}
     
-    function getFormattedDateVal(dVal){
-        if(!dVal)return""; 
-        let d;
-        if(dVal.includes("-")){ const[y,m,day]=dVal.split("-"); d=new Date(y,m-1,day); }
-        else if(dVal.includes("/")){
-            try{ let p=dVal.split(',')[0].split('/'); if(p.length===3) d=new Date(p[2],p[1]-1,p[0]); else d=new Date(dVal); }catch(e){d=new Date(dVal);}
-        }
-        else d=new Date(dVal);
-        if(isNaN(d.getTime())) return dVal;
-        const dy=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-        return`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}, ${dy[d.getDay()]}`;
-    }
+    function normalizePartyName(e){if(!e)return"";let t=e.trim(),a=t.toLowerCase();if(/(^|\s)usv(\s|$)/.test(a)||a.startsWith("usv"))return"USV";if(/(^|\s)nrb(\s|$)/.test(a)||a.startsWith("nrb"))return"NRB";if(/(^|\s)j\.?b\.?\s*chemical/.test(a)||a.startsWith("jb "))return"JB Chemicals";if(/(^|\s)r\.?k\.?\s*foodland/.test(a)||a.startsWith("rk "))return"RK Foodland";if(/(^|\s)tech\s*nova/.test(a)||a.startsWith("technova")||a.startsWith("tech nova"))return"Tech Nova";if(/(^|\s)vns(\s|$)/.test(a)||a.startsWith("vns"))return"VNS";if(/(^|\s)jnpt(\s|$)/.test(a)||a.startsWith("jnpt"))return"JNPT";if(a.startsWith("fr8")||a.startsWith("fr 8")){let e=t.replace(/^fr[\s-]*8/i,"").trim();return e.startsWith("-")&&(e=e.substring(1).trim()),e?"FR8 - "+formatCaseStr(e):"FR8"}if(a.startsWith("lobb")){let e=t.replace(/^lobb/i,"").trim();return e.startsWith("-")&&(e=e.substring(1).trim()),e?"Lobb - "+formatCaseStr(e):"Lobb"}return formatCaseStr(t)}
+    function formatPartyName(e){e&&e.value&&(e.value=normalizePartyName(e.value))}
+    function blockVehicleInPartyFields(e){let t="Own Booking"===e?["ob-party","ob-tname"]:["rl-party","rl-agency"],a=!1;return t.forEach(e=>{const t=document.getElementById(e);t&&isVehicleNumber(t.value)&&(alert("Error: Vehicle No. entered in Party/Agency field."),t.style.borderColor="#b3261e",a=!0)}),a}
     
-    function parseDate(dStr){if(!dStr)return 0;try{let p=dStr.split(",")[0].split("/");return p.length===3?new Date(p[2],p[1]-1,p[0]).getTime():0;}catch(e){return 0;}}
-    function isVehicleNumber(str){return!!str&&/^[A-Z]{2}\d{1,2}[A-Z]{0,3}\d{4}$/.test(str.replace(/[\s-_]/g,"").toUpperCase());}
-    function isKTPL(v){if(!v||!vehicles[v.toUpperCase()])return!1;let tr=vehicles[v.toUpperCase()].transporter;return tr&&String(tr).trim().toUpperCase()==="KTPL";}
-    function normalizePartyName(n){if(!n)return"";let o=n.trim();let l=o.toLowerCase();if(/(^|\s)usv(\s|$)/.test(l)||l.startsWith("usv"))return"USV";if(/(^|\s)nrb(\s|$)/.test(l)||l.startsWith("nrb"))return"NRB";if(/(^|\s)j\.?b\.?\s*chemical/.test(l)||l.startsWith("jb "))return"JB Chemicals";if(/(^|\s)r\.?k\.?\s*foodland/.test(l)||l.startsWith("rk "))return"RK Foodland";if(/(^|\s)tech\s*nova/.test(l)||l.startsWith("technova")||l.startsWith("tech nova"))return"Tech Nova";if(/(^|\s)vns(\s|$)/.test(l)||l.startsWith("vns"))return"VNS";if(/(^|\s)jnpt(\s|$)/.test(l)||l.startsWith("jnpt"))return"JNPT";if(l.startsWith("fr8")||l.startsWith("fr 8")){let r=o.replace(/^fr[\s-]*8/i,"").trim();if(r.startsWith("-"))r=r.substring(1).trim();return r?"FR8 - "+formatCaseStr(r):"FR8";}if(l.startsWith("lobb")){let r=o.replace(/^lobb/i,"").trim();if(r.startsWith("-"))r=r.substring(1).trim();return r?"Lobb - "+formatCaseStr(r):"Lobb";}return formatCaseStr(o);}
-    function formatPartyName(e){if(e&&e.value)e.value=normalizePartyName(e.value);}
-    function blockVehicleInPartyFields(m){let f=m==="Own Booking"?["ob-party","ob-tname"]:["rl-party","rl-agency"];let err=!1;f.forEach(id=>{const el=document.getElementById(id);if(el&&isVehicleNumber(el.value)){alert("Error: Vehicle No. entered in Party/Agency field.");el.style.borderColor="#b3261e";err=!0;}});return err;}
-    
-    function openWhatsAppChoice(msg){if(!msg){alert("Message empty");return;}pendingWhatsAppMsg=msg;if(document.getElementById("whatsappChoiceModal"))document.getElementById("whatsappChoiceModal").style.display="flex";if(document.getElementById("shareModal"))document.getElementById("shareModal").style.display="none";if(document.getElementById("batchPaymentModal"))document.getElementById("batchPaymentModal").style.display="none";}
-    function closeWhatsAppChoiceModal(){if(document.getElementById("whatsappChoiceModal"))document.getElementById("whatsappChoiceModal").style.display="none";}
-    function executeWhatsAppShare(appType){if(!pendingWhatsAppMsg)return;const enc=encodeURIComponent(pendingWhatsAppMsg);const ua=/android/i.test(navigator.userAgent||navigator.vendor||window.opera);let url="";if(appType==="business"&&ua){url=`intent://send?text=${enc}#Intent;package=com.whatsapp.w4b;scheme=whatsapp;end`;window.location.href=url;}else if(appType==="regular"&&ua){url=`intent://send?text=${enc}#Intent;package=com.whatsapp;scheme=whatsapp;end`;window.location.href=url;}else{url=`https://wa.me/?text=${enc}`;window.open(url,"_blank");}closeWhatsAppChoiceModal();}
-    function setGreeting(){const h=new Date().getHours();document.getElementById("greeting-text").innerText=h<12?"Good Morning,":h<17?"Good Afternoon,":"Good Evening,";}
+    function openWhatsAppChoice(e){if(!e)return void alert("Message empty");pendingWhatsAppMsg=e;document.getElementById("whatsappChoiceModal")&&(document.getElementById("whatsappChoiceModal").style.display="flex");document.getElementById("shareModal")&&(document.getElementById("shareModal").style.display="none");document.getElementById("batchPaymentModal")&&(document.getElementById("batchPaymentModal").style.display="none")}
+    function closeWhatsAppChoiceModal(){document.getElementById("whatsappChoiceModal")&&(document.getElementById("whatsappChoiceModal").style.display="none")}
+    function executeWhatsAppShare(e){if(!pendingWhatsAppMsg)return;const t=encodeURIComponent(pendingWhatsAppMsg),a=/android/i.test(navigator.userAgent||navigator.vendor||window.opera);let n="";"business"===e&&a?n=`intent://send?text=${t}#Intent;package=com.whatsapp.w4b;scheme=whatsapp;end`:"regular"===e&&a?n=`intent://send?text=${t}#Intent;package=com.whatsapp;scheme=whatsapp;end`:n=`https://wa.me/?text=${t}`,window.location.href=n,closeWhatsAppChoiceModal()}
+    function setGreeting(){const e=new Date().getHours();document.getElementById("greeting-text").innerText=e<12?"Good Morning,":e<17?"Good Afternoon,":"Good Evening,"}
     setGreeting();
 
-    window.onload = async () => {
-        try {
-            const savedUser = sessionStorage.getItem("ktpl_user");
-            if(document.getElementById("ob-date")) document.getElementById("ob-date").valueAsDate = new Date();
-            if(document.getElementById("rl-date")) document.getElementById("rl-date").valueAsDate = new Date();
-            if(sessionStorage.getItem("ktpl_unlocked") === "true" && savedUser){
-                currentUser = JSON.parse(savedUser);
-                document.getElementById("pin-overlay").style.display="none";
-                document.getElementById("loading-overlay").style.display="flex";
-                try{ await performDatabaseSync(); document.getElementById("loading-overlay").style.display="none"; applyUserPermissions(); }
-                catch(err){ document.getElementById("loader-text").innerText="Offline Mode: Connection Failed."; document.getElementById("error-box").innerText=err.message; document.getElementById("error-box").style.display="block"; document.getElementById("bypass-btn").style.display="inline-block"; }
-            }else{ document.getElementById("loading-overlay").style.display="none"; document.getElementById("pin-overlay").style.display="flex"; }
-        }catch(err){ document.getElementById("loading-overlay").style.display="none"; document.getElementById("pin-overlay").style.display="flex"; }
+    window.onload = async () => { 
+        try { 
+            const savedUser = sessionStorage.getItem("ktpl_user"); 
+            if(document.getElementById("ob-date")) document.getElementById("ob-date").valueAsDate = new Date(); 
+            if(document.getElementById("rl-date")) document.getElementById("rl-date").valueAsDate = new Date(); 
+            if (sessionStorage.getItem("ktpl_unlocked") === "true" && savedUser) { 
+                currentUser = JSON.parse(savedUser); document.getElementById("pin-overlay").style.display = "none"; document.getElementById("loading-overlay").style.display = "flex"; 
+                try { await performDatabaseSync(); document.getElementById("loading-overlay").style.display = "none"; applyUserPermissions(); } 
+                catch (err) { document.getElementById("loader-text").innerText = "Offline Mode: Connection Failed."; document.getElementById("error-box").innerText = err.message; document.getElementById("error-box").style.display = "block"; document.getElementById("bypass-btn").style.display = "inline-block"; } 
+            } else { document.getElementById("loading-overlay").style.display = "none"; document.getElementById("pin-overlay").style.display = "flex"; } 
+        } catch (err) { document.getElementById("loading-overlay").style.display = "none"; document.getElementById("pin-overlay").style.display = "flex"; } 
     };
 
-    function bypassLoading(){document.getElementById("loading-overlay").style.display="none";document.getElementById("pin-overlay").style.display="flex";document.getElementById("app-pin").value="";document.getElementById("error-box").style.display="none";document.getElementById("bypass-btn").style.display="none";}
-    function logoutApp(){sessionStorage.clear();location.reload();}
+    function bypassLoading(){document.getElementById("loading-overlay").style.display="none",document.getElementById("pin-overlay").style.display="flex",document.getElementById("app-pin").value="",document.getElementById("error-box").style.display="none",document.getElementById("bypass-btn").style.display="none"}
+    function logoutApp(){sessionStorage.clear(),location.reload()}
 
-    async function checkPin(){
-        if(isCheckingPin)return; const pInp=document.getElementById("app-pin"); const pin=pInp?pInp.value.trim():"";
-        if(!pin)return; if(pin.length!==4){document.getElementById("pin-error").innerText="Enter 4-digit PIN.";document.getElementById("pin-error").style.display="block";return;}
-        isCheckingPin=!0; document.getElementById("pin-error").style.display="none"; document.getElementById("pin-overlay").style.display="none"; document.getElementById("loading-overlay").style.display="flex"; document.getElementById("loader-text").innerText="Verifying & Syncing Databank...";
-        try{
-            await performDatabaseSync();
-            const u=users.find(x=>x&&String(x.PIN||x.pin)===String(pin))||(pin==="0711"?{Name:"Master Admin",Role:"Master Admin"}:null);
-            if(u){ currentUser=u; sessionStorage.setItem("ktpl_unlocked","true"); sessionStorage.setItem("ktpl_user",JSON.stringify(u)); document.getElementById("loading-overlay").style.display="none"; applyUserPermissions(); }
-            else{ document.getElementById("loading-overlay").style.display="none"; document.getElementById("pin-overlay").style.display="flex"; document.getElementById("pin-error").innerText="Invalid PIN."; document.getElementById("pin-error").style.display="block"; if(pInp)pInp.value=""; }
-        }catch(err){ document.getElementById("loader-text").innerText="Sync Failed."; document.getElementById("error-box").innerText=err.message; document.getElementById("error-box").style.display="block"; document.getElementById("bypass-btn").style.display="inline-block"; }
-        isCheckingPin=!1;
-    }
+    async function checkPin(){if(isCheckingPin)return;const e=document.getElementById("app-pin"),t=e?e.value.trim():"";if(!t)return;if(4!==t.length)return document.getElementById("pin-error").innerText="Enter 4-digit PIN.",void(document.getElementById("pin-error").style.display="block");isCheckingPin=!0,document.getElementById("pin-error").style.display="none",document.getElementById("pin-overlay").style.display="none",document.getElementById("loading-overlay").style.display="flex",document.getElementById("loader-text").innerText="Verifying & Syncing Databank...";try{await performDatabaseSync();const a=users.find(e=>e&&String(e.PIN||e.pin)===String(t))||("0711"===t?{Name:"Master Admin",Role:"Master Admin"}:null);a?(currentUser=a,sessionStorage.setItem("ktpl_unlocked","true"),sessionStorage.setItem("ktpl_user",JSON.stringify(a)),document.getElementById("loading-overlay").style.display="none",applyUserPermissions()):(document.getElementById("loading-overlay").style.display="none",document.getElementById("pin-overlay").style.display="flex",document.getElementById("pin-error").innerText="Invalid PIN.",document.getElementById("pin-error").style.display="block",e&&(e.value=""))}catch(e){document.getElementById("loader-text").innerText="Sync Failed.",document.getElementById("error-box").innerText=e.message,document.getElementById("error-box").style.display="block",document.getElementById("bypass-btn").style.display="inline-block"}isCheckingPin=!1}
 
     async function performDatabaseSync(){
-        const res = await fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now()); if(!res.ok)throw new Error("Connection failed."); const data=await res.json();
-        vehicles=data.vehicles||{}; clients=data.clients||[]; transporters=data.transporters||{}; users=data.users||[]; transporterBanks={}; statusLogs=data.statusLogs||[];
-        let cU=users.find(u=>(u.Name||u.name)==="__VCONFIG__"); if(cU){try{vehicleBranches=JSON.parse(cU.Role||cU.role);localStorage.setItem("ktpl_branches",JSON.stringify(vehicleBranches));}catch(e){}}
-        const revLogIds=["TRP-1779115155932","TRP-1779117724465","TRP-1779204199291","TRP-1779272619346","TRP-1779375136137","TRP-1779457814247","TRP-1779638743270","TRP-1779686779691","TRP-1779722314454"];
+        const ts = Date.now(); const res = await fetch(GOOGLE_SCRIPT_URL + "?t=" + ts); if (!res.ok) throw new Error("Connection failed."); const data = await res.json();
+        vehicles = data.vehicles || {}; clients = data.clients || []; transporters = data.transporters || {}; users = data.users || []; statusLogs = data.statusLogs || []; transporterBanks = {};
         
-        allTrips=(data.trips||[]).map(t=>{
-            t.bookingType="Own Booking"; t.brokingAgent=""; t.type=t.type||t.vType||""; t.vType=t.type;
-            if(t.financialLedger){try{let j=JSON.parse(t.financialLedger);if(j.bookingType)t.bookingType=j.bookingType;if(j.brokingAgent)t.brokingAgent=j.brokingAgent;}catch(e){}}
-            if(!t.bookingType||t.bookingType==="Own Booking"){if(t.brokingAgent&&t.brokingAgent.trim()!==""){t.bookingType="Reverse Logistics";t.tName="";}}
-            if(revLogIds.includes(t.id))t.bookingType="Reverse Logistics";
-            t.computedBookingType=t.bookingType; return t;
+        let cU = users.find(u => (u.Name || u.name) === "__VCONFIG__"); 
+        if (cU) { try { vehicleBranches = JSON.parse(cU.Role || cU.role); localStorage.setItem("ktpl_branches", JSON.stringify(vehicleBranches)); } catch(e){} }
+        
+        const revLogIds = ["TRP-1779115155932","TRP-1779117724465","TRP-1779204199291","TRP-1779272619346","TRP-1779375136137","TRP-1779457814247","TRP-1779638743270","TRP-1779686779691","TRP-1779722314454"];
+        
+        allTrips = (data.trips || []).map(t => {
+            t.bookingType = "Own Booking"; t.brokingAgent = ""; t.type = t.type || t.vType || ""; t.vType = t.type;
+            if(t.financialLedger) { try { let j = JSON.parse(t.financialLedger); if(j.bookingType) t.bookingType = j.bookingType; if(j.brokingAgent) t.brokingAgent = j.brokingAgent; } catch(e){} }
+            if(!t.bookingType || t.bookingType === "Own Booking") { if(t.brokingAgent && t.brokingAgent.trim() !== "") { t.bookingType = "Reverse Logistics"; t.tName = ""; } }
+            if(revLogIds.includes(t.id)) t.bookingType = "Reverse Logistics";
+            t.computedBookingType = t.bookingType; return t;
         });
 
-        allTrips.forEach(t=>{
-            let trName=t.computedBookingType==="Own Booking"?t.tName:t.brokingAgent; let nTr=normalizePartyName(trName);
-            if(nTr&&t.financialLedger){
-                try{
-                    let j=JSON.parse(t.financialLedger);
-                    if(j.reco&&(j.reco.bankName||j.reco.bankAc||j.reco.ifsc)){
-                        if(!transporterBanks[nTr] || parseDate(t.date)>=transporterBanks[nTr].time) transporterBanks[nTr]={bankName:j.reco.bankName||"",bankAc:j.reco.bankAc||"",ifsc:j.reco.ifsc||"",time:parseDate(t.date)};
-                    }
-                    if(j.currentLoc){ t.statusNote=j.currentLoc; t.locTime=j.locTime||0; }
-                }catch(e){}
+        allTrips.forEach(t => {
+            let trName = t.computedBookingType === "Own Booking" ? t.tName : t.brokingAgent; let nTr = normalizePartyName(trName);
+            if (t.financialLedger) { 
+                try { 
+                    let j = JSON.parse(t.financialLedger); 
+                    if (nTr && j.reco && (j.reco.bankName || j.reco.bankAc || j.reco.ifsc)) { 
+                        let pDt = parseDate(t.date);
+                        if (!transporterBanks[nTr] || pDt >= transporterBanks[nTr].time) { 
+                            transporterBanks[nTr] = { bankName: j.reco.bankName||"", bankAc: j.reco.bankAc||"", ifsc: j.reco.ifsc||"", time: pDt }; 
+                        } 
+                    } 
+                    if (j.currentLoc) { t.statusNote = j.currentLoc; t.locTime = j.locTime || 0; }
+                } catch(e){} 
+            }
+            
+            let tripLogs = statusLogs.filter(l => String(l.tripId) === String(t.id));
+            if (tripLogs.length > 0) {
+                tripLogs.sort((a, b) => new Date(b.time) - new Date(a.time));
+                let logTime = new Date(tripLogs[0].time).getTime();
+                if (!t.locTime || logTime > t.locTime) {
+                    t.statusNote = tripLogs[0].note;
+                    t.locTime = logTime;
+                }
             }
         });
-
-        let pU=users.find(u=>(u.Name||u.name)==="__PERMS__"); if(pU){try{let pObj=JSON.parse(pU.Role||pU.role);users.forEach(u=>{let n=u.Name||u.name;if(pObj[n])u.permissions=pObj[n];});}catch(e){}}
+        
+        let pU = users.find(u => (u.Name || u.name) === "__PERMS__"); 
+        if (pU) { try { let permObj = JSON.parse(pU.Role || pU.role); users.forEach(u => { let n = u.Name || u.name; if(permObj[n]) u.permissions = permObj[n]; }); } catch(e){} }
+        
         setupMemoryDropdowns(); renderAdminUsers();
     }
 
-    function getUserPerms(){
-        const n=currentUser.Name||currentUser.name||""; const r=currentUser.Role||currentUser.role||"";
-        let p={adminTab:r==="Master Admin",fleetStatusTab:!0,paymentsTab:!0,reportsTab:!0,revLogistics:!0,editTrips:!0,viewChargedFreightOB:!0,viewChargedFreightRL:!0,editChargedFreightOB:!0,editChargedFreightRL:!0,generateMIS:!0,exportLedger:!0};
-        const pUsers=["Sanket Matkar","Mitali Yadav","Anita Fagare","Amruta Chavare","Ashok Dubey"];
-        if(r==="Admin")p.adminTab=!1; else if(n==="Pramod Nayak"){p.adminTab=!1;p.paymentsTab=!1;p.editChargedFreightOB=!1;} else if(n==="Parveen Sharma"){p.adminTab=!1;p.paymentsTab=!1;p.reportsTab=!1;p.fleetStatusTab=!1;p.revLogistics=!1;p.editChargedFreightOB=!1;p.editChargedFreightRL=!1;} else if(["Vijay Deore","Sachin Mokashi","Jalindar Jadhav"].includes(n)){p.adminTab=!1;p.paymentsTab=!1;p.editTrips=!1;p.viewChargedFreightOB=!1;p.viewChargedFreightRL=!1;p.editChargedFreightOB=!1;p.editChargedFreightRL=!1;p.generateMIS=!1;p.exportLedger=!1;} else if(r==="ReadOnly"){p.adminTab=!1;p.paymentsTab=!1;p.reportsTab=!1;p.editTrips=!1;p.editChargedFreightOB=!1;p.editChargedFreightRL=!1;}
-        p.changeDelCanStatus=!0; if(pUsers.includes(n))p.paymentsTab=!0; p.editPayments=r==="Admin"||r==="Master Admin"||pUsers.includes(n); p.viewBaseFreight=["Master Admin","Admin"].includes(r)||["Anita Fagare","Amruta Chavare"].includes(n);
-        if(currentUser.permissions){if(currentUser.permissions.Placement===!1)p.placementTab=!1;if(currentUser.permissions.Deployed===!1)p.deployedTab=!1;if(currentUser.permissions.POD===!1)p.podTab=!1;if(currentUser.permissions.Payments===!1)p.paymentsTab=!1;if(currentUser.permissions.Reports===!1)p.reportsTab=!1;}
-        return p;
-    }
-
-    function applyUserPermissions(){
-        document.getElementById("pin-overlay").style.display="none"; document.getElementById("main-app").style.display="block"; document.getElementById("user-name-text").innerText=`Hi ${currentUser.Name||currentUser.name}!`; document.getElementById("user-name-text").style.display="block";
-        const p=getUserPerms(); document.getElementById("card-locator").style.display=p.fleetStatusTab?"flex":"none"; document.getElementById("card-fleet").style.display=p.fleetStatusTab?"flex":"none"; document.getElementById("card-admin").style.display=p.adminTab?"flex":"none"; document.getElementById("card-payments").style.display=p.paymentsTab?"flex":"none"; document.getElementById("card-reports").style.display=p.reportsTab?"flex":"none";
-        const n=currentUser.Name||currentUser.name||""; document.getElementById("f-sec-20").style.display="inline-block"; document.getElementById("f-sec-oth").style.display="inline-block";
-        if(n==="Pramod Nayak"){document.getElementById("f-sec-20").style.display="none";document.getElementById("f-sec-oth").style.display="none";currentFleetSecondary="32Ft Fleet";document.querySelectorAll("#fleet-secondary-tabs .secondary-tab").forEach(e=>e.classList.remove("active"));document.getElementById("f-sec-32").classList.add("active");}else{currentFleetSecondary="20Ft Fleet";document.querySelectorAll("#fleet-secondary-tabs .secondary-tab").forEach(e=>e.classList.remove("active"));document.getElementById("f-sec-20").classList.add("active");}
-        const cOB=document.getElementById("ob-cfreight"); if(cOB){cOB.disabled=!p.editChargedFreightOB;cOB.placeholder=p.editChargedFreightOB?"Receivable":"Restricted";}
-        const cRL=document.getElementById("rl-cfreight"); if(cRL){cRL.disabled=!p.editChargedFreightRL;cRL.placeholder=p.editChargedFreightRL?"Receivable Amount":"Restricted";}
-        const bRL=document.getElementById("btn-rl-flow"); if(bRL)bRL.style.display=p.revLogistics?"block":"none";
-        returnToHome();
-    }
-
-    function setupCustomDropdown(inpId,lstId,fn,onSel=null){
-        const inp=document.getElementById(inpId); const lst=document.getElementById(lstId); if(!inp||!lst)return;
-        function showL(text=""){
-            const arr=fn(); lst.innerHTML=""; let has=!1;
-            arr.forEach(i=>{
-                if(!i)return;
-                if(!text||String(i).toLowerCase().includes(text.toLowerCase())){
-                    has=!0; let div=document.createElement("div"); div.innerHTML=i;
-                    div.onclick=function(){inp.value=i;lst.style.display="none";if(["ob-party","ob-tname","rl-party","rl-agency","edit-party","mis-party","rf-party","uf-party","uf-transporter"].includes(inp.id))formatPartyName(inp);else formatCase(inp,"title");if(onSel)onSel(i);if(inp.id.startsWith("uf-"))triggerFilterRender();};
-                    lst.appendChild(div);
-                }
-            });
-            lst.style.display=has?"block":"none";
-        }
-        inp.addEventListener("input",function(){showL(this.value);}); inp.addEventListener("click",function(){showL(this.value);}); document.addEventListener("click",function(e){if(e.target!==inp)lst.style.display="none";});
-    }
-
+    function getUserPerms(){const e=currentUser.Name||currentUser.name||"",t=currentUser.Role||currentUser.role||"";let a={adminTab:"Master Admin"===t,fleetStatusTab:!0,paymentsTab:!0,reportsTab:!0,revLogistics:!0,editTrips:!0,viewChargedFreightOB:!0,viewChargedFreightRL:!0,editChargedFreightOB:!0,editChargedFreightRL:!0,generateMIS:!0,exportLedger:!0};const n=["Sanket Matkar","Mitali Yadav","Anita Fagare","Amruta Chavare","Ashok Dubey"];return"Admin"===t?a.adminTab=!1:"Pramod Nayak"===e?(a.adminTab=!1,a.paymentsTab=!1,a.editChargedFreightOB=!1):"Parveen Sharma"===e?(a.adminTab=!1,a.paymentsTab=!1,a.reportsTab=!1,a.fleetStatusTab=!1,a.revLogistics=!1,a.editChargedFreightOB=!1,a.editChargedFreightRL=!1):["Vijay Deore","Sachin Mokashi","Jalindar Jadhav"].includes(e)?(a.adminTab=!1,a.paymentsTab=!1,a.editTrips=!1,a.viewChargedFreightOB=!1,a.viewChargedFreightRL=!1,a.editChargedFreightOB=!1,a.editChargedFreightRL=!1,a.generateMIS=!1,a.exportLedger=!1):"ReadOnly"===t&&(a.adminTab=!1,a.paymentsTab=!1,a.reportsTab=!1,a.editTrips=!1,a.editChargedFreightOB=!1,a.editChargedFreightRL=!1),a.changeDelCanStatus=!0,n.includes(e)&&(a.paymentsTab=!0),a.editPayments="Admin"===t||"Master Admin"===t||n.includes(e),a.viewBaseFreight=["Master Admin","Admin"].includes(t)||["Anita Fagare","Amruta Chavare"].includes(e),currentUser.permissions&&(!1===currentUser.permissions.Placement&&(a.placementTab=!1),!1===currentUser.permissions.Deployed&&(a.deployedTab=!1),!1===currentUser.permissions.POD&&(a.podTab=!1),!1===currentUser.permissions.Payments&&(a.paymentsTab=!1),!1===currentUser.permissions.Reports&&(a.reportsTab=!1)),a}
+    
+    function applyUserPermissions(){document.getElementById("pin-overlay").style.display="none",document.getElementById("main-app").style.display="block",document.getElementById("user-name-text").innerText=`Hi ${currentUser.Name||currentUser.name}!`,document.getElementById("user-name-text").style.display="block";const e=getUserPerms();document.getElementById("card-locator").style.display=e.fleetStatusTab?"flex":"none",document.getElementById("card-fleet").style.display=e.fleetStatusTab?"flex":"none",document.getElementById("card-admin").style.display=e.adminTab?"flex":"none",document.getElementById("card-payments").style.display=e.paymentsTab?"flex":"none",document.getElementById("card-reports").style.display=e.reportsTab?"flex":"none";const t=currentUser.Name||currentUser.name||"";"Pramod Nayak"===t?(document.getElementById("f-sec-20").style.display="none",document.getElementById("f-sec-oth").style.display="none",currentFleetSecondary="32Ft Fleet",document.querySelectorAll("#fleet-secondary-tabs .secondary-tab").forEach(e=>e.classList.remove("active")),document.getElementById("f-sec-32").classList.add("active")):(currentFleetSecondary="20Ft Fleet",document.querySelectorAll("#fleet-secondary-tabs .secondary-tab").forEach(e=>e.classList.remove("active")),document.getElementById("f-sec-20").classList.add("active"));const a=document.getElementById("ob-cfreight");a&&(a.disabled=!e.editChargedFreightOB,a.placeholder=e.editChargedFreightOB?"Receivable":"Restricted");const n=document.getElementById("rl-cfreight");n&&(n.disabled=!e.editChargedFreightRL,n.placeholder=e.editChargedFreightRL?"Receivable Amount":"Restricted");const r=document.getElementById("btn-rl-flow");r&&(r.style.display=e.revLogistics?"block":"none"),returnToHome()}
+</script>
+<script>
+    function setupCustomDropdown(e,t,a,n=null){const r=document.getElementById(e),s=document.getElementById(t);if(!r||!s)return;function showL(e=""){const t=a();s.innerHTML="";let i=!1;t.forEach(t=>{if(!t)return;if(!e||String(t).toLowerCase().includes(e.toLowerCase())){i=!0;let a=document.createElement("div");a.innerHTML=t,a.onclick=function(){r.value=t,s.style.display="none",["ob-party","ob-tname","rl-party","rl-agency","edit-party","mis-party","rf-party","uf-party","uf-transporter"].includes(r.id)?formatPartyName(r):formatCase(r,"title"),n&&n(t),r.id.startsWith("uf-")&&triggerFilterRender()},s.appendChild(a)}}),s.style.display=i?"block":"none"}r.addEventListener("input",function(){showL(this.value)}),r.addEventListener("click",function(){showL(this.value)}),document.addEventListener("click",function(e){e.target!==r&&(s.style.display="none")})}
+    
     function setupMemoryDropdowns(){
         const getCN=c=>c?typeof c==="string"?c:c.name||c["Party Name"]||c.Name||Object.values(c)[0]||"":"";
         setupCustomDropdown("uf-party","uf-party-list",()=>[...new Set(clients.map(getCN).filter(Boolean))].sort(),()=>triggerFilterRender());
@@ -328,14 +454,12 @@
         setupCustomDropdown("uf-dest","uf-dest-list",()=>[...new Set(allTrips.map(e=>e?e.to:"").filter(Boolean))].sort(),()=>triggerFilterRender());
         setupCustomDropdown("uf-vtype","uf-vtype-list",()=>[...new Set(allTrips.map(e=>e?e.type||e.vType:"").filter(Boolean))].sort(),()=>triggerFilterRender());
         setupCustomDropdown("uf-vcap","uf-vcap-list",()=>[...new Set(allTrips.map(e=>e?e.weight:"").filter(Boolean))].sort(),()=>triggerFilterRender());
-        
         setupCustomDropdown("ob-party","ob-party-list",()=>[...new Set(clients.map(getCN).filter(Boolean))].sort());
         setupCustomDropdown("ob-vnum","ob-vnum-list",()=>Object.keys(vehicles).sort(),e=>autoFillVehicle(e,"ob"));
         setupCustomDropdown("ob-tname","ob-tname-list",()=>Object.keys(transporters).map(normalizePartyName).sort());
         setupCustomDropdown("ob-tperson","ob-tperson-list",()=>{let e=Object.keys(transporters).find(e=>normalizePartyName(e)===normalizePartyName(document.getElementById("ob-tname").value));let t=transporters[e||document.getElementById("ob-tname").value];return t?[...new Set(t.map(e=>e.name))].sort():[];},e=>autoFillContact(e,"ob"));
         setupCustomDropdown("ob-from","ob-from-list",()=>[...new Set(allTrips.map(e=>e?e.from:"").filter(Boolean))].sort());
         setupCustomDropdown("ob-to","ob-to-list",()=>[...new Set(allTrips.map(e=>e?e.to:"").filter(Boolean))].sort());
-        
         setupCustomDropdown("rl-party","rl-party-list",()=>[...new Set(clients.map(getCN).filter(Boolean))].sort());
         setupCustomDropdown("rl-vnum","rl-vnum-list",()=>Object.keys(vehicles).sort(),e=>autoFillVehicle(e,"rl"));
         setupCustomDropdown("rl-from","rl-from-list",()=>[...new Set(allTrips.map(e=>e?e.from:"").filter(Boolean))].sort());
@@ -371,10 +495,10 @@
 
     function openWorkspace(id){
         const p=getUserPerms();
-        if(id==='tab-fleet-locator'&&!p.fleetStatusTab)return alert("Restricted.");if(id==='tab-fleet-status'&&!p.fleetStatusTab)return alert("Restricted.");if(id==='tab-admin'&&!p.adminTab)return alert("Restricted.");if(id==='tab-payments'&&!p.paymentsTab)return alert("Restricted.");if(id==='tab-reports'&&!p.reportsTab)return alert("Restricted.");
+        if(id==="tab-fleet-locator"&&!p.fleetStatusTab)return alert("Restricted.");if(id==="tab-fleet-status"&&!p.fleetStatusTab)return alert("Restricted.");if(id==="tab-admin"&&!p.adminTab)return alert("Restricted.");if(id==="tab-payments"&&!p.paymentsTab)return alert("Restricted.");if(id==="tab-reports"&&!p.reportsTab)return alert("Restricted.");
         document.querySelectorAll(".app-section").forEach(e=>e.classList.remove("active"));document.getElementById(id).classList.add("active");currentActiveMainTab=id;document.querySelectorAll(".reco-accordion-body").forEach(e=>e.classList.remove("open"));currentOpenRecoId=null;
-        if(id!=='tab-placement'){document.getElementById("placement-selection-screen").style.display="block";document.getElementById("placement-form-container").style.display="none";}
-        if(id==='tab-fleet-status')renderFleetStatus();if(id==='tab-placement')showPlacementSelection();if(id==='tab-deployed'){currentDeployedType="";showSelectionScreen("deployed");}if(id==='tab-pod'){currentPodType="";showSelectionScreen("pod");}if(id==='tab-payments'){currentRecoType="";selectedPaymentTrips=[];updateBatchPaymentUI();showSelectionScreen("reco");}if(id==='tab-reports'){currentReportType="";showSelectionScreen("report");document.getElementById("screen-report").innerHTML="";document.getElementById("print-report-container").innerHTML="";document.getElementById("report-actions").style.display="none";}
+        if(id!=="tab-placement"){document.getElementById("placement-selection-screen").style.display="block";document.getElementById("placement-form-container").style.display="none";}
+        if(id==="tab-fleet-status")renderFleetStatus();if(id==="tab-placement")showPlacementSelection();if(id==="tab-deployed"){currentDeployedType="";showSelectionScreen("deployed");}if(id==="tab-pod"){currentPodType="";showSelectionScreen("pod");}if(id==="tab-payments"){currentRecoType="";selectedPaymentTrips=[];updateBatchPaymentUI();showSelectionScreen("reco");}if(id==="tab-reports"){currentReportType="";showSelectionScreen("report");document.getElementById("screen-report").innerHTML="";document.getElementById("print-report-container").innerHTML="";document.getElementById("report-actions").style.display="none";}
         if(["tab-deployed","tab-pod","tab-payments","tab-reports"].includes(id))document.getElementById("unified-filter-bar").style.display="block";else document.getElementById("unified-filter-bar").style.display="none";
         clearFilters();
     }
@@ -438,7 +562,11 @@
     }
     
     function updateFleetState(vn,st){if(!vehicles[vn])vehicles[vn]={};vehicles[vn].fleetStatus=st;vehicles[vn].statusTimestamp=Date.now();fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"updateVehicleState",vNum:vn,state:st})});renderFleetStatus();}
-    function updateIdleLocation(vn,locStr){if(!locStr)return;const nLoc=formatCaseStr(locStr);let idleLocs=JSON.parse(localStorage.getItem("ktpl_idle_locs")||"{}");idleLocs[vn.toUpperCase()]=nLoc;localStorage.setItem("ktpl_idle_locs",JSON.stringify(idleLocs));renderFleetStatus();}
+    function updateIdleLocation(vn,locStr,lastTripId){
+        if(!locStr)return; const formattedLoc=formatCaseStr(locStr);
+        if(lastTripId&&lastTripId!=="null"){updateStatusLog(lastTripId,formattedLoc);}
+        else{let idleLocs=JSON.parse(localStorage.getItem("ktpl_idle_locs")||"{}");idleLocs[vn.toUpperCase()]=formattedLoc;localStorage.setItem("ktpl_idle_locs",JSON.stringify(idleLocs));renderFleetStatus();}
+    }
     function assignIdleVehicle(vn){window.pendingAssignVehicle=vn;openWorkspace("tab-placement");}
     
     function renderFleetStatus(){
@@ -455,14 +583,14 @@
             if(currentFleetPrimary!=="All"&&stat!==currentFleetPrimary)return;
             let cpTr=vTr.filter(t=>(t.status||"").trim()==="Delivered"); cpTr.sort((a,b)=>parseDate(b.deliveryDate||b.date)-parseDate(a.deliveryDate||a.date)); let lTr=cpTr[0]||null;
             let loc="Blank (No completed trips)"; if(aTr){loc=aTr.statusNote||aTr.to||loc;}else if(lTr){loc=lTr.statusNote||lTr.to||loc;}else if(idleLocs[vn.toUpperCase()]){loc=idleLocs[vn.toUpperCase()];}
-            lst.push({vNum:vn,type:vd.type||"Unknown",capacity:vd.capacity||"0",status:stat,location:loc,driverName:lTr?lTr.dName:"N/A",driverPhone:lTr?lTr.dContact:"N/A",deliveryDate:lTr?lTr.deliveryDate||lTr.date:null,activeDate:aTr?aTr.date:null,statusTimestamp:vd.statusTimestamp,branch:vBr});
+            lst.push({vNum:vn,type:vd.type||"Unknown",capacity:vd.capacity||"0",status:stat,location:loc,driverName:lTr?lTr.dName:"N/A",driverPhone:lTr?lTr.dContact:"N/A",deliveryDate:lTr?lTr.deliveryDate||lTr.date:null,activeDate:aTr?aTr.date:null,statusTimestamp:vd.statusTimestamp,branch:vBr,lastTripId:lTr?lTr.id:null});
         });
         if(lst.length===0){c.innerHTML=`<p style='padding:20px; color:#5f6368; text-align:center;'>No KTPL vehicles found matching filters.</p>`;return;}
         lst.sort((a,b)=>(parseFloat(a.capacity.replace(/[^0-9.]/g,""))||0)-(parseFloat(b.capacity.replace(/[^0-9.]/g,""))||0));
         c.innerHTML=lst.map(v=>{
             let sc="#5f6368"; let bg="#f1f3f4"; if(v.status==="In Transit"){sc="#b06000";bg="#fef7e0";}else if(v.status==="Available (Idle)"){sc="#137333";bg="#e6f4ea";}else if(v.status==="In Workshop"){sc="#b3261e";bg="#fce8e6";}else if(v.status==="No Driver"){sc="#5f6368";bg="#e8f0fe";}
             let dur=""; if(v.status==="In Transit"&&v.activeDate){let d=parseDate(v.activeDate);if(d>0){let e=Math.floor((Date.now()-d)/86400000);dur=e>0?` - ${e}d`:" - <1d";}}else if(v.status==="Available (Idle)"&&v.deliveryDate){let d=parseDate(v.deliveryDate);if(d>0){let e=Date.now()-d,a=Math.floor(e/86400000),r=Math.floor((e/3600000)%24);dur=a>0?` - ${a}d ${r}h`:` - ${r}h`;}}else if((v.status==="In Workshop"||v.status==="No Driver")&&v.statusTimestamp){let e=Date.now()-v.statusTimestamp;if(e>0){let a=Math.floor(e/86400000),r=Math.floor((e/3600000)%24);dur=a>0?` - ${a}d ${r}h`:` - ${r}h`;}}
-            let lHTML=""; if(v.status!=="In Transit"){let lv=v.location==="Blank (No completed trips)"?"":v.location;lHTML=`<input type="text" class="compact-input" value="${safeStr(lv)}" placeholder="Enter Current Location..." onchange="updateIdleLocation('${v.vNum}', this.value)" style="margin-top:4px;">`;}else{lHTML=`<strong style="font-size:12px; display:inline-block; margin-top:4px;">📍 ${safeStr(v.location)}</strong>`;}
+            let lHTML=""; if(v.status!=="In Transit"){let lv=v.location==="Blank (No completed trips)"?"":v.location;lHTML=`<input type="text" class="compact-input" value="${safeStr(lv)}" placeholder="Enter Current Location..." onchange="updateIdleLocation('${v.vNum}', this.value, '${v.lastTripId}')" style="margin-top:4px;">`;}else{lHTML=`<strong style="font-size:12px; display:inline-block; margin-top:4px;">📍 ${safeStr(v.location)}</strong>`;}
             let h=`<div class="trip-card"><div style="border-bottom: 1px solid #f1f3f4; padding-bottom: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:bold; font-size:14px; color:#1f1f1f;">${v.vNum}</span><span class="status-badge" style="background:${bg}; color:${sc};">${v.status}${dur}</span></div><div class="grid-2" style="margin-bottom: 10px;"><div><span style="color:#5f6368; font-size:10px; text-transform:uppercase;">Current Location</span><br>${lHTML}</div><div><span style="color:#5f6368; font-size:10px; text-transform:uppercase;">Specs</span><br><strong style="font-size:12px; display:inline-block; margin-top:4px;">🚚 ${safeStr(v.type)} (${safeStr(v.capacity)})</strong></div></div>`;
             h+=`<div style="display:flex;gap:10px;margin-bottom:10px;background:#f8f9fa;padding:8px;border-radius:8px;"><div style="flex:1;"><span style="color:#5f6368;font-size:10px;display:block;margin-bottom:2px;">BRANCH</span><select class="compact-input" style="padding:4px;" onchange="updateVehicleBranch('${v.vNum}', this.value)"><option value="Unassigned" ${v.branch==="Unassigned"?"selected":""}>Unassigned</option><option value="Ex. Thane" ${v.branch==="Ex. Thane"?"selected":""}>Ex. Thane</option><option value="Ex. Waluj" ${v.branch==="Ex. Waluj"?"selected":""}>Ex. Waluj</option></select></div>`;
             if(v.status!=="In Transit"){h+=`<div style="flex:1;"><span style="color:#5f6368;font-size:10px;display:block;margin-bottom:2px;">STATUS</span><select class="compact-input" style="padding:4px;" onchange="updateFleetState('${v.vNum}', this.value)"><option value="Available (Idle)" ${v.status==="Available (Idle)"?"selected":""}>Available (Idle)</option><option value="In Workshop" ${v.status==="In Workshop"?"selected":""}>In Workshop</option><option value="No Driver" ${v.status==="No Driver"?"selected":""}>No Driver</option></select></div></div><div style="display:flex;justify-content:flex-end;gap:5px;margin-bottom:10px;">${v.status==="Available (Idle)"?`<button class="btn-primary" style="font-size:11px;padding:6px 12px;border-radius:6px;width:auto;" onclick="assignIdleVehicle('${v.vNum}')">Assign</button><button class="btn-whatsapp" style="font-size:11px;padding:6px 12px;border-radius:6px;width:auto;" onclick="shareFleetIdle('${v.vNum}', '${safeStr(v.location)}', '${safeStr(v.type)}', '${safeStr(v.capacity)}')">Share</button>`:""}</div>`;}else{h+=`</div><div style="margin-bottom:10px; color:#5f6368; font-size:11px; text-align:right;"><em>Locked while In-Transit. Update via Deployed tab.</em></div>`;}
@@ -501,7 +629,8 @@
         if(document.getElementById("rl-cfreight").value)h+=`*Freight:* ${document.getElementById("rl-cfreight").value}\n`;if(document.getElementById("rl-remarks").value)h+=`*Remarks:* ${document.getElementById("rl-remarks").value}`;
         openWhatsAppChoice(h);
     }
-
+</script>
+<script>
     function setDepType(t){currentDeployedType=t;document.getElementById("deployed-selection-screen").style.display="none";document.getElementById("deployed-content-area").style.display="block";document.getElementById("deployed-title-text").innerText=t+" Fleet";triggerCurrentRender();}
     function setDepStat(s){currentDeployedStatus=s;document.getElementById("btn-dep-stat-ong").classList.toggle("active",s==="In-Transit");document.getElementById("btn-dep-stat-com").classList.toggle("active",s==="Delivered");document.getElementById("btn-dep-stat-can").classList.toggle("active",s==="Cancelled Trip");triggerCurrentRender();}
     function renderDeployed(){const c=document.getElementById("deployed-container");if(!currentDeployedType)return;let items=getFilteredTrips(allTrips).filter(t=>t.computedBookingType===currentDeployedType&&(t.status||"In-Transit").trim()===currentDeployedStatus);if(items.length===0){c.innerHTML="<p style='padding:20px; text-align:center;'>No trips found.</p>";return;}c.innerHTML=items.map((t,i)=>buildTripCard(t,i,"deployed")).join("");}
@@ -521,23 +650,15 @@
         l.currentLoc=locStr; l.locTime=Date.now(); if(!l.locHistory)l.locHistory=[]; l.locHistory.push({loc:locStr,time:l.locTime});
         const jStr=JSON.stringify(l); t.financialLedger=jStr;
         fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now(),{method:"POST",body:JSON.stringify({action:"updateFinancialLedger",id:tId,ledgerJson:jStr})});
-        
-        let existingLogIndex = statusLogs.findIndex(x => x.tripId === tId && x.note === locStr);
-        if(existingLogIndex === -1) statusLogs.push({tripId: tId, note: locStr, time: new Date().toISOString()});
+        let eLog = statusLogs.findIndex(x=>x.tripId===tId&&x.note===locStr); if(eLog===-1)statusLogs.push({tripId:tId,note:locStr,time:new Date().toISOString()});
     }
     
     function toggleHistory(tId,vMode){
         document.querySelectorAll(".history-panel").forEach(p=>{if(p.id!==`hist-${vMode}-${tId}`)p.style.display="none";});
         const p=document.getElementById(`hist-${vMode}-${tId}`); const t=allTrips.find(x=>x.id===tId); let hist=[];
         try{let l=JSON.parse(t.financialLedger);if(l.locHistory)hist=[...l.locHistory];}catch(e){}
-        
-        let oldLogs = statusLogs.filter(l => String(l.tripId) === String(tId));
-        oldLogs.forEach(ol => {
-            if(!hist.some(h => h.loc === ol.note)) {
-                hist.push({loc: ol.note, time: new Date(ol.time).getTime()});
-            }
-        });
-        
+        let oldLogs=statusLogs.filter(l=>String(l.tripId)===String(tId));
+        oldLogs.forEach(ol=>{if(!hist.some(h=>h.loc===ol.note)){hist.push({loc:ol.note,time:new Date(ol.time).getTime()});}});
         if(hist.length===0){ p.innerHTML="<div class='history-item'>No history found.</div>"; }
         else{ hist.sort((a,b)=>b.time-a.time); p.innerHTML=hist.map(h=>{const d=new Date(h.time);return `<div class="history-item"><strong>${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes()<10?"0":""}${d.getMinutes()}</strong> - ${safeStr(h.loc)}</div>`;}).join(""); }
         p.style.display=p.style.display==="block"?"none":"block";
@@ -599,12 +720,14 @@
         let trips=getFilteredTrips(allTrips).filter(t=>t.computedBookingType===currentRecoType).filter(t=>{let l={reco:{}};try{let p=JSON.parse(t.financialLedger);if(p.reco)l.reco=p.reco;}catch(e){}return currentRecoStat==="Completed"?"Cleared"===(l.reco.status||"Pending"):"Cleared"!==(l.reco.status||"Pending");});
         if(trips.length===0){c.innerHTML="<p style='padding:20px; text-align:center;'>No ledger records matching parameters.</p>";return;}
         const pAuth=getUserPerms(); const cEP=pAuth.editPayments; const cVF=pAuth.viewBaseFreight;
+
         c.innerHTML=trips.map((t,i)=>{
             let l={income:[],expense:[],reco:{payments:[]}}; try{let p=JSON.parse(t.financialLedger);if(p.income)l.income=p.income;if(p.expense)l.expense=p.expense;if(p.reco)l.reco=p.reco;if(!l.reco.payments)l.reco.payments=[];}catch(e){}
             if(!l.reco.payments)l.reco.payments=[];
             if(l.reco.payments.length===0){if(currentRecoType==="Own Booking"){if(l.reco.advPaid||l.reco.balPaid1||l.reco.balPaid2||l.reco.balPaid3){if(l.reco.advPaid)l.reco.payments.push({amt:l.reco.advPaid,date:l.reco.advDate});if(l.reco.balPaid1||l.reco.balPaid)l.reco.payments.push({amt:l.reco.balPaid1||l.reco.balPaid,date:l.reco.balDate1||l.reco.balDate});if(l.reco.balPaid2)l.reco.payments.push({amt:l.reco.balPaid2,date:l.reco.balDate2});if(l.reco.balPaid3)l.reco.payments.push({amt:l.reco.balPaid3,date:l.reco.balDate3});}}else{if(l.reco.advRec||l.reco.osDues1||l.reco.osDues2||l.reco.osDues3){if(l.reco.advRec)l.reco.payments.push({amt:l.reco.advRec,date:l.reco.advRecDate});if(l.reco.osDues1||l.reco.osDues)l.reco.payments.push({amt:l.reco.osDues1||l.reco.osDues,date:l.reco.osDate1||l.reco.osDate});if(l.reco.osDues2)l.reco.payments.push({amt:l.reco.osDues2,date:l.reco.osDate2});if(l.reco.osDues3)l.reco.payments.push({amt:l.reco.osDues3,date:l.reco.osDate3});}}}
             if(l.reco.payments.length===0)l.reco.payments.push({amt:"",date:""});
             if(l.expense.length===0&&(t.otherExp||t.loadingExp||t.unloadingExp||t.lrExp)){if(t.otherExp)l.expense.push({type:t.otherExpReason||"Generic",amt:parseFloat(t.otherExp)});if(t.loadingExp)l.expense.push({type:"Loading",amt:parseFloat(t.loadingExp)});if(t.unloadingExp)l.expense.push({type:"Unloading",amt:parseFloat(t.unloadingExp)});if(t.lrExp)l.expense.push({type:"LR",amt:parseFloat(t.lrExp)});}
+            
             let bR=parseFloat(t.cFreight||0); let eR=l.income.reduce((s,r)=>s+parseFloat(r.amt||0),0); let bC=parseFloat(t.vFreight||0); let eC=l.expense.reduce((s,r)=>s+parseFloat(r.amt||0),0); let tP=bC+eC; let tR=bR+eR;
             let brAgt=t.brokingAgent; if(!brAgt){try{let p=JSON.parse(t.financialLedger);if(p.brokingAgent)brAgt=p.brokingAgent;}catch(e){}}
             let hdr=`<strong>${(t.date||"").split(",")[0]}</strong> | <strong>${t.vNum}</strong> | ${safeStr(t.from)}➔${safeStr(t.to)} <br> <span style="color:#5f6368; font-size:11px;">Party: ${safeStr(t.party)||"N/A"} | ${currentRecoType==="Own Booking"?"Transporter":"Broker"}: ${currentRecoType==="Own Booking"?safeStr(t.tName):safeStr(brAgt)}</span>`;
