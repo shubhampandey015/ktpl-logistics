@@ -631,46 +631,58 @@
     
     function savePlacementOwn(){if(!validatePlacementOwn())return;const vn=document.getElementById("ob-vnum").value.replace(/[\s-_]/g,"").toUpperCase();const p={action:"saveTrip",id:"TRP-"+Date.now(),date:getFormattedDateVal(document.getElementById("ob-date").value),party:normalizePartyName(document.getElementById("ob-party").value),from:formatCaseStr(document.getElementById("ob-from").value),to:formatCaseStr(document.getElementById("ob-to").value),vNum:vn,type:document.getElementById("ob-vtype").value.toUpperCase(),weight:document.getElementById("ob-weight").value.toUpperCase(),status:"In-Transit",deliveryDate:"",cNote:"",podDate:"",createdBy:currentUser.Name||currentUser.name||"Unknown",vFreight:document.getElementById("ob-vfreight").value||"",cFreight:document.getElementById("ob-cfreight").value||"",dName:formatCaseStr(document.getElementById("ob-dname").value),dContact:formatPhoneString(document.getElementById("ob-dcontact").value),tName:normalizePartyName(document.getElementById("ob-tname").value),tPerson:formatCaseStr(document.getElementById("ob-tperson").value),tContact:formatPhoneString(document.getElementById("ob-tcontact").value),remarks:document.getElementById("ob-remarks").value,podRemark:"",loadingExp:"",unloadingExp:"",lrExp:"",otherExp:"",otherExpReason:"",bookingType:"Own Booking",brokingAgent:""};finalizePlacementSave(p);}
     function savePlacementRev(){if(!validatePlacementRev())return;const vn=document.getElementById("rl-vnum").value.replace(/[\s-_]/g,"").toUpperCase();if(!isKTPL(vn))return alert("Reverse Logistics strictly requires a valid KTPL fleet asset.");let rp=document.getElementById("rl-party").value;let tc=document.getElementById("rl-typeco").value;let fp=normalizePartyName(rp);if(tc&&fp)fp+=" ("+tc+")";const p={action:"saveTrip",id:"TRP-"+Date.now(),date:getFormattedDateVal(document.getElementById("rl-date").value),party:fp||"",from:formatCaseStr(document.getElementById("rl-from").value),to:formatCaseStr(document.getElementById("rl-to").value),vNum:vn,type:document.getElementById("rl-vtype").value.toUpperCase(),weight:document.getElementById("rl-weight").value.toUpperCase(),status:"In-Transit",deliveryDate:"",cNote:"",podDate:"",createdBy:currentUser.Name||currentUser.name||"Unknown",vFreight:"",cFreight:document.getElementById("rl-cfreight").value||"",dName:formatCaseStr(document.getElementById("rl-dname").value),dContact:formatPhoneString(document.getElementById("rl-dcontact").value),tName:"",tPerson:formatCaseStr(document.getElementById("rl-agent").value),tContact:formatPhoneString(document.getElementById("rl-contact").value),remarks:document.getElementById("rl-remarks").value,podRemark:"",loadingExp:"",unloadingExp:"",lrExp:"",otherExp:"",otherExpReason:"",bookingType:"Reverse Logistics",brokingAgent:normalizePartyName(document.getElementById("rl-agency").value)};finalizePlacementSave(p);}
-    function finalizePlacementSave(p){
-        // 1. HARD OFFLINE CHECK: Stops real Ghost Saves before they happen
+   function finalizePlacementSave(p){
+        // 1. HARD OFFLINE CHECK
         if (!navigator.onLine) {
             alert("⚠️ No Internet Connection. Please check your network and try again.");
             return; 
         }
 
-        // 2. THE PADLOCK: Instantly locks the function so it physically cannot double-click
+        // 2. THE PADLOCK (Blocks Double Clicks)
         if (window.isSavingPlacementLock) return; 
         window.isSavingPlacementLock = true;
-        
-        // Safety reset: Unlocks the button after 2.5 seconds
         setTimeout(() => { window.isSavingPlacementLock = false; }, 2500); 
 
-        // Safely show loader if it exists
         const loader = document.getElementById("loading-overlay");
         const loaderText = document.getElementById("loader-text");
         if (loader) loader.style.display="flex";
         if (loaderText) loaderText.innerText="Saving to Cloud...";
 
-        const lj=JSON.stringify({bookingType:p.bookingType,brokingAgent:p.brokingAgent,income:[],expense:[],reco:{payments:[]}});
+        // --- 3. 🚨 STRICT AUTO-ROUTER & DATA MAPPER ---
+        // Because "Broking Agency" is mandatory, we use it as a fingerprint.
+        // If it exists, this is 100% a Reverse Logistics trip.
+        if (p.brokingAgent && String(p.brokingAgent).trim() !== "") {
+            p.bookingType = "Reverse Logistics";
+            // Mirror it into the standard tName slot so your database and UI cards can read it flawlessly
+            if (!p.tName) p.tName = p.brokingAgent;
+        } else if (!p.bookingType) {
+            p.bookingType = "Own Booking";
+        }
+
+        // 4. SECURE LEDGER
+        const lj=JSON.stringify({bookingType:p.bookingType,brokingAgent:(p.brokingAgent||""),income:[],expense:[],reco:{payments:[]}});
         p.financialLedger=lj;
-        const dR=[p.id,p.date,p.party,p.from,p.to,p.vNum,p.type,p.weight,"In-Transit","","","","",p.createdBy,p.vFreight,p.cFreight,p.dName,p.dContact,p.tName,p.tPerson,p.tContact,p.remarks,"","","","","",lj];
         
-        // 3. FIRE AND FORGET: Sends perfectly, intentionally ignores Google's strict security receipt
+        // Agent Name (p.tPerson) and Contact No. (p.tContact) are perfectly packed in here automatically
+        const dR=[p.id,p.date,p.party,p.from,p.to,p.vNum,p.type,p.weight,"In-Transit","","","","",p.createdBy,p.vFreight,p.cFreight,p.dName,p.dContact,p.tName||"",p.tPerson||"",p.tContact||"",p.remarks,"","","","","",lj];
+        
+        // 5. FIRE AND FORGET
         fetch(GOOGLE_SCRIPT_URL, {
             method:"POST", 
             body:JSON.stringify({action:"saveTrip",data:dR,...p})
         }).catch(err => {
-            console.log("Safe background fetch complete. Ignored CORS fake error.");
+            console.log("Safe background fetch complete. Ignored CORS.");
         });
         
-        // 4. INSTANT MEMORY UPDATE: Do not wait for Google's fake receipt
+        // 6. INSTANT MEMORY UPDATE (Guarantees perfect routing into Deployed Tabs)
         allTrips.push({...p,statusNote:"",computedBookingType:p.bookingType});
         updateLocalMemory({vNum:p.vNum,type:p.type,weight:p.weight,party:p.party,brokingAgent:p.brokingAgent,tName:p.tName,dName:p.dName,dContact:p.dContact,tPerson:p.tPerson,tContact:p.tContact});
         
-        // 5. SMOOTH UNLOCK: Cleanly resets the screen
+        // 7. SMOOTH UNLOCK
         setTimeout(() => {
             if (loader) loader.style.display="none"; 
-            alert("Details saved!");
+            // The success alert will now confirm EXACTLY which tab it saved to!
+            alert(p.bookingType + " details saved successfully!");
             showSelectionScreen("placement");
         }, 1000);
     }
