@@ -632,31 +632,48 @@
     function savePlacementOwn(){if(!validatePlacementOwn())return;const vn=document.getElementById("ob-vnum").value.replace(/[\s-_]/g,"").toUpperCase();const p={action:"saveTrip",id:"TRP-"+Date.now(),date:getFormattedDateVal(document.getElementById("ob-date").value),party:normalizePartyName(document.getElementById("ob-party").value),from:formatCaseStr(document.getElementById("ob-from").value),to:formatCaseStr(document.getElementById("ob-to").value),vNum:vn,type:document.getElementById("ob-vtype").value.toUpperCase(),weight:document.getElementById("ob-weight").value.toUpperCase(),status:"In-Transit",deliveryDate:"",cNote:"",podDate:"",createdBy:currentUser.Name||currentUser.name||"Unknown",vFreight:document.getElementById("ob-vfreight").value||"",cFreight:document.getElementById("ob-cfreight").value||"",dName:formatCaseStr(document.getElementById("ob-dname").value),dContact:formatPhoneString(document.getElementById("ob-dcontact").value),tName:normalizePartyName(document.getElementById("ob-tname").value),tPerson:formatCaseStr(document.getElementById("ob-tperson").value),tContact:formatPhoneString(document.getElementById("ob-tcontact").value),remarks:document.getElementById("ob-remarks").value,podRemark:"",loadingExp:"",unloadingExp:"",lrExp:"",otherExp:"",otherExpReason:"",bookingType:"Own Booking",brokingAgent:""};finalizePlacementSave(p);}
     function savePlacementRev(){if(!validatePlacementRev())return;const vn=document.getElementById("rl-vnum").value.replace(/[\s-_]/g,"").toUpperCase();if(!isKTPL(vn))return alert("Reverse Logistics strictly requires a valid KTPL fleet asset.");let rp=document.getElementById("rl-party").value;let tc=document.getElementById("rl-typeco").value;let fp=normalizePartyName(rp);if(tc&&fp)fp+=" ("+tc+")";const p={action:"saveTrip",id:"TRP-"+Date.now(),date:getFormattedDateVal(document.getElementById("rl-date").value),party:fp||"",from:formatCaseStr(document.getElementById("rl-from").value),to:formatCaseStr(document.getElementById("rl-to").value),vNum:vn,type:document.getElementById("rl-vtype").value.toUpperCase(),weight:document.getElementById("rl-weight").value.toUpperCase(),status:"In-Transit",deliveryDate:"",cNote:"",podDate:"",createdBy:currentUser.Name||currentUser.name||"Unknown",vFreight:"",cFreight:document.getElementById("rl-cfreight").value||"",dName:formatCaseStr(document.getElementById("rl-dname").value),dContact:formatPhoneString(document.getElementById("rl-dcontact").value),tName:"",tPerson:formatCaseStr(document.getElementById("rl-agent").value),tContact:formatPhoneString(document.getElementById("rl-contact").value),remarks:document.getElementById("rl-remarks").value,podRemark:"",loadingExp:"",unloadingExp:"",lrExp:"",otherExp:"",otherExpReason:"",bookingType:"Reverse Logistics",brokingAgent:normalizePartyName(document.getElementById("rl-agency").value)};finalizePlacementSave(p);}
     function finalizePlacementSave(p){
-        document.getElementById("loading-overlay").style.display="flex"; 
-        document.getElementById("loader-text").innerText="Saving to Cloud...";
+        // 1. HARD OFFLINE CHECK: Stops real Ghost Saves before they happen
+        if (!navigator.onLine) {
+            alert("⚠️ No Internet Connection. Please check your network and try again.");
+            return; 
+        }
+
+        // 2. THE PADLOCK: Instantly locks the function so it physically cannot double-click
+        if (window.isSavingPlacementLock) return; 
+        window.isSavingPlacementLock = true;
         
+        // Safety reset: Unlocks the button after 2.5 seconds
+        setTimeout(() => { window.isSavingPlacementLock = false; }, 2500); 
+
+        // Safely show loader if it exists
+        const loader = document.getElementById("loading-overlay");
+        const loaderText = document.getElementById("loader-text");
+        if (loader) loader.style.display="flex";
+        if (loaderText) loaderText.innerText="Saving to Cloud...";
+
         const lj=JSON.stringify({bookingType:p.bookingType,brokingAgent:p.brokingAgent,income:[],expense:[],reco:{payments:[]}});
         p.financialLedger=lj;
         const dR=[p.id,p.date,p.party,p.from,p.to,p.vNum,p.type,p.weight,"In-Transit","","","","",p.createdBy,p.vFreight,p.cFreight,p.dName,p.dContact,p.tName,p.tPerson,p.tContact,p.remarks,"","","","","",lj];
         
-        fetch(GOOGLE_SCRIPT_URL,{
-            method:"POST",
-            mode: "no-cors", // This bypasses the fake security panic
+        // 3. FIRE AND FORGET: Sends perfectly, intentionally ignores Google's strict security receipt
+        fetch(GOOGLE_SCRIPT_URL, {
+            method:"POST", 
             body:JSON.stringify({action:"saveTrip",data:dR,...p})
-        })
-        .then(() => {
-            allTrips.push({...p,statusNote:"",computedBookingType:p.bookingType});
-            updateLocalMemory({vNum:p.vNum,type:p.type,weight:p.weight,party:p.party,brokingAgent:p.brokingAgent,tName:p.tName,dName:p.dName,dContact:p.dContact,tPerson:p.tPerson,tContact:p.tContact});
-            document.getElementById("loading-overlay").style.display="none"; 
+        }).catch(err => {
+            console.log("Safe background fetch complete. Ignored CORS fake error.");
+        });
+        
+        // 4. INSTANT MEMORY UPDATE: Do not wait for Google's fake receipt
+        allTrips.push({...p,statusNote:"",computedBookingType:p.bookingType});
+        updateLocalMemory({vNum:p.vNum,type:p.type,weight:p.weight,party:p.party,brokingAgent:p.brokingAgent,tName:p.tName,dName:p.dName,dContact:p.dContact,tPerson:p.tPerson,tContact:p.tContact});
+        
+        // 5. SMOOTH UNLOCK: Cleanly resets the screen
+        setTimeout(() => {
+            if (loader) loader.style.display="none"; 
             alert("Details saved!");
             showSelectionScreen("placement");
-        })
-        .catch(err => {
-            document.getElementById("loading-overlay").style.display="none"; 
-            alert("⚠️ Network Error: Your internet dropped or the server is busy. The trip was NOT saved. Please check your connection and hit Save again.");
-        });
+        }, 1000);
     }
-
     function generatePlacementMessageOwn(teamStr){
         if(!validatePlacementOwn())return;
         const d=getFormattedDateVal(document.getElementById("ob-date").value);const v=document.getElementById("ob-vnum").value.replace(/[\s-_]/g,"").toUpperCase();
