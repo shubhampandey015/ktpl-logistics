@@ -290,9 +290,14 @@
         let cU=users.find(u=>(u.Name||u.name)==="__VCONFIG__"); if(cU){try{vehicleBranches=JSON.parse(cU.Role||cU.role);localStorage.setItem("ktpl_branches",JSON.stringify(vehicleBranches));}catch(e){}}
         const revLogIds=["TRP-1779115155932","TRP-1779117724465","TRP-1779204199291","TRP-1779272619346","TRP-1779375136137","TRP-1779457814247","TRP-1779638743270","TRP-1779686779691","TRP-1779722314454"];
         
+        // SECURED JSON PARSING (Fixes the Blank Screen Crash permanently)
         allTrips=(data.trips||[]).map(t=>{
             t.bookingType="Own Booking"; t.brokingAgent="";
-            if(t.financialLedger){try{let j=JSON.parse(t.financialLedger);if(j.bookingType)t.bookingType=j.bookingType;if(j.brokingAgent)t.brokingAgent=j.brokingAgent;}catch(e){}}
+            if(t.financialLedger && String(t.financialLedger).trim() !== "undefined" && String(t.financialLedger).trim() !== ""){
+                try{let j=JSON.parse(t.financialLedger);if(j.bookingType)t.bookingType=j.bookingType;if(j.brokingAgent)t.brokingAgent=j.brokingAgent;}catch(e){}
+            } else {
+                t.financialLedger = JSON.stringify({bookingType:"Own Booking",brokingAgent:"",income:[],expense:[],reco:{payments:[]}});
+            }
             if(!t.bookingType||t.bookingType==="Own Booking"){if(t.brokingAgent&&String(t.brokingAgent).trim()!==""){t.bookingType="Reverse Logistics";t.tName="";}}
             if(revLogIds.includes(t.id))t.bookingType="Reverse Logistics";
             t.computedBookingType=t.bookingType; return t;
@@ -310,7 +315,6 @@
                         let pDt=parseDate(t.date);
                         if(!transporterBanks[nTr] || pDt>=transporterBanks[nTr].time){ transporterBanks[nTr]={bankName:j.reco.bankName||"",bankAc:j.reco.bankAc||"",ifsc:j.reco.ifsc||"",time:pDt}; }
                     }
-                    // Pull the latest location logged to the cloud
                     if(j.currentLoc){ serverLoc=j.currentLoc; serverTime=j.locTime||0; }
                 }catch(e){}
             }
@@ -321,7 +325,6 @@
                 localLoc = sorted[0].note; localTime = new Date(sorted[0].time).getTime();
             }
             
-            // Compare cloud vs local and always display the absolute newest update
             t.statusNote = (serverTime >= localTime && serverLoc) ? serverLoc : (localLoc || "");
         });
 
@@ -329,19 +332,88 @@
         setupMemoryDropdowns(); renderAdminUsers();
     }
 
+    // THE FULLY UPDATED ACCESS MATRIX
     function getUserPerms(){
-        const n=currentUser.Name||currentUser.name||""; const r=currentUser.Role||currentUser.role||"";
-        let p={adminTab:r==="Master Admin",fleetStatusTab:!0,paymentsTab:!0,reportsTab:!0,revLogistics:!0,editTrips:!0,viewChargedFreightOB:!0,viewChargedFreightRL:!0,editChargedFreightOB:!0,editChargedFreightRL:!0,generateMIS:!0,exportLedger:!0};
-        const pUsers=["Sanket Matkar","Mitali Yadav","Anita Fagare","Amruta Chavare","Ashok Dubey"];
-        if(r==="Admin")p.adminTab=!1; else if(n==="Pramod Nayak"){p.adminTab=!1;p.paymentsTab=!1;p.editChargedFreightOB=!1;p.editChargedFreightRL=!0;} else if(n==="Parveen Sharma"){p.adminTab=!1;p.paymentsTab=!1;p.reportsTab=!1;p.fleetStatusTab=!1;p.revLogistics=!1;p.editChargedFreightOB=!1;p.editChargedFreightRL=!1;} else if(["Vijay Deore","Sachin Mokashi","Jalindar Jadhav"].includes(n)){p.adminTab=!1;p.paymentsTab=!1;p.editTrips=!1;p.viewChargedFreightOB=!1;p.viewChargedFreightRL=!1;p.editChargedFreightOB=!1;p.editChargedFreightRL=!1;p.generateMIS=!1;p.exportLedger=!1;} else if(r==="ReadOnly"){p.adminTab=!1;p.paymentsTab=!1;p.reportsTab=!1;p.editTrips=!1;p.editChargedFreightOB=!1;p.editChargedFreightRL=!1;}
-        p.changeDelCanStatus=!0; if(pUsers.includes(n))p.paymentsTab=!0; p.editPayments=r==="Admin"||r==="Master Admin"||pUsers.includes(n); p.viewBaseFreight=["Master Admin","Admin"].includes(r)||["Anita Fagare","Amruta Chavare"].includes(n);
-        if(currentUser.permissions){if(currentUser.permissions.Placement===!1)p.placementTab=!1;if(currentUser.permissions.Deployed===!1)p.deployedTab=!1;if(currentUser.permissions.POD===!1)p.podTab=!1;if(currentUser.permissions.Payments===!1)p.paymentsTab=!1;if(currentUser.permissions.Reports===!1)p.reportsTab=!1;}
+        const n = currentUser.Name || currentUser.name || "";
+        const r = currentUser.Role || currentUser.role || "";
+        const isMA = (r === "Master Admin");
+        const isA = (r === "Admin" || isMA);
+
+        let p = {
+            adminTab: isMA, fleetStatusTab: true, placementTab: true, deployedTab: true, podTab: true, 
+            paymentsTab: true, reportsTab: true, revLogistics: true, editTrips: true, 
+            viewChargedFreightOB: true, viewChargedFreightRL: true, editChargedFreightOB: true, 
+            editChargedFreightRL: true, editPayments: true, generateMIS: true, exportLedger: true, 
+            changeDelCanStatus: true
+        };
+
+        const financeViewers = ["Anita Fagare", "Amruta Chavare"];
+        const extraFinEditors = ["Sanket Matkar", "Mitali Yadav", "Ashok Dubey", "Jalindar Jadhav"];
+
+        if(!isA) {
+            p.adminTab = false;
+            p.viewChargedFreightOB = false; 
+            p.editChargedFreightOB = false; 
+            p.editPayments = false; 
+        }
+
+        if(n === "Parveen Sharma" || r === "SelfOnly"){
+            p.paymentsTab = false; p.reportsTab = false; p.fleetStatusTab = false; p.revLogistics = false; 
+            p.viewChargedFreightOB = false; p.viewChargedFreightRL = false; p.editChargedFreightOB = false; p.editChargedFreightRL = false;
+            p.editPayments = false; p.exportLedger = false; p.generateMIS = false;
+        }
+        else if (n === "Pramod Nayak") {
+            p.paymentsTab = false; p.viewChargedFreightOB = false; p.viewChargedFreightRL = false; 
+            p.editChargedFreightOB = false; p.editChargedFreightRL = true; p.editPayments = false;
+            p.exportLedger = false; p.generateMIS = false;
+        }
+        else if (["Vijay Deore", "Sachin Mokashi"].includes(n)) {
+            p.paymentsTab = false; p.editTrips = false; p.viewChargedFreightOB = false; p.viewChargedFreightRL = false; 
+            p.editChargedFreightOB = false; p.editChargedFreightRL = true; p.generateMIS = false; p.exportLedger = false;
+            p.editPayments = false;
+        }
+        else if (extraFinEditors.includes(n)) {
+            p.paymentsTab = true; p.viewChargedFreightOB = false; p.viewChargedFreightRL = true; 
+            p.editChargedFreightOB = false; p.editChargedFreightRL = true; p.editPayments = true; 
+            if(n==="Jalindar Jadhav") { p.editTrips = false; p.generateMIS = false; p.exportLedger = false; }
+        }
+        else if (financeViewers.includes(n)) {
+            p.paymentsTab = true; p.viewChargedFreightOB = true; p.viewChargedFreightRL = true; 
+            p.editChargedFreightOB = false; p.editChargedFreightRL = true; p.editPayments = false; 
+        }
+        else if (r === "ReadOnly") {
+            p.paymentsTab = false; p.reportsTab = false; p.editTrips = false; p.changeDelCanStatus = false;
+            p.viewChargedFreightOB = false; p.viewChargedFreightRL = false; p.editChargedFreightOB = false; p.editChargedFreightRL = false;
+            p.editPayments = false;
+        }
+
+        if(isA) {
+            p.viewChargedFreightOB = true; p.viewChargedFreightRL = true; p.editChargedFreightOB = true; 
+            p.editChargedFreightRL = true; p.editPayments = true;
+        }
+
+        if(currentUser.permissions){
+            if(currentUser.permissions.Placement===false) p.placementTab=false;
+            if(currentUser.permissions.Deployed===false) p.deployedTab=false;
+            if(currentUser.permissions.POD===false) p.podTab=false;
+            if(currentUser.permissions.Payments===false) p.paymentsTab=false;
+            if(currentUser.permissions.Reports===false) p.reportsTab=false;
+        }
         return p;
     }
 
     function applyUserPermissions(){
         document.getElementById("pin-overlay").style.display="none"; document.getElementById("main-app").style.display="block"; document.getElementById("user-name-text").innerText=`Hi ${currentUser.Name||currentUser.name}!`; document.getElementById("user-name-text").style.display="block";
-        const p=getUserPerms(); document.getElementById("card-locator").style.display=p.fleetStatusTab?"flex":"none"; document.getElementById("card-fleet").style.display=p.fleetStatusTab?"flex":"none"; document.getElementById("card-admin").style.display=p.adminTab?"flex":"none"; document.getElementById("card-payments").style.display=p.paymentsTab?"flex":"none"; document.getElementById("card-reports").style.display=p.reportsTab?"flex":"none";
+        const p=getUserPerms(); 
+        document.getElementById("card-locator").style.display = p.fleetStatusTab ? "flex" : "none"; 
+        document.getElementById("card-fleet").style.display = p.fleetStatusTab ? "flex" : "none"; 
+        document.getElementById("card-placement").style.display = p.placementTab ? "flex" : "none";
+        document.getElementById("card-deployed").style.display = p.deployedTab ? "flex" : "none";
+        document.getElementById("card-pod").style.display = p.podTab ? "flex" : "none";
+        document.getElementById("card-admin").style.display = p.adminTab ? "flex" : "none"; 
+        document.getElementById("card-payments").style.display = p.paymentsTab ? "flex" : "none"; 
+        document.getElementById("card-reports").style.display = p.reportsTab ? "flex" : "none";
+        
         const n=currentUser.Name||currentUser.name||""; document.getElementById("f-sec-20").style.display="inline-block"; document.getElementById("f-sec-oth").style.display="inline-block";
         if(n==="Pramod Nayak"){document.getElementById("f-sec-20").style.display="none";document.getElementById("f-sec-oth").style.display="none";currentFleetSecondary="32Ft Fleet";document.querySelectorAll("#fleet-secondary-tabs .secondary-tab").forEach(e=>e.classList.remove("active"));document.getElementById("f-sec-32").classList.add("active");}else{currentFleetSecondary="20Ft Fleet";document.querySelectorAll("#fleet-secondary-tabs .secondary-tab").forEach(e=>e.classList.remove("active"));document.getElementById("f-sec-20").classList.add("active");}
         const cOB=document.getElementById("ob-cfreight"); if(cOB){cOB.disabled=!p.editChargedFreightOB;cOB.placeholder=p.editChargedFreightOB?"Receivable":"Restricted";}
@@ -364,7 +436,6 @@
             });
             lst.style.display=has?"block":"none";
         }
-        // Wipes old memory listeners to prevent UI lag and freezing
         inp.oninput = function(){showL(this.value);}; 
         inp.onclick = function(){showL(this.value);}; 
         if(!lst.dataset.docListener){ document.addEventListener("click",function(e){if(e.target!==inp)lst.style.display="none";}); lst.dataset.docListener="true"; }
@@ -440,9 +511,26 @@
         if(currentActiveMainTab!=="tab-reports"&&currentActiveMainTab!=="tab-fleet-status"&&currentActiveMainTab!=="tab-fleet-locator"){triggerCurrentRender();}else if(currentActiveMainTab==="tab-reports"){document.getElementById("screen-report").innerHTML="";document.getElementById("report-actions").style.display="none";}else if(currentActiveMainTab==="tab-fleet-status")renderFleetStatus();
     }
 
+    // THE FULLY UPDATED PRAMOD/PARVEEN VISIBILITY CHECKER
     function getFilteredTrips(base){
-        let r=[...base]; const n=currentUser.Name||currentUser.name||""; const role=currentUser.Role||currentUser.role||"";
-        if(n==="Parveen Sharma"||role==="SelfOnly"){r=r.filter(t=>t.createdBy===n);}else if(n==="Pramod Nayak"){r=r.filter(t=>{let isK=isKTPL(t.vNum);let is32=String(t.type||t.vType||"").includes("32");return(isK&&is32)||(t.createdBy===n);});}
+        let r=[...base]; 
+        const n=currentUser.Name||currentUser.name||""; 
+        const role=currentUser.Role||currentUser.role||"";
+        
+        if(n==="Parveen Sharma"||role==="SelfOnly"){
+            r=r.filter(t=>t.createdBy===n);
+        }else if(n==="Pramod Nayak"){
+            r=r.filter(t=>{
+                let isK = isKTPL(t.vNum);
+                let vKey = String(t.vNum || "").toUpperCase();
+                let vehicleSize = String(t.type || t.vType || (vehicles[vKey] ? vehicles[vKey].type || vehicles[vKey].vType : "") || "");
+                let is32 = vehicleSize.includes("32");
+
+                if (isK && is32) return true; // View all 32FT KTPL across the company
+                return t.createdBy === n; // Everything else must be his own entries
+            });
+        }
+        
         const sD=document.getElementById("uf-start")?document.getElementById("uf-start").value:""; const eD=document.getElementById("uf-end")?document.getElementById("uf-end").value:""; const vM=document.getElementById("uf-vnum")?document.getElementById("uf-vnum").value.trim().toLowerCase():""; const vtM=document.getElementById("uf-vtype")?document.getElementById("uf-vtype").value.trim().toLowerCase():""; const vcM=document.getElementById("uf-vcap")?document.getElementById("uf-vcap").value.trim().toLowerCase():""; const pM=document.getElementById("uf-party")?document.getElementById("uf-party").value.trim().toLowerCase():""; const tM=document.getElementById("uf-transporter")?document.getElementById("uf-transporter").value.trim().toLowerCase():""; const oM=document.getElementById("uf-origin")?document.getElementById("uf-origin").value.trim().toLowerCase():""; const dM=document.getElementById("uf-dest")?document.getElementById("uf-dest").value.trim().toLowerCase():"";
         let sDate=sD?new Date(sD):null; if(sDate)sDate.setHours(0,0,0,0); let eDate=eD?new Date(eD):null; if(eDate)eDate.setHours(23,59,59,999);
         r=r.filter(t=>{
@@ -496,6 +584,7 @@
         const tId = document.getElementById("share-modal-trip-id").value;
         const t = allTrips.find(x => x.id === tId);
         if (!t) return alert("Error loading trip data.");
+        const pAuth = getUserPerms();
         
         let bt = t.computedBookingType;
         let brAgt = t.brokingAgent;
@@ -521,7 +610,10 @@
                 if(t.tPerson) h += `*Agent Name:* ${t.tPerson}\n`;
             }
             if(t.vFreight) h += `*Veh Freight:* ${t.vFreight}\n`;
-            if(t.cFreight) h += `*Chg Freight:* ${t.cFreight}\n`;
+            
+            // Secure share logic
+            let sCF = bt === "Own Booking" ? pAuth.viewChargedFreightOB : pAuth.viewChargedFreightRL;
+            if(sCF && t.cFreight) h += `*Chg Freight:* ${t.cFreight}\n`;
         }
         
         h += `\n*Status:* ${statusText}\n`;
@@ -631,14 +723,14 @@
     
     function savePlacementOwn(){if(!validatePlacementOwn())return;const vn=document.getElementById("ob-vnum").value.replace(/[\s-_]/g,"").toUpperCase();const p={action:"saveTrip",id:"TRP-"+Date.now(),date:getFormattedDateVal(document.getElementById("ob-date").value),party:normalizePartyName(document.getElementById("ob-party").value),from:formatCaseStr(document.getElementById("ob-from").value),to:formatCaseStr(document.getElementById("ob-to").value),vNum:vn,type:document.getElementById("ob-vtype").value.toUpperCase(),weight:document.getElementById("ob-weight").value.toUpperCase(),status:"In-Transit",deliveryDate:"",cNote:"",podDate:"",createdBy:currentUser.Name||currentUser.name||"Unknown",vFreight:document.getElementById("ob-vfreight").value||"",cFreight:document.getElementById("ob-cfreight").value||"",dName:formatCaseStr(document.getElementById("ob-dname").value),dContact:formatPhoneString(document.getElementById("ob-dcontact").value),tName:normalizePartyName(document.getElementById("ob-tname").value),tPerson:formatCaseStr(document.getElementById("ob-tperson").value),tContact:formatPhoneString(document.getElementById("ob-tcontact").value),remarks:document.getElementById("ob-remarks").value,podRemark:"",loadingExp:"",unloadingExp:"",lrExp:"",otherExp:"",otherExpReason:"",bookingType:"Own Booking",brokingAgent:""};finalizePlacementSave(p);}
     function savePlacementRev(){if(!validatePlacementRev())return;const vn=document.getElementById("rl-vnum").value.replace(/[\s-_]/g,"").toUpperCase();if(!isKTPL(vn))return alert("Reverse Logistics strictly requires a valid KTPL fleet asset.");let rp=document.getElementById("rl-party").value;let tc=document.getElementById("rl-typeco").value;let fp=normalizePartyName(rp);if(tc&&fp)fp+=" ("+tc+")";const p={action:"saveTrip",id:"TRP-"+Date.now(),date:getFormattedDateVal(document.getElementById("rl-date").value),party:fp||"",from:formatCaseStr(document.getElementById("rl-from").value),to:formatCaseStr(document.getElementById("rl-to").value),vNum:vn,type:document.getElementById("rl-vtype").value.toUpperCase(),weight:document.getElementById("rl-weight").value.toUpperCase(),status:"In-Transit",deliveryDate:"",cNote:"",podDate:"",createdBy:currentUser.Name||currentUser.name||"Unknown",vFreight:"",cFreight:document.getElementById("rl-cfreight").value||"",dName:formatCaseStr(document.getElementById("rl-dname").value),dContact:formatPhoneString(document.getElementById("rl-dcontact").value),tName:"",tPerson:formatCaseStr(document.getElementById("rl-agent").value),tContact:formatPhoneString(document.getElementById("rl-contact").value),remarks:document.getElementById("rl-remarks").value,podRemark:"",loadingExp:"",unloadingExp:"",lrExp:"",otherExp:"",otherExpReason:"",bookingType:"Reverse Logistics",brokingAgent:normalizePartyName(document.getElementById("rl-agency").value)};finalizePlacementSave(p);}
-  function finalizePlacementSave(p){
-        // 1. HARD OFFLINE CHECK
+    
+    // BULLETPROOF SAVE MECHANISM WITH 28-COLUMN ARCHITECTURE
+    function finalizePlacementSave(p){
         if (!navigator.onLine) {
             alert("⚠️ No Internet Connection. Please check your network and try again.");
             return; 
         }
 
-        // 2. THE PADLOCK (Stops Double Clicks)
         if (window.isSavingPlacementLock) return; 
         window.isSavingPlacementLock = true;
         setTimeout(() => { window.isSavingPlacementLock = false; }, 2500); 
@@ -648,7 +740,6 @@
         if (loader) loader.style.display="flex";
         if (loaderText) loaderText.innerText="Saving to Cloud...";
 
-        // 3. SAFE ROUTER: Fixes "Own Booking" mix-up safely without breaking columns
         if (!p.bookingType) {
             if (p.brokingAgent && String(p.brokingAgent).trim() !== "") {
                 p.bookingType = "Reverse Logistics";
@@ -657,14 +748,12 @@
             }
         }
 
-        // 4. THE SECURE LEDGER
         const lj=JSON.stringify({bookingType:p.bookingType,brokingAgent:(p.brokingAgent||""),income:[],expense:[],reco:{payments:[]}});
         p.financialLedger=lj;
         
-        // 5. EXACT ORIGINAL DATA PACKAGE (Matches your database perfectly - 28 columns)
-        const dR=[p.id,p.date,p.party,p.from,p.to,p.vNum,p.type,p.weight,"In-Transit","","","","",p.createdBy,p.vFreight,p.cFreight,p.dName,p.dContact,p.tName,p.tPerson,p.tContact,p.remarks,"","","","","",lj];
+        // Exact 28 Columns - Ensures the hidden ledger lands perfectly in Column AB
+        const dR=[p.id,p.date,p.party,p.from,p.to,p.vNum,p.type,p.weight,"In-Transit","","","","",p.createdBy,p.vFreight,p.cFreight,p.dName,p.dContact,p.tName||"",p.tPerson||"",p.tContact||"",p.remarks,"","","","","",lj];
         
-        // 6. FIRE AND FORGET
         fetch(GOOGLE_SCRIPT_URL, {
             method:"POST", 
             body:JSON.stringify({action:"saveTrip",data:dR,...p})
@@ -672,17 +761,16 @@
             console.log("Safe background fetch complete.");
         });
         
-        // 7. INSTANT MEMORY UPDATE
         allTrips.push({...p,statusNote:"",computedBookingType:p.bookingType});
         updateLocalMemory({vNum:p.vNum,type:p.type,weight:p.weight,party:p.party,brokingAgent:p.brokingAgent,tName:p.tName,dName:p.dName,dContact:p.dContact,tPerson:p.tPerson,tContact:p.tContact});
         
-        // 8. SMOOTH UNLOCK
         setTimeout(() => {
             if (loader) loader.style.display="none"; 
             alert(p.bookingType + " details saved successfully!");
             showSelectionScreen("placement");
         }, 1000);
     }
+    
     function generatePlacementMessageOwn(teamStr){
         if(!validatePlacementOwn())return;
         const d=getFormattedDateVal(document.getElementById("ob-date").value);const v=document.getElementById("ob-vnum").value.replace(/[\s-_]/g,"").toUpperCase();
@@ -834,7 +922,12 @@
             let l={reco:{}};try{let p=JSON.parse(t.financialLedger);if(p.reco)l.reco=p.reco;}catch(e){}return currentRecoStat==="Completed"?"Cleared"===(l.reco.status||"Pending"):"Cleared"!==(l.reco.status||"Pending");
         });
         if(trips.length===0){c.innerHTML="<p style='padding:20px; text-align:center;'>No ledger records matching parameters.</p>";return;}
-        const pAuth=getUserPerms(); const cEP=pAuth.editPayments; const cVF=pAuth.viewBaseFreight;
+        
+        const pAuth = getUserPerms(); 
+        const cEP = pAuth.editPayments; 
+        
+        // STRICT CF PRIVACY CHECK: Hides OB Freight mathematically for Extra Fin editors
+        const cVF = currentRecoType === "Own Booking" ? pAuth.viewChargedFreightOB : pAuth.viewChargedFreightRL;
 
         c.innerHTML=trips.map((t,i)=>{
             let l={income:[],expense:[],reco:{payments:[]}}; try{let p=JSON.parse(t.financialLedger);if(p.income)l.income=p.income;if(p.expense)l.expense=p.expense;if(p.reco)l.reco=p.reco;if(!l.reco.payments)l.reco.payments=[];}catch(e){}
@@ -847,18 +940,36 @@
             let brAgt=t.brokingAgent; if(!brAgt){try{let p=JSON.parse(t.financialLedger);if(p.brokingAgent)brAgt=p.brokingAgent;}catch(e){}}
             let hdr=`<strong>${String(t.date||"").split(",")[0]}</strong> | <strong>${t.vNum}</strong> | ${safeStr(t.from)}➔${safeStr(t.to)} <br> <span style="color:#5f6368; font-size:11px;">Party: ${safeStr(t.party)||"N/A"} | ${currentRecoType==="Own Booking"?"Transporter":"Broker"}: ${currentRecoType==="Own Booking"?safeStr(t.tName):safeStr(brAgt)}</span>`;
             let oC=currentOpenRecoId===t.id?"open":""; let isC=l.reco.status==="Cleared"; let ptTot=l.reco.payments.reduce((s,x)=>s+parseFloat(x.amt||0),0); let amtRem=currentRecoType==="Own Booking"?(tP-ptTot-eR):(tR-tP-ptTot);
-            let dH=""; if(isC&&amtRem>0)dH=`<del style="color:#8e8e8e; margin-right:4px;">₹${amtRem.toFixed(2)}</del> ₹0`; else dH=`₹${amtRem.toFixed(2)}`;
+            
+            let dH=""; 
+            if(currentRecoType === "Reverse Logistics" && !cVF) {
+                dH = "🔒"; 
+            } else {
+                if(isC&&amtRem>0)dH=`<del style="color:#8e8e8e; margin-right:4px;">₹${amtRem.toFixed(2)}</del> ₹0`; else dH=`₹${amtRem.toFixed(2)}`;
+            }
+
             let trN=currentRecoType==="Own Booking"?t.tName:brAgt; let memB=transporterBanks[normalizePartyName(trN)]||{bankName:"",bankAc:"",ifsc:""};
             let bnV=l.reco.bankName||memB.bankName||""; let bacV=l.reco.bankAc||memB.bankAc||""; let ifscV=l.reco.ifsc||memB.ifsc||"";
             
             let h=`<div class="reco-accordion-header" style="position:relative;">${currentRecoStat==="Pending"?`<input type="checkbox" class="batch-checkbox" id="cb-pay-${t.id}" onchange="togglePaymentSelection('${t.id}')" ${selectedPaymentTrips.includes(t.id)?"checked":""} style="position:absolute; left:-5px; top:12px;">`:""}<div class="reco-info-col" onclick="toggleRecoCard('${t.id}')" style="margin-left: ${currentRecoStat==="Pending"?"15px":"0"};">${hdr}</div><div class="reco-amt-col" onclick="toggleRecoCard('${t.id}')"><div class="far-right-amt">${dH}</div><div style="color:#1a73e8;">▼</div></div></div><div id="reco-body-${t.id}" class="reco-accordion-body ${oC}"><div class="reco-split-grid"><div class="reco-panel"><div class="reco-header-title">Receivables</div>`;
-            if(cVF||currentRecoType!=="Own Booking"){h+=`<div class="calc-row"><span>Base Freight:</span> <span>₹${bR}</span></div><div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${l.income.map(x=>`<div class="calc-line-item"><span>${safeStr(x.type)}:</span> <span>₹${x.amt}</span></div>`).join("")}</div><div class="calc-gross"><span>Total Receivable:</span> <span>₹${tR}</span></div>`;}else{h+=`<div class="calc-row"><span>Base Freight:</span> <span style="color:#b3261e;">🔒 Restricted</span></div><div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${l.income.map(x=>`<div class="calc-line-item"><span>${safeStr(x.type)}:</span> <span>₹${x.amt}</span></div>`).join("")}</div><div class="calc-gross"><span>Total Receivable:</span> <span style="color:#b3261e;">🔒 Restricted</span></div>`;}
+            
+            if(cVF){
+                h+=`<div class="calc-row"><span>Base Freight:</span> <span>₹${bR}</span></div><div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${l.income.map(x=>`<div class="calc-line-item"><span>${safeStr(x.type)}:</span> <span>₹${x.amt}</span></div>`).join("")}</div><div class="calc-gross"><span>Total Receivable:</span> <span>₹${tR}</span></div>`;
+            }else{
+                h+=`<div class="calc-row"><span>Base Freight:</span> <span style="color:#b3261e;">🔒 Restricted</span></div><div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${l.income.map(x=>`<div class="calc-line-item"><span>${safeStr(x.type)}:</span> <span style="color:#b3261e;">🔒</span></div>`).join("")}</div><div class="calc-gross"><span>Total Receivable:</span> <span style="color:#b3261e;">🔒 Restricted</span></div>`;
+            }
             h+=`</div><div class="reco-panel"><div class="reco-header-title">Payables</div><div class="calc-row"><span>Base Cost:</span> <span>₹${bC}</span></div><div style="max-height:120px; overflow-y:auto; overflow-x:hidden; padding-right:4px;">${l.expense.map(x=>`<div class="calc-line-item"><span>${safeStr(x.type)}:</span> <span>₹${x.amt}</span></div>`).join("")}</div><div class="calc-gross"><span>Total Payable:</span> <span>₹${tP}</span></div>`;
+            
             if(cEP){
                 h+=`<div style="margin-top:10px;"><label>${currentRecoType==="Own Booking"?"Payments Processed":"Dues Received"}</label><div id="payment-slots-${t.id}">`;
                 l.reco.payments.forEach((p,idx)=>{let pld=currentRecoType==="Own Booking"?idx===0?"Advance Paid":"Balance Paid":idx===0?"Advance Recv":"O/s Dues";h+=`<div class="payment-slot-row"><input type="number" class="compact-input pay-amt-${t.id}" placeholder="${pld}" value="${p.amt||""}" oninput="calcRecoUI('${t.id}', '${currentRecoType}')"><input type="date" class="compact-input pay-date-${t.id}" value="${p.date||""}"><button class="btn-clear" onclick="this.parentElement.remove(); calcRecoUI('${t.id}', '${currentRecoType}');" style="padding:6px; font-weight:bold; color:#b3261e; width:auto; border-radius:6px;">X</button></div>`;});
                 h+=`</div><button class="btn-secondary" style="padding:6px 12px; font-size:11px; width:auto; border-radius:6px; margin-top:8px;" onclick="addPaymentSlot('${t.id}', '${currentRecoType}')">+ Add Slot</button></div><div class="highlight-red-box" id="dyn-bal-${t.id}">`;
-                if(isC&&amtRem>0){if(currentRecoType==="Own Booking")h+=`<div style="color:#5f6368;"><del>Original Balance: ₹${amtRem.toFixed(2)}</del></div><div style="color:#188c38; margin:6px 0;">Saved on deduction: ₹${amtRem.toFixed(2)}</div><div>Final Balance to Pay: ₹0</div>`;else h+=`<div style="color:#5f6368;"><del>Original O/S: ₹${amtRem.toFixed(2)}</del></div><div style="color:#d93025; margin:6px 0;">Bad Debts: ₹${amtRem.toFixed(2)}</div><div>Final Outstanding: ₹0</div>`;}else{if(currentRecoType==="Own Booking")h+=`Balance to Pay: ₹${amtRem.toFixed(2)}`;else h+=`Outstanding Amount: ₹${amtRem.toFixed(2)}`;}
+                
+                if (cVF || currentRecoType === "Own Booking") {
+                    if(isC&&amtRem>0){if(currentRecoType==="Own Booking")h+=`<div style="color:#5f6368;"><del>Original Balance: ₹${amtRem.toFixed(2)}</del></div><div style="color:#188c38; margin:6px 0;">Saved on deduction: ₹${amtRem.toFixed(2)}</div><div>Final Balance to Pay: ₹0</div>`;else h+=`<div style="color:#5f6368;"><del>Original O/S: ₹${amtRem.toFixed(2)}</del></div><div style="color:#d93025; margin:6px 0;">Bad Debts: ₹${amtRem.toFixed(2)}</div><div>Final Outstanding: ₹0</div>`;}else{if(currentRecoType==="Own Booking")h+=`Balance to Pay: ₹${amtRem.toFixed(2)}`;else h+=`Outstanding Amount: ₹${amtRem.toFixed(2)}`;}
+                } else {
+                    h+=`🔒 Final Balances Restricted`;
+                }
                 h+=`</div>`;
             }
             h+=`</div></div>`;
@@ -868,6 +979,7 @@
             h+=`</div>`; return h;
         }).join("");
     }
+    
     function commitRecoRecord(id,mode){
         let t=allTrips.find(x=>x.id===id); if(!t)return; let l={income:[],expense:[],reco:{payments:[]}}; try{let p=JSON.parse(t.financialLedger);if(p)Object.assign(l,p);if(!l.reco)l.reco={payments:[]};}catch(e){}
         let bn=document.getElementById(`reco-bankname-${id}`)?document.getElementById(`reco-bankname-${id}`).value.trim():""; let ba=document.getElementById(`reco-bank-${id}`)?document.getElementById(`reco-bank-${id}`).value.trim():""; let bi=document.getElementById(`reco-ifsc-${id}`)?document.getElementById(`reco-ifsc-${id}`).value.trim():"";
@@ -889,8 +1001,12 @@
         let vKey = String(e.vNum || "").toUpperCase();         let vt = e.type || e.vType || (vehicles[vKey] ? vehicles[vKey].type || vehicles[vKey].vType : "") || "-";         let vw = e.weight || (vehicles[vKey] ? vehicles[vKey].capacity : "") || "-";         h+=`</div><div style="margin-bottom: 5px;"><strong>Route:</strong> ${safeStr(e.from)} ➔ ${safeStr(e.to)}</div><div style="margin-bottom: 5px;"><strong>Vehicle:</strong> ${e.vNum} (${safeStr(vt)}, ${safeStr(vw)})</div>`;
         let bt=e.computedBookingType; let brAgt=e.brokingAgent; if(!brAgt){try{let pf=JSON.parse(e.financialLedger);if(pf.brokingAgent)brAgt=pf.brokingAgent;}catch(err){}}
         if(bt==="Reverse Logistics"&&brAgt)h+=`<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Agency:</strong> ${safeStr(brAgt)}</div>`;
+        
         let sVF=isA; if(vMode==="deployed")sVF=!0; if(sVF&&e.vFreight&&String(e.vFreight).trim()!=="")h+=`<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Vehicle Freight:</strong> ${e.vFreight}</div>`;
-        let sCF=bt==="Own Booking"?p.viewChargedFreightOB:p.viewChargedFreightRL; if(sCF&&e.cFreight&&String(e.cFreight).trim()!=="")h+=`<div style="margin-bottom: 5px; color:#137333; font-size:11px; font-weight:500;"><strong>Charged Freight:</strong> ${e.cFreight}</div>`;
+        
+        // Strict App-Wide CF Blocker
+        let sCF=bt==="Own Booking"?p.viewChargedFreightOB:p.viewChargedFreightRL; 
+        if(sCF&&e.cFreight&&String(e.cFreight).trim()!=="")h+=`<div style="margin-bottom: 5px; color:#137333; font-size:11px; font-weight:500;"><strong>Charged Freight:</strong> ${e.cFreight}</div>`;
         
         const dTel=getSafeTel(e.dContact); const tTel=getSafeTel(e.tContact);
         window.shareMessages=window.shareMessages||{};
@@ -904,16 +1020,84 @@
             h+=`<div style="display:flex; margin-top:5px; gap: 8px; width: 100%; align-items:center;">`;
             if(!iDC){if(p.changeDelCanStatus)h+=`<select class="compact-input" onchange="handleStatusChange('${e.id}', this.value, this)" style="flex:1;"><option value="In-Transit" selected>In-Transit</option><option value="Delivered">Delivered</option><option value="Cancelled Trip">Cancelled Trip</option></select>`;h+=`<input type="text" class="compact-input" placeholder="Update location..." value="${sn}" onchange="formatSentence(this); updateStatusLog('${e.id}', this.value)" style="${p.changeDelCanStatus?"flex:2;":"flex:1; width:100%;"}">`;}
             else{if(isA)h+=`<select class="compact-input" onchange="revertStatus('${e.id}', 'In-Transit')" style="flex:1;"><option value="" selected>Status Locked</option><option value="In-Transit">Undo: Revert to In-Transit</option></select>`;h+=`<input type="text" class="compact-input" placeholder="Locked" value="${sn}" disabled style="${isA?"flex:2;":"flex:1; width:100%;"} background:#e3e3e3; color:#8e8e8e; cursor:not-allowed;">`;}
-            h+=`</div><div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;"><button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${e.id}', '${vMode}')">▶ History</button><div style="display:flex; gap: 5px;">${!isRO?`<button class="btn-clear" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="openFinancialAllocation('${e.id}')">₹ Expenses</button>`:""}<button class="btn-primary" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="triggerShare('${e.id}')">Share</button></div></div><div id="hist-${vMode}-${e.id}" class="history-panel"></div>`;
+            h+=`</div><div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;"><button class="history-btn" style="margin-top:0;" onclick="toggleHistory('${e.id}', '${vMode}')">▶ History</button><div style="display:flex; gap: 5px;">${!isRO&&p.editExtraFin?`<button class="btn-clear" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="openFinancialAllocation('${e.id}')">₹ Expenses</button>`:""}<button class="btn-primary" style="font-size:10px; padding:6px 10px; width:auto; border-radius:4px;" onclick="triggerShare('${e.id}')">Share</button></div></div><div id="hist-${vMode}-${e.id}" class="history-panel"></div>`;
         }
         if(vMode==="pod-pending"&&!isRO)h+=`<div style="margin-bottom: 5px;"><input type="text" class="compact-input" placeholder="Enter C-Note" value="${safeStr(e.cNote)}" onchange="updateBackendData('${e.id}', 'updateCNote', this.value)"></div><div style="margin-bottom: 5px;"><input type="text" class="compact-input" placeholder="Add POD Remarks..." value="${safeStr(e.podRemark)}" onchange="updateBackendData('${e.id}', 'updatePODRemark', this.value)"></div><div style="display:flex; gap:10px; margin-top:10px; align-items:center; width: 100%;"><label style="margin:0;">POD Date:</label><input type="date" class="compact-input" id="pod-date-${e.id}"><button class="btn-primary" style="padding: 6px 12px; margin:0; width:auto; border-radius:4px;" onclick="savePOD('${e.id}', false)">Save</button></div>`;
         if(vMode==="pod-received"){h+=`<div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>C-Note:</strong> ${safeStr(e.cNote)||"N/A"}</div>${e.podRemark?`<div style="margin-bottom: 5px; font-size:11px; color:#5f6368;"><strong>Remarks:</strong> ${safeStr(e.podRemark)}</div>`:""}<div style="margin-top:10px; color:#137333; font-weight:500;">POD Received: ${e.podDate}</div>`;if(!isRO)h+=`<button class="btn-clear" style="font-size:10px; padding:6px 10px; margin-top:5px; width:auto; border-radius:4px;" onclick="savePOD('${e.id}', true)">Remove Date</button>`;}
         h+=`</div>`; return h;
     }
 
-    function openAdminEdit(tId){const t=allTrips.find(x=>x.id===tId);if(!t)return;document.getElementById("edit-trip-id").value=tId;document.getElementById("edit-party").value=t.party||"";document.getElementById("edit-vnum").value=t.vNum||"";document.getElementById("edit-vtype").value=t.type||t.vType||"";document.getElementById("edit-vcap").value=t.weight||"";document.getElementById("edit-from").value=t.from||"";document.getElementById("edit-to").value=t.to||"";document.getElementById("edit-vfreight").value=t.vFreight||"";const pAuth=getUserPerms();const cfInput=document.getElementById("edit-cfreight");let cECF=t.computedBookingType==="Own Booking"?pAuth.editChargedFreightOB:pAuth.editChargedFreightRL;if(cECF){cfInput.value=t.cFreight||"";cfInput.disabled=!1;cfInput.style.backgroundColor="#f1f3f4";cfInput.placeholder="";}else{cfInput.value="";cfInput.disabled=!0;cfInput.placeholder="🔒 Restricted";cfInput.style.backgroundColor="#e3e3e3";}document.getElementById("edit-dname").value=t.dName||"";document.getElementById("edit-dcontact").value=t.dContact||"";document.getElementById("adminEditModal").style.display="flex";}
+    function openAdminEdit(tId){
+        const t=allTrips.find(x=>x.id===tId);if(!t)return;
+        document.getElementById("edit-trip-id").value=tId;
+        document.getElementById("edit-party").value=t.party||"";
+        document.getElementById("edit-vnum").value=t.vNum||"";
+        document.getElementById("edit-vtype").value=t.type||t.vType||"";
+        document.getElementById("edit-vcap").value=t.weight||"";
+        document.getElementById("edit-from").value=t.from||"";
+        document.getElementById("edit-to").value=t.to||"";
+        document.getElementById("edit-vfreight").value=t.vFreight||"";
+        
+        const pAuth=getUserPerms();
+        const cfInput=document.getElementById("edit-cfreight");
+        
+        let cECF=t.computedBookingType==="Own Booking"?pAuth.editChargedFreightOB:pAuth.editChargedFreightRL;
+        let cVCF=t.computedBookingType==="Own Booking"?pAuth.viewChargedFreightOB:pAuth.viewChargedFreightRL;
+        
+        if(cECF){
+            cfInput.value=t.cFreight||"";
+            cfInput.disabled=!1;
+            cfInput.style.backgroundColor="#f1f3f4";
+            cfInput.placeholder="";
+        }else if(cVCF){
+            cfInput.value=t.cFreight||"";
+            cfInput.disabled=!0;
+            cfInput.style.backgroundColor="#e3e3e3";
+            cfInput.placeholder="Read Only";
+        }else{
+            cfInput.value="";
+            cfInput.disabled=!0;
+            cfInput.placeholder="🔒 Restricted";
+            cfInput.style.backgroundColor="#e3e3e3";
+        }
+        document.getElementById("edit-dname").value=t.dName||"";
+        document.getElementById("edit-dcontact").value=t.dContact||"";
+        document.getElementById("adminEditModal").style.display="flex";
+    }
+
     function closeAdminEditModal(){document.getElementById("adminEditModal").style.display="none";}
-    function saveAdminEdit(){const pF=document.getElementById("edit-party");if(isVehicleNumber(pF.value)){alert("Error: Vehicle Number in Party field.");pF.style.borderColor="#b3261e";return;}pF.style.borderColor="transparent";const tId=document.getElementById("edit-trip-id").value;const vn=document.getElementById("edit-vnum").value.replace(/[\s-_]/g,"").toUpperCase();const p={action:"adminEditTrip",id:tId,party:normalizePartyName(document.getElementById("edit-party").value),vNum:vn,type:document.getElementById("edit-vtype").value.toUpperCase(),weight:document.getElementById("edit-vcap").value.toUpperCase(),from:formatCaseStr(document.getElementById("edit-from").value),to:formatCaseStr(document.getElementById("edit-to").value),vFreight:document.getElementById("edit-vfreight").value,cFreight:document.getElementById("edit-cfreight").value,dName:formatCaseStr(document.getElementById("edit-dname").value),dContact:formatPhoneString(document.getElementById("edit-dcontact").value)};fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify(p)});const t=allTrips.find(x=>x.id===tId);if(t)Object.assign(t,p);updateLocalMemory(p);closeAdminEditModal();triggerCurrentRender();}
+    function saveAdminEdit(){
+        const pF=document.getElementById("edit-party");
+        if(isVehicleNumber(pF.value)){alert("Error: Vehicle Number in Party field.");pF.style.borderColor="#b3261e";return;}
+        pF.style.borderColor="transparent";
+        
+        const tId=document.getElementById("edit-trip-id").value;
+        const t=allTrips.find(x=>x.id===tId);if(!t)return;
+        const pAuth=getUserPerms();
+        let cECF=t.computedBookingType==="Own Booking"?pAuth.editChargedFreightOB:pAuth.editChargedFreightRL;
+        
+        const vn=document.getElementById("edit-vnum").value.replace(/[\s-_]/g,"").toUpperCase();
+        const p={
+            action:"adminEditTrip",
+            id:tId,
+            party:normalizePartyName(document.getElementById("edit-party").value),
+            vNum:vn,
+            type:document.getElementById("edit-vtype").value.toUpperCase(),
+            weight:document.getElementById("edit-vcap").value.toUpperCase(),
+            from:formatCaseStr(document.getElementById("edit-from").value),
+            to:formatCaseStr(document.getElementById("edit-to").value),
+            vFreight:document.getElementById("edit-vfreight").value,
+            cFreight: cECF ? document.getElementById("edit-cfreight").value : t.cFreight,
+            dName:formatCaseStr(document.getElementById("edit-dname").value),
+            dContact:formatPhoneString(document.getElementById("edit-dcontact").value)
+        };
+        
+        fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify(p)});
+        Object.assign(t,p);
+        updateLocalMemory(p);
+        closeAdminEditModal();
+        triggerCurrentRender();
+    }
 
     function openFinancialAllocation(tId){const t=allTrips.find(x=>x.id===tId);if(!t)return;document.getElementById("fin-trip-id").value=tId;document.getElementById("income-rows-container").innerHTML="";document.getElementById("expense-rows-container").innerHTML="";let l={income:[],expense:[]};try{let p=JSON.parse(t.financialLedger);if(p.income)l.income=p.income;if(p.expense)l.expense=p.expense;}catch(e){}if((l.expense||[]).length===0&&(t.otherExp||t.loadingExp||t.unloadingExp||t.lrExp)){if(t.otherExp)l.expense.push({type:t.otherExpReason||"Generic",amt:parseFloat(t.otherExp)});if(t.loadingExp)l.expense.push({type:"Loading",amt:parseFloat(t.loadingExp)});if(t.unloadingExp)l.expense.push({type:"Unloading",amt:parseFloat(t.unloadingExp)});if(t.lrExp)l.expense.push({type:"LR",amt:parseFloat(t.lrExp)});} (l.income||[]).forEach(r=>addFinancialRow("income",r.type,r.amt)); (l.expense||[]).forEach(r=>addFinancialRow("expense",r.type,r.amt));document.getElementById("financialModal").style.display="flex";}
     function addFinancialRow(cat,t="",a=""){const c=document.getElementById(`${cat}-rows-container`);const r=document.createElement("div");r.className="financial-row";r.innerHTML=`<input type="text" placeholder="Desc/Type" class="compact-input fin-desc" value="${safeStr(t)}"><input type="number" placeholder="Amount" class="compact-input fin-amt" value="${a}"><button class="btn btn-clear" onclick="this.parentElement.remove()" style="padding:10px; font-weight:bold; color:#b3261e; width:auto; border-radius:8px;">X</button>`;c.appendChild(r);}
@@ -933,9 +1117,12 @@
             const sC=document.getElementById("screen-report");const pC=document.getElementById("print-report-container");document.getElementById("report-actions").style.display="flex";
             if(fT.length===0){sC.innerHTML=`<div style="text-align:center; padding:20px;">No records match these filters.</div>`;pC.innerHTML="";return;}
             const td=new Date();const dS=`${String(td.getDate()).padStart(2,"0")}/${String(td.getMonth()+1).padStart(2,"0")}/${td.getFullYear()}`;
+            
+            // STRICT REPORT VIEW - Charged Freight is completely removed from all MIS Tables here
             let sH=`<table class="report-table"><thead><tr><th>Sr. No.</th><th>Booking Date</th><th>Delivery Date</th><th>Vehicle No. & Specs</th><th>Party Name</th><th>Route</th><th>Status</th><th>Location</th></tr></thead><tbody>`;
             fT.forEach((x,i)=>{let st=String(x.status||"").trim()==="Delivered"?"Delivered":String(x.status||"").trim()==="Cancelled Trip"?"Cancelled":"In-Transit";sH+=`<tr><td>${i+1}</td><td>${String(x.date||"").split(",")[0]}</td><td>${x.deliveryDate||"Pending"}</td><td>${x.vNum} (${x.type||x.vType||"-"}, ${x.weight||"-"})</td><td><strong>${safeStr(x.party)||""}</strong></td><td>${safeStr(x.from||"-")} to ${safeStr(x.to||"-")}</td><td>${st}</td><td>${safeStr(x.statusNote||"-")}</td></tr>`;});
             sH+=`</tbody></table>`;sC.innerHTML=sH;
+            
             let pH=`<div class="print-header"><h2>Data Report as on ${dS} - ${currentReportType}</h2></div><div class="party-table-wrapper"><table class="print-table"><thead><tr><th style="width:5%; text-align:center;">Sr</th><th style="width:12%;">Booking Date</th><th style="width:12%;">Delivery Date</th><th style="width:20%;">Vehicle No. & Specs</th><th style="width:15%;">Party Name</th><th style="width:16%;">Route</th><th style="width:10%;">Current Status</th><th style="width:10%;">Current Location</th></tr></thead><tbody>`;
             fT.forEach((x,i)=>{let st=String(x.status||"").trim()==="Delivered"?"Delivered":String(x.status||"").trim()==="Cancelled Trip"?"Cancelled":"In-Transit";pH+=`<tr><td style="text-align:center;">${i+1}</td><td>${String(x.date||"").split(",")[0]}</td><td>${x.deliveryDate||"Pending"}</td><td>${x.vNum} (${x.type||x.vType||"-"}, ${x.weight||"-"})</td><td><strong>${safeStr(x.party)||""}</strong></td><td>${safeStr(x.from||"-")} to ${safeStr(x.to||"-")}</td><td>${st}</td><td>${safeStr(x.statusNote||"-")}</td></tr>`;});
             pH+=`</tbody></table></div>`;pC.innerHTML=pH;currentReportTrips=fT;
