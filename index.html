@@ -362,11 +362,6 @@
             p.viewChargedFreightOB = false; p.viewChargedFreightRL = false; p.editChargedFreightOB = false; p.editChargedFreightRL = false;
             p.editPayments = false; p.exportLedger = false; p.generateMIS = false;
         }
-        else if (n === "Pramod Nayak") {
-            p.paymentsTab = false; p.reportsTab = true; p.viewChargedFreightOB = false; p.viewChargedFreightRL = false; 
-            p.editChargedFreightOB = false; p.editChargedFreightRL = true; p.editPayments = false;
-            p.exportLedger = false; p.generateMIS = false;
-        }
         else if (["Vijay Deore", "Sachin Mokashi"].includes(n)) {
             p.paymentsTab = false; p.editTrips = false; p.viewChargedFreightOB = false; p.viewChargedFreightRL = false; 
             p.editChargedFreightOB = false; p.editChargedFreightRL = true; p.generateMIS = false; p.exportLedger = false;
@@ -392,6 +387,7 @@
             p.editChargedFreightRL = true; p.editPayments = true;
         }
 
+        // Apply any manual Admin Panel checkbox overrides
         if(currentUser.permissions){
             if(currentUser.permissions.Placement===false) p.placementTab=false;
             if(currentUser.permissions.Deployed===false) p.deployedTab=false;
@@ -399,9 +395,23 @@
             if(currentUser.permissions.Payments===false) p.paymentsTab=false;
             if(currentUser.permissions.Reports===false) p.reportsTab=false;
         }
+
+        // 🚨 ABSOLUTE OVERRIDE: Must remain at the very bottom
+        // This mathematically forces Pramod's permissions, ignoring any Admin Checkboxes or generic Roles above
+        if (n === "Pramod Nayak") {
+            p.reportsTab = true; 
+            p.paymentsTab = false; 
+            p.viewChargedFreightOB = false; 
+            p.viewChargedFreightRL = false; 
+            p.editChargedFreightOB = false; 
+            p.editChargedFreightRL = true; 
+            p.editPayments = false;
+            p.exportLedger = false; 
+            p.generateMIS = false;
+        }
+
         return p;
     }
-
     function applyUserPermissions(){
         document.getElementById("pin-overlay").style.display="none"; document.getElementById("main-app").style.display="block"; document.getElementById("user-name-text").innerText=`Hi ${currentUser.Name||currentUser.name}!`; document.getElementById("user-name-text").style.display="block";
         const p=getUserPerms(); 
