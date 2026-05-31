@@ -332,7 +332,7 @@
         setupMemoryDropdowns(); renderAdminUsers();
     }
 
-    // THE FULLY UPDATED ACCESS MATRIX
+   // THE FULLY UPDATED ACCESS MATRIX
     function getUserPerms(){
         const n = currentUser.Name || currentUser.name || "";
         const r = currentUser.Role || currentUser.role || "";
@@ -397,8 +397,9 @@
         }
 
         // 🚨 ABSOLUTE OVERRIDE: Must remain at the very bottom
-        // This mathematically forces Pramod's permissions, ignoring any Admin Checkboxes or generic Roles above
         if (n === "Pramod Nayak") {
+            p.placementTab = true;       // <--- FORCE PLACEMENT TAB ON
+            p.revLogistics = true;       // <--- FORCE REVERSE LOGISTICS ON
             p.reportsTab = true; 
             p.paymentsTab = false; 
             p.viewChargedFreightOB = false; 
@@ -411,7 +412,8 @@
         }
 
         return p;
-    }
+    }    
+    
     function applyUserPermissions(){
         document.getElementById("pin-overlay").style.display="none"; document.getElementById("main-app").style.display="block"; document.getElementById("user-name-text").innerText=`Hi ${currentUser.Name||currentUser.name}!`; document.getElementById("user-name-text").style.display="block";
         const p=getUserPerms(); 
