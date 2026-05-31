@@ -284,22 +284,38 @@
         isCheckingPin=!1;
     }
 
-    async function performDatabaseSync(){
+   async function performDatabaseSync(){
         const res = await fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now()); if(!res.ok)throw new Error("Connection failed."); const data=await res.json();
         vehicles=data.vehicles||{}; clients=data.clients||[]; transporters=data.transporters||{}; users=data.users||[]; transporterBanks={}; statusLogs=data.statusLogs||[];
         let cU=users.find(u=>(u.Name||u.name)==="__VCONFIG__"); if(cU){try{vehicleBranches=JSON.parse(cU.Role||cU.role);localStorage.setItem("ktpl_branches",JSON.stringify(vehicleBranches));}catch(e){}}
         const revLogIds=["TRP-1779115155932","TRP-1779117724465","TRP-1779204199291","TRP-1779272619346","TRP-1779375136137","TRP-1779457814247","TRP-1779638743270","TRP-1779686779691","TRP-1779722314454"];
         
-        // SECURED JSON PARSING (Fixes the Blank Screen Crash permanently)
+        // 🚨 SECURED PARSING & UNBREAKABLE DATA RESCUE
         allTrips=(data.trips||[]).map(t=>{
             t.bookingType="Own Booking"; t.brokingAgent="";
+            
+            // 1. Read the indestructible [RL] tag from the Transporter Column
+            if (t.tName && String(t.tName).startsWith("[RL] ")) {
+                t.bookingType = "Reverse Logistics";
+                t.brokingAgent = String(t.tName).substring(5).trim();
+                t.tName = ""; // Erase the tag from UI memory so it stays clean
+            }
+
+            // 2. Parse ledger if it managed to survive Google's cutoff
             if(t.financialLedger && String(t.financialLedger).trim() !== "undefined" && String(t.financialLedger).trim() !== ""){
                 try{let j=JSON.parse(t.financialLedger);if(j.bookingType)t.bookingType=j.bookingType;if(j.brokingAgent)t.brokingAgent=j.brokingAgent;}catch(e){}
             } else {
-                t.financialLedger = JSON.stringify({bookingType:"Own Booking",brokingAgent:"",income:[],expense:[],reco:{payments:[]}});
+                t.financialLedger = JSON.stringify({bookingType:t.bookingType,brokingAgent:t.brokingAgent,income:[],expense:[],reco:{payments:[]}});
             }
+            
+            // 3. Absolute Fallback
             if(!t.bookingType||t.bookingType==="Own Booking"){if(t.brokingAgent&&String(t.brokingAgent).trim()!==""){t.bookingType="Reverse Logistics";t.tName="";}}
-            if(revLogIds.includes(t.id))t.bookingType="Reverse Logistics";
+            if(revLogIds.includes(t.id)){
+                t.bookingType="Reverse Logistics";
+                if(!t.brokingAgent) t.brokingAgent = t.tName || t.tPerson || "";
+                t.tName = "";
+            }
+            
             t.computedBookingType=t.bookingType; return t;
         });
 
@@ -737,12 +753,14 @@
     function savePlacementRev(){if(!validatePlacementRev())return;const vn=document.getElementById("rl-vnum").value.replace(/[\s-_]/g,"").toUpperCase();if(!isKTPL(vn))return alert("Reverse Logistics strictly requires a valid KTPL fleet asset.");let rp=document.getElementById("rl-party").value;let tc=document.getElementById("rl-typeco").value;let fp=normalizePartyName(rp);if(tc&&fp)fp+=" ("+tc+")";const p={action:"saveTrip",id:"TRP-"+Date.now(),date:getFormattedDateVal(document.getElementById("rl-date").value),party:fp||"",from:formatCaseStr(document.getElementById("rl-from").value),to:formatCaseStr(document.getElementById("rl-to").value),vNum:vn,type:document.getElementById("rl-vtype").value.toUpperCase(),weight:document.getElementById("rl-weight").value.toUpperCase(),status:"In-Transit",deliveryDate:"",cNote:"",podDate:"",createdBy:currentUser.Name||currentUser.name||"Unknown",vFreight:"",cFreight:document.getElementById("rl-cfreight").value||"",dName:formatCaseStr(document.getElementById("rl-dname").value),dContact:formatPhoneString(document.getElementById("rl-dcontact").value),tName:"",tPerson:formatCaseStr(document.getElementById("rl-agent").value),tContact:formatPhoneString(document.getElementById("rl-contact").value),remarks:document.getElementById("rl-remarks").value,podRemark:"",loadingExp:"",unloadingExp:"",lrExp:"",otherExp:"",otherExpReason:"",bookingType:"Reverse Logistics",brokingAgent:normalizePartyName(document.getElementById("rl-agency").value)};finalizePlacementSave(p);}
     
     // BULLETPROOF SAVE MECHANISM WITH 28-COLUMN ARCHITECTURE
-    function finalizePlacementSave(p){
+  function finalizePlacementSave(p){
+        // 1. HARD OFFLINE CHECK
         if (!navigator.onLine) {
             alert("⚠️ No Internet Connection. Please check your network and try again.");
             return; 
         }
 
+        // 2. THE PADLOCK
         if (window.isSavingPlacementLock) return; 
         window.isSavingPlacementLock = true;
         setTimeout(() => { window.isSavingPlacementLock = false; }, 2500); 
@@ -752,6 +770,7 @@
         if (loader) loader.style.display="flex";
         if (loaderText) loaderText.innerText="Saving to Cloud...";
 
+        // 3. SAFE ROUTER
         if (!p.bookingType) {
             if (p.brokingAgent && String(p.brokingAgent).trim() !== "") {
                 p.bookingType = "Reverse Logistics";
@@ -760,12 +779,18 @@
             }
         }
 
+        // 4. THE SECURE LEDGER
         const lj=JSON.stringify({bookingType:p.bookingType,brokingAgent:(p.brokingAgent||""),income:[],expense:[],reco:{payments:[]}});
         p.financialLedger=lj;
         
-        // Exact 28 Columns - Ensures the hidden ledger lands perfectly in Column AB
-        const dR=[p.id,p.date,p.party,p.from,p.to,p.vNum,p.type,p.weight,"In-Transit","","","","",p.createdBy,p.vFreight,p.cFreight,p.dName,p.dContact,p.tName||"",p.tPerson||"",p.tContact||"",p.remarks,"","","","","",lj];
+        // 🚨 THE PERSISTENCE HACK: Google Sheets is dropping the last column (ledger). 
+        // We pack the Reverse Logistics Agency directly into the Transporter Column with an [RL] tag to guarantee it saves.
+        const safeTName = p.bookingType === "Reverse Logistics" ? "[RL] " + (p.brokingAgent || "") : (p.tName || "");
         
+        // 5. EXACT ORIGINAL DATA PACKAGE
+        const dR=[p.id,p.date,p.party,p.from,p.to,p.vNum,p.type,p.weight,"In-Transit","","","","",p.createdBy,p.vFreight,p.cFreight,p.dName,p.dContact,safeTName,p.tPerson||"",p.tContact||"",p.remarks,"","","","","",lj];
+        
+        // 6. FIRE AND FORGET
         fetch(GOOGLE_SCRIPT_URL, {
             method:"POST", 
             body:JSON.stringify({action:"saveTrip",data:dR,...p})
@@ -773,9 +798,11 @@
             console.log("Safe background fetch complete.");
         });
         
+        // 7. INSTANT MEMORY UPDATE
         allTrips.push({...p,statusNote:"",computedBookingType:p.bookingType});
         updateLocalMemory({vNum:p.vNum,type:p.type,weight:p.weight,party:p.party,brokingAgent:p.brokingAgent,tName:p.tName,dName:p.dName,dContact:p.dContact,tPerson:p.tPerson,tContact:p.tContact});
         
+        // 8. SMOOTH UNLOCK
         setTimeout(() => {
             if (loader) loader.style.display="none"; 
             alert(p.bookingType + " details saved successfully!");
