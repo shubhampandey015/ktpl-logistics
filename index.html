@@ -290,17 +290,14 @@
         let cU=users.find(u=>(u.Name||u.name)==="__VCONFIG__"); if(cU){try{vehicleBranches=JSON.parse(cU.Role||cU.role);localStorage.setItem("ktpl_branches",JSON.stringify(vehicleBranches));}catch(e){}}
         const revLogIds=["TRP-1779115155932","TRP-1779117724465","TRP-1779204199291","TRP-1779272619346","TRP-1779375136137","TRP-1779457814247","TRP-1779638743270","TRP-1779686779691","TRP-1779722314454"];
         
-        // 🚨 THE UNBREAKABLE RESCUE OPERATION
         allTrips=(data.trips||[]).map(t=>{
             t.bookingType="Own Booking"; t.brokingAgent="";
             
-            // 1. If the ID contains -RL-, it belongs in Reverse Logistics permanently.
             let isRev = (t.id && String(t.id).includes("-RL-")) || revLogIds.includes(t.id);
             if (isRev) {
                 t.bookingType = "Reverse Logistics";
             }
 
-            // 🛡️ ZERO-RISK FIX: Stop Google Apps Script from corrupting the JSON string
             if (t.financialLedger !== null && typeof t.financialLedger === "object") {
                 t.financialLedger = JSON.stringify(t.financialLedger);
             } else if (t.financialLedger === "[object Object]") {
@@ -317,7 +314,6 @@
                 t.financialLedger = JSON.stringify({bookingType:t.bookingType,brokingAgent:t.brokingAgent,income:[],expense:[],reco:{payments:[]}});
             }
             
-            // 3. The Ultimate Fallback: Pull Agency Name directly from the safe Transporter column
             if (t.bookingType === "Reverse Logistics") {
                 if(!t.brokingAgent) t.brokingAgent = t.tName || t.tPerson || "";
             } else if(t.brokingAgent && String(t.brokingAgent).trim()!==""){
@@ -886,7 +882,7 @@
     function updateBackendData(tId,act,val){const p={action:act,id:tId};if(act==="updateCNote")p.value=val;if(act==="updatePODRemark")p.value=val;if(act==="updateTripRemark")p.value=val;if(act==="updatePOD")p.date=val;fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify(p)});const t=allTrips.find(x=>x.id===tId);if(t){if(act==="updateCNote")t.cNote=val;if(act==="updatePODRemark")t.podRemark=val;if(act==="updateTripRemark")t.remarks=val;if(act==="updatePOD")t.podDate=val;}if(act==="updatePOD")triggerCurrentRender();}
     function savePOD(tId,clr=!1){let fd="";if(clr){if(!confirm("Remove POD Date?"))return;}else{const d=document.getElementById(`pod-date-${tId}`).value;const r=currentUser.Role||currentUser.role;const isA=(r==="Admin"||r==="Master Admin");if(!d){if(!isA||!confirm("Save without date?"))return alert("Select POD date.");fd="No Date";}else{fd=getFormattedDateVal(d);}}updateBackendData(tId,"updatePOD",fd);}
     
-    function updateStatusLog(tId,locStr){
+    async function updateStatusLog(tId,locStr){
         const t=allTrips.find(x=>x.id===tId); if(!t)return; t.statusNote=locStr;
         let l={}; 
         try{
@@ -894,14 +890,18 @@
             if(p) Object.assign(l,p);
         }catch(e){}
         
-        // 🛡️ THE UNBREAKABLE SHIELD
         l.bookingType = t.computedBookingType || t.bookingType;
         if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
 
         l.currentLoc=locStr; l.locTime=Date.now(); if(!l.locHistory)l.locHistory=[]; l.locHistory.push({loc:locStr,time:l.locTime});
         const jStr=JSON.stringify(l); t.financialLedger=jStr;
         
-        fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now(),{method:"POST",body:JSON.stringify({action:"updateFinancialLedger",id:tId,ledgerJson:jStr})});
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "updateFinancialLedger", id: tId, ledgerJson: jStr })
+            });
+        } catch(err) { console.error(err); }
         
         let localLocs = JSON.parse(localStorage.getItem('ktpl_custom_locs') || '{}');
         if(!localLocs[tId]) localLocs[tId] = [];
@@ -1056,7 +1056,7 @@
         }).join("");
     }
     
-    function commitRecoRecord(id,mode){
+    async function commitRecoRecord(id,mode){
         let t=allTrips.find(x=>x.id===id); if(!t)return; let l={income:[],expense:[],reco:{payments:[]}}; 
         try{
             let p = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger);
@@ -1064,7 +1064,6 @@
             if(!l.reco) l.reco={payments:[]};
         }catch(e){}
         
-        // 🛡️ THE UNBREAKABLE SHIELD: Prevents Deployed tags from wiping if parse fails
         l.bookingType = t.computedBookingType || t.bookingType;
         if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
 
@@ -1077,7 +1076,20 @@
         for(let i=0;i<cAmt.length;i++){if(cAmt[i].value||cDt[i].value)l.reco.payments.push({amt:cAmt[i].value,date:cDt[i].value});}
         const jS=JSON.stringify(l); t.financialLedger=jS; 
         
-        fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now(),{method:"POST",body:JSON.stringify({action:"updateFinancialLedger",id:id,ledgerJson:jS})}); 
+        const loader = document.getElementById("loading-overlay");
+        const loaderText = document.getElementById("loader-text");
+        if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Ledger to Cloud..."; }
+        
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "updateFinancialLedger", id: id, ledgerJson: jS })
+            });
+        } catch(err) {
+            console.error(err);
+        }
+        
+        if(loader) loader.style.display="none";
         alert("Ledger updated."); renderReconciliation();
     }
 
@@ -1192,7 +1204,7 @@
     function addFinancialRow(cat,t="",a=""){const c=document.getElementById(`${cat}-rows-container`);const r=document.createElement("div");r.className="financial-row";r.innerHTML=`<input type="text" placeholder="Desc/Type" class="compact-input fin-desc" value="${safeStr(t)}"><input type="number" placeholder="Amount" class="compact-input fin-amt" value="${a}"><button class="btn btn-clear" onclick="this.parentElement.remove()" style="padding:10px; font-weight:bold; color:#b3261e; width:auto; border-radius:8px;">X</button>`;c.appendChild(r);}
     function closeFinancialModal(){document.getElementById("financialModal").style.display="none";}
     
-    function saveFinancialLedger(){
+    async function saveFinancialLedger(){
         const tId=document.getElementById("fin-trip-id").value;const t=allTrips.find(x=>x.id===tId);
         let l={income:[],expense:[],reco:{}};
         try{
@@ -1200,7 +1212,6 @@
             if(p) Object.assign(l,p);
         }catch(e){}
         
-        // 🛡️ THE UNBREAKABLE SHIELD
         l.bookingType = t.computedBookingType || t.bookingType;
         if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
 
@@ -1209,7 +1220,21 @@
         document.querySelectorAll("#expense-rows-container .financial-row").forEach(r=>{let d=r.querySelector(".fin-desc").value;let a=r.querySelector(".fin-amt").value;if(d&&a)l.expense.push({type:d,amt:parseFloat(a)});});
         
         const js=JSON.stringify(l);t.financialLedger=js;
-        fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now(),{method:"POST",body:JSON.stringify({action:"updateFinancialLedger",id:tId,ledgerJson:js})});
+        
+        const loader = document.getElementById("loading-overlay");
+        const loaderText = document.getElementById("loader-text");
+        if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Expenses to Cloud..."; }
+        
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "updateFinancialLedger", id: tId, ledgerJson: js })
+            });
+        } catch(err) {
+            console.error(err);
+        }
+        
+        if(loader) loader.style.display="none";
         closeFinancialModal();triggerCurrentRender();
     }
 
