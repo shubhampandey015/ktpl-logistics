@@ -284,7 +284,7 @@
         isCheckingPin=!1;
     }
 
-  async function performDatabaseSync(){
+    async function performDatabaseSync(){
         const res = await fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now()); if(!res.ok)throw new Error("Connection failed."); const data=await res.json();
         vehicles=data.vehicles||{}; clients=data.clients||[]; transporters=data.transporters||{}; users=data.users||[]; transporterBanks={}; statusLogs=data.statusLogs||[];
         let cU=users.find(u=>(u.Name||u.name)==="__VCONFIG__"); if(cU){try{vehicleBranches=JSON.parse(cU.Role||cU.role);localStorage.setItem("ktpl_branches",JSON.stringify(vehicleBranches));}catch(e){}}
@@ -300,7 +300,13 @@
                 t.bookingType = "Reverse Logistics";
             }
 
-            // 2. Safely parse whatever parts of the ledger survived
+            // 🛡️ ZERO-RISK FIX: Stop Google Apps Script from corrupting the JSON string
+            if (t.financialLedger !== null && typeof t.financialLedger === "object") {
+                t.financialLedger = JSON.stringify(t.financialLedger);
+            } else if (t.financialLedger === "[object Object]") {
+                t.financialLedger = "";
+            }
+
             if(t.financialLedger && String(t.financialLedger).trim() !== "undefined" && String(t.financialLedger).trim() !== ""){
                 try{
                     let j=JSON.parse(t.financialLedger);
@@ -541,7 +547,6 @@
         if(currentActiveMainTab!=="tab-reports"&&currentActiveMainTab!=="tab-fleet-status"&&currentActiveMainTab!=="tab-fleet-locator"){triggerCurrentRender();}else if(currentActiveMainTab==="tab-reports"){document.getElementById("screen-report").innerHTML="";document.getElementById("report-actions").style.display="none";}else if(currentActiveMainTab==="tab-fleet-status")renderFleetStatus();
     }
 
-    // THE FULLY UPDATED PRAMOD/PARVEEN VISIBILITY CHECKER
     function getFilteredTrips(base){
         let r=[...base]; 
         const n=currentUser.Name||currentUser.name||""; 
@@ -618,7 +623,7 @@
         
         let bt = t.computedBookingType;
         let brAgt = t.brokingAgent;
-        if(!brAgt) { try { let pf = JSON.parse(t.financialLedger); if(pf.brokingAgent) brAgt = pf.brokingAgent; } catch(err){} }
+        if(!brAgt) { try { let pf = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger); if(pf && pf.brokingAgent) brAgt = pf.brokingAgent; } catch(err){} }
 
         let st = String(t.status||"").trim();
         let statusText = st;
@@ -765,7 +770,7 @@
 
         const p={
             action:"saveTrip",
-            id:"TRP-RL-"+Date.now(), // 🚨 THE FIX: Unbreakable '-RL-' Tag in the ID
+            id:"TRP-RL-"+Date.now(), 
             date:getFormattedDateVal(document.getElementById("rl-date").value),
             party:fp||"",
             from:formatCaseStr(document.getElementById("rl-from").value),
@@ -780,7 +785,7 @@
             cFreight:document.getElementById("rl-cfreight").value||"",
             dName:formatCaseStr(document.getElementById("rl-dname").value),
             dContact:formatPhoneString(document.getElementById("rl-dcontact").value),
-            tName: agencyName, // 🚨 Forces Agency Name into the safe Transporter slot so it never deletes
+            tName: agencyName, 
             tPerson:formatCaseStr(document.getElementById("rl-agent").value),
             tContact:formatPhoneString(document.getElementById("rl-contact").value),
             remarks:document.getElementById("rl-remarks").value,
@@ -805,8 +810,7 @@
         const loaderText = document.getElementById("loader-text");
         if (loader) loader.style.display="flex";
         if (loaderText) loaderText.innerText="Saving to Cloud...";
-
-        // 🚨 Reads the unbreakable ID 
+ 
         if (!p.bookingType) {
             p.bookingType = (p.id && String(p.id).includes("-RL-")) ? "Reverse Logistics" : "Own Booking";
         }
@@ -884,9 +888,19 @@
     
     function updateStatusLog(tId,locStr){
         const t=allTrips.find(x=>x.id===tId); if(!t)return; t.statusNote=locStr;
-        let l={}; try{if(t.financialLedger)l=JSON.parse(t.financialLedger);}catch(e){}
+        let l={}; 
+        try{
+            let p = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger);
+            if(p) Object.assign(l,p);
+        }catch(e){}
+        
+        // 🛡️ THE UNBREAKABLE SHIELD
+        l.bookingType = t.computedBookingType || t.bookingType;
+        if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
+
         l.currentLoc=locStr; l.locTime=Date.now(); if(!l.locHistory)l.locHistory=[]; l.locHistory.push({loc:locStr,time:l.locTime});
         const jStr=JSON.stringify(l); t.financialLedger=jStr;
+        
         fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now(),{method:"POST",body:JSON.stringify({action:"updateFinancialLedger",id:tId,ledgerJson:jStr})});
         
         let localLocs = JSON.parse(localStorage.getItem('ktpl_custom_locs') || '{}');
@@ -900,7 +914,7 @@
     function toggleHistory(tId,vMode){
         document.querySelectorAll(".history-panel").forEach(p=>{if(p.id!==`hist-${vMode}-${tId}`)p.style.display="none";});
         const p=document.getElementById(`hist-${vMode}-${tId}`); const t=allTrips.find(x=>x.id===tId); let hist=[];
-        try{let l=JSON.parse(t.financialLedger);if(l.locHistory)hist=[...l.locHistory];}catch(e){}
+        try{let l=typeof t.financialLedger==="object"?t.financialLedger:JSON.parse(t.financialLedger);if(l.locHistory)hist=[...l.locHistory];}catch(e){}
         
         let localLocs = JSON.parse(localStorage.getItem('ktpl_custom_locs') || '{}');
         if(localLocs[tId]) {
@@ -940,7 +954,7 @@
         let total=0;
         selectedPaymentTrips.forEach(id=>{
             let t=allTrips.find(x=>x.id===id); if(t){
-                let l={income:[],expense:[],reco:{payments:[]}}; try{let p=JSON.parse(t.financialLedger);if(p)Object.assign(l,p);}catch(e){}
+                let l={income:[],expense:[],reco:{payments:[]}}; try{let p=typeof t.financialLedger==="object"?t.financialLedger:JSON.parse(t.financialLedger);if(p)Object.assign(l,p);}catch(e){}
                 let bC=parseFloat(t.vFreight||0); let eC=l.expense.reduce((s,r)=>s+parseFloat(r.amt||0),0); let bR=parseFloat(t.cFreight||0); let eR=l.income.reduce((s,r)=>s+parseFloat(r.amt||0),0); let tP=bC+eC; let tR=bR+eR;
                 let pt=0; if(l.reco.payments&&l.reco.payments.length>0){pt=l.reco.payments.reduce((s,x)=>s+parseFloat(x.amt||0),0);}else{if(currentRecoType==="Own Booking")pt=parseFloat(l.reco.advPaid||t.advancePaid||0)+parseFloat(l.reco.balPaid1||l.reco.balPaid||0)+parseFloat(l.reco.balPaid2||0)+parseFloat(l.reco.balPaid3||0);else pt=parseFloat(l.reco.advRec||0)+parseFloat(l.reco.osDues1||l.reco.osDues||0)+parseFloat(l.reco.osDues2||0)+parseFloat(l.reco.osDues3||0);}
                 let rem=currentRecoType==="Own Booking"?(tP-pt-eR):(tR-tP-pt); if(l.reco.status!=="Cleared"&&rem>0)total+=rem;
@@ -956,7 +970,7 @@
         let str=`*Payment Request: ${pt}*\nTotal Trips: ${selectedPaymentTrips.length}\n\n`; let exData=[["Sr","Transporter","Party Name","Vehicle","Type/Cap","Route","Payable Amount","Bank Name","Bank A/c","IFSC"]]; let c=1;
         selectedPaymentTrips.forEach(id=>{
             let t=allTrips.find(x=>x.id===id); if(t){
-                let l={income:[],expense:[],reco:{payments:[]}}; try{let p=JSON.parse(t.financialLedger);if(p)Object.assign(l,p);}catch(e){}
+                let l={income:[],expense:[],reco:{payments:[]}}; try{let p=typeof t.financialLedger==="object"?t.financialLedger:JSON.parse(t.financialLedger);if(p)Object.assign(l,p);}catch(e){}
                 let bC=parseFloat(t.vFreight||0); let eC=l.expense.reduce((s,r)=>s+parseFloat(r.amt||0),0); let bR=parseFloat(t.cFreight||0); let eR=l.income.reduce((s,r)=>s+parseFloat(r.amt||0),0); let tP=bC+eC; let tR=bR+eR;
                 let ptT=0; if(l.reco.payments&&l.reco.payments.length>0){ptT=l.reco.payments.reduce((s,x)=>s+parseFloat(x.amt||0),0);}else{if(currentRecoType==="Own Booking")ptT=parseFloat(l.reco.advPaid||t.advancePaid||0)+parseFloat(l.reco.balPaid1||l.reco.balPaid||0)+parseFloat(l.reco.balPaid2||0)+parseFloat(l.reco.balPaid3||0);else ptT=parseFloat(l.reco.advRec||0)+parseFloat(l.reco.osDues1||l.reco.osDues||0)+parseFloat(l.reco.osDues2||0)+parseFloat(l.reco.osDues3||0);}
                 let rem=currentRecoType==="Own Booking"?(tP-ptT-eR):(tR-tP-ptT); let trn=currentRecoType==="Own Booking"?t.tName:t.brokingAgent; let pty=t.party||"N/A";
@@ -970,7 +984,7 @@
     window.addPaymentSlot=function(tid,type){let c=document.getElementById(`payment-slots-${tid}`);let s=c.querySelectorAll(".payment-slot-row").length;let p=type==="Own Booking"?s===0?"Advance Paid":"Balance Paid":s===0?"Advance Recv":"O/s Dues";let h=`<div class="payment-slot-row"><input type="number" class="compact-input pay-amt-${tid}" placeholder="${p}" value="" oninput="calcRecoUI('${tid}', '${type}')"><input type="date" class="compact-input pay-date-${tid}" value=""><button class="btn-clear" onclick="this.parentElement.remove(); calcRecoUI('${tid}', '${type}');" style="padding:6px; font-weight:bold; color:#b3261e; width:auto; border-radius:6px;">X</button></div>`;c.insertAdjacentHTML("beforeend",h);};
     window.calcRecoUI=function(tid,type){
         let t=allTrips.find(x=>x.id===tid); if(!t)return;
-        let l={income:[],expense:[]}; try{let p=JSON.parse(t.financialLedger);if(p.income)l.income=p.income;if(p.expense)l.expense=p.expense;}catch(e){}
+        let l={income:[],expense:[]}; try{let p=typeof t.financialLedger==="object"?t.financialLedger:JSON.parse(t.financialLedger);if(p.income)l.income=p.income;if(p.expense)l.expense=p.expense;}catch(e){}
         let bC=parseFloat(t.vFreight||0); let eC=l.expense.reduce((s,r)=>s+parseFloat(r.amt||0),0); let bR=parseFloat(t.cFreight||0); let eR=l.income.reduce((s,r)=>s+parseFloat(r.amt||0),0); let tP=bC+eC; let tR=bR+eR;
         let tPay=0; document.querySelectorAll(`.pay-amt-${tid}`).forEach(i=>{tPay+=parseFloat(i.value||0);}); let isC=document.getElementById(`mstat-${tid}`).value==="Cleared";
         if(type==="Own Booking"){let bToP=tP-tPay-eR;let el=document.getElementById(`dyn-bal-${tid}`);if(el){if(isC&&bToP>0){el.innerHTML=`<div style="color:#5f6368;"><del>Original Balance: ₹${bToP.toFixed(2)}</del></div><div style="color:#188c38; margin:6px 0;">Saved on deduction: ₹${bToP.toFixed(2)}</div><div>Final Balance to Pay: ₹0</div>`;}else{el.innerHTML=`Balance to Pay: ₹${bToP.toFixed(2)}`;}}}else{let os=tR-tP-tPay;let el=document.getElementById(`dyn-bal-${tid}`);if(el){if(isC&&os>0){el.innerHTML=`<div style="color:#5f6368;"><del>Original O/S: ₹${os.toFixed(2)}</del></div><div style="color:#d93025; margin:6px 0;">Bad Debts: ₹${os.toFixed(2)}</div><div>Final Outstanding: ₹0</div>`;}else{el.innerHTML=`Outstanding Amount: ₹${os.toFixed(2)}`;}}}
@@ -981,7 +995,7 @@
         const c=document.getElementById("reco-container"); if(!currentRecoType)return;
         let trips=getFilteredTrips(allTrips).filter(t=>t.computedBookingType===currentRecoType).filter(t=>{
             if(currentRecoType==="Own Booking" && isKTPL(t.vNum)) return false;
-            let l={reco:{}};try{let p=JSON.parse(t.financialLedger);if(p.reco)l.reco=p.reco;}catch(e){}return currentRecoStat==="Completed"?"Cleared"===(l.reco.status||"Pending"):"Cleared"!==(l.reco.status||"Pending");
+            let l={reco:{}};try{let p=typeof t.financialLedger==="object"?t.financialLedger:JSON.parse(t.financialLedger);if(p.reco)l.reco=p.reco;}catch(e){}return currentRecoStat==="Completed"?"Cleared"===(l.reco.status||"Pending"):"Cleared"!==(l.reco.status||"Pending");
         });
         if(trips.length===0){c.innerHTML="<p style='padding:20px; text-align:center;'>No ledger records matching parameters.</p>";return;}
         
@@ -992,14 +1006,14 @@
         const cVF = currentRecoType === "Own Booking" ? pAuth.viewChargedFreightOB : pAuth.viewChargedFreightRL;
 
         c.innerHTML=trips.map((t,i)=>{
-            let l={income:[],expense:[],reco:{payments:[]}}; try{let p=JSON.parse(t.financialLedger);if(p.income)l.income=p.income;if(p.expense)l.expense=p.expense;if(p.reco)l.reco=p.reco;if(!l.reco.payments)l.reco.payments=[];}catch(e){}
+            let l={income:[],expense:[],reco:{payments:[]}}; try{let p=typeof t.financialLedger==="object"?t.financialLedger:JSON.parse(t.financialLedger);if(p.income)l.income=p.income;if(p.expense)l.expense=p.expense;if(p.reco)l.reco=p.reco;if(!l.reco.payments)l.reco.payments=[];}catch(e){}
             if(!l.reco.payments)l.reco.payments=[];
             if(l.reco.payments.length===0){if(currentRecoType==="Own Booking"){if(l.reco.advPaid||l.reco.balPaid1||l.reco.balPaid2||l.reco.balPaid3){if(l.reco.advPaid)l.reco.payments.push({amt:l.reco.advPaid,date:l.reco.advDate});if(l.reco.balPaid1||l.reco.balPaid)l.reco.payments.push({amt:l.reco.balPaid1||l.reco.balPaid,date:l.reco.balDate1||l.reco.balDate});if(l.reco.balPaid2)l.reco.payments.push({amt:l.reco.balPaid2,date:l.reco.balDate2});if(l.reco.balPaid3)l.reco.payments.push({amt:l.reco.balPaid3,date:l.reco.balDate3});}}else{if(l.reco.advRec||l.reco.osDues1||l.reco.osDues2||l.reco.osDues3){if(l.reco.advRec)l.reco.payments.push({amt:l.reco.advRec,date:l.reco.advRecDate});if(l.reco.osDues1||l.reco.osDues)l.reco.payments.push({amt:l.reco.osDues1||l.reco.osDues,date:l.reco.osDate1||l.reco.osDate});if(l.reco.osDues2)l.reco.payments.push({amt:l.reco.osDues2,date:l.reco.osDate2});if(l.reco.osDues3)l.reco.payments.push({amt:l.reco.osDues3,date:l.reco.osDate3});}}}
             if(l.reco.payments.length===0)l.reco.payments.push({amt:"",date:""});
             if(l.expense.length===0&&(t.otherExp||t.loadingExp||t.unloadingExp||t.lrExp)){if(t.otherExp)l.expense.push({type:t.otherExpReason||"Generic",amt:parseFloat(t.otherExp)});if(t.loadingExp)l.expense.push({type:"Loading",amt:parseFloat(t.loadingExp)});if(t.unloadingExp)l.expense.push({type:"Unloading",amt:parseFloat(t.unloadingExp)});if(t.lrExp)l.expense.push({type:"LR",amt:parseFloat(t.lrExp)});}
             
             let bR=parseFloat(t.cFreight||0); let eR=l.income.reduce((s,r)=>s+parseFloat(r.amt||0),0); let bC=parseFloat(t.vFreight||0); let eC=l.expense.reduce((s,r)=>s+parseFloat(r.amt||0),0); let tP=bC+eC; let tR=bR+eR;
-            let brAgt=t.brokingAgent; if(!brAgt){try{let p=JSON.parse(t.financialLedger);if(p.brokingAgent)brAgt=p.brokingAgent;}catch(e){}}
+            let brAgt=t.brokingAgent; if(!brAgt){try{let p=typeof t.financialLedger==="object"?t.financialLedger:JSON.parse(t.financialLedger);if(p.brokingAgent)brAgt=p.brokingAgent;}catch(e){}}
             let hdr=`<strong>${String(t.date||"").split(",")[0]}</strong> | <strong>${t.vNum}</strong> | ${safeStr(t.from)}➔${safeStr(t.to)} <br> <span style="color:#5f6368; font-size:11px;">Party: ${safeStr(t.party)||"N/A"} | ${currentRecoType==="Own Booking"?"Transporter":"Broker"}: ${currentRecoType==="Own Booking"?safeStr(t.tName):safeStr(brAgt)}</span>`;
             let oC=currentOpenRecoId===t.id?"open":""; let isC=l.reco.status==="Cleared"; let ptTot=l.reco.payments.reduce((s,x)=>s+parseFloat(x.amt||0),0); let amtRem=currentRecoType==="Own Booking"?(tP-ptTot-eR):(tR-tP-ptTot);
             
@@ -1043,7 +1057,17 @@
     }
     
     function commitRecoRecord(id,mode){
-        let t=allTrips.find(x=>x.id===id); if(!t)return; let l={income:[],expense:[],reco:{payments:[]}}; try{let p=JSON.parse(t.financialLedger);if(p)Object.assign(l,p);if(!l.reco)l.reco={payments:[]};}catch(e){}
+        let t=allTrips.find(x=>x.id===id); if(!t)return; let l={income:[],expense:[],reco:{payments:[]}}; 
+        try{
+            let p = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger);
+            if(p) Object.assign(l,p);
+            if(!l.reco) l.reco={payments:[]};
+        }catch(e){}
+        
+        // 🛡️ THE UNBREAKABLE SHIELD: Prevents Deployed tags from wiping if parse fails
+        l.bookingType = t.computedBookingType || t.bookingType;
+        if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
+
         let bn=document.getElementById(`reco-bankname-${id}`)?document.getElementById(`reco-bankname-${id}`).value.trim():""; let ba=document.getElementById(`reco-bank-${id}`)?document.getElementById(`reco-bank-${id}`).value.trim():""; let bi=document.getElementById(`reco-ifsc-${id}`)?document.getElementById(`reco-ifsc-${id}`).value.trim():"";
         let tr=mode==="Own Booking"?t.tName:t.brokingAgent; let nTr=normalizePartyName(tr); let mB=transporterBanks[nTr]||{};
         if(nTr&&((mB.bankAc&&ba&&mB.bankAc!==ba)||(mB.ifsc&&bi&&mB.ifsc!==bi))){if(!confirm(`You are changing existing Bank Details for ${nTr}.\nOld A/C: ${mB.bankAc||"N/A"}\nNew A/C: ${ba||"N/A"}\n\nDo you want to proceed and overwrite?`))return;}
@@ -1051,7 +1075,10 @@
         if(nTr)transporterBanks[nTr]={bankName:bn,bankAc:ba,ifsc:bi,time:Date.now()};
         let cAmt=document.querySelectorAll(`.pay-amt-${id}`); let cDt=document.querySelectorAll(`.pay-date-${id}`); l.reco.payments=[];
         for(let i=0;i<cAmt.length;i++){if(cAmt[i].value||cDt[i].value)l.reco.payments.push({amt:cAmt[i].value,date:cDt[i].value});}
-        const jS=JSON.stringify(l); t.financialLedger=jS; fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now(),{method:"POST",body:JSON.stringify({action:"updateFinancialLedger",id:id,ledgerJson:jS})}); alert("Ledger updated."); renderReconciliation();
+        const jS=JSON.stringify(l); t.financialLedger=jS; 
+        
+        fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now(),{method:"POST",body:JSON.stringify({action:"updateFinancialLedger",id:id,ledgerJson:jS})}); 
+        alert("Ledger updated."); renderReconciliation();
     }
 
     function buildTripCard(e,idx,vMode){
@@ -1061,7 +1088,7 @@
         let h=`<div class="trip-card"><div style="border-bottom: 1px solid #f1f3f4; padding-bottom: 8px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;"><span><strong>#${idx+1}</strong> | ${String(e.date||"").split(",")[0]}</span><span class="status-badge ${sC}">${st}</span></div><div style="margin-bottom: 5px; display:flex; justify-content:space-between; align-items:center;"><span><strong>Party:</strong> ${safeStr(e.party)||"N/A"}</span>`;
         if(cE)h+=`<span style="cursor:pointer; color:#1a73e8; font-size:10px; font-weight:600; text-transform:uppercase;" onclick="openAdminEdit('${e.id}')">Edit Trip</span>`;
         let vKey = String(e.vNum || "").toUpperCase();         let vt = e.type || e.vType || (vehicles[vKey] ? vehicles[vKey].type || vehicles[vKey].vType : "") || "-";         let vw = e.weight || (vehicles[vKey] ? vehicles[vKey].capacity : "") || "-";         h+=`</div><div style="margin-bottom: 5px;"><strong>Route:</strong> ${safeStr(e.from)} ➔ ${safeStr(e.to)}</div><div style="margin-bottom: 5px;"><strong>Vehicle:</strong> ${e.vNum} (${safeStr(vt)}, ${safeStr(vw)})</div>`;
-        let bt=e.computedBookingType; let brAgt=e.brokingAgent; if(!brAgt){try{let pf=JSON.parse(e.financialLedger);if(pf.brokingAgent)brAgt=pf.brokingAgent;}catch(err){}}
+        let bt=e.computedBookingType; let brAgt=e.brokingAgent; if(!brAgt){try{let pf=typeof e.financialLedger==="object"?e.financialLedger:JSON.parse(e.financialLedger);if(pf.brokingAgent)brAgt=pf.brokingAgent;}catch(err){}}
         if(bt==="Reverse Logistics"&&brAgt)h+=`<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Agency:</strong> ${safeStr(brAgt)}</div>`;
         
         let sVF=isA; if(vMode==="deployed")sVF=!0; if(sVF&&e.vFreight&&String(e.vFreight).trim()!=="")h+=`<div style="margin-bottom: 5px; color:#5f6368; font-size:11px;"><strong>Vehicle Freight:</strong> ${e.vFreight}</div>`;
@@ -1161,10 +1188,30 @@
         triggerCurrentRender();
     }
 
-    function openFinancialAllocation(tId){const t=allTrips.find(x=>x.id===tId);if(!t)return;document.getElementById("fin-trip-id").value=tId;document.getElementById("income-rows-container").innerHTML="";document.getElementById("expense-rows-container").innerHTML="";let l={income:[],expense:[]};try{let p=JSON.parse(t.financialLedger);if(p.income)l.income=p.income;if(p.expense)l.expense=p.expense;}catch(e){}if((l.expense||[]).length===0&&(t.otherExp||t.loadingExp||t.unloadingExp||t.lrExp)){if(t.otherExp)l.expense.push({type:t.otherExpReason||"Generic",amt:parseFloat(t.otherExp)});if(t.loadingExp)l.expense.push({type:"Loading",amt:parseFloat(t.loadingExp)});if(t.unloadingExp)l.expense.push({type:"Unloading",amt:parseFloat(t.unloadingExp)});if(t.lrExp)l.expense.push({type:"LR",amt:parseFloat(t.lrExp)});} (l.income||[]).forEach(r=>addFinancialRow("income",r.type,r.amt)); (l.expense||[]).forEach(r=>addFinancialRow("expense",r.type,r.amt));document.getElementById("financialModal").style.display="flex";}
+    function openFinancialAllocation(tId){const t=allTrips.find(x=>x.id===tId);if(!t)return;document.getElementById("fin-trip-id").value=tId;document.getElementById("income-rows-container").innerHTML="";document.getElementById("expense-rows-container").innerHTML="";let l={income:[],expense:[]};try{let p=typeof t.financialLedger==="object"?t.financialLedger:JSON.parse(t.financialLedger);if(p.income)l.income=p.income;if(p.expense)l.expense=p.expense;}catch(e){}if((l.expense||[]).length===0&&(t.otherExp||t.loadingExp||t.unloadingExp||t.lrExp)){if(t.otherExp)l.expense.push({type:t.otherExpReason||"Generic",amt:parseFloat(t.otherExp)});if(t.loadingExp)l.expense.push({type:"Loading",amt:parseFloat(t.loadingExp)});if(t.unloadingExp)l.expense.push({type:"Unloading",amt:parseFloat(t.unloadingExp)});if(t.lrExp)l.expense.push({type:"LR",amt:parseFloat(t.lrExp)});} (l.income||[]).forEach(r=>addFinancialRow("income",r.type,r.amt)); (l.expense||[]).forEach(r=>addFinancialRow("expense",r.type,r.amt));document.getElementById("financialModal").style.display="flex";}
     function addFinancialRow(cat,t="",a=""){const c=document.getElementById(`${cat}-rows-container`);const r=document.createElement("div");r.className="financial-row";r.innerHTML=`<input type="text" placeholder="Desc/Type" class="compact-input fin-desc" value="${safeStr(t)}"><input type="number" placeholder="Amount" class="compact-input fin-amt" value="${a}"><button class="btn btn-clear" onclick="this.parentElement.remove()" style="padding:10px; font-weight:bold; color:#b3261e; width:auto; border-radius:8px;">X</button>`;c.appendChild(r);}
     function closeFinancialModal(){document.getElementById("financialModal").style.display="none";}
-    function saveFinancialLedger(){const tId=document.getElementById("fin-trip-id").value;const t=allTrips.find(x=>x.id===tId);let l={income:[],expense:[],reco:{}};try{let p=JSON.parse(t.financialLedger);if(p)Object.assign(l,p);l.income=[];l.expense=[];}catch(e){}document.querySelectorAll("#income-rows-container .financial-row").forEach(r=>{let d=r.querySelector(".fin-desc").value;let a=r.querySelector(".fin-amt").value;if(d&&a)l.income.push({type:d,amt:parseFloat(a)});});document.querySelectorAll("#expense-rows-container .financial-row").forEach(r=>{let d=r.querySelector(".fin-desc").value;let a=r.querySelector(".fin-amt").value;if(d&&a)l.expense.push({type:d,amt:parseFloat(a)});});const js=JSON.stringify(l);t.financialLedger=js;fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now(),{method:"POST",body:JSON.stringify({action:"updateFinancialLedger",id:tId,ledgerJson:js})});closeFinancialModal();triggerCurrentRender();}
+    
+    function saveFinancialLedger(){
+        const tId=document.getElementById("fin-trip-id").value;const t=allTrips.find(x=>x.id===tId);
+        let l={income:[],expense:[],reco:{}};
+        try{
+            let p = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger);
+            if(p) Object.assign(l,p);
+        }catch(e){}
+        
+        // 🛡️ THE UNBREAKABLE SHIELD
+        l.bookingType = t.computedBookingType || t.bookingType;
+        if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
+
+        l.income=[];l.expense=[];
+        document.querySelectorAll("#income-rows-container .financial-row").forEach(r=>{let d=r.querySelector(".fin-desc").value;let a=r.querySelector(".fin-amt").value;if(d&&a)l.income.push({type:d,amt:parseFloat(a)});});
+        document.querySelectorAll("#expense-rows-container .financial-row").forEach(r=>{let d=r.querySelector(".fin-desc").value;let a=r.querySelector(".fin-amt").value;if(d&&a)l.expense.push({type:d,amt:parseFloat(a)});});
+        
+        const js=JSON.stringify(l);t.financialLedger=js;
+        fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now(),{method:"POST",body:JSON.stringify({action:"updateFinancialLedger",id:tId,ledgerJson:js})});
+        closeFinancialModal();triggerCurrentRender();
+    }
 
     function setReportType(ts){currentReportType=ts;document.getElementById("report-selection-screen").style.display="none";document.getElementById("report-content-area").style.display="block";document.getElementById("report-title-text").innerText=ts+" Reports";document.getElementById("screen-report").innerHTML="";document.getElementById("print-report-container").innerHTML="";document.getElementById("report-actions").style.display="none";}
     function generateCustomReport(){
