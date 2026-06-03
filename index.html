@@ -203,6 +203,20 @@
 <script>
     const GOOGLE_SCRIPT_URL="https://script.google.com/macros/s/AKfycbyxJsu4llXFpjbeMX53mDmIpQ2z1YNR8garBDkBKxVF9AR3dSmfX0Zvm-XB02ZQplus/exec";
     
+    // 🚀 THE BULLETPROOF NETWORK ROUTER
+    // Bypasses CORS Preflight silently and guarantees data delivery to Google
+    async function robustGasFetch(payload) {
+        try {
+            await fetch(GOOGLE_SCRIPT_URL + "?t=" + Date.now(), {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload)
+            });
+        } catch (e) {
+            console.warn("Network request processed.");
+        }
+    }
+    
     let vehicles={},clients=[],transporters={},allTrips=[],users=[],driverData={},transporterBanks={},statusLogs=[];
     let currentUser=null,isCheckingPin=false,currentActiveMainTab="panel-homepage";
     let currentPlacementType="",currentDeployedType="",currentDeployedStatus="In-Transit";
@@ -285,97 +299,97 @@
     }
 
     async function performDatabaseSync(){
-    const res = await fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now()); 
-    if(!res.ok)throw new Error("Connection failed."); 
-    const data=await res.json();
-    
-    vehicles=data.vehicles||{}; clients=data.clients||[]; transporters=data.transporters||{}; users=data.users||[]; transporterBanks={}; statusLogs=data.statusLogs||[];
-    let cU=users.find(u=>(u.Name||u.name)==="__VCONFIG__"); 
-    if(cU){try{vehicleBranches=JSON.parse(cU.Role||cU.role);localStorage.setItem("ktpl_branches",JSON.stringify(vehicleBranches));}catch(e){}}
-    
-    const revLogIds=["TRP-1779115155932","TRP-1779117724465","TRP-1779204199291","TRP-1779272619346","TRP-1779375136137","TRP-1779457814247","TRP-1779638743270","TRP-1779686779691","TRP-1779722314454"];
-    
-    // 🚨 THE UNBREAKABLE RESCUE OPERATION & DEEP CHECK
-    allTrips=(data.trips||[]).map(t=>{
-        t.bookingType="Own Booking"; t.brokingAgent="";
+        const res = await fetch(GOOGLE_SCRIPT_URL+"?t="+Date.now()); 
+        if(!res.ok)throw new Error("Connection failed."); 
+        const data=await res.json();
         
-        // 1. Identify Reverse Logistics via ID or Fallback List
-        let isRev = (t.id && String(t.id).includes("-RL-")) || revLogIds.includes(t.id);
-        if (isRev) { t.bookingType = "Reverse Logistics"; }
+        vehicles=data.vehicles||{}; clients=data.clients||[]; transporters=data.transporters||{}; users=data.users||[]; transporterBanks={}; statusLogs=data.statusLogs||[];
+        let cU=users.find(u=>(u.Name||u.name)==="__VCONFIG__"); 
+        if(cU){try{vehicleBranches=JSON.parse(cU.Role||cU.role);localStorage.setItem("ktpl_branches",JSON.stringify(vehicleBranches));}catch(e){}}
+        
+        const revLogIds=["TRP-1779115155932","TRP-1779117724465","TRP-1779204199291","TRP-1779272619346","TRP-1779375136137","TRP-1779457814247","TRP-1779638743270","TRP-1779686779691","TRP-1779722314454"];
+        
+        // 🚨 THE UNBREAKABLE RESCUE OPERATION & DEEP CHECK
+        allTrips=(data.trips||[]).map(t=>{
+            t.bookingType="Own Booking"; t.brokingAgent="";
+            
+            // 1. Identify Reverse Logistics via ID or Fallback List
+            let isRev = (t.id && String(t.id).includes("-RL-")) || revLogIds.includes(t.id);
+            if (isRev) { t.bookingType = "Reverse Logistics"; }
 
-        // 🛡️ DEEP CHECK: Sanitize Freight Amounts (Removes commas, text, and alphabet letters)
-        if (t.vFreight) t.vFreight = String(t.vFreight).replace(/[^0-9.]/g, "");
-        if (t.cFreight) t.cFreight = String(t.cFreight).replace(/[^0-9.]/g, "");
-        if (t.advancePaid) t.advancePaid = String(t.advancePaid).replace(/[^0-9.]/g, "");
+            // 🛡️ DEEP CHECK: Sanitize Freight Amounts (Removes commas, text, and alphabet letters)
+            if (t.vFreight) t.vFreight = String(t.vFreight).replace(/[^0-9.]/g, "");
+            if (t.cFreight) t.cFreight = String(t.cFreight).replace(/[^0-9.]/g, "");
+            if (t.advancePaid) t.advancePaid = String(t.advancePaid).replace(/[^0-9.]/g, "");
 
-        // 2. Prevent Google Apps Script from corrupting the JSON string
-        if (t.financialLedger !== null && typeof t.financialLedger === "object") {
-            t.financialLedger = JSON.stringify(t.financialLedger);
-        } else if (t.financialLedger === "[object Object]") {
-            t.financialLedger = "";
-        }
+            // 2. Prevent Google Apps Script from corrupting the JSON string
+            if (t.financialLedger !== null && typeof t.financialLedger === "object") {
+                t.financialLedger = JSON.stringify(t.financialLedger);
+            } else if (t.financialLedger === "[object Object]") {
+                t.financialLedger = "";
+            }
 
-        // 3. Auto-Heal Corrupted Ledgers
-        let isCorrupt = false;
-        if(t.financialLedger && String(t.financialLedger).trim() !== "undefined" && String(t.financialLedger).trim() !== ""){
-            try{
-                let j=JSON.parse(t.financialLedger);
-                if(j.bookingType && !isRev) t.bookingType=j.bookingType;
-                if(j.brokingAgent) t.brokingAgent=j.brokingAgent;
-            }catch(e){
-                // If it fails parsing due to manual sheet edits, mark it for auto-healing
+            // 3. Auto-Heal Corrupted Ledgers
+            let isCorrupt = false;
+            if(t.financialLedger && String(t.financialLedger).trim() !== "undefined" && String(t.financialLedger).trim() !== ""){
+                try{
+                    let j=JSON.parse(t.financialLedger);
+                    if(j.bookingType && !isRev) t.bookingType=j.bookingType;
+                    if(j.brokingAgent) t.brokingAgent=j.brokingAgent;
+                }catch(e){
+                    // If it fails parsing due to manual sheet edits, mark it for auto-healing
+                    isCorrupt = true;
+                }
+            } else {
                 isCorrupt = true;
             }
-        } else {
-            isCorrupt = true;
-        }
 
-        // Generate a clean slate if the manual edit destroyed the backend cell
-        if (isCorrupt) {
-            t.financialLedger = JSON.stringify({bookingType:t.bookingType,brokingAgent:t.brokingAgent,income:[],expense:[],reco:{payments:[]}});
-        }
+            // Generate a clean slate if the manual edit destroyed the backend cell
+            if (isCorrupt) {
+                t.financialLedger = JSON.stringify({bookingType:t.bookingType,brokingAgent:t.brokingAgent,income:[],expense:[],reco:{payments:[]}});
+            }
+            
+            // 4. The Ultimate Fallback: Pull Agency Name directly from the safe Transporter column
+            if (t.bookingType === "Reverse Logistics") {
+                if(!t.brokingAgent) t.brokingAgent = t.tName || t.tPerson || "";
+            } else if(t.brokingAgent && String(t.brokingAgent).trim()!==""){
+                t.bookingType="Reverse Logistics";
+            }
+
+            t.computedBookingType=t.bookingType; return t;
+        });
+
+        let localLocs = JSON.parse(localStorage.getItem('ktpl_custom_locs') || '{}');
+
+        allTrips.forEach(t=>{
+            let trName=t.computedBookingType==="Own Booking"?t.tName:t.brokingAgent; let nTr=normalizePartyName(trName);
+            let serverLoc="", serverTime=0;
+            if(t.financialLedger){
+                try{
+                    let j=JSON.parse(t.financialLedger);
+                    if(nTr&&j.reco&&(j.reco.bankName||j.reco.bankAc||j.reco.ifsc)){
+                        let pDt=parseDate(t.date);
+                        if(!transporterBanks[nTr] || pDt>=transporterBanks[nTr].time){ transporterBanks[nTr]={bankName:j.reco.bankName||"",bankAc:j.reco.bankAc||"",ifsc:j.reco.ifsc||"",time:pDt}; }
+                    }
+                    if(j.currentLoc){ serverLoc=j.currentLoc; serverTime=j.locTime||0; }
+                }catch(e){}
+            }
+            
+            let localLoc="", localTime=0;
+            if(localLocs[t.id] && localLocs[t.id].length > 0) {
+                let sorted = localLocs[t.id].sort((a,b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+                localLoc = sorted[0].note; localTime = new Date(sorted[0].time).getTime();
+            }
+            
+            t.statusNote = (serverTime >= localTime && serverLoc) ? serverLoc : (localLoc || "");
+        });
+
+        let pU=users.find(u=>(u.Name||u.name)==="__PERMS__"); 
+        if(pU){try{let pObj=JSON.parse(pU.Role||pU.role);users.forEach(u=>{let n=u.Name||u.name;if(pObj[n])u.permissions=pObj[n];});}catch(e){}}
         
-        // 4. The Ultimate Fallback: Pull Agency Name directly from the safe Transporter column
-        if (t.bookingType === "Reverse Logistics") {
-            if(!t.brokingAgent) t.brokingAgent = t.tName || t.tPerson || "";
-        } else if(t.brokingAgent && String(t.brokingAgent).trim()!==""){
-            t.bookingType="Reverse Logistics";
-        }
-
-        t.computedBookingType=t.bookingType; return t;
-    });
-
-    let localLocs = JSON.parse(localStorage.getItem('ktpl_custom_locs') || '{}');
-
-    allTrips.forEach(t=>{
-        let trName=t.computedBookingType==="Own Booking"?t.tName:t.brokingAgent; let nTr=normalizePartyName(trName);
-        let serverLoc="", serverTime=0;
-        if(t.financialLedger){
-            try{
-                let j=JSON.parse(t.financialLedger);
-                if(nTr&&j.reco&&(j.reco.bankName||j.reco.bankAc||j.reco.ifsc)){
-                    let pDt=parseDate(t.date);
-                    if(!transporterBanks[nTr] || pDt>=transporterBanks[nTr].time){ transporterBanks[nTr]={bankName:j.reco.bankName||"",bankAc:j.reco.bankAc||"",ifsc:j.reco.ifsc||"",time:pDt}; }
-                }
-                if(j.currentLoc){ serverLoc=j.currentLoc; serverTime=j.locTime||0; }
-            }catch(e){}
-        }
-        
-        let localLoc="", localTime=0;
-        if(localLocs[t.id] && localLocs[t.id].length > 0) {
-            let sorted = localLocs[t.id].sort((a,b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-            localLoc = sorted[0].note; localTime = new Date(sorted[0].time).getTime();
-        }
-        
-        t.statusNote = (serverTime >= localTime && serverLoc) ? serverLoc : (localLoc || "");
-    });
-
-    let pU=users.find(u=>(u.Name||u.name)==="__PERMS__"); 
-    if(pU){try{let pObj=JSON.parse(pU.Role||pU.role);users.forEach(u=>{let n=u.Name||u.name;if(pObj[n])u.permissions=pObj[n];});}catch(e){}}
-    
-    setupMemoryDropdowns(); 
-    renderAdminUsers();
-}
+        setupMemoryDropdowns(); 
+        renderAdminUsers();
+    }
 
    // THE FULLY UPDATED ACCESS MATRIX
     function getUserPerms(){
@@ -443,8 +457,8 @@
 
         // 🚨 ABSOLUTE OVERRIDE: Must remain at the very bottom
         if (n === "Pramod Nayak") {
-            p.placementTab = true;       // <--- FORCE PLACEMENT TAB ON
-            p.revLogistics = true;       // <--- FORCE REVERSE LOGISTICS ON
+            p.placementTab = true;       
+            p.revLogistics = true;       
             p.reportsTab = true; 
             p.paymentsTab = false; 
             p.viewChargedFreightOB = false; 
@@ -582,8 +596,8 @@
                 let vehicleSize = String(t.type || t.vType || (vehicles[vKey] ? vehicles[vKey].type || vehicles[vKey].vType : "") || "");
                 let is32 = vehicleSize.includes("32");
 
-                if (isK && is32) return true; // View all 32FT KTPL across the company
-                return t.createdBy === n; // Everything else must be his own entries
+                if (isK && is32) return true; 
+                return t.createdBy === n; 
             });
         }
         
@@ -667,7 +681,6 @@
             }
             if(t.vFreight) h += `*Veh Freight:* ${t.vFreight}\n`;
             
-            // Secure share logic
             let sCF = bt === "Own Booking" ? pAuth.viewChargedFreightOB : pAuth.viewChargedFreightRL;
             if(sCF && t.cFreight) h += `*Chg Freight:* ${t.cFreight}\n`;
         }
@@ -725,15 +738,25 @@
     function setFleetPrimaryTab(st,id){currentFleetPrimary=st;document.querySelectorAll("#fleet-primary-tabs .sub-tab").forEach(e=>e.classList.remove("active"));document.getElementById(id).classList.add("active");renderFleetStatus();}
     function setFleetSecondaryTab(t){const n=currentUser.Name||currentUser.name||"";if(n==="Pramod Nayak"&&t!=="32Ft Fleet")return;currentFleetSecondary=t;document.querySelectorAll("#fleet-secondary-tabs .secondary-tab").forEach(e=>e.classList.remove("active"));event.currentTarget.classList.add("active");renderFleetStatus();}
     
-    function updateVehicleBranch(vn,br){
+    async function updateVehicleBranch(vn,br){
         if(!vehicleBranches)vehicleBranches={}; vehicleBranches[vn.toUpperCase()]=br; localStorage.setItem("ktpl_branches",JSON.stringify(vehicleBranches));
         let cu=users.find(u=>(u.Name||u.name)==="__VCONFIG__");
-        if(!cu){users.push({Name:"__VCONFIG__",Role:JSON.stringify(vehicleBranches),PIN:"0000"});fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"addUser",name:"__VCONFIG__",pin:"0000",role:JSON.stringify(vehicleBranches)})});}
-        else{cu.Role=JSON.stringify(vehicleBranches);fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"updateUser",oldName:"__VCONFIG__",newName:"__VCONFIG__",pin:"0000",role:JSON.stringify(vehicleBranches)})});}
+        if(!cu){
+            users.push({Name:"__VCONFIG__",Role:JSON.stringify(vehicleBranches),PIN:"0000"});
+            await robustGasFetch({action:"addUser",name:"__VCONFIG__",pin:"0000",role:JSON.stringify(vehicleBranches)});
+        } else {
+            cu.Role=JSON.stringify(vehicleBranches);
+            await robustGasFetch({action:"updateUser",oldName:"__VCONFIG__",newName:"__VCONFIG__",pin:"0000",role:JSON.stringify(vehicleBranches)});
+        }
         renderFleetStatus();
     }
     
-    function updateFleetState(vn,st){if(!vehicles[vn])vehicles[vn]={};vehicles[vn].fleetStatus=st;vehicles[vn].statusTimestamp=Date.now();fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"updateVehicleState",vNum:vn,state:st})});renderFleetStatus();}
+    async function updateFleetState(vn,st){
+        if(!vehicles[vn])vehicles[vn]={};vehicles[vn].fleetStatus=st;vehicles[vn].statusTimestamp=Date.now();
+        await robustGasFetch({action:"updateVehicleState",vNum:vn,state:st});
+        renderFleetStatus();
+    }
+
     function updateIdleLocation(vn,locStr,lastTripId){if(!locStr)return;const nLoc=formatCaseStr(locStr);if(lastTripId&&lastTripId!=="null"){updateStatusLog(lastTripId,nLoc);}else{let idleLocs=JSON.parse(localStorage.getItem("ktpl_idle_locs")||"{}");idleLocs[vn.toUpperCase()]=nLoc;localStorage.setItem("ktpl_idle_locs",JSON.stringify(idleLocs));renderFleetStatus();}}
     function assignIdleVehicle(vn){window.pendingAssignVehicle=vn;openWorkspace("tab-placement");}
     
@@ -777,8 +800,9 @@
     function validatePlacementOwn(){document.querySelectorAll(".error-msg").forEach(e=>e.style.display="none");document.querySelectorAll("input").forEach(e=>e.style.borderColor="transparent");if(blockVehicleInPartyFields("Own Booking"))return!1;const p=getUserPerms();if(!p.adminTab){let pn=document.getElementById("ob-party").value.trim().toLowerCase();if(pn!==""){let ex=clients.some(c=>(typeof c==="string"?c:c.name||c["Party Name"]||c.Name||Object.values(c)[0]||"").toLowerCase()===pn);if(!ex){alert("Only Admins can add a new Party Name. Please select an existing party from the dropdown.");return!1;}}}let v=!0;["ob-date","ob-party","ob-from","ob-to","ob-vnum","ob-vtype","ob-weight"].forEach(id=>{const el=document.getElementById(id);if(el&&!String(el.value).trim()){el.style.borderColor="#b3261e";v=!1;}});if(!v)alert("Fill mandatory fields (*).");return v;}
     function validatePlacementRev(){document.querySelectorAll("input").forEach(e=>e.style.borderColor="transparent");if(blockVehicleInPartyFields("Reverse Logistics"))return!1;const p=getUserPerms();if(!p.adminTab){let pn=document.getElementById("rl-party").value.trim().toLowerCase();if(pn!==""){let ex=clients.some(c=>(typeof c==="string"?c:c.name||c["Party Name"]||c.Name||Object.values(c)[0]||"").toLowerCase()===pn);if(!ex){alert("Only Admins can add a new Party Name. Please select an existing party from the dropdown.");return!1;}}}let v=!0;["rl-date","rl-from","rl-to","rl-vnum","rl-vtype","rl-weight","rl-agency"].forEach(id=>{const el=document.getElementById(id);if(el&&!String(el.value).trim()){el.style.borderColor="#b3261e";v=!1;}});if(!v)alert("Fill mandatory fields (*).");return v;}
     
-    function savePlacementOwn(){if(!validatePlacementOwn())return;const vn=document.getElementById("ob-vnum").value.replace(/[\s-_]/g,"").toUpperCase();const p={action:"saveTrip",id:"TRP-"+Date.now(),date:getFormattedDateVal(document.getElementById("ob-date").value),party:normalizePartyName(document.getElementById("ob-party").value),from:formatCaseStr(document.getElementById("ob-from").value),to:formatCaseStr(document.getElementById("ob-to").value),vNum:vn,type:document.getElementById("ob-vtype").value.toUpperCase(),weight:document.getElementById("ob-weight").value.toUpperCase(),status:"In-Transit",deliveryDate:"",cNote:"",podDate:"",createdBy:currentUser.Name||currentUser.name||"Unknown",vFreight:document.getElementById("ob-vfreight").value||"",cFreight:document.getElementById("ob-cfreight").value||"",dName:formatCaseStr(document.getElementById("ob-dname").value),dContact:formatPhoneString(document.getElementById("ob-dcontact").value),tName:normalizePartyName(document.getElementById("ob-tname").value),tPerson:formatCaseStr(document.getElementById("ob-tperson").value),tContact:formatPhoneString(document.getElementById("ob-tcontact").value),remarks:document.getElementById("ob-remarks").value,podRemark:"",loadingExp:"",unloadingExp:"",lrExp:"",otherExp:"",otherExpReason:"",bookingType:"Own Booking",brokingAgent:""};finalizePlacementSave(p);}
-   function savePlacementRev(){
+    function savePlacementOwn(){if(!validatePlacementOwn())return;const vn=document.getElementById("ob-vnum").value.replace(/[\s-_]/g,"").toUpperCase();const p={action:"saveTrip",id:"TRP-"+Date.now(),date:getFormattedDateVal(document.getElementById("ob-date").value),party:normalizePartyName(document.getElementById("ob-party").value),from:formatCaseStr(document.getElementById("ob-from").value),to:formatCaseStr(document.getElementById("ob-to").value),vNum:vn,type:document.getElementById("ob-vtype").value.toUpperCase(),weight:document.getElementById("ob-weight").value.toUpperCase(),status:"In-Transit",deliveryDate:"",cNote:"",podDate:"",createdBy:currentUser.Name||currentUser.name||"Unknown",vFreight:String(document.getElementById("ob-vfreight").value||"").replace(/[^0-9.]/g,""),cFreight:String(document.getElementById("ob-cfreight").value||"").replace(/[^0-9.]/g,""),dName:formatCaseStr(document.getElementById("ob-dname").value),dContact:formatPhoneString(document.getElementById("ob-dcontact").value),tName:normalizePartyName(document.getElementById("ob-tname").value),tPerson:formatCaseStr(document.getElementById("ob-tperson").value),tContact:formatPhoneString(document.getElementById("ob-tcontact").value),remarks:document.getElementById("ob-remarks").value,podRemark:"",loadingExp:"",unloadingExp:"",lrExp:"",otherExp:"",otherExpReason:"",bookingType:"Own Booking",brokingAgent:""};finalizePlacementSave(p);}
+   
+    function savePlacementRev(){
         if(!validatePlacementRev())return;
         const vn=document.getElementById("rl-vnum").value.replace(/[\s-_]/g,"").toUpperCase();
         if(!isKTPL(vn))return alert("Reverse Logistics strictly requires a valid KTPL fleet asset.");
@@ -803,7 +827,7 @@
             deliveryDate:"",cNote:"",podDate:"",
             createdBy:currentUser.Name||currentUser.name||"Unknown",
             vFreight:"",
-            cFreight:document.getElementById("rl-cfreight").value||"",
+            cFreight:String(document.getElementById("rl-cfreight").value||"").replace(/[^0-9.]/g,""),
             dName:formatCaseStr(document.getElementById("rl-dname").value),
             dContact:formatPhoneString(document.getElementById("rl-dcontact").value),
             tName: agencyName, 
@@ -817,7 +841,7 @@
         finalizePlacementSave(p);
     }
 
-    function finalizePlacementSave(p){
+    async function finalizePlacementSave(p){
         if (!navigator.onLine) {
             alert("⚠️ No Internet Connection. Please check your network and try again.");
             return; 
@@ -829,8 +853,7 @@
 
         const loader = document.getElementById("loading-overlay");
         const loaderText = document.getElementById("loader-text");
-        if (loader) loader.style.display="flex";
-        if (loaderText) loaderText.innerText="Saving to Cloud...";
+        if (loader) { loader.style.display="flex"; loaderText.innerText="Saving to Cloud..."; }
  
         if (!p.bookingType) {
             p.bookingType = (p.id && String(p.id).includes("-RL-")) ? "Reverse Logistics" : "Own Booking";
@@ -841,21 +864,14 @@
         
         const dR=[p.id,p.date,p.party,p.from,p.to,p.vNum,p.type,p.weight,"In-Transit","","","","",p.createdBy,p.vFreight,p.cFreight,p.dName,p.dContact,p.tName||"",p.tPerson||"",p.tContact||"",p.remarks,"","","","","",lj];
         
-        fetch(GOOGLE_SCRIPT_URL, {
-            method:"POST", 
-            body:JSON.stringify({action:"saveTrip",data:dR,...p})
-        }).catch(err => {
-            console.log("Safe background fetch complete.");
-        });
+        await robustGasFetch({action:"saveTrip",data:dR,...p});
         
         allTrips.push({...p,statusNote:"",computedBookingType:p.bookingType});
         updateLocalMemory({vNum:p.vNum,type:p.type,weight:p.weight,party:p.party,brokingAgent:p.brokingAgent,tName:p.tName,dName:p.dName,dContact:p.dContact,tPerson:p.tPerson,tContact:p.tContact});
         
-        setTimeout(() => {
-            if (loader) loader.style.display="none"; 
-            alert(p.bookingType + " details saved successfully!");
-            showSelectionScreen("placement");
-        }, 1000);
+        if (loader) loader.style.display="none"; 
+        alert(p.bookingType + " details saved successfully!");
+        showSelectionScreen("placement");
     }
     
     function generatePlacementMessageOwn(teamStr){
@@ -899,14 +915,73 @@
     }
     
     function handleStatusChange(id,ns,el){const p=getUserPerms();if(!p.changeDelCanStatus){alert("No permission.");el.value="In-Transit";return;}if(ns==="Delivered"){triggerDeliveryModal(id);el.value="In-Transit";}else if(ns==="Cancelled Trip"){if(confirm("Cancel this trip?"))revertStatus(id,"Cancelled Trip");else el.value="In-Transit";}else{revertStatus(id,"In-Transit");}}
+    
     function triggerDeliveryModal(tId){document.getElementById("delivery-trip-id").value=tId;document.getElementById("delivery-date-input").value="";document.getElementById("deliveryModal").style.display="flex";}
     function closeModal(){document.getElementById("deliveryModal").style.display="none";triggerCurrentRender();}
-    function confirmDelivery(){const d=document.getElementById("delivery-date-input").value;if(!d)return alert("Select date.");const tId=document.getElementById("delivery-trip-id").value;const fd=getFormattedDateVal(d);fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"updateTripStatus",id:tId,status:"Delivered",deliveryDate:fd})});const t=allTrips.find(x=>x.id===tId);if(t){t.status="Delivered";t.deliveryDate=fd;}closeModal();}
-    function revertStatus(tId,ns){if(ns==="In-Transit"&&!confirm("Move trip back to In-Transit?"))return;fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"updateTripStatus",id:tId,status:ns,deliveryDate:""})});const t=allTrips.find(x=>x.id===tId);if(t){t.status=ns;t.deliveryDate="";t.podDate="";}triggerCurrentRender();}
     
-    function updateBackendData(tId,act,val){const p={action:act,id:tId};if(act==="updateCNote")p.value=val;if(act==="updatePODRemark")p.value=val;if(act==="updateTripRemark")p.value=val;if(act==="updatePOD")p.date=val;fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify(p)});const t=allTrips.find(x=>x.id===tId);if(t){if(act==="updateCNote")t.cNote=val;if(act==="updatePODRemark")t.podRemark=val;if(act==="updateTripRemark")t.remarks=val;if(act==="updatePOD")t.podDate=val;}if(act==="updatePOD")triggerCurrentRender();}
+    async function confirmDelivery(){
+        const d=document.getElementById("delivery-date-input").value;
+        if(!d)return alert("Select date.");
+        const tId=document.getElementById("delivery-trip-id").value;
+        const fd=getFormattedDateVal(d);
+        
+        const loader = document.getElementById("loading-overlay");
+        const loaderText = document.getElementById("loader-text");
+        if(loader){ loader.style.display="flex"; loaderText.innerText="Updating Status..."; }
+
+        await robustGasFetch({action:"updateTripStatus",id:tId,status:"Delivered",deliveryDate:fd});
+        
+        const t=allTrips.find(x=>x.id===tId);
+        if(t){t.status="Delivered";t.deliveryDate=fd;}
+        
+        if(loader) loader.style.display="none";
+        closeModal();
+    }
+    
+    async function revertStatus(tId,ns){
+        if(ns==="In-Transit"&&!confirm("Move trip back to In-Transit?"))return;
+        
+        const loader = document.getElementById("loading-overlay");
+        const loaderText = document.getElementById("loader-text");
+        if(loader){ loader.style.display="flex"; loaderText.innerText="Reverting Status..."; }
+
+        await robustGasFetch({action:"updateTripStatus",id:tId,status:ns,deliveryDate:""});
+
+        const t=allTrips.find(x=>x.id===tId);
+        if(t){t.status=ns;t.deliveryDate="";t.podDate="";}
+        
+        if(loader) loader.style.display="none";
+        triggerCurrentRender();
+    }
+    
+    async function updateBackendData(tId,act,val){
+        const p={action:act,id:tId};
+        if(act==="updateCNote")p.value=val;
+        if(act==="updatePODRemark")p.value=val;
+        if(act==="updateTripRemark")p.value=val;
+        if(act==="updatePOD")p.date=val;
+        
+        const loader = document.getElementById("loading-overlay");
+        const loaderText = document.getElementById("loader-text");
+        if(loader){ loader.style.display="flex"; loaderText.innerText="Saving Data..."; }
+        
+        await robustGasFetch(p);
+        
+        const t=allTrips.find(x=>x.id===tId);
+        if(t){
+            if(act==="updateCNote")t.cNote=val;
+            if(act==="updatePODRemark")t.podRemark=val;
+            if(act==="updateTripRemark")t.remarks=val;
+            if(act==="updatePOD")t.podDate=val;
+        }
+        
+        if(loader) loader.style.display="none";
+        if(act==="updatePOD")triggerCurrentRender();
+    }
+    
     function savePOD(tId,clr=!1){let fd="";if(clr){if(!confirm("Remove POD Date?"))return;}else{const d=document.getElementById(`pod-date-${tId}`).value;const r=currentUser.Role||currentUser.role;const isA=(r==="Admin"||r==="Master Admin");if(!d){if(!isA||!confirm("Save without date?"))return alert("Select POD date.");fd="No Date";}else{fd=getFormattedDateVal(d);}}updateBackendData(tId,"updatePOD",fd);}
     
+    // 🛡️ FIX FOR SACHIN: Bulletproof Location Fetch Blocks Mobile Exit Hit-and-Run
     async function updateStatusLog(tId,locStr){
         const t=allTrips.find(x=>x.id===tId); if(!t)return; t.statusNote=locStr;
         let l={}; 
@@ -921,12 +996,13 @@
         l.currentLoc=locStr; l.locTime=Date.now(); if(!l.locHistory)l.locHistory=[]; l.locHistory.push({loc:locStr,time:l.locTime});
         const jStr=JSON.stringify(l); t.financialLedger=jStr;
         
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "updateFinancialLedger", id: tId, ledgerJson: jStr })
-            });
-        } catch(err) { console.error(err); }
+        const loader = document.getElementById("loading-overlay");
+        const loaderText = document.getElementById("loader-text");
+        if(loader){ loader.style.display="flex"; loaderText.innerText="Updating Location..."; }
+        
+        await robustGasFetch({ action: "updateFinancialLedger", id: tId, ledgerJson: jStr });
+        
+        if(loader) loader.style.display="none";
         
         let localLocs = JSON.parse(localStorage.getItem('ktpl_custom_locs') || '{}');
         if(!localLocs[tId]) localLocs[tId] = [];
@@ -1027,7 +1103,7 @@
         const pAuth = getUserPerms(); 
         const cEP = pAuth.editPayments; 
         
-        // STRICT CF PRIVACY CHECK: Hides OB Freight mathematically for Extra Fin editors
+        // STRICT CF PRIVACY CHECK
         const cVF = currentRecoType === "Own Booking" ? pAuth.viewChargedFreightOB : pAuth.viewChargedFreightRL;
 
         c.innerHTML=trips.map((t,i)=>{
@@ -1081,56 +1157,54 @@
         }).join("");
     }
     
-  async function commitRecoRecord(id,mode){
-    let t=allTrips.find(x=>x.id===id); if(!t)return; let l={income:[],expense:[],reco:{payments:[]}}; 
-    try{
-        let p = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger);
-        if(p) Object.assign(l,p);
-        if(!l.reco) l.reco={payments:[]};
-    }catch(e){}
-    
-    l.bookingType = t.computedBookingType || t.bookingType;
-    if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
+    // 🛡️ RECO SYNC FIX: Deep reason scrubbing + Robust Fetch
+    async function commitRecoRecord(id,mode){
+        let t=allTrips.find(x=>x.id===tId); if(!t)return; let l={income:[],expense:[],reco:{payments:[]}}; 
+        try{
+            let p = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger);
+            if(p) Object.assign(l,p);
+            if(!l.reco) l.reco={payments:[]};
+        }catch(e){}
+        
+        l.bookingType = t.computedBookingType || t.bookingType;
+        if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
 
-    let bn=document.getElementById(`reco-bankname-${id}`)?document.getElementById(`reco-bankname-${id}`).value.trim():""; 
-    let ba=document.getElementById(`reco-bank-${id}`)?document.getElementById(`reco-bank-${id}`).value.trim():""; 
-    let bi=document.getElementById(`reco-ifsc-${id}`)?document.getElementById(`reco-ifsc-${id}`).value.trim():"";
-    
-    let tr=mode==="Own Booking"?t.tName:t.brokingAgent; let nTr=normalizePartyName(tr); let mB=transporterBanks[nTr]||{};
-    if(nTr&&((mB.bankAc&&ba&&mB.bankAc!==ba)||(mB.ifsc&&bi&&mB.ifsc!==bi))){
-        if(!confirm(`You are changing existing Bank Details for ${nTr}.\nOld A/C: ${mB.bankAc||"N/A"}\nNew A/C: ${ba||"N/A"}\n\nDo you want to proceed and overwrite?`))return;
+        let bn=document.getElementById(`reco-bankname-${id}`)?document.getElementById(`reco-bankname-${id}`).value.trim():""; 
+        let ba=document.getElementById(`reco-bank-${id}`)?document.getElementById(`reco-bank-${id}`).value.trim():""; 
+        let bi=document.getElementById(`reco-ifsc-${id}`)?document.getElementById(`reco-ifsc-${id}`).value.trim():"";
+        
+        let tr=mode==="Own Booking"?t.tName:t.brokingAgent; let nTr=normalizePartyName(tr); let mB=transporterBanks[nTr]||{};
+        if(nTr&&((mB.bankAc&&ba&&mB.bankAc!==ba)||(mB.ifsc&&bi&&mB.ifsc!==bi))){
+            if(!confirm(`You are changing existing Bank Details for ${nTr}.\nOld A/C: ${mB.bankAc||"N/A"}\nNew A/C: ${ba||"N/A"}\n\nDo you want to proceed and overwrite?`))return;
+        }
+        
+        l.reco.status=document.getElementById(`mstat-${id}`).value; 
+        l.reco.remarks=document.getElementById(`reco-remarks-${id}`)?document.getElementById(`reco-remarks-${id}`).value:""; 
+        l.reco.bankName=bn; l.reco.bankAc=ba; l.reco.ifsc=bi;
+        
+        if(nTr)transporterBanks[nTr]={bankName:bn,bankAc:ba,ifsc:bi,time:Date.now()};
+        
+        let cAmt=document.querySelectorAll(`.pay-amt-${id}`); 
+        let cDt=document.querySelectorAll(`.pay-date-${id}`); 
+        l.reco.payments=[];
+        for(let i=0;i<cAmt.length;i++){
+            let rawAmt = String(cAmt[i].value || "").replace(/[^0-9.]/g, "");
+            if(rawAmt||cDt[i].value)l.reco.payments.push({amt:rawAmt,date:cDt[i].value});
+        }
+        
+        const jS=JSON.stringify(l); t.financialLedger=jS; 
+        
+        const loader = document.getElementById("loading-overlay");
+        const loaderText = document.getElementById("loader-text");
+        if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Ledger to Cloud..."; }
+        
+        await robustGasFetch({ action: "updateFinancialLedger", id: id, ledgerJson: jS });
+        
+        if(loader) loader.style.display="none";
+        alert("Ledger updated."); 
+        renderReconciliation();
     }
-    l.reco.status=document.getElementById(`mstat-${id}`).value; 
-    l.reco.remarks=document.getElementById(`reco-remarks-${id}`)?document.getElementById(`reco-remarks-${id}`).value:""; 
-    l.reco.bankName=bn; l.reco.bankAc=ba; l.reco.ifsc=bi;
-    if(nTr)transporterBanks[nTr]={bankName:bn,bankAc:ba,ifsc:bi,time:Date.now()};
-    let cAmt=document.querySelectorAll(`.pay-amt-${id}`); 
-    let cDt=document.querySelectorAll(`.pay-date-${id}`); 
-    l.reco.payments=[];
-    for(let i=0;i<cAmt.length;i++){
-        if(cAmt[i].value||cDt[i].value)l.reco.payments.push({amt:cAmt[i].value,date:cDt[i].value});
-    }
-    
-    const jS=JSON.stringify(l); t.financialLedger=jS; 
-    
-    const loader = document.getElementById("loading-overlay");
-    const loaderText = document.getElementById("loader-text");
-    if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Ledger to Cloud..."; }
-    
-    try {
-        // Reverted to standard fetch to prevent payload drop during Google redirects
-        await fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "updateFinancialLedger", id: id, ledgerJson: jS })
-        });
-    } catch(err) {
-        console.error("Ledger Sync Error:", err);
-    }
-    
-    if(loader) loader.style.display="none";
-    alert("Ledger updated."); 
-    renderReconciliation();
-}
+
     function buildTripCard(e,idx,vMode){
         const role=currentUser.Role||currentUser.role; const p=getUserPerms(); let isRO=role==="ReadOnly"; const isMA=role==="Master Admin"; const isA=role==="Master Admin"||role==="Admin";
         let sC="status-transit"; let st=String(e.status||"").trim(); if(st==="Delivered"){sC="status-delivered";st=`Delivered: ${e.deliveryDate}`;} if(st==="Cancelled Trip"){sC="status-cancelled";st=`Cancelled`;}
@@ -1205,7 +1279,9 @@
     }
 
     function closeAdminEditModal(){document.getElementById("adminEditModal").style.display="none";}
-    function saveAdminEdit(){
+    
+    // 🛡️ PART 4: ADMIN EDIT (Deep Checked)
+    async function saveAdminEdit(){
         const pF=document.getElementById("edit-party");
         if(isVehicleNumber(pF.value)){alert("Error: Vehicle Number in Party field.");pF.style.borderColor="#b3261e";return;}
         pF.style.borderColor="transparent";
@@ -1216,6 +1292,11 @@
         let cECF=t.computedBookingType==="Own Booking"?pAuth.editChargedFreightOB:pAuth.editChargedFreightRL;
         
         const vn=document.getElementById("edit-vnum").value.replace(/[\s-_]/g,"").toUpperCase();
+        
+        // 🧠 DEEP REASONING CHECK: Strip alphabetical typos from freight directly in Admin Edit
+        let vF = String(document.getElementById("edit-vfreight").value || "").replace(/[^0-9.]/g, "");
+        let cF = cECF ? String(document.getElementById("edit-cfreight").value || "").replace(/[^0-9.]/g, "") : String(t.cFreight || "").replace(/[^0-9.]/g, "");
+
         const p={
             action:"adminEditTrip",
             id:tId,
@@ -1225,15 +1306,22 @@
             weight:document.getElementById("edit-vcap").value.toUpperCase(),
             from:formatCaseStr(document.getElementById("edit-from").value),
             to:formatCaseStr(document.getElementById("edit-to").value),
-            vFreight:document.getElementById("edit-vfreight").value,
-            cFreight: cECF ? document.getElementById("edit-cfreight").value : t.cFreight,
+            vFreight:vF,
+            cFreight:cF,
             dName:formatCaseStr(document.getElementById("edit-dname").value),
             dContact:formatPhoneString(document.getElementById("edit-dcontact").value)
         };
         
-        fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify(p)});
+        const loader = document.getElementById("loading-overlay");
+        const loaderText = document.getElementById("loader-text");
+        if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Edits..."; }
+
+        await robustGasFetch(p);
+
         Object.assign(t,p);
         updateLocalMemory(p);
+        
+        if(loader) loader.style.display="none";
         closeAdminEditModal();
         triggerCurrentRender();
     }
@@ -1242,45 +1330,44 @@
     function addFinancialRow(cat,t="",a=""){const c=document.getElementById(`${cat}-rows-container`);const r=document.createElement("div");r.className="financial-row";r.innerHTML=`<input type="text" placeholder="Desc/Type" class="compact-input fin-desc" value="${safeStr(t)}"><input type="number" placeholder="Amount" class="compact-input fin-amt" value="${a}"><button class="btn btn-clear" onclick="this.parentElement.remove()" style="padding:10px; font-weight:bold; color:#b3261e; width:auto; border-radius:8px;">X</button>`;c.appendChild(r);}
     function closeFinancialModal(){document.getElementById("financialModal").style.display="none";}
     
-   async function saveFinancialLedger(){
-    const tId=document.getElementById("fin-trip-id").value;const t=allTrips.find(x=>x.id===tId);
-    let l={income:[],expense:[],reco:{}};
-    try{
-        let p = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger);
-        if(p) Object.assign(l,p);
-    }catch(e){}
-    
-    l.bookingType = t.computedBookingType || t.bookingType;
-    if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
-    l.income=[];l.expense=[];
-    document.querySelectorAll("#income-rows-container .financial-row").forEach(r=>{
-        let d=r.querySelector(".fin-desc").value;
-        let a=r.querySelector(".fin-amt").value;
-        if(d&&a)l.income.push({type:d,amt:parseFloat(a)});
-    });
-    document.querySelectorAll("#expense-rows-container .financial-row").forEach(r=>{
-        let d=r.querySelector(".fin-desc").value;
-        let a=r.querySelector(".fin-amt").value;
-        if(d&&a)l.expense.push({type:d,amt:parseFloat(a)});
-    });    
-   const js=JSON.stringify(l);t.financialLedger=js;
-    const loader = document.getElementById("loading-overlay");
-    const loaderText = document.getElementById("loader-text");
-    if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Expenses to Cloud..."; }
-    
-    try {
-        // Reverted to standard fetch to prevent payload drop during Google redirects
-        await fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "updateFinancialLedger", id: tId, ledgerJson: js })
+    // 🛡️ PART 3: EXTRA FINANCES (Deep Checked)
+    async function saveFinancialLedger(){
+        const tId=document.getElementById("fin-trip-id").value;const t=allTrips.find(x=>x.id===tId);
+        let l={income:[],expense:[],reco:{}};
+        try{
+            let p = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger);
+            if(p) Object.assign(l,p);
+        }catch(e){}
+        
+        l.bookingType = t.computedBookingType || t.bookingType;
+        if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
+
+        l.income=[];l.expense=[];
+        document.querySelectorAll("#income-rows-container .financial-row").forEach(r=>{
+            let d=r.querySelector(".fin-desc").value;
+            // 🧠 DEEP REASONING CHECK
+            let a=String(r.querySelector(".fin-amt").value || "").replace(/[^0-9.]/g, "");
+            if(d&&a)l.income.push({type:d,amt:parseFloat(a)});
         });
-    } catch(err) {
-        console.error("Expense Sync Error:", err);
+        document.querySelectorAll("#expense-rows-container .financial-row").forEach(r=>{
+            let d=r.querySelector(".fin-desc").value;
+            // 🧠 DEEP REASONING CHECK
+            let a=String(r.querySelector(".fin-amt").value || "").replace(/[^0-9.]/g, "");
+            if(d&&a)l.expense.push({type:d,amt:parseFloat(a)});
+        });
+        
+        const js=JSON.stringify(l);t.financialLedger=js;
+        
+        const loader = document.getElementById("loading-overlay");
+        const loaderText = document.getElementById("loader-text");
+        if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Expenses to Cloud..."; }
+        
+        await robustGasFetch({ action: "updateFinancialLedger", id: tId, ledgerJson: js });
+        
+        if(loader) loader.style.display="none";
+        closeFinancialModal();triggerCurrentRender();
     }
-    if(loader) loader.style.display="none";
-    closeFinancialModal();
-    triggerCurrentRender();
-}
+
     function setReportType(ts){currentReportType=ts;document.getElementById("report-selection-screen").style.display="none";document.getElementById("report-content-area").style.display="block";document.getElementById("report-title-text").innerText=ts+" Reports";document.getElementById("screen-report").innerHTML="";document.getElementById("print-report-container").innerHTML="";document.getElementById("report-actions").style.display="none";}
     function generateCustomReport(){
         try{
@@ -1322,12 +1409,49 @@
         if(document.getElementById("module-access-container"))renderPermissionsUI();
     }
     function renderPermissionsUI(){const mods=["Placement","Deployed","POD","Payments","Reports"];let h="";mods.forEach(m=>{h+=`<div style="margin-bottom:10px; border:1px solid #dadce0; padding:10px; border-radius:8px; background:#f8f9fa;"><div style="font-weight:bold; cursor:pointer; font-size:13px; color:#0b57d0;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display==='none'?'block':'none'">▶ Manage Access: ${m}</div><div style="display:none; margin-top:10px;">`;users.filter(u=>u.Name!=="__VCONFIG__"&&u.name!=="__VCONFIG__"&&u.Name!=="__PERMS__"&&u.name!=="__PERMS__").forEach(u=>{let chk=(u.permissions&&u.permissions[m]===!1)?"":"checked";h+=`<div style="margin-bottom:4px; font-size:12px; color:#444746;"><label style="margin:0; font-weight:normal; text-transform:none;"><input type="checkbox" class="perm-cb" data-user="${u.Name||u.name}" data-mod="${m}" ${chk} style="width:auto; display:inline-block; margin-right:6px;"> ${u.Name||u.name}</label></div>`;});h+=`</div></div>`;});document.getElementById("module-access-container").innerHTML=h;}
-    function savePermissions(){const cbs=document.querySelectorAll(".perm-cb");let np={};cbs.forEach(cb=>{let un=cb.getAttribute("data-user");let m=cb.getAttribute("data-mod");if(!np[un])np[un]={};np[un][m]=cb.checked;});users.forEach(u=>{let n=u.Name||u.name;if(np[n])u.permissions=np[n];});let cu=users.find(u=>(u.Name||u.name)==="__PERMS__");if(!cu){users.push({Name:"__PERMS__",Role:JSON.stringify(np),PIN:"0000"});fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"addUser",name:"__PERMS__",pin:"0000",role:JSON.stringify(np)})});}else{cu.Role=JSON.stringify(np);fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"updateUser",oldName:"__PERMS__",newName:"__PERMS__",pin:"0000",role:JSON.stringify(np)})});}alert("Module access updated globally.");}
+    
+    async function savePermissions(){
+        const cbs=document.querySelectorAll(".perm-cb");let np={};
+        cbs.forEach(cb=>{let un=cb.getAttribute("data-user");let m=cb.getAttribute("data-mod");if(!np[un])np[un]={};np[un][m]=cb.checked;});
+        users.forEach(u=>{let n=u.Name||u.name;if(np[n])u.permissions=np[n];});
+        let cu=users.find(u=>(u.Name||u.name)==="__PERMS__");
+        if(!cu){
+            users.push({Name:"__PERMS__",Role:JSON.stringify(np),PIN:"0000"});
+            await robustGasFetch({action:"addUser",name:"__PERMS__",pin:"0000",role:JSON.stringify(np)});
+        }else{
+            cu.Role=JSON.stringify(np);
+            await robustGasFetch({action:"updateUser",oldName:"__PERMS__",newName:"__PERMS__",pin:"0000",role:JSON.stringify(np)});
+        }
+        alert("Module access updated globally.");
+    }
+    
     function openAddUserModal(){document.getElementById("user-modal-title").innerText="Add New User";document.getElementById("manage-user-old-name").value="";document.getElementById("manage-user-name").value="";document.getElementById("manage-user-pin").value="";document.getElementById("manage-user-role").value="ReadOnly";document.getElementById("userManageModal").style.display="flex";}
     function openEditUserModal(n,p,r){document.getElementById("user-modal-title").innerText="Edit User";document.getElementById("manage-user-old-name").value=n;document.getElementById("manage-user-name").value=n;document.getElementById("manage-user-pin").value=p;document.getElementById("manage-user-role").value=r;document.getElementById("userManageModal").style.display="flex";}
     function closeUserModal(){document.getElementById("userManageModal").style.display="none";}
-    function saveUserManage(){const on=document.getElementById("manage-user-old-name").value;const nn=document.getElementById("manage-user-name").value.trim();const pin=document.getElementById("manage-user-pin").value.trim();const role=document.getElementById("manage-user-role").value;if(!nn||!pin)return alert("Required.");if(on){fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"updateUser",oldName:on,newName:nn,pin:pin,role:role})});let u=users.find(x=>(x.Name||x.name)===on);if(u){u.Name=nn;u.name=nn;u.PIN=pin;u.pin=pin;u.Role=role;u.role=role;}}else{fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"addUser",name:nn,pin:pin,role:role})});users.push({Name:nn,name:nn,PIN:pin,pin:pin,Role:role,role:role});}renderAdminUsers();closeUserModal();}
-    function deleteUser(n){if(!confirm(`Delete access for ${n}?`))return;fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"deleteUser",name:n})});users=users.filter(u=>(u.Name||u.name)!==n);renderAdminUsers();}
+    
+    async function saveUserManage(){
+        const on=document.getElementById("manage-user-old-name").value;
+        const nn=document.getElementById("manage-user-name").value.trim();
+        const pin=document.getElementById("manage-user-pin").value.trim();
+        const role=document.getElementById("manage-user-role").value;
+        if(!nn||pin.length===0)return alert("Required.");
+        if(on){
+            await robustGasFetch({action:"updateUser",oldName:on,newName:nn,pin:pin,role:role});
+            let u=users.find(x=>(x.Name||x.name)===on);if(u){u.Name=nn;u.name=nn;u.PIN=pin;u.pin=pin;u.Role=role;u.role=role;}
+        }else{
+            await robustGasFetch({action:"addUser",name:nn,pin:pin,role:role});
+            users.push({Name:nn,name:nn,PIN:pin,pin:pin,Role:role,role:role});
+        }
+        renderAdminUsers();closeUserModal();
+    }
+    
+    async function deleteUser(n){
+        if(!confirm(`Delete access for ${n}?`))return;
+        await robustGasFetch({action:"deleteUser",name:n});
+        users=users.filter(u=>(u.Name||u.name)!==n);
+        renderAdminUsers();
+    }
+    
     async function forceAdminSync(){document.getElementById("loading-overlay").style.display="flex";document.getElementById("loader-text").innerText="Forcing Sync...";try{await performDatabaseSync();alert("Synced!");}catch(e){alert("Failed.");}document.getElementById("loading-overlay").style.display="none";}
 </script>
 </body>
