@@ -1089,7 +1089,6 @@
         if(!l.reco) l.reco={payments:[]};
     }catch(e){}
     
-    // 🛡️ THE UNBREAKABLE SHIELD
     l.bookingType = t.computedBookingType || t.bookingType;
     if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
 
@@ -1101,13 +1100,10 @@
     if(nTr&&((mB.bankAc&&ba&&mB.bankAc!==ba)||(mB.ifsc&&bi&&mB.ifsc!==bi))){
         if(!confirm(`You are changing existing Bank Details for ${nTr}.\nOld A/C: ${mB.bankAc||"N/A"}\nNew A/C: ${ba||"N/A"}\n\nDo you want to proceed and overwrite?`))return;
     }
-    
     l.reco.status=document.getElementById(`mstat-${id}`).value; 
     l.reco.remarks=document.getElementById(`reco-remarks-${id}`)?document.getElementById(`reco-remarks-${id}`).value:""; 
     l.reco.bankName=bn; l.reco.bankAc=ba; l.reco.ifsc=bi;
-    
     if(nTr)transporterBanks[nTr]={bankName:bn,bankAc:ba,ifsc:bi,time:Date.now()};
-    
     let cAmt=document.querySelectorAll(`.pay-amt-${id}`); 
     let cDt=document.querySelectorAll(`.pay-date-${id}`); 
     l.reco.payments=[];
@@ -1122,11 +1118,9 @@
     if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Ledger to Cloud..."; }
     
     try {
-        // 🚀 THE BULLETPROOF NETWORK SHIELD
+        // Reverted to standard fetch to prevent payload drop during Google redirects
         await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
-            mode: "no-cors",
-            keepalive: true, // Prevents fetch murder on page reload
             body: JSON.stringify({ action: "updateFinancialLedger", id: id, ledgerJson: jS })
         });
     } catch(err) {
@@ -1256,34 +1250,36 @@
         if(p) Object.assign(l,p);
     }catch(e){}
     
-    // 🛡️ THE UNBREAKABLE SHIELD
     l.bookingType = t.computedBookingType || t.bookingType;
     if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
-
     l.income=[];l.expense=[];
-    document.querySelectorAll("#income-rows-container .financial-row").forEach(r=>{let d=r.querySelector(".fin-desc").value;let a=r.querySelector(".fin-amt").value;if(d&&a)l.income.push({type:d,amt:parseFloat(a)});});
-    document.querySelectorAll("#expense-rows-container .financial-row").forEach(r=>{let d=r.querySelector(".fin-desc").value;let a=r.querySelector(".fin-amt").value;if(d&&a)l.expense.push({type:d,amt:parseFloat(a)});});
-    
-    const js=JSON.stringify(l);t.financialLedger=js;
-    
+    document.querySelectorAll("#income-rows-container .financial-row").forEach(r=>{
+        let d=r.querySelector(".fin-desc").value;
+        let a=r.querySelector(".fin-amt").value;
+        if(d&&a)l.income.push({type:d,amt:parseFloat(a)});
+    });
+    document.querySelectorAll("#expense-rows-container .financial-row").forEach(r=>{
+        let d=r.querySelector(".fin-desc").value;
+        let a=r.querySelector(".fin-amt").value;
+        if(d&&a)l.expense.push({type:d,amt:parseFloat(a)});
+    });    
+   const js=JSON.stringify(l);t.financialLedger=js;
     const loader = document.getElementById("loading-overlay");
     const loaderText = document.getElementById("loader-text");
     if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Expenses to Cloud..."; }
     
     try {
-        // 🚀 THE BULLETPROOF NETWORK SHIELD
+        // Reverted to standard fetch to prevent payload drop during Google redirects
         await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
-            mode: "no-cors",
-            keepalive: true, // Prevents fetch murder on page reload
             body: JSON.stringify({ action: "updateFinancialLedger", id: tId, ledgerJson: js })
         });
     } catch(err) {
         console.error("Expense Sync Error:", err);
     }
-    
     if(loader) loader.style.display="none";
-    closeFinancialModal();triggerCurrentRender();
+    closeFinancialModal();
+    triggerCurrentRender();
 }
     function setReportType(ts){currentReportType=ts;document.getElementById("report-selection-screen").style.display="none";document.getElementById("report-content-area").style.display="block";document.getElementById("report-title-text").innerText=ts+" Reports";document.getElementById("screen-report").innerHTML="";document.getElementById("print-report-container").innerHTML="";document.getElementById("report-actions").style.display="none";}
     function generateCustomReport(){
