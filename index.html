@@ -1040,32 +1040,40 @@
         let eLog=statusLogs.findIndex(x=>x.tripId===tId&&x.note===locStr); if(eLog===-1)statusLogs.push({tripId:tId,note:locStr,time:new Date().toISOString()});
     }
 
+   // 🛡️ HISTORY CLEANER: Strictly shows manual text logs only
     function toggleHistory(tId,vMode){
         document.querySelectorAll(".history-panel").forEach(p=>{if(p.id!==`hist-${vMode}-${tId}`)p.style.display="none";});
         const p=document.getElementById(`hist-${vMode}-${tId}`); const t=allTrips.find(x=>x.id===tId); let hist=[];
+        
+        // 1. Pull network-saved history from Google Sheets
         try{let l=typeof t.financialLedger==="object"?t.financialLedger:JSON.parse(t.financialLedger);if(l.locHistory)hist=[...l.locHistory];}catch(e){}
         
+        // 2. Pull local device memory backups
         let localLocs = JSON.parse(localStorage.getItem('ktpl_custom_locs') || '{}');
         if(localLocs[tId]) {
             localLocs[tId].forEach(ll => { if(!hist.some(h=>h.loc===ll.note)) hist.push({loc: ll.note, time: new Date(ll.time).getTime()}); });
         }
         
+        // 3. Pull legacy status logs
         let oldLogs=statusLogs.filter(l=>String(l.tripId)===String(tId));
         oldLogs.forEach(ol=>{if(!hist.some(h=>h.loc===ol.note)){hist.push({loc:ol.note,time:new Date(ol.time).getTime()});}});
         
-        let baseDate = parseDate(t.date);
-        if(baseDate > 0 && !hist.some(h=>h.loc && h.loc.includes("Trip Dispatched"))) {
-             hist.push({loc: `Trip Dispatched from ${safeStr(t.from)}`, time: baseDate});
+        // 🚫 DELETED the confusing auto-injected "Trip Dispatched" messages here!
+        
+        // 4. Render clean UI with proper Date/Time formatting
+        if(hist.length===0){ 
+            p.innerHTML="<div class='history-item' style='color:#8e8e8e; font-style:italic;'>No manual location updates yet.</div>"; 
+        } else { 
+            hist.sort((a,b)=>b.time-a.time); 
+            p.innerHTML=hist.map(h=>{
+                const d=new Date(h.time);
+                const dd=String(d.getDate()).padStart(2,'0');
+                const mm=String(d.getMonth()+1).padStart(2,'0');
+                const hh=String(d.getHours()).padStart(2,'0');
+                const mn=String(d.getMinutes()).padStart(2,'0');
+                return `<div class="history-item"><strong>${dd}/${mm} ${hh}:${mn}</strong> - ${safeStr(h.loc)}</div>`;
+            }).join(""); 
         }
-        if(t.status === "Delivered" && t.deliveryDate) {
-             let delDate = parseDate(t.deliveryDate);
-             if(delDate > 0 && !hist.some(h=>h.loc && h.loc.includes("Delivered"))) {
-                  hist.push({loc: `Delivered at ${safeStr(t.to)}`, time: delDate});
-             }
-        }
-
-        if(hist.length===0){ p.innerHTML="<div class='history-item'>No history found.</div>"; }
-        else{ hist.sort((a,b)=>b.time-a.time); p.innerHTML=hist.map(h=>{const d=new Date(h.time);return `<div class="history-item"><strong>${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${d.getMinutes()<10?"0":""}${d.getMinutes()}</strong> - ${safeStr(h.loc)}</div>`;}).join(""); }
         p.style.display=p.style.display==="block"?"none":"block";
     }
 
