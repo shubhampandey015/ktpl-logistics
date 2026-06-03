@@ -1056,43 +1056,62 @@
         }).join("");
     }
     
-    async function commitRecoRecord(id,mode){
-        let t=allTrips.find(x=>x.id===id); if(!t)return; let l={income:[],expense:[],reco:{payments:[]}}; 
-        try{
-            let p = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger);
-            if(p) Object.assign(l,p);
-            if(!l.reco) l.reco={payments:[]};
-        }catch(e){}
-        
-        l.bookingType = t.computedBookingType || t.bookingType;
-        if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
+  async function commitRecoRecord(id,mode){
+    let t=allTrips.find(x=>x.id===id); if(!t)return; let l={income:[],expense:[],reco:{payments:[]}}; 
+    try{
+        let p = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger);
+        if(p) Object.assign(l,p);
+        if(!l.reco) l.reco={payments:[]};
+    }catch(e){}
+    
+    // 🛡️ THE UNBREAKABLE SHIELD
+    l.bookingType = t.computedBookingType || t.bookingType;
+    if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
 
-        let bn=document.getElementById(`reco-bankname-${id}`)?document.getElementById(`reco-bankname-${id}`).value.trim():""; let ba=document.getElementById(`reco-bank-${id}`)?document.getElementById(`reco-bank-${id}`).value.trim():""; let bi=document.getElementById(`reco-ifsc-${id}`)?document.getElementById(`reco-ifsc-${id}`).value.trim():"";
-        let tr=mode==="Own Booking"?t.tName:t.brokingAgent; let nTr=normalizePartyName(tr); let mB=transporterBanks[nTr]||{};
-        if(nTr&&((mB.bankAc&&ba&&mB.bankAc!==ba)||(mB.ifsc&&bi&&mB.ifsc!==bi))){if(!confirm(`You are changing existing Bank Details for ${nTr}.\nOld A/C: ${mB.bankAc||"N/A"}\nNew A/C: ${ba||"N/A"}\n\nDo you want to proceed and overwrite?`))return;}
-        l.reco.status=document.getElementById(`mstat-${id}`).value; l.reco.remarks=document.getElementById(`reco-remarks-${id}`)?document.getElementById(`reco-remarks-${id}`).value:""; l.reco.bankName=bn; l.reco.bankAc=ba; l.reco.ifsc=bi;
-        if(nTr)transporterBanks[nTr]={bankName:bn,bankAc:ba,ifsc:bi,time:Date.now()};
-        let cAmt=document.querySelectorAll(`.pay-amt-${id}`); let cDt=document.querySelectorAll(`.pay-date-${id}`); l.reco.payments=[];
-        for(let i=0;i<cAmt.length;i++){if(cAmt[i].value||cDt[i].value)l.reco.payments.push({amt:cAmt[i].value,date:cDt[i].value});}
-        const jS=JSON.stringify(l); t.financialLedger=jS; 
-        
-        const loader = document.getElementById("loading-overlay");
-        const loaderText = document.getElementById("loader-text");
-        if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Ledger to Cloud..."; }
-        
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "updateFinancialLedger", id: id, ledgerJson: jS })
-            });
-        } catch(err) {
-            console.error(err);
-        }
-        
-        if(loader) loader.style.display="none";
-        alert("Ledger updated."); renderReconciliation();
+    let bn=document.getElementById(`reco-bankname-${id}`)?document.getElementById(`reco-bankname-${id}`).value.trim():""; 
+    let ba=document.getElementById(`reco-bank-${id}`)?document.getElementById(`reco-bank-${id}`).value.trim():""; 
+    let bi=document.getElementById(`reco-ifsc-${id}`)?document.getElementById(`reco-ifsc-${id}`).value.trim():"";
+    
+    let tr=mode==="Own Booking"?t.tName:t.brokingAgent; let nTr=normalizePartyName(tr); let mB=transporterBanks[nTr]||{};
+    if(nTr&&((mB.bankAc&&ba&&mB.bankAc!==ba)||(mB.ifsc&&bi&&mB.ifsc!==bi))){
+        if(!confirm(`You are changing existing Bank Details for ${nTr}.\nOld A/C: ${mB.bankAc||"N/A"}\nNew A/C: ${ba||"N/A"}\n\nDo you want to proceed and overwrite?`))return;
     }
-
+    
+    l.reco.status=document.getElementById(`mstat-${id}`).value; 
+    l.reco.remarks=document.getElementById(`reco-remarks-${id}`)?document.getElementById(`reco-remarks-${id}`).value:""; 
+    l.reco.bankName=bn; l.reco.bankAc=ba; l.reco.ifsc=bi;
+    
+    if(nTr)transporterBanks[nTr]={bankName:bn,bankAc:ba,ifsc:bi,time:Date.now()};
+    
+    let cAmt=document.querySelectorAll(`.pay-amt-${id}`); 
+    let cDt=document.querySelectorAll(`.pay-date-${id}`); 
+    l.reco.payments=[];
+    for(let i=0;i<cAmt.length;i++){
+        if(cAmt[i].value||cDt[i].value)l.reco.payments.push({amt:cAmt[i].value,date:cDt[i].value});
+    }
+    
+    const jS=JSON.stringify(l); t.financialLedger=jS; 
+    
+    const loader = document.getElementById("loading-overlay");
+    const loaderText = document.getElementById("loader-text");
+    if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Ledger to Cloud..."; }
+    
+    try {
+        // 🚀 THE BULLETPROOF NETWORK SHIELD
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            keepalive: true, // Prevents fetch murder on page reload
+            body: JSON.stringify({ action: "updateFinancialLedger", id: id, ledgerJson: jS })
+        });
+    } catch(err) {
+        console.error("Ledger Sync Error:", err);
+    }
+    
+    if(loader) loader.style.display="none";
+    alert("Ledger updated."); 
+    renderReconciliation();
+}
     function buildTripCard(e,idx,vMode){
         const role=currentUser.Role||currentUser.role; const p=getUserPerms(); let isRO=role==="ReadOnly"; const isMA=role==="Master Admin"; const isA=role==="Master Admin"||role==="Admin";
         let sC="status-transit"; let st=String(e.status||"").trim(); if(st==="Delivered"){sC="status-delivered";st=`Delivered: ${e.deliveryDate}`;} if(st==="Cancelled Trip"){sC="status-cancelled";st=`Cancelled`;}
@@ -1204,40 +1223,43 @@
     function addFinancialRow(cat,t="",a=""){const c=document.getElementById(`${cat}-rows-container`);const r=document.createElement("div");r.className="financial-row";r.innerHTML=`<input type="text" placeholder="Desc/Type" class="compact-input fin-desc" value="${safeStr(t)}"><input type="number" placeholder="Amount" class="compact-input fin-amt" value="${a}"><button class="btn btn-clear" onclick="this.parentElement.remove()" style="padding:10px; font-weight:bold; color:#b3261e; width:auto; border-radius:8px;">X</button>`;c.appendChild(r);}
     function closeFinancialModal(){document.getElementById("financialModal").style.display="none";}
     
-    async function saveFinancialLedger(){
-        const tId=document.getElementById("fin-trip-id").value;const t=allTrips.find(x=>x.id===tId);
-        let l={income:[],expense:[],reco:{}};
-        try{
-            let p = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger);
-            if(p) Object.assign(l,p);
-        }catch(e){}
-        
-        l.bookingType = t.computedBookingType || t.bookingType;
-        if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
+   async function saveFinancialLedger(){
+    const tId=document.getElementById("fin-trip-id").value;const t=allTrips.find(x=>x.id===tId);
+    let l={income:[],expense:[],reco:{}};
+    try{
+        let p = typeof t.financialLedger === "object" ? t.financialLedger : JSON.parse(t.financialLedger);
+        if(p) Object.assign(l,p);
+    }catch(e){}
+    
+    // 🛡️ THE UNBREAKABLE SHIELD
+    l.bookingType = t.computedBookingType || t.bookingType;
+    if(t.brokingAgent) l.brokingAgent = t.brokingAgent;
 
-        l.income=[];l.expense=[];
-        document.querySelectorAll("#income-rows-container .financial-row").forEach(r=>{let d=r.querySelector(".fin-desc").value;let a=r.querySelector(".fin-amt").value;if(d&&a)l.income.push({type:d,amt:parseFloat(a)});});
-        document.querySelectorAll("#expense-rows-container .financial-row").forEach(r=>{let d=r.querySelector(".fin-desc").value;let a=r.querySelector(".fin-amt").value;if(d&&a)l.expense.push({type:d,amt:parseFloat(a)});});
-        
-        const js=JSON.stringify(l);t.financialLedger=js;
-        
-        const loader = document.getElementById("loading-overlay");
-        const loaderText = document.getElementById("loader-text");
-        if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Expenses to Cloud..."; }
-        
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "updateFinancialLedger", id: tId, ledgerJson: js })
-            });
-        } catch(err) {
-            console.error(err);
-        }
-        
-        if(loader) loader.style.display="none";
-        closeFinancialModal();triggerCurrentRender();
+    l.income=[];l.expense=[];
+    document.querySelectorAll("#income-rows-container .financial-row").forEach(r=>{let d=r.querySelector(".fin-desc").value;let a=r.querySelector(".fin-amt").value;if(d&&a)l.income.push({type:d,amt:parseFloat(a)});});
+    document.querySelectorAll("#expense-rows-container .financial-row").forEach(r=>{let d=r.querySelector(".fin-desc").value;let a=r.querySelector(".fin-amt").value;if(d&&a)l.expense.push({type:d,amt:parseFloat(a)});});
+    
+    const js=JSON.stringify(l);t.financialLedger=js;
+    
+    const loader = document.getElementById("loading-overlay");
+    const loaderText = document.getElementById("loader-text");
+    if(loader){ loader.style.display="flex"; loaderText.innerText="Syncing Expenses to Cloud..."; }
+    
+    try {
+        // 🚀 THE BULLETPROOF NETWORK SHIELD
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            keepalive: true, // Prevents fetch murder on page reload
+            body: JSON.stringify({ action: "updateFinancialLedger", id: tId, ledgerJson: js })
+        });
+    } catch(err) {
+        console.error("Expense Sync Error:", err);
     }
-
+    
+    if(loader) loader.style.display="none";
+    closeFinancialModal();triggerCurrentRender();
+}
     function setReportType(ts){currentReportType=ts;document.getElementById("report-selection-screen").style.display="none";document.getElementById("report-content-area").style.display="block";document.getElementById("report-title-text").innerText=ts+" Reports";document.getElementById("screen-report").innerHTML="";document.getElementById("print-report-container").innerHTML="";document.getElementById("report-actions").style.display="none";}
     function generateCustomReport(){
         try{
