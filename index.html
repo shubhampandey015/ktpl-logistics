@@ -230,7 +230,16 @@
     
     const ZONES={"Zone 1. West":["Baramati","Mumbai","Thane","Bhiwandi","Pune","Vapi","Surat","Taloja","JNPT","Nhava Sheva","Vashi","Vasai","Belapur","Dombivali","Dombivli","Kalyan","Yewai Naka","Aurangabad","Waluj","Jalna","Ahmedabad","Panoli","Dahej","Kheda"],"Zone 2. NCR":["New Delhi","Ghaziabad","Sonipat","Aligarh","Gurugram","Noida","Sahibabad","Bahadurgarh","Alipur"],"Zone 3. North West":["Zirakpur","Ludhiana","Ambala","Kapurthala","Baddi","Ponta Sahib","Mohali","Chandigarh"],"Zone 4. East / North East":["Kolkata","Siliguri","Guwahati","Patna","Cuttack","Bhubaneswar"],"Zone 5. South West":["Bangalore","Hosur","Hoskote","Dhansapura"],"Zone 6. Telangana":["Hyderabad","Rangareddy","Sangareddy","Uppal","Medchal"],"Zone 7. Chennai":["Chennai","Sri City","Sriperumbudur","Guindy","Kanchipuram"],"Zone 8. Rajasthan":["Jaipur","Bagur","VKI","Bhiwadi","Neemrana","Keshwana","Alwar"]};
     
-    window.onclick = function(e){if(e.target.classList.contains("modal")) e.target.style.display="none"};
+   window.onclick = function(e) {
+    if(e.target.classList.contains("modal")) {
+        // 🛡️ THE INTERCEPTOR: If they click the background of the Share Modal, force it through our secure function!
+        if (e.target.id === "shareModal") {
+            closeShareModal();
+        } else {
+            e.target.style.display = "none";
+        }
+    }
+};
     function getZoneForCity(c){if(!c)return null;let t=c.trim().toLowerCase().replace(/\s+(mh|up|gj|dl|hr|pb|wb|or|ka|ts|tn|rj|uk|ch)$/i,"");for(let z in ZONES){if(ZONES[z].some(x=>t.includes(x.toLowerCase())||x.toLowerCase().includes(t)))return z;}return null;}
     function safeStr(s){if(s===null||s===undefined)return"";return String(s).replace(/"/g,'&quot;').replace(/'/g,"\\'");}
     function getSafeTel(n){if(!n)return"";let c=String(n).replace(/[\s-]/g,"").trim();return c.startsWith("+")?c:c.startsWith("91")&&c.length>10?"+"+c:"+91"+c;}
@@ -619,36 +628,46 @@
         return r;
     }
     
-    function openShareModal(type, id = "") {
-        document.getElementById("share-modal-type").value = type;
-        if(id) document.getElementById("share-modal-trip-id").value = id;
-        document.getElementById("shareModal").style.display = "flex";
+   function openShareModal(type, id = "") {
+    // 🛡️ THE INTERCEPTOR: Stops the team from sharing before saving
+    if ((type === "placement-own" || type === "placement-rev") && !window.isPlacementSaved) {
+        alert("⚠️ Please click 'Save Details' first!\n\nThe app will securely save the trip and then automatically ask if you want to share it on WhatsApp.");
+        return;
     }
+    
+    document.getElementById("share-modal-type").value = type;
+    if(id) document.getElementById("share-modal-trip-id").value = id;
+    document.getElementById("shareModal").style.display = "flex";
+}
 
     function triggerShare(tId) {
         openShareModal("deployed", tId);
     }
     
-    function closeShareModal() {
-        document.getElementById("shareModal").style.display = "none";
+ function closeShareModal() {
+    document.getElementById("shareModal").style.display = "none";
+    const type = document.getElementById("share-modal-type").value;
+    
+    // 🛡️ SECURITY CATCH: If they cancel the share prompt AFTER saving, 
+    // clear the screen anyway so they don't accidentally hit save twice!
+    if (window.isPlacementSaved && (type === "placement-own" || type === "placement-rev")) {
+        showSelectionScreen("placement");
+        window.isPlacementSaved = false;
     }
-
-    function executeShareAction(target) {
-        const type = document.getElementById("share-modal-type").value;
-        const id = document.getElementById("share-modal-trip-id").value;
-        closeShareModal(); 
-        
-        if (type === "placement-own") {
-            generatePlacementMessageOwn(target);
-        } else if (type === "placement-rev") {
-            generatePlacementMessageRev(target);
-        } else if (type === "fleet") {
-            let msg = window.fleetShareData && window.fleetShareData[id] ? window.fleetShareData[id] : `*Vehicle Update*\nNo: ${id}\nReady for load.`;
-            openWhatsAppChoice(msg);
-        } else {
-            executeDeployedShare(target);
+}
+    else if (type === "placement-rev") {
+        generatePlacementMessageRev(target); // Extracts text to memory FIRST
+        if (window.isPlacementSaved) {
+            showSelectionScreen("placement"); // 🧹 Safely wipes screen in background
+            window.isPlacementSaved = false;
         }
+    } else if (type === "fleet") {
+        let msg = window.fleetShareData && window.fleetShareData[id] ? window.fleetShareData[id] : `*Vehicle Update*\nNo: ${id}\nReady for load.`;
+        openWhatsAppChoice(msg);
+    } else {
+        executeDeployedShare(target);
     }
+}
     
     function executeDeployedShare(target) {
         const tId = document.getElementById("share-modal-trip-id").value;
@@ -841,39 +860,48 @@
         finalizePlacementSave(p);
     }
 
-    async function finalizePlacementSave(p){
-        if (!navigator.onLine) {
-            alert("⚠️ No Internet Connection. Please check your network and try again.");
-            return; 
-        }
-
-        if (window.isSavingPlacementLock) return; 
-        window.isSavingPlacementLock = true;
-        setTimeout(() => { window.isSavingPlacementLock = false; }, 2500); 
-
-        const loader = document.getElementById("loading-overlay");
-        const loaderText = document.getElementById("loader-text");
-        if (loader) { loader.style.display="flex"; loaderText.innerText="Saving to Cloud..."; }
- 
-        if (!p.bookingType) {
-            p.bookingType = (p.id && String(p.id).includes("-RL-")) ? "Reverse Logistics" : "Own Booking";
-        }
-
-        const lj=JSON.stringify({bookingType:p.bookingType,brokingAgent:(p.brokingAgent||""),income:[],expense:[],reco:{payments:[]}});
-        p.financialLedger=lj;
-        
-        const dR=[p.id,p.date,p.party,p.from,p.to,p.vNum,p.type,p.weight,"In-Transit","","","","",p.createdBy,p.vFreight,p.cFreight,p.dName,p.dContact,p.tName||"",p.tPerson||"",p.tContact||"",p.remarks,"","","","","",lj];
-        
-        await robustGasFetch({action:"saveTrip",data:dR,...p});
-        
-        allTrips.push({...p,statusNote:"",computedBookingType:p.bookingType});
-        updateLocalMemory({vNum:p.vNum,type:p.type,weight:p.weight,party:p.party,brokingAgent:p.brokingAgent,tName:p.tName,dName:p.dName,dContact:p.dContact,tPerson:p.tPerson,tContact:p.tContact});
-        
-        if (loader) loader.style.display="none"; 
-        alert(p.bookingType + " details saved successfully!");
-        showSelectionScreen("placement");
+   async function finalizePlacementSave(p){
+    if (!navigator.onLine) {
+        alert("⚠️ No Internet Connection. Please check your network and try again.");
+        return; 
     }
+
+    if (window.isSavingPlacementLock) return; 
+    window.isSavingPlacementLock = true;
+    setTimeout(() => { window.isSavingPlacementLock = false; }, 2500); 
+
+    const loader = document.getElementById("loading-overlay");
+    const loaderText = document.getElementById("loader-text");
+    if (loader) { loader.style.display="flex"; loaderText.innerText="Saving to Cloud..."; }
+
+    if (!p.bookingType) {
+        p.bookingType = (p.id && String(p.id).includes("-RL-")) ? "Reverse Logistics" : "Own Booking";
+    }
+
+    const lj=JSON.stringify({bookingType:p.bookingType,brokingAgent:(p.brokingAgent||""),income:[],expense:[],reco:{payments:[]}});
+    p.financialLedger=lj;
     
+    const dR=[p.id,p.date,p.party,p.from,p.to,p.vNum,p.type,p.weight,"In-Transit","","","","",p.createdBy,p.vFreight,p.cFreight,p.dName,p.dContact,p.tName||"",p.tPerson||"",p.tContact||"",p.remarks,"","","","","",lj];
+    
+    await robustGasFetch({action:"saveTrip",data:dR,...p});
+    
+    allTrips.push({...p,statusNote:"",computedBookingType:p.bookingType});
+    updateLocalMemory({vNum:p.vNum,type:p.type,weight:p.weight,party:p.party,brokingAgent:p.brokingAgent,tName:p.tName,dName:p.dName,dContact:p.dContact,tPerson:p.tPerson,tContact:p.tContact});
+    
+    if (loader) loader.style.display="none"; 
+    
+    // 🚀 SMART UX FIX: Bypass the interceptor, prompt to share, then reset.
+    if(confirm(p.bookingType + " saved to database successfully!\n\nWould you like to share these details on WhatsApp now?")) {
+        window.isPlacementSaved = true; // Sets a security flag to unlock sharing
+        if (p.bookingType === "Own Booking") {
+            openShareModal('placement-own');
+        } else {
+            openShareModal('placement-rev');
+        }
+    } else {
+        showSelectionScreen("placement"); // Clears the form immediately if they decline to share
+    }
+}    
     function generatePlacementMessageOwn(teamStr){
         if(!validatePlacementOwn())return;
         const d=getFormattedDateVal(document.getElementById("ob-date").value);const v=document.getElementById("ob-vnum").value.replace(/[\s-_]/g,"").toUpperCase();
