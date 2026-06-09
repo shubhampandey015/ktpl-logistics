@@ -203,16 +203,15 @@
 <script>
     const GOOGLE_SCRIPT_URL="https://script.google.com/macros/s/AKfycbyxJsu4llXFpjbeMX53mDmIpQ2z1YNR8garBDkBKxVF9AR3dSmfX0Zvm-XB02ZQplus/exec";
     
-    // 🚀 THE BULLETPROOF NETWORK ROUTER
+ // 🚀 THE UNBLOCKED NETWORK ROUTER
     async function robustGasFetch(payload) {
         try {
-            await fetch(GOOGLE_SCRIPT_URL + "?t=" + Date.now(), {
+            await fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify(payload)
             });
         } catch (e) {
-            console.warn("Network request processed.");
+            console.log("Network request processed.");
         }
     }
     
